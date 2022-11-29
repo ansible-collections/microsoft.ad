@@ -1,0 +1,66 @@
+- name: create domain - idempotent
+  domain:
+    dns_domain_name: '{{ domain_realm }}'
+    safe_mode_password: '{{ domain_password }}'
+  register: domain_again
+
+- name: assert create domain - idempotent
+  assert:
+    that:
+    - not domain_again is changed
+    - domain_again.reboot_required == False
+
+- name: fail when reboot and async is used
+  domain:
+    dns_domain_name: '{{ domain_realm }}'
+    safe_mode_password: '{{ domain_password }}'
+    reboot: true
+  async: 60
+  register: fail_reboot_async
+  failed_when:
+  - fail_reboot_async.msg != "async is not supported for this task when reboot=true"
+
+- name: fail when domain_netbios_name is greater than 15 character
+  domain:
+    dns_domain_name: '{{ domain_realm }}'
+    safe_mode_password: '{{ domain_password }}'
+    domain_netbios_name: AReallyLongName1
+  register: fail_long_netbios_name
+  failed_when:
+  - fail_long_netbios_name.msg != "The parameter 'domain_netbios_name' should not exceed 15 characters in length"
+
+- name: get OS version
+  ansible.windows.win_powershell:
+    script: |
+      $Ansible.Changed = $false
+
+      $osVersion = [System.Environment]::OSVersion.Version
+      '{0}.{1}' -f $osVersion.Major, $osVersion.Minor
+  register: os_version
+
+- set_fact:
+    known_modes:
+      '6.2': Win2003, Win2008, Win2008R2, Win2012, Default
+      '6.3': Win2008, Win2008R2, Win2012, Win2012R2, Default
+      default: Win2008, Win2008R2, Win2012, Win2012R2, WinThreshold, Default
+
+- set_fact:
+    expected_modes: '{{ known_modes[os_version.output[0]] | default(known_modes["default"]) }}'
+
+- name: fail when domain_mode is invalid
+  domain:
+    dns_domain_name: '{{ domain_realm }}'
+    safe_mode_password: '{{ domain_password }}'
+    domain_mode: fail
+  register: fail_domain_mode
+  failed_when:
+  - 'fail_domain_mode.msg != "The parameter ''domain_mode'' does not accept ''fail'', please use one of: " ~ expected_modes'
+
+- name: fail when forest_mode is invalid
+  domain:
+    dns_domain_name: '{{ domain_realm }}'
+    safe_mode_password: '{{ domain_password }}'
+    forest_mode: fail
+  register: fail_forest_mode
+  failed_when:
+  - 'fail_forest_mode.msg != "The parameter ''forest_mode'' does not accept ''fail'', please use one of: " ~ expected_modes'

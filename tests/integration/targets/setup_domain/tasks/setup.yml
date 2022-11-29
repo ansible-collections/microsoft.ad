@@ -1,0 +1,5 @@
+- name: ensure domain is present
+  domain:
+    dns_domain_name: '{{ domain_realm }}'
+    safe_mode_password: '{{ domain_password }}'
+    reboot: true
