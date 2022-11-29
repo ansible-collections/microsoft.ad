@@ -1,0 +1,3 @@
+setuptools > 0.6 # pytest-xdist installed via requirements does not work with very old setuptools (sanity_ok)
+unittest2 ; python_version < '2.7'
+importlib ; python_version < '2.7'

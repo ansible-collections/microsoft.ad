@@ -1,0 +1,21 @@
+namespace: ansible
+name: active_directory
+version: 0.1.0
+readme: README.md
+authors:
+- Jordan Borean @jborean93
+- Matt Davis @nitzmahone
+description: |
+  Ansible collection for Active Directory management
+license_file: COPYING
+tags:
+- windows
+dependencies: {}
+repository: https://github.com/ansible-collections/ansible.active_directory
+documentation: https://docs.ansible.com/ansible/devel/collections/ansible/active_directory
+homepage: https://github.com/ansible-collections/ansible.active_directory
+issues: https://github.com/ansible-collections/ansible.active_directory/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc
+build_ignore:
+- .vscode
+- tests/integration/inventory*
+- changelogs/.plugin-cache.yaml
