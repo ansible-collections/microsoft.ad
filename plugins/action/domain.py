@@ -12,8 +12,6 @@ class ActionModule(ActionModuleWithReboot):
         self._ran_once = False
 
     def _ad_should_rerun(self, result: t.Dict[str, t.Any]) -> bool:
-        result["reboot_required"] = False
-
         ran_once = self._ran_once
         self._ran_once = True
 

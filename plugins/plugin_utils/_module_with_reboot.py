@@ -26,14 +26,77 @@ display = Display()
 
 
 class ActionModuleWithReboot(ActionBase):
+    """Action Plugin with Auto Reboot.
+
+    An action plugin that can be used to automatically reboot the host after
+    running a module. By default it checks for the return value reboot_required
+    and reboots the host if it is present.
+
+    There are method that can be overloaded in the sub class to control the
+    behaviour like retries, whether to reboot, etc.
+    """
+
     def _ad_should_reboot(self, result: t.Dict[str, t.Any]) -> bool:
+        """Check whether a reboot is to be done
+
+        Called after the module is run and is used to check if the reboot
+        should be performed. The default check is to see if reboot_required
+        was returned by the module.
+
+        Args:
+            result: The module result.
+
+        Returns:
+            bool: Whether to do a reboot or not.
+        """
         return result.get("reboot_required", False)
 
     def _ad_should_rerun(self, result: t.Dict[str, t.Any]) -> bool:
+        """Check whether to rerun the module.
+
+        Called after the reboot is completed and used to check whether the
+        module should be rerun. The default is to not rerun the module.
+
+        Args:
+            result: The module result.
+
+        Returns:
+            bool: Whether to rerun the module again.
+        """
         return False
 
     def _ad_process_result(self, result: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
+        """Called at the end of the run.
+
+        Called at the end of the plugin run for the sub class to edit the
+        result as needed. The default is for the result to be returned as is.
+
+        Args:
+            result: The module result.
+
+        Returns:
+            Dict[str, Any]: The final result to return.
+        """
         return result
+
+    def _ad_set_rebooted(
+        self,
+        result: t.Dict[str, t.Any],
+        reboot_result: t.Dict[str, t.Any],
+    ) -> None:
+        """Called when a reboot is done.
+
+        Called when the reboot has been performed. The sub class can use this
+        to edit the result or do additional checks as needed. The default is to
+        set the reboot_required return value to False if it is in the module
+        result.
+
+        Args:
+            result: The module result.
+            reboot_result: The result from the reboot
+        """
+        if "reboot_required" in result:
+            result["reboot_required"] = False
 
     def run(
         self,
@@ -83,6 +146,7 @@ class ActionModuleWithReboot(ActionBase):
                 # Regardless of the module result this needs to be True as a
                 # reboot happened.
                 module_res["changed"] = True
+                self._ad_set_rebooted(module_res, reboot_res)
 
                 if self._ad_should_rerun(module_res) and not self._task.check_mode:
                     display.vv(
