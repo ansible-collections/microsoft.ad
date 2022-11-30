@@ -1,0 +1,95 @@
+- name: setup domain with no prereqs - check mode
+  domain:
+    dns_domain_name: '{{ domain_realm }}'
+    safe_mode_password: '{{ domain_password }}'
+    reboot: true
+  check_mode: true
+  register: domain_no_prereqs_check
+
+- name: assert setup domain with no prereqs - check mode
+  assert:
+    that:
+    - domain_no_prereqs_check is changed
+    - domain_no_prereqs_check.reboot_required == False
+
+- name: install feature pre-requisites
+  ansible.windows.win_feature:
+    name:
+    - AD-Domain-Services
+    - RSAT-ADDS
+    state: present
+
+- name: setup domain without reboot - check mode
+  domain:
+    dns_domain_name: '{{ domain_realm }}'
+    safe_mode_password: '{{ domain_password }}'
+  check_mode: true
+  register: domain_check_no_reboot
+
+- name: assert setup domain without reboot - check mode
+  assert:
+    that:
+    - domain_check_no_reboot is changed
+    - domain_check_no_reboot.reboot_required == True
+
+# While not needed it puts the host in a state where it needs to reboot
+# before it can create the domain. This is testing an edge case.
+- name: rename host
+  ansible.windows.win_hostname:
+    name: ansible-ad-test
+
+- name: setup domain without reboot after reboot pending - check mode
+  domain:
+    dns_domain_name: '{{ domain_realm }}'
+    safe_mode_password: '{{ domain_password }}'
+  check_mode: true
+  register: domain_check_no_reboot_pending
+
+- name: assert setup domain without reboot after reboot pending - check mode
+  assert:
+    that:
+    - domain_check_no_reboot_pending is changed
+    - domain_check_no_reboot_pending.reboot_required == True
+
+- name: setup domain with reboot - check mode
+  domain:
+    dns_domain_name: '{{ domain_realm }}'
+    safe_mode_password: '{{ domain_password }}'
+    reboot: true
+  check_mode: true
+  register: domain_check_reboot
+
+- name: assert setup domain with reboot - check mode
+  assert:
+    that:
+    - domain_check_reboot is changed
+    - domain_check_reboot.reboot_required == False
+
+- name: setup domain without reboot
+  domain:
+    dns_domain_name: '{{ domain_realm }}'
+    safe_mode_password: '{{ domain_password }}'
+  register: domain_no_reboot
+  ignore_errors: true
+
+- name: assert setup domain without reboot
+  assert:
+    that:
+    - not domain_no_reboot is changed
+    - domain_no_reboot is failed
+    - '"Failed to install ADDSForest" in domain_no_reboot.msg'
+    - '"A reboot is required" in domain_no_reboot.msg'
+    - domain_no_reboot.reboot_required == True
+
+- name: setup domain with reboot
+  domain:
+    dns_domain_name: '{{ domain_realm }}'
+    safe_mode_password: '{{ domain_password }}'
+    reboot: true
+  register: domain_reboot
+
+- name: assert setup domain with reboot
+  assert:
+    that:
+    - domain_reboot is changed
+    - domain_reboot.reboot_required == False
