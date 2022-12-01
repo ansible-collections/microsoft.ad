@@ -391,4 +391,5 @@ changelogs/.plugin-cache.yaml
 
 # ansible-test ignores
 tests/integration/inventory*
+tests/integration/targets/membership/.vagrant
 tests/output/

@@ -1,0 +1,524 @@
+- set_fact:
+    get_result_script: |
+      $Ansible.Changed = $false
+      $cs = Get-CimInstance -ClassName Win32_ComputerSystem -Property Domain, PartOfDomain, Workgroup
+      $domainName = if ($cs.PartOfDomain) {
+          try {
+              [System.DirectoryServices.ActiveDirectory.Domain]::GetComputerDomain().Name
+          }
+          catch [System.Security.Authentication.AuthenticationException] {
+              $cs.Domain
+          }
+      }
+      else {
+          $null
+      }
+
+      [PSCustomObject]@{
+          HostName = $env:COMPUTERNAME
+          PartOfDomain = $cs.PartOfDomain
+          DnsDomainName = $domainName
+          WorkgroupName = $cs.Workgroup
+      }
+
+    get_ad_result_script: |
+      $Ansible.Changed = $false
+      Get-ADComputer -Filter { Name -ne 'DC' } -Properties DistinguishedName, Name, Enabled |
+          Select-Object -Property DistinguishedName, Name, Enabled
+
+- name: join domain - check mode
+  membership:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    state: domain
+    reboot: true
+  check_mode: true
+  register: join_domain_check
+
+- name: get result of join domain - check mode
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: join_domain_check_actual
+
+- name: assert join domain - check mode
+  assert:
+    that:
+    - join_domain_check is changed
+    - join_domain_check.reboot_required == False
+    - join_domain_check_actual.output[0]["DnsDomainName"] == None
+    - join_domain_check_actual.output[0]["HostName"] == "TEST"
+    - join_domain_check_actual.output[0]["PartOfDomain"] == False
+    - join_domain_check_actual.output[0]["WorkgroupName"] == "WORKGROUP"
+
+- name: join domain with reboot
+  membership:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    state: domain
+    reboot: true
+  register: join_domain
+
+- name: get result of join domain with reboot
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: join_domain_actual
+
+- name: get ad result of join domain with reboot
+  ansible.windows.win_powershell:
+    script: '{{ get_ad_result_script }}'
+  delegate_to: DC
+  register: join_domain_ad_actual
+
+- name: assert join domain with reboot
+  assert:
+    that:
+    - join_domain is changed
+    - join_domain.reboot_required == False
+    - join_domain_actual.output[0]["DnsDomainName"] == domain_realm
+    - join_domain_actual.output[0]["HostName"] == "TEST"
+    - join_domain_actual.output[0]["PartOfDomain"] == True
+    - join_domain_actual.output[0]["WorkgroupName"] == None
+    - join_domain_ad_actual.output | length == 1
+    - join_domain_ad_actual.output[0]["Name"] == "TEST"
+    - join_domain_ad_actual.output[0]["Enabled"] == True
+
+- name: join domain with reboot - idempotent
+  membership:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    state: domain
+    reboot: true
+  register: join_domain_again
+
+- name: assert join domain with reboot - idempotent
+  assert:
+    that:
+    - not join_domain_again is changed
+    - join_domain_again.reboot_required == False
+
+- name: fail to change domain of already joined host
+  membership:
+    dns_domain_name: fake.realm
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    state: domain
+    reboot: true
+  register: fail_cannot_rename_domain
+  failed_when:
+  - fail_cannot_rename_domain.msg != "Host is already joined to '" ~ domain_realm ~ "', switching domains is not implemented"
+
+- name: rename hostname of domain joined host - check mode
+  membership:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    hostname: OTHER
+    state: domain
+    reboot: true
+  register: rename_host_domain_check
+  check_mode: True
+
+- name: get result of rename hostname of domain joined host - check mode
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: rename_host_domain_check_actual
+
+- name: get ad result of rename hostname of domain joined host - check mode
+  ansible.windows.win_powershell:
+    script: '{{ get_ad_result_script }}'
+  delegate_to: DC
+  register: rename_host_domain_check_ad_actual
+
+- name: assert rename hostname of domain joined host - check mode
+  assert:
+    that:
+    - rename_host_domain_check is changed
+    - rename_host_domain_check.reboot_required == False
+    - rename_host_domain_check_actual.output[0]["DnsDomainName"] == domain_realm
+    - rename_host_domain_check_actual.output[0]["HostName"] == "TEST"
+    - rename_host_domain_check_actual.output[0]["PartOfDomain"] == True
+    - rename_host_domain_check_actual.output[0]["WorkgroupName"] == None
+    - rename_host_domain_check_ad_actual.output | length == 1
+    - rename_host_domain_check_ad_actual.output[0]["Name"] == "TEST"
+    - rename_host_domain_check_ad_actual.output[0]["Enabled"] == True
+
+- name: rename hostname of domain joined host
+  membership:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    hostname: OTHER
+    state: domain
+    reboot: true
+  register: rename_host_domain
+
+- name: get result of rename hostname of domain joined host
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: rename_host_domain_actual
+
+- name: get ad result of rename hostname of domain joined host
+  ansible.windows.win_powershell:
+    script: '{{ get_ad_result_script }}'
+  delegate_to: DC
+  register: rename_host_domain_ad_actual
+
+- name: assert join domain
+  assert:
+    that:
+    - rename_host_domain is changed
+    - rename_host_domain.reboot_required == False
+    - rename_host_domain_actual.output[0]["DnsDomainName"] == domain_realm
+    - rename_host_domain_actual.output[0]["HostName"] == "OTHER"
+    - rename_host_domain_actual.output[0]["PartOfDomain"] == True
+    - rename_host_domain_actual.output[0]["WorkgroupName"] == None
+    - rename_host_domain_ad_actual.output | length == 1
+    - rename_host_domain_ad_actual.output[0]["Name"] == "OTHER"
+    - rename_host_domain_ad_actual.output[0]["Enabled"] == True
+
+- name: change domain to workgroup - check mode
+  membership:
+    workgroup_name: TEST
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    state: workgroup
+  register: to_workgroup_check
+  check_mode: true
+
+- name: get result of change domain to workgroup - check mode
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: to_workgroup_check_actual
+
+- name: get ad result of change domain to workgroup - check mode
+  ansible.windows.win_powershell:
+    script: '{{ get_ad_result_script }}'
+  delegate_to: DC
+  register: to_workgroup_check_ad_actual
+
+- name: assert change domain to workgroup - check mode
+  assert:
+    that:
+    - to_workgroup_check is changed
+    - to_workgroup_check.reboot_required == True
+    - to_workgroup_check_actual.output[0]["DnsDomainName"] == domain_realm
+    - to_workgroup_check_actual.output[0]["HostName"] == "OTHER"
+    - to_workgroup_check_actual.output[0]["PartOfDomain"] == True
+    - to_workgroup_check_actual.output[0]["WorkgroupName"] == None
+    - to_workgroup_check_ad_actual.output | length == 1
+    - to_workgroup_check_ad_actual.output[0]["Name"] == "OTHER"
+    - to_workgroup_check_ad_actual.output[0]["Enabled"] == True
+
+- name: change domain to workgroup
+  membership:
+    workgroup_name: TEST
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    state: workgroup
+  register: to_workgroup
+
+- set_fact:
+    local_user: OTHER\{{ ansible_user }}
+
+- ansible.windows.win_reboot:
+  when: to_workgroup.reboot_required
+  vars:
+    # To avoid conflicts with the domain account with the same name we
+    # explicitly prefix the user to be the local account. Failing to do so
+    # will have the connection fail as it will try to talk to the DC which
+    # ends up failing.
+    ansible_user: '{{ local_user }}'
+
+- name: get result of change domain to workgroup
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: to_workgroup_actual
+
+- name: get ad result of change domain to workgroup
+  ansible.windows.win_powershell:
+    script: '{{ get_ad_result_script }}'
+  delegate_to: DC
+  register: to_workgroup_ad_actual
+
+- name: assert change domain to workgroup
+  assert:
+    that:
+    - to_workgroup is changed
+    - to_workgroup.reboot_required == True
+    - to_workgroup_actual.output[0]["DnsDomainName"] == None
+    - to_workgroup_actual.output[0]["HostName"] == "OTHER"
+    - to_workgroup_actual.output[0]["PartOfDomain"] == False
+    - to_workgroup_actual.output[0]["WorkgroupName"] == "TEST"
+    - to_workgroup_ad_actual.output | length == 1
+    - to_workgroup_ad_actual.output[0]["Name"] == "OTHER"
+    - to_workgroup_ad_actual.output[0]["Enabled"] == False
+
+- name: remove orphaned AD account for later tests
+  ansible.windows.win_powershell:
+    script: |
+      Remove-ADComputer -Identity OTHER$ -Confirm:$false
+  delegate_to: DC
+
+- name: change domain to workgroup - idempotent
+  membership:
+    workgroup_name: TEST
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    state: workgroup
+    reboot: true
+  register: to_workgroup_again
+
+- name: assert change domain to workgroup - idempotent
+  assert:
+    that:
+    - not to_workgroup_again is changed
+    - to_workgroup_again.reboot_required == False
+
+- name: change workgroup - check mode
+  membership:
+    workgroup_name: TEST2
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    state: workgroup
+    reboot: true
+  register: change_workgroup_check
+  check_mode: true
+
+- name: get result of change workgroup - check mode
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: change_workgroup_check_actual
+
+- name: assert change workgroup - check mode
+  assert:
+    that:
+    - change_workgroup_check is changed
+    - change_workgroup_check.reboot_required == False
+    - change_workgroup_check_actual.output[0]["DnsDomainName"] == None
+    - change_workgroup_check_actual.output[0]["HostName"] == "OTHER"
+    - change_workgroup_check_actual.output[0]["PartOfDomain"] == False
+    - change_workgroup_check_actual.output[0]["WorkgroupName"] == "TEST"
+
+- name: change workgroup
+  membership:
+    workgroup_name: TEST2
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    state: workgroup
+    reboot: true
+  register: change_workgroup
+
+- name: get result of change workgroup
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: change_workgroup_actual
+
+- name: assert change workgroup
+  assert:
+    that:
+    - change_workgroup is changed
+    - change_workgroup.reboot_required == False
+    - change_workgroup_actual.output[0]["DnsDomainName"] == None
+    - change_workgroup_actual.output[0]["HostName"] == "OTHER"
+    - change_workgroup_actual.output[0]["PartOfDomain"] == False
+    - change_workgroup_actual.output[0]["WorkgroupName"] == "TEST2"
+
+- name: change just the hostname - check mode
+  membership:
+    workgroup_name: TEST2
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    state: workgroup
+    reboot: true
+    hostname: FOO
+  register: change_hostname_check
+  check_mode: true
+
+- name: get result of change just the hostname - check mode
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: change_hostname_check_actual
+
+- name: assert change just the hostname - check mode
+  assert:
+    that:
+    - change_hostname_check is changed
+    - change_hostname_check.reboot_required == False
+    - change_hostname_check_actual.output[0]["DnsDomainName"] == None
+    - change_hostname_check_actual.output[0]["HostName"] == "OTHER"
+    - change_hostname_check_actual.output[0]["PartOfDomain"] == False
+    - change_hostname_check_actual.output[0]["WorkgroupName"] == "TEST2"
+
+- name: change just the hostname
+  membership:
+    workgroup_name: TEST2
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    state: workgroup
+    reboot: true
+    hostname: FOO
+  register: change_hostname
+
+- name: get result of change just the hostname
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: change_hostname_actual
+
+- name: assert change just the hostname - check mode
+  assert:
+    that:
+    - change_hostname is changed
+    - change_hostname.reboot_required == False
+    - change_hostname_actual.output[0]["DnsDomainName"] == None
+    - change_hostname_actual.output[0]["HostName"] == "FOO"
+    - change_hostname_actual.output[0]["PartOfDomain"] == False
+    - change_hostname_actual.output[0]["WorkgroupName"] == "TEST2"
+
+- name: create custom OU
+  ansible.windows.win_powershell:
+    script: |
+      $ou = New-ADOrganizationalUnit -Name MyHosts -PassThru
+      $ou.DistinguishedName
+  delegate_to: DC
+  register: custom_ou
+
+- name: join domain with hostname and OU - check mode
+  membership:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    hostname: BAR
+    domain_ou_path: '{{ custom_ou.output[0] }}'
+    state: domain
+  register: join_ou_check
+  check_mode: true
+
+- name: get result of join domain with hostname and OU - check mode
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: join_ou_check_actual
+
+- name: assert change just the hostname - check mode
+  assert:
+    that:
+    - join_ou_check is changed
+    - join_ou_check.reboot_required == True
+    - join_ou_check_actual.output[0]["DnsDomainName"] == None
+    - join_ou_check_actual.output[0]["HostName"] == "FOO"
+    - join_ou_check_actual.output[0]["PartOfDomain"] == False
+    - join_ou_check_actual.output[0]["WorkgroupName"] == "TEST2"
+
+- name: join domain with hostname and OU
+  membership:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    hostname: BAR
+    domain_ou_path: '{{ custom_ou.output[0] }}'
+    state: domain
+  register: join_ou
+
+- ansible.windows.win_reboot:
+  when: join_ou.reboot_required
+
+- name: get result of join domain with hostname and OU
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: join_ou_actual
+
+- name: get ad result of join domain with hostname and OU
+  ansible.windows.win_powershell:
+    script: '{{ get_ad_result_script }}'
+  register: join_ou_ad_actual
+  delegate_to: DC
+
+- name: assert change just the hostname
+  assert:
+    that:
+    - join_ou is changed
+    - join_ou.reboot_required == True
+    - join_ou_actual.output[0]["DnsDomainName"] == domain_realm
+    - join_ou_actual.output[0]["HostName"] == "BAR"
+    - join_ou_actual.output[0]["PartOfDomain"] == True
+    - join_ou_actual.output[0]["WorkgroupName"] == None
+    - join_ou_ad_actual.output | length == 1
+    - join_ou_ad_actual.output[0]["Name"] == "BAR"
+    - join_ou_ad_actual.output[0]["Enabled"] == True
+    - join_ou_ad_actual.output[0]["DistinguishedName"] == "CN=BAR," ~ custom_ou.output[0]
+
+- name: change domain to workgroup with hostname change - check mode
+  membership:
+    workgroup_name: WORKGROUP
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    hostname: FOO
+    state: workgroup
+  register: to_workgroup_hostname_check
+  check_mode: true
+
+- name: get result of change domain to workgroup with hostname change - check mode
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: to_workgroup_hostname_check_actual
+
+- name: get ad result of change domain to workgroup with hostname change - check mode
+  ansible.windows.win_powershell:
+    script: '{{ get_ad_result_script }}'
+  delegate_to: DC
+  register: to_workgroup_hostname_check_ad_actual
+
+- name: assert change domain to workgroup with hostname change - check mode
+  assert:
+    that:
+    - to_workgroup_hostname_check is changed
+    - to_workgroup_hostname_check.reboot_required == True
+    - to_workgroup_hostname_check_actual.output[0]["DnsDomainName"] == domain_realm
+    - to_workgroup_hostname_check_actual.output[0]["HostName"] == "BAR"
+    - to_workgroup_hostname_check_actual.output[0]["PartOfDomain"] == True
+    - to_workgroup_hostname_check_actual.output[0]["WorkgroupName"] == None
+    - to_workgroup_hostname_check_ad_actual.output | length == 1
+    - to_workgroup_hostname_check_ad_actual.output[0]["Name"] == "BAR"
+    - to_workgroup_hostname_check_ad_actual.output[0]["Enabled"] == True
+
+- name: change domain to workgroup with hostname change
+  membership:
+    workgroup_name: WORKGROUP
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    hostname: FOO
+    state: workgroup
+    reboot: true
+  register: to_workgroup_hostname
+
+- name: get result of change domain to workgroup with hostname change
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: to_workgroup_hostname_actual
+
+- name: get ad result of change domain to workgroup with hostname change
+  ansible.windows.win_powershell:
+    script: '{{ get_ad_result_script }}'
+  delegate_to: DC
+  register: to_workgroup_hostname_ad_actual
+
+- name: assert change domain to workgroup with hostname change
+  assert:
+    that:
+    - to_workgroup_hostname is changed
+    - to_workgroup_hostname.reboot_required == False
+    - to_workgroup_hostname_actual.output[0]["DnsDomainName"] == None
+    - to_workgroup_hostname_actual.output[0]["HostName"] == "FOO"
+    - to_workgroup_hostname_actual.output[0]["PartOfDomain"] == False
+    - to_workgroup_hostname_actual.output[0]["WorkgroupName"] == "WORKGROUP"
+    - to_workgroup_hostname_ad_actual.output | length == 1
+    - to_workgroup_hostname_ad_actual.output[0]["Name"] == "BAR"
+    - to_workgroup_hostname_ad_actual.output[0]["Enabled"] == False
+
+- name: remove orphaned AD account for later tests
+  ansible.windows.win_powershell:
+    script: |
+      Remove-ADComputer -Identity BAR$ -Confirm:$false
+  delegate_to: DC
