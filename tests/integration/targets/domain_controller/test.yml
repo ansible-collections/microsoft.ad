@@ -1,0 +1,30 @@
+- name: ensure time is in sync
+  hosts: windows
+  gather_facts: no
+  tasks:
+  - name: get current host datetime
+    command: date +%s
+    changed_when: False
+    delegate_to: localhost
+    run_once: True
+    register: local_time
+
+  - name: set datetime on Windows
+    ansible.windows.win_powershell:
+      parameters:
+        SecondsSinceEpoch: '{{ local_time.stdout | trim }}'
+      script: |
+        param($SecondsSinceEpoch)
+
+        $utc = [System.DateTimeKind]::Utc
+        $epoch = New-Object -TypeName System.DateTime -ArgumentList 1970, 1, 1, 0, 0, 0, 0, $utc
+        $date = $epoch.AddSeconds($SecondsSinceEpoch)
+
+        Set-Date -Date $date
+
+- name: run ansible.active_directory.domain_controller tests
+  hosts: TEST
+  gather_facts: no
+
+  tasks:
+  - import_tasks: tasks/main.yml

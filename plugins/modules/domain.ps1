@@ -82,9 +82,7 @@ if ($unavailableFeatures) {
 
 $missingFeatures = $features | Where-Object InstallState -NE Installed
 if ($missingFeatures) {
-    $start = Get-Date
     $res = Install-WindowsFeature -Name $missingFeatures -WhatIf:$module.CheckMode
-    $module.Result.feature = ((Get-Date) - $start).TotalSeconds
     $module.Result.changed = $true
     $module.Result.reboot_required = [bool]$res.RestartNeeded
 
@@ -161,7 +159,6 @@ if (-not $forest) {
         $installParams.ForestMode = $forest_mode
     }
 
-    $start = Get-Date
     $res = $null
     try {
         $res = Install-ADDSForest @installParams
@@ -198,7 +195,6 @@ if (-not $forest) {
     }
 
     $module.Result.changed = $true
-    $module.Result.install = ((Get-Date) - $start).TotalSeconds
 
     if ($module.CheckMode) {
         # the return value after -WhatIf does not have RebootRequired populated

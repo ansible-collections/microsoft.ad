@@ -128,10 +128,16 @@ class ActionModuleWithReboot(ActionBase):
             invocation = module_res.pop("invocation", None)
 
             if reboot and self._ad_should_reboot(module_res):
+                previous_boot_time = module_res.pop("_previous_boot_time", None)
+
                 if self._task.check_mode:
                     reboot_res = {}
                 else:
-                    reboot_res = reboot_host(self._task.action, self._connection)
+                    reboot_res = reboot_host(
+                        self._task.action,
+                        self._connection,
+                        previous_boot_time=previous_boot_time,
+                    )
 
                 if reboot_res.get("failed", False):
                     module_res = {
