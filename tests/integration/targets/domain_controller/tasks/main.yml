@@ -1,0 +1,232 @@
+- set_fact:
+    get_role_script: |
+      $Ansible.Changed = $false
+      Get-CimInstance -ClassName Win32_ComputerSystem -Property Domain, DomainRole, PartOfDomain |
+        Select-Object -Property @{
+            N = 'Domain'
+            E = {
+                if ($_.PartOfDomain) {
+                    $_.Domain
+                }
+                else {
+                    $null
+                }
+            }
+        }, @{
+            N = 'DomainRole'
+            E = {
+                switch ($_.DomainRole) {
+                    0 { "StandaloneWorkstation" }
+                    1 { "MemberWorkstation" }
+                    2 { "StandaloneServer" }
+                    3 { "MemberServer" }
+                    4 { "BackupDC" }
+                    5 { "PrimaryDC" }
+                }
+            }
+        }, @{
+            N = 'HostName'
+            E = { $env:COMPUTERNAME }
+        }
+
+- name: test no change when not a DC
+  domain_controller:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    local_admin_password: '{{ domain_password }}'
+    state: member_server
+    reboot: true
+  register: not_dc_no_change
+
+- name: assert test no change when not a DC
+  assert:
+    that:
+    - not not_dc_no_change is changed
+    - not_dc_no_change.reboot_required == False
+
+- name: promote to DC - check mode
+  domain_controller:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    safe_mode_password: '{{ domain_password }}'
+    state: domain_controller
+    reboot: true
+  register: to_dc_check
+  check_mode: true
+
+- name: get result of promote to DC - check mode
+  ansible.windows.win_powershell:
+    script: '{{ get_role_script }}'
+  register: to_dc_check_actual
+
+- name: assert promote to DC - check mode
+  assert:
+    that:
+    - to_dc_check is changed
+    - to_dc_check_actual.output[0]["Domain"] == None
+    - to_dc_check_actual.output[0]["DomainRole"] == "StandaloneServer"
+
+- name: change hostname to have a pending change before promotion
+  ansible.windows.win_hostname:
+    name: FOO
+
+- name: promote to DC with pending reboot
+  domain_controller:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    safe_mode_password: '{{ domain_password }}'
+    state: domain_controller
+    reboot: true
+  register: to_dc
+
+- name: get result of promote to DC with pending reboot
+  ansible.windows.win_powershell:
+    script: '{{ get_role_script }}'
+  register: to_dc_actual
+
+- name: assert promote to DC with pending reboot
+  assert:
+    that:
+    - to_dc is changed
+    - to_dc.reboot_required == False
+    - to_dc_actual.output[0]["Domain"] == domain_realm
+    - to_dc_actual.output[0]["DomainRole"] == "BackupDC"
+    - to_dc_actual.output[0]["HostName"] == "FOO"
+
+- name: promote to DC - idempotent
+  domain_controller:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    safe_mode_password: '{{ domain_password }}'
+    state: domain_controller
+    reboot: true
+  register: to_dc_again
+
+- name: assert promote to DC - idempotent
+  assert:
+    that:
+    - not to_dc_again is changed
+    - to_dc_again.reboot_required == False
+
+# The following operations will run with the domain admin account now that the
+# host is joined to the domain
+- name: change connection user and password to domain account
+  set_fact:
+    ansible_user: '{{ domain_user_upn }}'
+    ansible_password: '{{ domain_password }}'
+
+- name: fail to change domain of DC
+  domain_controller:
+    dns_domain_name: bogus.local
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    safe_mode_password: '{{ domain_password }}'
+    state: domain_controller
+    reboot: true
+  register: change_domain_fail
+  failed_when:
+  - change_domain_fail.msg != "The host FOO is a domain controller for the domain " ~ domain_realm ~ "; changing DC domains is not implemented"
+
+- name: fail with invalid username format
+  domain_controller:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_username }}'  # Must be a UPN or Netbios Name
+    domain_admin_password: '{{ domain_password }}'
+    safe_mode_password: '{{ domain_password }}'
+    state: domain_controller
+    reboot: true
+  register: invalid_user_fail
+  failed_when:
+  - invalid_user_fail.msg != "domain_admin_user must be in domain\\user or user@domain.com format"
+
+- name: set DC as member server - check mode
+  domain_controller:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    local_admin_password: '{{ domain_password }}'
+    state: member_server
+    reboot: true
+  register: member_server_check
+  check_mode: true
+
+- name: get result of set DC as member server - check mode
+  ansible.windows.win_powershell:
+    script: '{{ get_role_script }}'
+  register: member_server_check_actual
+
+- name: assert set DC as member server - check mode
+  assert:
+    that:
+    - member_server_check is changed
+    - member_server_check.reboot_required == False
+    - member_server_check_actual.output[0]["Domain"] == domain_realm
+    - member_server_check_actual.output[0]["DomainRole"] == "BackupDC"
+
+- name: set DC as member server
+  domain_controller:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    local_admin_password: '{{ domain_password }}'
+    state: member_server
+    reboot: true
+  register: member_server
+
+- name: get result of set DC as member server
+  ansible.windows.win_powershell:
+    script: '{{ get_role_script }}'
+  register: member_server_actual
+
+- name: assert set DC as member server
+  assert:
+    that:
+    - member_server is changed
+    - member_server.reboot_required == False
+    - member_server_actual.output[0]["Domain"] == domain_realm
+    - member_server_actual.output[0]["DomainRole"] == "MemberServer"
+
+- name: set DC as member server - idempotent
+  domain_controller:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    local_admin_password: '{{ domain_password }}'
+    state: member_server
+    reboot: true
+  register: member_server_again
+
+- name: assert set DC as member server - idempotent
+  assert:
+    that:
+    - not member_server_again is changed
+    - member_server_again.reboot_required == False
+
+# Promote it once more to a DC to test an edge case where Ansible is unable to
+# connect back until a reboot has occurred.
+- name: promote to DC again
+  domain_controller:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    safe_mode_password: '{{ domain_password }}'
+    state: domain_controller
+    reboot: true
+  register: to_dc_manual_reboot
+
+- name: get result of promote to DC with manual reboot
+  ansible.windows.win_powershell:
+    script: '{{ get_role_script }}'
+  register: to_dc_manual_reboot_actual
+
+- name: assert promote to DC with manual reboot
+  assert:
+    that:
+    - to_dc_manual_reboot is changed
+    - to_dc_manual_reboot.reboot_required == False
+    - to_dc_manual_reboot_actual.output[0]["Domain"] == domain_realm
+    - to_dc_manual_reboot_actual.output[0]["DomainRole"] == "BackupDC"

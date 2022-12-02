@@ -82,8 +82,8 @@ attributes:
   bypass_host_loop:
     support: none
 seealso:
-- module: ansible.active_directory.win_domain
-- module: ansible.windows.win_domain_controller
+- module: ansible.active_directory.domain
+- module: ansible.active_directory.domain_controller
 - module: community.windows.win_domain_computer
 - module: community.windows.win_domain_group
 - module: community.windows.win_domain_user

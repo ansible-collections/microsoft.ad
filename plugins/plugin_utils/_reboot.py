@@ -82,6 +82,7 @@ def reboot_host(
     pre_reboot_delay: int = 2,
     reboot_timeout: int = 600,
     test_command: t.Optional[str] = None,
+    previous_boot_time: t.Optional[str] = None,
 ) -> t.Dict[str, t.Any]:
     """Reboot a Windows Host.
 
@@ -123,6 +124,10 @@ def reboot_host(
             determines the machine is ready for management. When not defined
             the default command should wait until the reboot is complete and
             all pre-login configuration has completed.
+        previous_boot_time: The previous boot time of the host, when set the
+            value is used as the previous boot time check and the code will
+            not initiate the reboot itself as it expects the host to be in a
+            reboot cycle itself. Used when a module has initiated the reboot.
 
     Returns:
         (Dict[str, Any]): The return result as a dictionary. Use the 'failed'
@@ -137,34 +142,37 @@ def reboot_host(
     }
     host_context = {"do_close_on_reset": True}
 
-    # Get current boot time. A lot of tasks that require a reboot leave the WSMan stack in a bad place. Will try to
-    # get the initial boot time 3 times before giving up.
-    try:
-        previous_boot_time = _do_until_success_or_retry_limit(
-            task_action,
-            connection,
-            host_context,
-            "pre-reboot boot time check",
-            3,
-            _get_system_boot_time,
-            task_action,
-            connection,
-            boot_time_command,
-        )
+    send_reboot_command = previous_boot_time is None
 
-    except Exception as e:
-        # Report a the failure based on the last exception received.
-        if isinstance(e, _ReturnResultException):
-            result.update(e.result)
+    if send_reboot_command:
+        # Get current boot time. A lot of tasks that require a reboot leave the WSMan stack in a bad place. Will try to
+        # get the initial boot time 3 times before giving up.
+        try:
+            previous_boot_time = _do_until_success_or_retry_limit(
+                task_action,
+                connection,
+                host_context,
+                "pre-reboot boot time check",
+                3,
+                _get_system_boot_time,
+                task_action,
+                connection,
+                boot_time_command,
+            )
 
-        if isinstance(e, AnsibleConnectionFailure):
-            result["unreachable"] = True
-        else:
-            result["failed"] = True
+        except Exception as e:
+            # Report a the failure based on the last exception received.
+            if isinstance(e, _ReturnResultException):
+                result.update(e.result)
 
-        result["msg"] = str(e)
-        result["exception"] = traceback.format_exc()
-        return result
+            if isinstance(e, AnsibleConnectionFailure):
+                result["unreachable"] = True
+            else:
+                result["failed"] = True
+
+            result["msg"] = str(e)
+            result["exception"] = traceback.format_exc()
+            return result
 
     # Get the original connection_timeout option var so it can be reset after
     original_connection_timeout: t.Optional[float] = None
@@ -218,7 +226,8 @@ ConvertTo-Json -Compress -InputObject @{
 
     start = None
     try:
-        _perform_reboot(task_action, connection, reboot_command)
+        if send_reboot_command:
+            _perform_reboot(task_action, connection, reboot_command)
 
         start = datetime.datetime.utcnow()
         result["changed"] = True
