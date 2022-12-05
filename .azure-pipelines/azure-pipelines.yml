@@ -23,7 +23,7 @@ schedules:
 
 variables:
   - name: checkoutPath
-    value: ansible_collections/community/windows
+    value: ansible_collections/ansible/active_directory
   - name: coverageBranches
     value: main
   - name: pipelinesCoverage

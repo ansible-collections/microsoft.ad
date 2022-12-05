@@ -1,0 +1,876 @@
+- name: create contact object - check
+  object:
+    name: '{{ object_name }}'
+    type: contact
+    state: present
+  register: create_check
+  check_mode: true
+
+- name: get result of create contact object - check
+  object_info:
+    identity: '{{ create_check.distinguished_name }}'
+  register: create_check_actual
+
+- name: assert create contact object - check
+  assert:
+    that:
+    - create_check is changed
+    - create_check.distinguished_name == object_dn
+    - create_check.object_guid == '00000000-0000-0000-0000-000000000000'
+    - create_check_actual.objects == []
+
+- name: create contact object
+  object:
+    name: '{{ object_name }}'
+    type: contact
+    state: present
+  register: create
+
+- name: get result of create contact object
+  object_info:
+    identity: '{{ create_check.distinguished_name }}'
+    properties:
+    - objectClass
+  register: create_actual
+
+- name: assert create contact object
+  assert:
+    that:
+    - create is changed
+    - create_actual.objects | length == 1
+    - create_actual.objects[0].ObjectClass == 'contact'
+    - create.distinguished_name == object_dn
+    - create.distinguished_name == create_actual.objects[0].DistinguishedName
+    - create.object_guid == create_actual.objects[0].ObjectGUID
+
+- set_fact:
+    object_identity: '{{ create.object_guid }}'
+
+- name: create contact object - idempotent
+  object:
+    name: '{{ object_name }}'
+    type: contact
+    state: present
+  register: create_again
+
+- name: assert create contact object - idempotent
+  assert:
+    that:
+    - not create_again is changed
+    - create_again.distinguished_name == create_actual.objects[0].DistinguishedName
+    - create_again.object_guid == create_actual.objects[0].ObjectGUID
+
+- name: fail to change type
+  object:
+    name: '{{ object_name }}'
+    state: present
+    type: failure
+  register: fail_change_type
+  failed_when: fail_change_type.msg != "Cannot change object type contact of existing object " ~ object_dn ~ " to failure"
+
+- name: rename and set display name of object - check
+  object:
+    name: My, Contact 2
+    identity: '{{ object_identity }}'
+    display_name: Display Name
+    state: present
+    type: contact
+  register: rename_check
+  check_mode: true
+
+- name: get result of create contact object - check
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - displayName
+    - name
+  register: rename_check_actual
+
+- name: assert rename and set display name of object - check
+  assert:
+    that:
+    - rename_check is changed
+    - rename_check.distinguished_name == 'CN=My\, Contact 2,' ~ setup_domain_info.output[0].defaultNamingContext
+    - rename_check.object_guid == object_identity
+    - rename_check_actual.objects[0].DisplayName == None
+    - rename_check_actual.objects[0].DistinguishedName == object_dn
+    - rename_check_actual.objects[0].Name == object_name
+
+- name: rename and set display name of object
+  object:
+    name: My, Contact 2
+    identity: '{{ object_identity }}'
+    display_name: Display Name
+    state: present
+    type: contact
+  register: rename
+
+- name: get result of create contact object
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - displayName
+    - name
+  register: rename_actual
+
+- name: assert rename and set display name of object
+  assert:
+    that:
+    - rename is changed
+    - rename.distinguished_name == 'CN=My\, Contact 2,' ~ setup_domain_info.output[0].defaultNamingContext
+    - rename.object_guid == object_identity
+    - rename_actual.objects[0].DisplayName == 'Display Name'
+    - rename_actual.objects[0].DistinguishedName == 'CN=My\, Contact 2,' ~ setup_domain_info.output[0].defaultNamingContext
+    - rename_actual.objects[0].Name == 'My, Contact 2'
+
+- name: rename and set display name of object - idempotent
+  object:
+    name: My, Contact 2
+    identity: '{{ object_identity }}'
+    display_name: Display Name
+    state: present
+    type: contact
+  register: rename_again
+
+- name: assert rename and set display name of object - idempotent
+  assert:
+    that:
+    - not rename_again is changed
+    - rename_again.distinguished_name == 'CN=My\, Contact 2,' ~ setup_domain_info.output[0].defaultNamingContext
+    - rename_again.object_guid == object_identity
+
+- name: move and set description - check
+  object:
+    name: My, Contact 2
+    identity: '{{ object_identity }}'
+    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    description: My Description
+    state: present
+    type: contact
+  register: move_check
+  check_mode: true
+
+- name: move and set description - check
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - description
+    - name
+  register: move_check_actual
+
+- name: assert move and set description - check
+  assert:
+    that:
+    - move_check is changed
+    - move_check.distinguished_name == 'CN=My\, Contact 2,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - move_check.object_guid == object_identity
+    - move_check_actual.objects[0].Description == None
+    - move_check_actual.objects[0].DistinguishedName == 'CN=My\, Contact 2,' ~ setup_domain_info.output[0].defaultNamingContext
+    - move_check_actual.objects[0].Name == 'My, Contact 2'
+
+- name: move and set description
+  object:
+    name: My, Contact 2
+    identity: '{{ object_identity }}'
+    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    description: My Description
+    state: present
+    type: contact
+  register: move
+
+- name: move and set description
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - description
+    - name
+  register: move_actual
+
+- name: assert move and set description
+  assert:
+    that:
+    - move is changed
+    - move.distinguished_name == 'CN=My\, Contact 2,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - move.object_guid == object_identity
+    - move_actual.objects[0].Description == 'My Description'
+    - move_actual.objects[0].DistinguishedName == 'CN=My\, Contact 2,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - move_actual.objects[0].Name == 'My, Contact 2'
+
+- name: move and set description - idempotent
+  object:
+    name: My, Contact 2
+    identity: '{{ object_identity }}'
+    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    description: My Description
+    state: present
+    type: contact
+  register: move_again
+
+- name: assert move and set description - idempotent
+  assert:
+    that:
+    - not move_again is changed
+    - move_again.distinguished_name == 'CN=My\, Contact 2,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - move_again.object_guid == object_identity
+
+- name: rename and move - check
+  object:
+    name: '{{ object_name }}'
+    identity: '{{ object_identity }}'
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    state: present
+    type: contact
+  register: rename_and_move_check
+  check_mode: true
+
+- name: get result of rename and move - check
+  object_info:
+    identity: '{{ object_identity }}'
+  register: rename_and_move_check_actual
+
+- name: assert rename and move - check
+  assert:
+    that:
+    - rename_and_move_check is changed
+    - rename_and_move_check.distinguished_name == object_dn
+    - rename_and_move_check.object_guid == object_identity
+    - rename_and_move_check_actual.objects[0].DistinguishedName == 'CN=My\, Contact 2,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - rename_and_move_check_actual.objects[0].Name == 'My, Contact 2'
+
+- name: rename and move
+  object:
+    name: '{{ object_name }}'
+    identity: '{{ object_identity }}'
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    state: present
+    type: contact
+  register: rename_and_move
+
+- name: get result of rename and move
+  object_info:
+    identity: '{{ object_identity }}'
+  register: rename_and_move_actual
+
+- name: assert rename and move
+  assert:
+    that:
+    - rename_and_move is changed
+    - rename_and_move.distinguished_name == object_dn
+    - rename_and_move.object_guid == object_identity
+    - rename_and_move_actual.objects[0].DistinguishedName == object_dn
+    - rename_and_move_actual.objects[0].Name == object_name
+
+- name: remove object by name - check
+  object:
+    name: '{{ object_name }}'
+    state: absent
+  register: remove_check
+  check_mode: true
+
+- name: get result of remove by name - check
+  object_info:
+    identity: '{{ object_identity }}'
+  register: remove_check_actual
+
+- name: assert remove object by name - check
+  assert:
+    that:
+    - remove_check is changed
+    - remove_check.distinguished_name == object_dn
+    - remove_check.object_guid == object_identity
+    - remove_check_actual.objects | length == 1
+
+- name: remove object by name
+  object:
+    name: '{{ object_name }}'
+    state: absent
+  register: remove
+
+- name: get result of remove by name
+  object_info:
+    identity: '{{ object_identity }}'
+  register: remove_actual
+
+- name: assert remove object by name - check
+  assert:
+    that:
+    - remove is changed
+    - remove.distinguished_name == object_dn
+    - remove.object_guid == object_identity
+    - remove_actual.objects == []
+
+- name: remove object by name - idempotent
+  object:
+    name: '{{ object_name }}'
+    state: absent
+  register: remove_again
+
+- name: assert remove object by name - check
+  assert:
+    that:
+    - not remove_again is changed
+    - remove_again.distinguished_name == None
+    - remove_again.object_guid == None
+
+- name: create object with custom path, description, and display_name
+  object:
+    name: My, Container
+    description: Test Description
+    display_name: Display Name
+    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    state: present
+    type: container
+  register: create_custom
+
+- set_fact:
+    object_identity: '{{ create_custom.object_guid }}'
+
+- name: get result of create object with custom path, description, and display_name
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - description
+    - displayName
+    - objectClass
+  register: create_custom_actual
+
+- name: assert create object with custom path, description, and display_name
+  assert:
+    that:
+    - create_custom is changed
+    - create_custom.distinguished_name == 'CN=My\, Container,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_custom.object_guid == object_identity
+    - create_custom_actual.objects[0].Description == 'Test Description'
+    - create_custom_actual.objects[0].DisplayName == 'Display Name'
+    - create_custom_actual.objects[0].ObjectClass == 'container'
+
+- name: create child object in container with attributes
+  object:
+    name: Contact
+    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    description: Test Description
+    display_name: Display Name
+    attributes:
+      add:
+        wWWHomePage: https://ansible.com
+        extensionName:
+        - value 1
+        - value 2
+    type: contact
+    state: present
+  register: sub_object
+
+- name: get result of child object attributes
+  object_info:
+    identity: '{{ sub_object.object_guid }}'
+    properties:
+    - wWWHomePage
+    - extensionName
+  register: sub_object_actual
+
+- name: assert create child object in container with attributes
+  assert:
+    that:
+    - sub_object is changed
+    - sub_object.distinguished_name == 'CN=Contact,CN=My\, Container,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - sub_object_actual.objects[0].wWWHomePage == 'https://ansible.com'
+    - sub_object_actual.objects[0].extensionName | length == 2
+    - '"value 1" in sub_object_actual.objects[0].extensionName'
+    - '"value 2" in sub_object_actual.objects[0].extensionName'
+
+- name: add attribute - check
+  object:
+    name: Contact
+    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    type: contact
+    description: test description
+    display_name: display name
+    attributes:
+      add:
+        adminDescription: Test description
+        attributeCertificateAttribute:
+        - type: bytes
+          value: Zm9v
+        - type: bytes
+          value: YmFy
+        - type: bytes
+          value: ZGVm
+        extensionName:
+        - value 1
+        - value 3
+        dsaSignature:
+          type: bytes
+          value: Zm9v
+    state: present
+  register: add_attr_check
+  check_mode: true
+
+- name: get result of add attribute - check
+  object_info:
+    identity: '{{ sub_object.object_guid }}'
+    properties:
+    - Description
+    - DisplayName
+    - adminDescription
+    - attributeCertificateAttribute
+    - dsaSignature
+    - extensionName
+  register: add_attr_check_actual
+
+- name: assert add attribute - check
+  assert:
+    that:
+    - add_attr_check is changed
+    - add_attr_check_actual.objects[0].adminDescription == None
+    - add_attr_check_actual.objects[0].attributeCertificateAttribute == None
+    - add_attr_check_actual.objects[0].Description == 'Test Description'
+    - add_attr_check_actual.objects[0].DisplayName == 'Display Name'
+    - add_attr_check_actual.objects[0].dsaSignature == None
+    - add_attr_check_actual.objects[0].extensionName | length == 2
+    - '"value 1" in add_attr_check_actual.objects[0].extensionName'
+    - '"value 2" in add_attr_check_actual.objects[0].extensionName'
+
+- name: add attribute
+  object:
+    name: Contact
+    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    type: contact
+    description: test description
+    display_name: display name
+    attributes:
+      add:
+        adminDescription: Test description
+        attributeCertificateAttribute:
+        - type: bytes
+          value: Zm9v
+        - type: bytes
+          value: YmFy
+        - type: bytes
+          value: ZGVm
+        extensionName:
+        - value 1
+        - value 3
+        dsaSignature:
+          type: bytes
+          value: Zm9v
+    state: present
+  register: add_attr
+
+- name: get result of add attribute
+  object_info:
+    identity: '{{ sub_object.object_guid }}'
+    properties:
+    - description
+    - DisplayName
+    - adminDescription
+    - attributeCertificateAttribute
+    - dsaSignature
+    - extensionName
+  register: add_attr_actual
+
+- name: assert add attribute
+  assert:
+    that:
+    - add_attr is changed
+    - add_attr_actual.objects[0].adminDescription == 'Test description'
+    - add_attr_actual.objects[0].attributeCertificateAttribute | length == 3
+    - '"Zm9v" in add_attr_actual.objects[0].attributeCertificateAttribute'
+    - '"YmFy" in add_attr_actual.objects[0].attributeCertificateAttribute'
+    - '"ZGVm" in add_attr_actual.objects[0].attributeCertificateAttribute'
+    - add_attr_actual.objects[0].Description == 'test description'
+    - add_attr_actual.objects[0].DisplayName == 'display name'
+    - add_attr_actual.objects[0].dsaSignature == 'Zm9v'
+    - add_attr_actual.objects[0].extensionName | length == 3
+    - '"value 1" in add_attr_actual.objects[0].extensionName'
+    - '"value 2" in add_attr_actual.objects[0].extensionName'
+    - '"value 3" in add_attr_actual.objects[0].extensionName'
+
+- name: add attribute - idempotent
+  object:
+    name: Contact
+    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    type: contact
+    description: test description
+    display_name: display name
+    attributes:
+      add:
+        adminDescription: Test description
+        attributeCertificateAttribute:
+        - type: bytes
+          value: Zm9v
+        - type: bytes
+          value: YmFy
+        - type: bytes
+          value: ZGVm
+        extensionName:
+        - value 1
+        - value 3
+        dsaSignature:
+          type: bytes
+          value: Zm9v
+    state: present
+  register: add_attr_again
+
+- name: assert add attribute - idempotent
+  assert:
+    that:
+    - not add_attr_again is changed
+
+- name: remove attribute - check
+  object:
+    name: Contact
+    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    type: contact
+    attributes:
+      remove:
+        attributeCertificateAttribute:
+        - type: bytes
+          value: YmFy
+        extensionName:
+        - value 2
+    state: present
+  register: remove_attr_check
+  check_mode: true
+
+- name: get result of remove attribute - check
+  object_info:
+    identity: '{{ sub_object.object_guid }}'
+    properties:
+    - attributeCertificateAttribute
+    - extensionName
+  register: remove_attr_check_actual
+
+- name: assert remove attribute - check
+  assert:
+    that:
+    - remove_attr_check is changed
+    - remove_attr_check_actual.objects[0].attributeCertificateAttribute | length == 3
+    - '"Zm9v" in remove_attr_check_actual.objects[0].attributeCertificateAttribute'
+    - '"YmFy" in remove_attr_check_actual.objects[0].attributeCertificateAttribute'
+    - '"ZGVm" in remove_attr_check_actual.objects[0].attributeCertificateAttribute'
+    - remove_attr_check_actual.objects[0].extensionName | length == 3
+    - '"value 1" in remove_attr_check_actual.objects[0].extensionName'
+    - '"value 2" in remove_attr_check_actual.objects[0].extensionName'
+    - '"value 3" in remove_attr_check_actual.objects[0].extensionName'
+
+- name: remove attribute
+  object:
+    name: Contact
+    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    type: contact
+    attributes:
+      remove:
+        attributeCertificateAttribute:
+        - type: bytes
+          value: YmFy
+        extensionName:
+        - value 2
+    state: present
+  register: remove_attr
+
+- name: get result of remove attribute
+  object_info:
+    identity: '{{ sub_object.object_guid }}'
+    properties:
+    - attributeCertificateAttribute
+    - extensionName
+  register: remove_attr_actual
+
+- name: assert remove attribute
+  assert:
+    that:
+    - remove_attr is changed
+    - remove_attr_actual.objects[0].attributeCertificateAttribute | length == 2
+    - '"Zm9v" in remove_attr_actual.objects[0].attributeCertificateAttribute'
+    - '"ZGVm" in remove_attr_actual.objects[0].attributeCertificateAttribute'
+    - remove_attr_actual.objects[0].extensionName | length == 2
+    - '"value 1" in remove_attr_actual.objects[0].extensionName'
+    - '"value 3" in remove_attr_actual.objects[0].extensionName'
+
+- name: remove attribute - idempotent
+  object:
+    name: Contact
+    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    type: contact
+    attributes:
+      remove:
+        attributeCertificateAttribute:
+        - type: bytes
+          value: YmFy
+        extensionName:
+        - value 2
+    state: present
+  register: remove_attr_again
+
+- name: assert remove attribute - idempotent
+  assert:
+    that:
+    - not remove_attr_again is changed
+
+- name: set attribute - check
+  object:
+    name: Contact
+    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    type: contact
+    attributes:
+      set:
+        adminDescription: Test Description
+        attributeCertificateAttribute:
+        - type: bytes
+          value: Zm9v
+        - type: bytes
+          value: YmFy
+        extensionName:
+        - value 1
+        - value 2
+        dsaSignature:
+          type: bytes
+          value: YmFy
+    state: present
+  register: set_attr_check
+  check_mode: true
+
+- name: get result of set attribute - check
+  object_info:
+    identity: '{{ sub_object.object_guid }}'
+    properties:
+    - description
+    - DisplayName
+    - adminDescription
+    - attributeCertificateAttribute
+    - dsaSignature
+    - extensionName
+  register: set_attr_check_actual
+
+- name: assert set attribute - check
+  assert:
+    that:
+    - set_attr_check is changed
+    - set_attr_check_actual.objects[0].adminDescription == 'Test description'
+    - set_attr_check_actual.objects[0].attributeCertificateAttribute | length == 2
+    - '"Zm9v" in set_attr_check_actual.objects[0].attributeCertificateAttribute'
+    - '"ZGVm" in set_attr_check_actual.objects[0].attributeCertificateAttribute'
+    - set_attr_check_actual.objects[0].Description == 'test description'
+    - set_attr_check_actual.objects[0].DisplayName == 'display name'
+    - set_attr_check_actual.objects[0].dsaSignature == 'Zm9v'
+    - set_attr_check_actual.objects[0].extensionName | length == 2
+    - '"value 1" in set_attr_check_actual.objects[0].extensionName'
+    - '"value 3" in set_attr_check_actual.objects[0].extensionName'
+
+- name: set attribute
+  object:
+    name: Contact
+    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    type: contact
+    attributes:
+      set:
+        adminDescription: Test Description
+        attributeCertificateAttribute:
+        - type: bytes
+          value: Zm9v
+        - type: bytes
+          value: YmFy
+        extensionName:
+        - value 1
+        - value 2
+        dsaSignature:
+          type: bytes
+          value: YmFy
+    state: present
+  register: set_attr
+
+- name: get result of set attribute
+  object_info:
+    identity: '{{ sub_object.object_guid }}'
+    properties:
+    - description
+    - DisplayName
+    - adminDescription
+    - attributeCertificateAttribute
+    - dsaSignature
+    - extensionName
+  register: set_attr_actual
+
+- name: assert set attribute
+  assert:
+    that:
+    - set_attr is changed
+    - set_attr_actual.objects[0].adminDescription == 'Test Description'
+    - set_attr_actual.objects[0].attributeCertificateAttribute | length == 2
+    - '"Zm9v" in set_attr_actual.objects[0].attributeCertificateAttribute'
+    - '"YmFy" in set_attr_actual.objects[0].attributeCertificateAttribute'
+    - set_attr_actual.objects[0].Description == 'test description'
+    - set_attr_actual.objects[0].DisplayName == 'display name'
+    - set_attr_actual.objects[0].dsaSignature == 'YmFy'
+    - set_attr_actual.objects[0].extensionName | length == 2
+    - '"value 1" in set_attr_actual.objects[0].extensionName'
+    - '"value 2" in set_attr_actual.objects[0].extensionName'
+
+- name: set attribute - idempotent
+  object:
+    name: Contact
+    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    type: contact
+    attributes:
+      set:
+        adminDescription: Test Description
+        attributeCertificateAttribute:
+        - type: bytes
+          value: Zm9v
+        - type: bytes
+          value: YmFy
+        extensionName:
+        - value 1
+        - value 2
+        dsaSignature:
+          type: bytes
+          value: YmFy
+    state: present
+  register: set_attr_again
+
+- name: assert set attribute - idempotent
+  assert:
+    that:
+    - not set_attr_again is changed
+
+
+- name: clear attribute - check
+  object:
+    name: Contact
+    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    type: contact
+    attributes:
+      set:
+        adminDescription:
+        attributeCertificateAttribute: []
+        extensionName:
+        dsaSignature: []
+    state: present
+  register: clear_attr_check
+  check_mode: true
+
+- name: get result of clear attribute - check
+  object_info:
+    identity: '{{ sub_object.object_guid }}'
+    properties:
+    - description
+    - DisplayName
+    - adminDescription
+    - attributeCertificateAttribute
+    - dsaSignature
+    - extensionName
+  register: clear_attr_check_actual
+
+- name: assert clear attribute - check
+  assert:
+    that:
+    - clear_attr_check is changed
+    - clear_attr_check_actual.objects[0].adminDescription == 'Test Description'
+    - clear_attr_check_actual.objects[0].attributeCertificateAttribute | length == 2
+    - '"Zm9v" in clear_attr_check_actual.objects[0].attributeCertificateAttribute'
+    - '"YmFy" in clear_attr_check_actual.objects[0].attributeCertificateAttribute'
+    - clear_attr_check_actual.objects[0].Description == 'test description'
+    - clear_attr_check_actual.objects[0].DisplayName == 'display name'
+    - clear_attr_check_actual.objects[0].dsaSignature == 'YmFy'
+    - clear_attr_check_actual.objects[0].extensionName | length == 2
+    - '"value 1" in clear_attr_check_actual.objects[0].extensionName'
+    - '"value 2" in clear_attr_check_actual.objects[0].extensionName'
+
+- name: clear attribute
+  object:
+    name: Contact
+    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    type: contact
+    attributes:
+      set:
+        adminDescription:
+        attributeCertificateAttribute: []
+        extensionName:
+        dsaSignature: []
+    state: present
+  register: clear_attr
+
+- name: get result of clear attribute
+  object_info:
+    identity: '{{ sub_object.object_guid }}'
+    properties:
+    - description
+    - DisplayName
+    - adminDescription
+    - attributeCertificateAttribute
+    - dsaSignature
+    - extensionName
+  register: clear_attr_actual
+
+- name: assert clear attribute
+  assert:
+    that:
+    - clear_attr is changed
+    - clear_attr_actual.objects[0].adminDescription == None
+    - clear_attr_actual.objects[0].attributeCertificateAttribute == None
+    - clear_attr_actual.objects[0].dsaSignature == None
+    - clear_attr_actual.objects[0].extensionName == None
+
+- name: clear attribute - idempotent
+  object:
+    name: Contact
+    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    type: contact
+    attributes:
+      set:
+        adminDescription:
+        attributeCertificateAttribute: []
+        extensionName:
+        dsaSignature: []
+    state: present
+  register: clear_attr_again
+
+- name: assert clear attribute - idempotent
+  assert:
+    that:
+    - not clear_attr_again is changed
+
+- name: set security descriptor attr
+  object:
+    name: Contact
+    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    type: contact
+    attributes:
+      set:
+        nTSecurityDescriptor:
+          type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)
+    state: present
+  register: set_sd
+
+- name: get result of set security descriptor attr
+  object_info:
+    identity: '{{ sub_object.object_guid }}'
+    properties:
+    - nTSecurityDescriptor
+  register: set_sd_actual
+
+- name: assert set security descriptor attr
+  assert:
+    that:
+    - set_sd is changed
+    # It might change the owner, we only care about the DACL bit
+    - set_sd_actual.objects[0].nTSecurityDescriptor.endswith('D:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)')
+
+- name: set security descriptor attr - idempotent
+  object:
+    name: Contact
+    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    type: contact
+    attributes:
+      set:
+        nTSecurityDescriptor:
+          type: security_descriptor
+          value: '{{ set_sd_actual.objects[0].nTSecurityDescriptor }}'
+    state: present
+  register: set_sd_again
+
+- name: assert set security descriptor attr - idemnpotent
+  assert:
+    that:
+    - not set_sd_again is changed

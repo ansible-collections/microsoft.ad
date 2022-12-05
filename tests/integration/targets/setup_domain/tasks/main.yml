@@ -49,6 +49,7 @@
           }
       }
       $attempts
+  register: setup_domain_info
   become: yes
   become_method: runas
   become_user: SYSTEM

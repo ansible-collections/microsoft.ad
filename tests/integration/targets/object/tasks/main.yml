@@ -1,0 +1,9 @@
+- block:
+  - import_tasks: tests.yml
+
+  always:
+  - name: remove temp object
+    object:
+      name: '{{ object_name }}'
+      identity: '{{ object_identity | default(omit) }}'
+      state: absent

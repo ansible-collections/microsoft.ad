@@ -207,12 +207,19 @@ try {
     $foundGuids = @($ps.Invoke())
 }
 catch {
-    # Because we ran in a pipeline we can't catch ADIdentityNotFoundException. Instead just get the base exception and
-    # do the error checking on that.
-    if ($_.Exception.GetBaseException() -is [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]) {
-        $foundGuids = @()
+    # Because we ran in a pipeline we can't catch ADIdentityNotFoundException. Instead this scans each InnerException
+    # to see if it contains ADIdentityNotFoundException.
+    $exp = $_.Exception
+    $foundGuids = $null
+    while ($exp) {
+        $exp = $exp.InnerException
+        if ($exp -is [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException]) {
+            $foundGuids = @()
+            break
+        }
     }
-    else {
+
+    if ($null -eq $foundGuids) {
         # The exception is from the .Invoke() call, compare on the InnerException which was what was actually raised by
         # the pipeline.
         $innerException = $_.Exception.InnerException.InnerException
