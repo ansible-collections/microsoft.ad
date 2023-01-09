@@ -11,11 +11,11 @@ short_description: Gather information an Active Directory object
 description:
 - Gather information about multiple Active Directory object(s).
 requirements:
-- ActiveDirectory PowerShell module
+- C(ActiveDirectory) PowerShell module
 options:
   domain_password:
     description:
-    - The password for C(domain_username).
+    - The password for I(domain_username).
     type: str
   domain_server:
     description:
@@ -72,7 +72,7 @@ options:
     type: str
   search_scope:
     description:
-    - Specify the scope of when searching for an object in the C(search_base).
+    - Specify the scope of when searching for an object in the I(search_base).
     - C(base) will limit the search to the base object so the maximum number of objects returned is always one. This
       will not search any objects inside a container..
     - C(one_level) will search the current path and any immediate objects in that path.
@@ -87,6 +87,23 @@ notes:
 - The C(sAMAccountType_AnsibleFlags) and C(userAccountControl_AnsibleFlags) return property is something set by the
   module itself as an easy way to view what those flags represent. These properties cannot be used as part of the
   I(filter) or I(ldap_filter) and are automatically added if those properties were requested.
+extends_documentation_fragment:
+- ansible.builtin.action_common_attributes
+attributes:
+  check_mode:
+    support: full
+  diff_mode:
+    support: full
+  platform:
+    platforms:
+    - windows
+seealso:
+- module: ansible.active_directory.domain
+- module: ansible.active_directory.domain_controller
+- module: ansible.active_directory.object
+- module: community.windows.win_domain_computer
+- module: community.windows.win_domain_group
+- module: community.windows.win_domain_user
 author:
 - Jordan Borean (@jborean93)
 """
