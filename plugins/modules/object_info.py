@@ -101,9 +101,9 @@ seealso:
 - module: ansible.active_directory.domain
 - module: ansible.active_directory.domain_controller
 - module: ansible.active_directory.object
+- module: ansible.active_directory.user
 - module: community.windows.win_domain_computer
 - module: community.windows.win_domain_group
-- module: community.windows.win_domain_user
 author:
 - Jordan Borean (@jborean93)
 """

@@ -84,9 +84,9 @@ attributes:
 seealso:
 - module: ansible.active_directory.domain
 - module: ansible.active_directory.domain_controller
+- module: ansible.active_directory.user
 - module: community.windows.win_domain_computer
 - module: community.windows.win_domain_group
-- module: community.windows.win_domain_user
 - module: ansible.windows.win_group
 - module: ansible.windows.win_group_membership
 - module: ansible.windows.win_user

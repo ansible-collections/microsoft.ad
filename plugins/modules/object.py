@@ -10,8 +10,6 @@ module: object
 short_description: Manage Active Directory objects
 description:
 - Manages Active Directory objects and their attributes.
-requirements:
-- C(ActiveDirectory) PowerShell module
 options:
   description:
     description:
@@ -22,59 +20,6 @@ options:
     description:
     - The display name of the AD object to set.
     - This is the value of the C(displayName) LDAP attribute.
-    type: str
-  domain_password:
-    description:
-    - The password for I(domain_username).
-    type: str
-  domain_server:
-    description:
-    - Specified the Active Directory Domain Services instance to connect to.
-    - Can be in the form of an FQDN or NetBIOS name.
-    - If not specified then the value is based on the default domain of the computer running PowerShell.
-    type: str
-  domain_username:
-    description:
-    - The username to use when interacting with AD.
-    - If this is not set then the user that is used for authentication will be the connection user.
-    - Ansible will be unable to use the connection user unless auth is Kerberos with credential delegation or CredSSP,
-      or become is used on the task.
-    type: str
-  identity:
-    description:
-    - The identity of the AD object used to find the AD object to manage.
-    - Must be specified if I(name) is not set, when trying to rename the object
-      with a new I(name), or when trying to move the object into a different
-      I(path).
-    - The identity can be in the form of a GUID representing the C(objectGUID)
-      value, the C(userPrincipalName), C(sAMAccountName), C(objectSid), or
-      C(distinguishedName).
-    - If omitted, the AD object to managed is selected by the
-      C(distinguishedName) using the format C(CN={{ name }},{{ path }}). If
-      I(path) is not defined, the C(defaultNamingContext) is used instead.
-    type: str
-  name:
-    description:
-    - The C(name) of the AD object to manage.
-    - If I(identity) is specified, and the name of the object it found does not
-      match this value, the object will be renamed.
-    - This must be set when I(state=present) or if I(identity) is not set.
-    type: str
-  path:
-    description:
-    - The path of the OU or the container where the new object should exist in.
-    - If no path is specified, the default is the C(defaultNamingContext) of
-      domain.
-    type: str
-  state:
-    description:
-    - Set to C(present) to ensure the AD object exists.
-    - Set to C(absent) to remove the AD object if it exists.
-    - The option I(name) must be set when I(state=present).
-    choices:
-    - absent
-    - present
-    default: present
     type: str
   type:
     description:
@@ -89,15 +34,8 @@ notes:
   Directory. It will not validate all the correct defaults are set for each
   type when it is created. If a type specific module is available to manage
   that AD object type it is recommend to use that.
-- Some LDAP attributes can have only a single value set while others can have
-  multiple. Some attributes are also read only and cannot be changed. It is
-  recommened to look at the schema metadata for an attribute where
-  C(System-Only) are read only values and C(Is-Single-Value) are attributes
-  with only 1 value.
-- Attempting to set multiple values to a C(Is-Single-Value) attribute results
-  in undefined behaviour.
 extends_documentation_fragment:
-- ansible.active_directory.ad_attribute
+- ansible.active_directory.ad_object
 - ansible.builtin.action_common_attributes
 attributes:
   check_mode:
@@ -111,9 +49,9 @@ seealso:
 - module: ansible.active_directory.domain
 - module: ansible.active_directory.domain_controller
 - module: ansible.active_directory.object_info
+- module: ansible.active_directory.user
 - module: community.windows.win_domain_computer
 - module: community.windows.win_domain_group
-- module: community.windows.win_domain_user
 author:
 - Jordan Borean (@jborean93)
 """

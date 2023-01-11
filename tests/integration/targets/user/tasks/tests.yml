@@ -1,0 +1,996 @@
+- name: create user with defaults - check
+  user:
+    name: MyUser
+    state: present
+  register: default_user_check
+  check_mode: true
+
+- name: get result of create user with defaults - check
+  object_info:
+    ldap_filter: (sAMAccountName=MyUser)
+  register: default_user_check_actual
+
+- name: assert create user with defaults - check
+  assert:
+    that:
+    - default_user_check is changed
+    - default_user_check_actual.objects == []
+    - default_user_check.distinguished_name == 'CN=MyUser,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - default_user_check.object_guid == '00000000-0000-0000-0000-000000000000'
+    - default_user_check.sid == 'S-1-5-0000'
+
+- name: create user with defaults
+  user:
+    name: MyUser
+    state: present
+  register: default_user
+
+- name: get result of create user with defaults
+  object_info:
+    ldap_filter: (sAMAccountName=MyUser)
+    properties:
+    - objectSid
+    - sAMAccountName
+    - userAccountControl
+    - userPrincipalName
+  register: default_user_actual
+
+- name: assert create user with defaults - check
+  assert:
+    that:
+    - default_user is changed
+    - default_user_actual.objects | length == 1
+    - default_user.distinguished_name == 'CN=MyUser,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - default_user.object_guid == default_user_actual.objects[0].ObjectGUID
+    - default_user.sid == default_user_actual.objects[0].objectSid.Sid
+    - default_user_actual.objects[0].sAMAccountName == 'MyUser'
+    - default_user_actual.objects[0].userPrincipalName == None
+    - '"ADS_UF_ACCOUNTDISABLE" in default_user_actual.objects[0].userAccountControl_AnsibleFlags'
+
+- set_fact:
+    object_identity: '{{ default_user.object_guid }}'
+    object_sid: '{{ default_user.sid }}'
+
+- name: create user with defaults - idempotent
+  user:
+    name: MyUser
+    state: present
+  register: default_user_again
+
+- name: assert create user with defaults - idempotent
+  assert:
+    that:
+    - not default_user_again is changed
+
+- name: rename user - check
+  user:
+    name: MyUser2
+    identity: '{{ object_identity }}'
+  register: rename_user_check
+  check_mode: true
+
+- name: get result of rename user - check
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - sAMAccountName
+  register: rename_user_check_actual
+
+- name: assert rename user - check
+  assert:
+    that:
+    - rename_user_check is changed
+    - rename_user_check.distinguished_name == 'CN=MyUser2,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - rename_user_check_actual.objects[0].DistinguishedName == default_user.distinguished_name
+    - rename_user_check_actual.objects[0].Name == 'MyUser'
+    - rename_user_check_actual.objects[0].sAMAccountName == 'MyUser'
+
+- name: rename user
+  user:
+    name: MyUser2
+    identity: '{{ object_identity }}'
+  register: rename_user
+
+- name: get result of rename user
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - sAMAccountName
+  register: rename_user_actual
+
+- name: assert rename user
+  assert:
+    that:
+    - rename_user is changed
+    - rename_user.distinguished_name == 'CN=MyUser2,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - rename_user_actual.objects[0].DistinguishedName == 'CN=MyUser2,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - rename_user_actual.objects[0].Name == 'MyUser2'
+    - rename_user_actual.objects[0].sAMAccountName == 'MyUser'
+
+- name: rename user - idempotent
+  user:
+    name: MyUser2
+    identity: '{{ object_identity }}'
+  register: rename_user_again
+
+- name: assert rename user - idempotent
+  assert:
+    that:
+    - not rename_user_again is changed
+
+- name: move user - check
+  user:
+    name: MyUser2
+    identity: '{{ object_sid }}'  # ID by SID
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+  register: move_user_check
+  check_mode: true
+
+- name: get result of move user - check
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - sAMAccountName
+  register: move_user_check_actual
+
+- name: assert move user - check
+  assert:
+    that:
+    - move_user_check is changed
+    - move_user_check.distinguished_name == 'CN=MyUser2,' ~ setup_domain_info.output[0].defaultNamingContext
+    - move_user_check_actual.objects[0].DistinguishedName == 'CN=MyUser2,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - move_user_check_actual.objects[0].Name == 'MyUser2'
+    - move_user_check_actual.objects[0].sAMAccountName == 'MyUser'
+
+- name: move user
+  user:
+    name: MyUser2
+    identity: '{{ object_sid }}'  # ID by SID
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+  register: move_user
+
+- name: get result of move user
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - sAMAccountName
+  register: move_user_actual
+
+- name: assert move user
+  assert:
+    that:
+    - move_user is changed
+    - move_user.distinguished_name == 'CN=MyUser2,' ~ setup_domain_info.output[0].defaultNamingContext
+    - move_user_actual.objects[0].DistinguishedName == 'CN=MyUser2,' ~ setup_domain_info.output[0].defaultNamingContext
+    - move_user_actual.objects[0].Name == 'MyUser2'
+    - move_user_actual.objects[0].sAMAccountName == 'MyUser'
+
+- name: move user - idempotent
+  user:
+    name: MyUser2
+    identity: '{{ object_sid }}'  # ID by SID
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+  register: move_user_again
+
+- name: assert move user - idempotent
+  assert:
+    that:
+    - not move_user_again is changed
+
+- name: move user back
+  user:
+    name: MyUser
+    identity: MyUser  # By sAMAccountName
+    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+
+- name: update password from blank - skip for on_create
+  user:
+    name: MyUser
+    password: Password123!
+    update_password: on_create
+  register: change_pass_on_create
+
+- name: assert update password from blank - skip for on_create
+  assert:
+    that:
+    - not change_pass_on_create is changed
+
+- name: update password - check
+  user:
+    name: MyUser
+    password: Password123!
+    update_password: when_changed
+    enabled: true
+  register: change_pass_check
+  check_mode: true
+
+- name: get result of update password - check
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - pwdLastSet
+    - userAccountControl
+  register: change_pass_check_actual
+
+- name: assert update password - check
+  assert:
+    that:
+    - change_pass_check is changed
+    - change_pass_check_actual.objects[0].pwdLastSet == 0
+    - '"ADS_UF_ACCOUNTDISABLE" in change_pass_check_actual.objects[0].userAccountControl_AnsibleFlags'
+
+- name: update password - check
+  user:
+    name: MyUser
+    password: Password123!
+    update_password: when_changed
+    enabled: true
+  register: change_pass
+
+- name: get result of update password
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - pwdLastSet
+    - userAccountControl
+  register: change_pass_actual
+
+- name: assert update password
+  assert:
+    that:
+    - change_pass is changed
+    - change_pass_actual.objects[0].pwdLastSet != 0
+    - '"ADS_UF_ACCOUNTDISABLE" not in change_pass_actual.objects[0].userAccountControl_AnsibleFlags'
+
+- name: update password - idempotent
+  user:
+    name: MyUser
+    password: Password123!
+    update_password: when_changed
+    enabled: true
+  register: change_pass_again
+
+- name: assert update password - idempotent
+  assert:
+    that:
+    - not change_pass_again is changed
+
+- name: force update password
+  user:
+    name: MyUser
+    password: Password123!
+  register: always_update_password
+
+- name: get result of force update password
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - pwdLastSet
+  register: always_update_password_actual
+
+- name: assert force update password
+  assert:
+    that:
+    - always_update_password is changed
+    - always_update_password_actual.objects[0].pwdLastSet > change_pass_actual.objects[0].pwdLastSet
+
+- name: remove user - check
+  user:
+    name: MyUser
+    state: absent
+  register: remove_user_check
+  check_mode: true
+
+- name: get result of remove user - check
+  object_info:
+    identity: '{{ object_identity }}'
+  register: remove_user_check_actual
+
+- name: assert remove user - check
+  assert:
+    that:
+    - remove_user_check is changed
+    - remove_user_check_actual.objects | length == 1
+
+- name: remove user
+  user:
+    name: MyUser
+    state: absent
+  register: remove_user
+
+- name: get result of remove user
+  object_info:
+    identity: '{{ object_identity }}'
+  register: remove_user_actual
+
+- name: assert remove user
+  assert:
+    that:
+    - remove_user is changed
+    - remove_user_actual.objects == []
+
+- name: remove user - idempotent
+  user:
+    name: MyUser
+    state: absent
+  register: remove_user_again
+
+- name: assert remove user - idempotent
+  assert:
+    that:
+    - not remove_user_again is changed
+
+- name: create user with extra info - check
+  user:
+    name: MyUser
+    state: present
+    city: Brisbane
+    company: Red Hat
+    country: au
+    delegates:
+    - CN=krbtgt,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    description: User Description
+    display_name: User Name
+    email: user@EMAIL.COM
+    firstname: FirstName
+    groups:
+    - Domain Admins
+    - Domain Users
+    password: Password123!
+    password_never_expires: true
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    postal_code: 4000
+    sam_account_name: MyUserSam
+    spn:
+    - HTTP/MyUser
+    state_province: QLD
+    street: Main
+    surname: LastName
+    upn: User@{{ domain_realm }}
+    user_cannot_change_password: true
+    attributes:
+      set:
+        comment: My comment
+  register: create_user_check
+  check_mode: true
+
+- name: get result of create user with extra info - check
+  object_info:
+    identity: '{{ create_user_check.distinguished_name }}'
+  register: create_user_actual_check
+
+- name: assert create user with extra info - check
+  assert:
+    that:
+    - create_user_check is changed
+    - create_user_actual_check.objects == []
+
+- name: create user with extra info
+  user:
+    name: MyUser
+    state: present
+    city: Brisbane
+    company: Red Hat
+    country: au
+    delegates:
+    - CN=krbtgt,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    description: User Description
+    display_name: User Name
+    email: user@EMAIL.COM
+    firstname: FirstName
+    groups:
+    - Domain Admins
+    - Domain Users
+    password: Password123!
+    password_never_expires: true
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    postal_code: 4000
+    sam_account_name: MyUserSam
+    spn:
+    - HTTP/MyUser
+    state_province: QLD
+    street: Main
+    surname: LastName
+    upn: User@{{ domain_realm }}
+    user_cannot_change_password: true
+    attributes:
+      set:
+        comment: My comment
+  register: create_user
+
+- set_fact:
+    object_identity: '{{ create_user.object_guid }}'
+    object_sid: '{{ create_user.sid }}'
+
+- name: get result of create user with extra info
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - c
+    - comment
+    - company
+    - Description
+    - displayName
+    - givenName
+    - l
+    - mail
+    - memberOf
+    - msDS-AllowedToActOnBehalfOfOtherIdentity
+    - objectSid
+    - postalcode
+    - primaryGroupID
+    - pwdLastSet
+    - sAMAccountName
+    - servicePrincipalName
+    - sn
+    - st
+    - streetaddress
+    - userAccountControl
+    - userPrincipalName
+  register: create_user_actual
+
+- name: convert delegate SDDL to human readable string
+  ansible.windows.win_powershell:
+    parameters:
+      SDDL: '{{ create_user_actual.objects[0]["msDS-AllowedToActOnBehalfOfOtherIdentity"] }}'
+    script: |
+      param($SDDL)
+
+      $sd = New-Object -TypeName System.DirectoryServices.ActiveDirectorySecurity
+      $sd.SetSecurityDescriptorSddlForm($SDDL, 'All')
+      $sd.GetAccessRules($true, $false, [Type][System.Security.Principal.NTAccount]
+      ).IdentityReference.Value | ForEach-Object {
+          ($_ -split '\\', 2)[-1]
+      } | Sort-Object
+  register: create_user_delegates
+
+- name: assert create user with extra info
+  assert:
+    that:
+    - create_user is changed
+    - create_user_actual.objects | length == 1
+    - create_user.distinguished_name == 'CN=MyUser,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_user.object_guid == create_user_actual.objects[0].ObjectGUID
+    - create_user.sid == create_user_actual.objects[0].objectSid.Sid
+    - create_user_actual.objects[0].Description == 'User Description'
+    - create_user_actual.objects[0].DisplayName == 'User Name'
+    - create_user_actual.objects[0].DistinguishedName == 'CN=MyUser,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_user_actual.objects[0].c == 'au'
+    - create_user_actual.objects[0].comment == 'My comment'
+    - create_user_actual.objects[0].company == 'Red Hat'
+    - create_user_actual.objects[0].givenName == 'FirstName'
+    - create_user_actual.objects[0].l == 'Brisbane'
+    - create_user_actual.objects[0].mail == 'user@EMAIL.COM'
+    # Domain Users is the primaryGroupID entry
+    - create_user_actual.objects[0].memberOf == 'CN=Domain Admins,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_user_actual.objects[0].postalcode == '4000'
+    - create_user_actual.objects[0].primaryGroupID == 513  # Domain Users
+    - create_user_actual.objects[0].pwdLastSet > 0
+    - create_user_actual.objects[0].sAMAccountName == 'MyUserSam'
+    - create_user_actual.objects[0].servicePrincipalName == 'HTTP/MyUser'
+    - create_user_actual.objects[0].sn == 'LastName'
+    - create_user_actual.objects[0].st == 'QLD'
+    - create_user_actual.objects[0].streetaddress == 'Main'
+    - create_user_actual.objects[0].userPrincipalName == 'User@' ~ domain_realm
+    - create_user_actual.objects[0].userAccountControl_AnsibleFlags == ["ADS_UF_NORMAL_ACCOUNT", "ADS_UF_DONT_EXPIRE_PASSWD"]
+    - create_user_delegates.output == ["Administrator", "krbtgt"]
+
+- name: create user with extra info - idempotent
+  user:
+    name: MyUser
+    state: present
+    city: Brisbane
+    company: Red Hat
+    country: au
+    delegates:
+    - CN=krbtgt,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    description: User Description
+    display_name: User Name
+    email: user@EMAIL.COM
+    firstname: FirstName
+    groups:
+    - Domain Admins
+    - Domain Users
+    password: Password123!
+    password_never_expires: true
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    postal_code: 4000
+    sam_account_name: MyUserSam
+    spn:
+    - HTTP/MyUser
+    state_province: QLD
+    street: Main
+    surname: LastName
+    upn: User@{{ domain_realm }}
+    update_password: when_changed
+    user_cannot_change_password: true
+    attributes:
+      set:
+        comment: My comment
+  register: create_user_again
+
+- name: assert create user with extra info - idempotent
+  assert:
+    that:
+    - not create_user_again is changed
+
+- name: update user settings - check
+  user:
+    name: MyUser
+    state: present
+    city: New York
+    company: Ansible
+    country: us
+    delegates:
+    - CN=KRBTGT,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    description: User description
+    display_name: User name
+    email: User@EMAIL.COM
+    firstname: firstName
+    groups:
+    - Domain Users
+    password: Password123!
+    password_never_expires: false
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    postal_code: 10001
+    sam_account_name: myUserSam
+    spn:
+    - HTTP/myUser
+    state_province: NY
+    street: main
+    surname: lastName
+    upn: user@{{ domain_realm }}
+    update_password: when_changed
+    user_cannot_change_password: false
+    attributes:
+      set:
+        comment: My Comment
+  register: update_user_check
+  check_mode: true
+
+- name: get result of update user settings - check
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - c
+    - comment
+    - company
+    - Description
+    - displayName
+    - givenName
+    - l
+    - mail
+    - memberOf
+    - msDS-AllowedToActOnBehalfOfOtherIdentity
+    - objectSid
+    - postalcode
+    - primaryGroupID
+    - pwdLastSet
+    - sAMAccountName
+    - servicePrincipalName
+    - sn
+    - st
+    - streetaddress
+    - userAccountControl
+    - userPrincipalName
+  register: update_user_check_actual
+
+- name: assert update user settings - check
+  assert:
+    that:
+    - update_user_check is changed
+    - update_user_check.distinguished_name == 'CN=MyUser,' ~ setup_domain_info.output[0].defaultNamingContext
+    - update_user_check.object_guid == create_user_actual.objects[0].ObjectGUID
+    - update_user_check.sid == create_user_actual.objects[0].objectSid.Sid
+    - update_user_check_actual.objects[0].Description == 'User Description'
+    - update_user_check_actual.objects[0].DisplayName == 'User Name'
+    - update_user_check_actual.objects[0].DistinguishedName == 'CN=MyUser,' ~ setup_domain_info.output[0].defaultNamingContext
+    - update_user_check_actual.objects[0].c == 'au'
+    - update_user_check_actual.objects[0].comment == 'My comment'
+    - update_user_check_actual.objects[0].company == 'Red Hat'
+    - update_user_check_actual.objects[0].givenName == 'FirstName'
+    - update_user_check_actual.objects[0].l == 'Brisbane'
+    - update_user_check_actual.objects[0].mail == 'user@EMAIL.COM'
+    # Domain Users is the primaryGroupID entry
+    - update_user_check_actual.objects[0].memberOf == 'CN=Domain Admins,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - update_user_check_actual.objects[0].postalcode == '4000'
+    - update_user_check_actual.objects[0].primaryGroupID == 513  # Domain Users
+    - update_user_check_actual.objects[0].pwdLastSet > 0
+    - update_user_check_actual.objects[0].sAMAccountName == 'MyUserSam'
+    - update_user_check_actual.objects[0].servicePrincipalName == 'HTTP/MyUser'
+    - update_user_check_actual.objects[0].sn == 'LastName'
+    - update_user_check_actual.objects[0].st == 'QLD'
+    - update_user_check_actual.objects[0].streetaddress == 'Main'
+    - update_user_check_actual.objects[0].userPrincipalName == 'User@' ~ domain_realm
+    - update_user_check_actual.objects[0].userAccountControl_AnsibleFlags == ["ADS_UF_NORMAL_ACCOUNT", "ADS_UF_DONT_EXPIRE_PASSWD"]
+    - update_user_check_actual.objects[0]['msDS-AllowedToActOnBehalfOfOtherIdentity'] == create_user_actual.objects[0]['msDS-AllowedToActOnBehalfOfOtherIdentity']
+
+- name: update user settings
+  user:
+    name: MyUser
+    state: present
+    city: New York
+    company: Ansible
+    country: us
+    delegates:
+    - CN=KRBTGT,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    description: User description
+    display_name: User name
+    email: User@EMAIL.COM
+    firstname: firstName
+    groups:
+    - Domain Users
+    password: Password123!
+    password_never_expires: false
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    postal_code: 10001
+    sam_account_name: myUserSam
+    spn:
+    - HTTP/myUser
+    state_province: NY
+    street: main
+    surname: lastName
+    upn: user@{{ domain_realm }}
+    update_password: when_changed
+    user_cannot_change_password: false
+    attributes:
+      set:
+        comment: My Comment
+  register: update_user
+
+- name: get result of update user settings
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - c
+    - comment
+    - company
+    - Description
+    - displayName
+    - givenName
+    - l
+    - mail
+    - memberOf
+    - msDS-AllowedToActOnBehalfOfOtherIdentity
+    - objectSid
+    - postalcode
+    - primaryGroupID
+    - pwdLastSet
+    - sAMAccountName
+    - servicePrincipalName
+    - sn
+    - st
+    - streetaddress
+    - userAccountControl
+    - userPrincipalName
+  register: update_user_actual
+
+- name: convert delegate SDDL to human readable string
+  ansible.windows.win_powershell:
+    parameters:
+      SDDL: '{{ update_user_actual.objects[0]["msDS-AllowedToActOnBehalfOfOtherIdentity"] }}'
+    script: |
+      param($SDDL)
+
+      $sd = New-Object -TypeName System.DirectoryServices.ActiveDirectorySecurity
+      $sd.SetSecurityDescriptorSddlForm($SDDL, 'All')
+      $sd.GetAccessRules($true, $false, [Type][System.Security.Principal.NTAccount]
+      ).IdentityReference.Value | ForEach-Object {
+          ($_ -split '\\', 2)[-1]
+      } | Sort-Object
+  register: update_user_delegates
+
+- name: assert update user settings
+  assert:
+    that:
+    - update_user is changed
+    - update_user.distinguished_name == 'CN=MyUser,' ~ setup_domain_info.output[0].defaultNamingContext
+    - update_user.object_guid == create_user_actual.objects[0].ObjectGUID
+    - update_user.sid == create_user_actual.objects[0].objectSid.Sid
+    - update_user_actual.objects[0].Description == 'User description'
+    - update_user_actual.objects[0].DisplayName == 'User name'
+    - update_user_actual.objects[0].DistinguishedName == 'CN=MyUser,' ~ setup_domain_info.output[0].defaultNamingContext
+    - update_user_actual.objects[0].c == 'us'
+    - update_user_actual.objects[0].comment == 'My Comment'
+    - update_user_actual.objects[0].company == 'Ansible'
+    - update_user_actual.objects[0].givenName == 'firstName'
+    - update_user_actual.objects[0].l == 'New York'
+    - update_user_actual.objects[0].mail == 'User@EMAIL.COM'
+    # Domain Users is the primaryGroupID entry
+    - update_user_actual.objects[0].memberOf == None
+    - update_user_actual.objects[0].postalcode == '10001'
+    - update_user_actual.objects[0].primaryGroupID == 513  # Domain Users
+    - update_user_actual.objects[0].pwdLastSet == create_user_actual.objects[0].pwdLastSet
+    - update_user_actual.objects[0].sAMAccountName == 'myUserSam'
+    - update_user_actual.objects[0].servicePrincipalName == 'HTTP/MyUser'
+    - update_user_actual.objects[0].sn == 'lastName'
+    - update_user_actual.objects[0].st == 'NY'
+    - update_user_actual.objects[0].streetaddress == 'main'
+    - update_user_actual.objects[0].userPrincipalName == 'user@' ~ domain_realm
+    - update_user_actual.objects[0].userAccountControl_AnsibleFlags == ["ADS_UF_NORMAL_ACCOUNT"]
+    - update_user_delegates.output == ["krbtgt"]
+
+- name: update delegates case insensitive
+  user:
+    name: MyUser
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    delegates:
+    - CN=KrbTGT,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+  register: update_delegates_insensitive
+
+- name: assert update delegates case insensitive
+  assert:
+    that:
+    - not update_delegates_insensitive is changed
+
+- name: update delegates
+  user:
+    name: MyUser
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    delegates:
+    - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    - CN=Enterprise Admins,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+  register: update_delegates
+
+- name: get result of update delegates
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - msDS-AllowedToActOnBehalfOfOtherIdentity
+  register: update_delegates_actual_raw
+
+- name: convert delegate SDDL to human readable string
+  ansible.windows.win_powershell:
+    parameters:
+      SDDL: '{{ update_delegates_actual_raw.objects[0]["msDS-AllowedToActOnBehalfOfOtherIdentity"] }}'
+    script: |
+      param($SDDL)
+
+      $sd = New-Object -TypeName System.DirectoryServices.ActiveDirectorySecurity
+      $sd.SetSecurityDescriptorSddlForm($SDDL, 'All')
+      $sd.GetAccessRules($true, $false, [Type][System.Security.Principal.NTAccount]
+      ).IdentityReference.Value | ForEach-Object {
+          ($_ -split '\\', 2)[-1]
+      } | Sort-Object
+  register: update_delegates_actual
+
+- name: assert update delegates
+  assert:
+    that:
+    - update_delegates is changed
+    - update_delegates_actual.output == ["Administrator", "Enterprise Admins"]
+
+- name: unset string option
+  user:
+    name: MyUser
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    firstname: ''
+  register: unset_option
+
+- name: get result of unset string option
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - givenName
+  register: unset_option_actual
+
+- name: assert unset string option
+  assert:
+    that:
+    - unset_option is changed
+    - unset_option_actual.objects[0].givenName == None
+
+- name: set groups - check
+  user:
+    name: MyUser
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    groups:
+    - Domain Admins
+  register: set_groups_check
+  check_mode: true
+
+- name: get result of set groups - check
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - memberOf
+    - primaryGroupID
+  register: set_groups_check_actual
+
+- name: assert set groups - check
+  assert:
+    that:
+    - set_groups_check is changed
+    - set_groups_check_actual.objects[0].memberOf == None
+    - set_groups_check_actual.objects[0].primaryGroupID == 513  # Domain Users
+
+- name: set groups
+  user:
+    name: MyUser
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    groups:
+    - Domain Admins
+  register: set_groups
+
+- name: get result of set groups
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - memberOf
+    - primaryGroupID
+  register: set_groups_actual
+
+- name: assert set groups - check
+  assert:
+    that:
+    - set_groups is changed
+    - set_groups.warnings | length == 1
+    - '"the primary group of the user, skipping" in set_groups.warnings[0]'
+    - set_groups_actual.objects[0].memberOf == "CN=Domain Admins,CN=Users," ~ setup_domain_info.output[0].defaultNamingContext
+    - set_groups_actual.objects[0].primaryGroupID == 513  # Domain Users
+
+- name: fail to add group that is missing
+  user:
+    name: MyUser
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    groups:
+    - Invalid
+    groups_action: add
+  register: fail_missing_group
+  failed_when:
+  - '"Failed to locate group Invalid: Cannot find an object with identity" not in fail_missing_group.msg'
+
+- name: warn on group that is missing
+  user:
+    name: MyUser
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    groups:
+    - Invalid
+    groups_action: add
+    groups_missing_behaviour: warn
+  register: warn_missing_group
+
+- name: assert warn on group that is missing
+  assert:
+    that:
+    - not warn_missing_group is changed
+    - warn_missing_group.warnings | length == 1
+    - '"Failed to locate group Invalid but continuing on" in warn_missing_group.warnings[0]'
+
+- name: ignore on group that is missing
+  user:
+    name: MyUser
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    groups:
+    - Invalid
+    groups_action: add
+    groups_missing_behaviour: ignore
+  register: ignore_missing_group
+
+- name: assert ignore on group that is missing
+  assert:
+    that:
+    - not ignore_missing_group is changed
+    - ignore_missing_group.warnings | default([]) | length == 0
+
+- name: remove group
+  user:
+    name: MyUser
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    groups:
+    - domain admins
+    - Enterprise Admins
+    groups_action: remove
+  register: groups_remove
+
+- name: get result of remove groups
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - memberOf
+    - primaryGroupID
+  register: groups_remove_actual
+
+- name: assert remove groups
+  assert:
+    that:
+    - groups_remove is changed
+    - groups_remove_actual.objects[0].memberOf == None
+    - groups_remove_actual.objects[0].primaryGroupID == 513  # Domain Users
+
+- name: add group
+  user:
+    name: MyUser
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    groups:
+    - domain users
+    - domain admins
+    groups_action: add
+  register: groups_add
+
+- name: get result of add groups
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - memberOf
+    - primaryGroupID
+  register: groups_add_actual
+
+- name: assert add groups
+  assert:
+    that:
+    - groups_add is changed
+    - groups_add_actual.objects[0].memberOf == "CN=Domain Admins,CN=Users," ~ setup_domain_info.output[0].defaultNamingContext
+    - groups_add_actual.objects[0].primaryGroupID == 513  # Domain Users
+
+- name: set spns
+  user:
+    name: MyUser
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    spn:
+    - HTTP/host
+    - HTTP/host.domain
+    - HTTP/host.domain:8080
+  register: spn_set
+
+- name: get result of set spns
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - servicePrincipalName
+  register: spn_set_actual
+
+- name: assert set spns
+  assert:
+    that:
+    - spn_set is changed
+    - spn_set_actual.objects[0].servicePrincipalName == ['HTTP/host.domain:8080', 'HTTP/host.domain', 'HTTP/host']
+
+- name: remove spns
+  user:
+    name: MyUser
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    spn:
+    - HTTP/fake
+    - HTTP/Host.domain
+    spn_action: remove
+  register: spn_remove
+
+- name: get result of remove spns
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - servicePrincipalName
+  register: spn_remove_actual
+
+- name: assert remove spns
+  assert:
+    that:
+    - spn_remove is changed
+    - spn_remove_actual.objects[0].servicePrincipalName == ['HTTP/host.domain:8080', 'HTTP/host']
+
+- name: add spns
+  user:
+    name: MyUser
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    spn:
+    - HTTP/Host.domain:8080
+    - HTTP/fake
+    spn_action: add
+  register: spn_add
+
+- name: get result of add spns
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - servicePrincipalName
+  register: spn_add_actual
+
+- name: assert add spns
+  assert:
+    that:
+    - spn_add is changed
+    - spn_add_actual.objects[0].servicePrincipalName == ['HTTP/fake', 'HTTP/host.domain:8080', 'HTTP/host']

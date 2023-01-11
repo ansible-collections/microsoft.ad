@@ -39,7 +39,7 @@
       state: present
 
   - name: create domain username
-    community.windows.win_domain_user:
+    ansible.active_directory.user:
       name: '{{ domain_username }}'
       upn: '{{ domain_user_upn }}'
       description: '{{ domain_username }} Domain Account'
@@ -48,6 +48,7 @@
       update_password: when_changed
       groups:
       - Domain Admins
+      - Domain Users
       state: present
 
 - name: setup test host
