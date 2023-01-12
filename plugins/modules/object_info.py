@@ -93,7 +93,7 @@ attributes:
   check_mode:
     support: full
   diff_mode:
-    support: full
+    support: none
   platform:
     platforms:
     - windows

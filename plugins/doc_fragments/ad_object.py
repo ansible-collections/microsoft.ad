@@ -33,6 +33,8 @@ options:
     - The C(raw) type is the int, string, or boolean value to set.
     - String attribute values are compared using a case sensitive match on the
       AD object being managed.
+    - See R(LDAP attributes help,ansible_collections.ansible.active_directory.docsite.guide_attributes)
+      for more information.
     default: {}
     type: dict
     suboptions:

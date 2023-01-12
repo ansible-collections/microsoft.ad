@@ -115,12 +115,14 @@ Function Compare-AnsibleADAttribute {
         }
 
         switch ($type) {
+            bool {
+                $desiredAttributes.Add([System.Boolean]$value)
+            }
             bytes {
                 $desiredAttributes.Add([System.Convert]::FromBase64String($value))
             }
             date_time {
-                $dtVal = [DateTime]::ParseExact(
-                    "o",
+                $dtVal = [DateTime]::Parse(
                     $value,
                     [System.Globalization.CultureInfo]::InvariantCulture)
                 $desiredAttributes.Add($dtVal.ToFileTimeUtc())

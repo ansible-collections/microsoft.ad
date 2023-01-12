@@ -34,11 +34,6 @@ options:
     description:
     - The desired hostname for the Windows host.
     type: str
-  log_path:
-    description:
-    - This option is deprecated and is preserved for backwards compatibility.
-    - Setting it will do nothing.
-    type: str
   reboot:
     description:
     - If C(true), this will reboot the host if a reboot was required to configure the domain.
