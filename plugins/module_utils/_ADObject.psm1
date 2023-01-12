@@ -580,6 +580,27 @@ Function Invoke-AnsibleADObject {
         absent = @()
     }
 
+    $PropertyInfo = @(
+        $PropertyInfo
+
+        # These 3 options are common to all AD objects.
+        [PSCustomObject]@{
+            Name = 'description'
+            Option = @{ type = 'str' }
+            Attribute = 'description'
+        }
+        [PSCustomObject]@{
+            Name = 'display_name'
+            Option = @{ type = 'str' }
+            Attribute = 'displayName'
+        }
+        [PSCustomObject]@{
+            Name = 'protect_from_deletion'
+            Option = @{ type = 'bool' }
+            Attribute = 'ProtectedFromAccidentalDeletion'
+        }
+    )
+
     [string[]]$requestedAttributes = @(
         foreach ($propInfo in $PropertyInfo) {
             $ansibleOption = $propInfo.Name
@@ -635,6 +656,11 @@ Function Invoke-AnsibleADObject {
         $module.Params.attributes.set.Keys
     ) | Where-Object { $_ }
 
+    $namePrefix = 'CN'
+    if ($ModuleNoun -eq 'ADOrganizationalUnit' -or $Module.Params.type -eq 'organizationalUnit') {
+        $namePrefix = 'OU'
+    }
+
     $identity = if ($module.Params.identity) {
         $module.Params.identity
     }
@@ -643,7 +669,7 @@ Function Invoke-AnsibleADObject {
         if ($module.Params.path) {
             $ouPath = $module.Params.path
         }
-        "CN=$($Module.Params.name -replace ',', '\,'),$ouPath"
+        "$namePrefix=$($Module.Params.name -replace ',', '\,'),$ouPath"
     }
 
     $getParams = @{
@@ -695,9 +721,14 @@ Function Invoke-AnsibleADObject {
 
             # Remove-ADObject -Recursive fails with access is denied, use this
             # instead to remove the child objects manually
-            Get-ADObject -Filter * -Searchbase $adObject.DistinguishedName |
+            Get-ADObject -Filter * -Properties ProtectedFromAccidentalDeletion -Searchbase $adObject.DistinguishedName |
                 Sort-Object -Property { $_.DistinguishedName.Length } -Descending |
-                Remove-ADObject @removeParams @adParams
+                ForEach-Object -Process {
+                    if ($_.ProtectedFromAccidentalDeletion) {
+                        $_ | Set-ADObject -ProtectedFromAccidentalDeletion $false @removeParams @adParams
+                    }
+                    $_ | Remove-ADObject @removeParams @adParams
+                }
 
             $module.Result.changed = $true
         }
@@ -761,7 +792,7 @@ Function Invoke-AnsibleADObject {
             $module.Result.changed = $true
 
             if ($module.CheckMode) {
-                $objectDN = "CN=$($module.Params.name -replace ',', '\,'),$objectPath"
+                $objectDN = "$namePrefix=$($module.Params.name -replace ',', '\,'),$objectPath"
                 $objectGuid = [Guid]::Empty  # Dummy value for check mode
             }
             else {
@@ -859,7 +890,21 @@ Function Invoke-AnsibleADObject {
                 $objectPath = $module.Params.path
                 $module.Diff.after.path = $objectPath
 
-                $finalADObject = Move-ADObject @commonParams -TargetPath $objectPath
+                $addProtection = $false
+                if ($adObject.ProtectedFromAccidentalDeletion) {
+                    $addProtection = $true
+                    $null = Set-ADObject -ProtectedFromAccidentalDeletion $false @commonParams @adParams
+                }
+
+                try {
+                    $finalADObject = Move-ADObject @commonParams -TargetPath $objectPath
+                }
+                finally {
+                    if ($addProtection) {
+                        $null = Set-ADObject -ProtectedFromAccidentalDeletion $true @commonParams @adParams
+                    }
+                }
+
                 $module.Result.changed = $true
             }
 
@@ -873,7 +918,7 @@ Function Invoke-AnsibleADObject {
                 $objectDN = $finalADObject.DistinguishedName
             }
             else {
-                $objectDN = "CN=$($objectName -replace ',', '\,'),$objectPath"
+                $objectDN = "$namePrefix=$($objectName -replace ',', '\,'),$objectPath"
             }
         }
 

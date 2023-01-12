@@ -1,0 +1,14 @@
+- name: remove temp OU
+  ou:
+    name: MyOU
+    state: absent
+
+- block:
+  - import_tasks: tests.yml
+
+  always:
+  - name: remove temp OU
+    ou:
+      name: MyOU
+      identity: '{{ object_identity | default(omit) }}'
+      state: absent

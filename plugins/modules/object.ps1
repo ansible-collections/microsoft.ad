@@ -9,16 +9,6 @@
 $setParams = @{
     PropertyInfo = @(
         [PSCustomObject]@{
-            Name = 'description'
-            Option = @{ type = 'str' }
-            Attribute = 'description'
-        }
-        [PSCustomObject]@{
-            Name = 'display_name'
-            Option = @{ type = 'str' }
-            Attribute = 'displayName'
-        }
-        [PSCustomObject]@{
             Name = 'type'
             Option = @{ type = 'str' }
 

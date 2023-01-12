@@ -48,16 +48,6 @@ options:
     - principals_allowed_to_delegate
     type: list
     elements: str
-  description:
-    description:
-    - The description of the AD object to set.
-    - This is the value set on the C(description) LDAP attribute.
-    type: str
-  display_name:
-    description:
-    - The display name of the AD object to set.
-    - This is the value of the C(displayName) LDAP attribute.
-    type: str
   email:
     description:
     - Configures the user's email address.
@@ -206,6 +196,9 @@ options:
     - C(yes) will prevent the user from changing their password.
     - C(no) will allow the user to change their password.
     type: bool
+notes:
+- See R(win_domain_user migration,ansible_collections.ansible.active_directory.docsite.guide_migration.migrated_modules.win_domain_user)
+  for help on migrating from M(community.windows.win_domain_user) to this module.
 extends_documentation_fragment:
 - ansible.active_directory.ad_object
 - ansible.builtin.action_common_attributes
