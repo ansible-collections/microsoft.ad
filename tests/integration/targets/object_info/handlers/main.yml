@@ -1,4 +1,4 @@
 - name: remove test domain user
-  win_domain_user:
+  ansible.active_directory.user:
     name: '{{ test_user.distinguished_name }}'
     state: absent

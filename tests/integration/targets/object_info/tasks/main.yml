@@ -1,5 +1,5 @@
 - name: create test ad user
-  community.windows.win_domain_user:
+  ansible.active_directory.user:
     name: Ansible Test
     firstname: Ansible
     surname: Test

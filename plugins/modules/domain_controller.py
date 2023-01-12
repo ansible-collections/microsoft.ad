@@ -113,9 +113,9 @@ attributes:
 seealso:
 - module: ansible.active_directory.domain
 - module: ansible.active_directory.membership
+- module: ansible.active_directory.user
 - module: community.windows.win_domain_computer
 - module: community.windows.win_domain_group
-- module: community.windows.win_domain_user
 author:
 - Matt Davis (@nitzmahone)
 - Jordan Borean (@jborean93)

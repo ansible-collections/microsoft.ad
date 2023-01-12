@@ -96,7 +96,7 @@
     - rename_check_actual.objects[0].DistinguishedName == object_dn
     - rename_check_actual.objects[0].Name == object_name
 
-- name: rename and set display name of object
+- name: rename and set display name of object[]
   object:
     name: My, Contact 2
     identity: '{{ object_identity }}'
@@ -874,3 +874,41 @@
   assert:
     that:
     - not set_sd_again is changed
+
+- name: unset display and description
+  object:
+    name: Contact
+    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    type: contact
+    display_name: ''
+    description: ''
+  register: unset_normal
+
+- name: get result of unset display and description
+  object_info:
+    identity: '{{ sub_object.object_guid }}'
+    properties:
+    - DisplayName
+    - Description
+  register: unset_normal_actual
+
+- name: assert unset display and description
+  assert:
+    that:
+    - unset_normal is changed
+    - unset_normal_actual.objects[0].DisplayName == None
+    - unset_normal_actual.objects[0].Description == None
+
+- name: unset display and description - idempotent
+  object:
+    name: Contact
+    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    type: contact
+    display_name: ''
+    description: ''
+  register: unset_normal_again
+
+- name: assert unset display and description - idempotent
+  assert:
+    that:
+    - not unset_normal_again is changed

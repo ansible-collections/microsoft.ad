@@ -1,0 +1,14 @@
+- name: remove temp user
+  user:
+    name: MyUser
+    state: absent
+
+- block:
+  - import_tasks: tests.yml
+
+  always:
+  - name: remove temp user
+    user:
+      name: MyUser
+      identity: '{{ object_identity | default(omit) }}'
+      state: absent
