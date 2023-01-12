@@ -25,11 +25,6 @@ $spec = @{
         hostname = @{
             type = 'str'
         }
-        log_path = @{
-            type = 'str'
-            removed_at_date = [DateTime]::ParseExact("2024-12-01", "yyyy-MM-dd", $null)
-            removed_from_collection = 'ansible.active_directory'
-        }
         reboot = @{
             default = $false
             type = 'bool'
