@@ -1,0 +1,166 @@
+- name: create computer - check
+  computer:
+    name: MyComputer
+    state: present
+  register: create_comp_check
+  check_mode: true
+
+- name: get result of create computer - check
+  object_info:
+    identity: '{{ create_comp_check.distinguished_name }}'
+  register: create_comp_check_actual
+
+- name: assert create computer - check
+  assert:
+    that:
+    - create_comp_check is changed
+    - create_comp_check.distinguished_name == 'CN=MyComputer,CN=Computers,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_comp_check.object_guid == '00000000-0000-0000-0000-000000000000'
+    - create_comp_check.sid == 'S-1-5-0000'
+    - create_comp_check_actual.objects == []
+
+- name: create computer
+  computer:
+    name: MyComputer
+    state: present
+  register: create_comp
+
+- set_fact:
+    object_identity: '{{ create_comp.object_guid }}'
+
+- name: get result of create computer
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - dnsHostName
+    - objectSid
+    - sAMAccountName
+    - userAccountControl
+  register: create_comp_actual
+
+- name: assert create computer
+  assert:
+    that:
+    - create_comp is changed
+    - create_comp_actual.objects | length == 1
+    - create_comp.distinguished_name == 'CN=MyComputer,CN=Computers,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_comp.object_guid == create_comp_actual.objects[0].ObjectGUID
+    - create_comp.sid == create_comp_actual.objects[0].objectSid.Sid
+    - create_comp_actual.objects[0].DistinguishedName == create_comp.distinguished_name
+    - create_comp_actual.objects[0].Name == 'MyComputer'
+    - create_comp_actual.objects[0].dnsHostName == None
+    - create_comp_actual.objects[0].sAMAccountName == 'MyComputer$'
+    - create_comp_actual.objects[0].ObjectClass == 'computer'
+    - '"ADS_UF_ACCOUNTDISABLE" not in create_comp_actual.objects[0].userAccountControl_AnsibleFlags'
+
+- name: remove computer - check
+  computer:
+    name: MyComputer
+    state: absent
+  register: remove_comp_check
+  check_mode: true
+
+- name: get result of remove computer - check
+  object_info:
+    identity: '{{ object_identity }}'
+  register: remove_comp_check_actual
+
+- name: assert remove computer - check
+  assert:
+    that:
+    - remove_comp_check is changed
+    - remove_comp_check_actual.objects | length == 1
+
+- name: remove computer
+  computer:
+    name: MyComputer
+    state: absent
+  register: remove_comp
+
+- name: get result of remove computer
+  object_info:
+    identity: '{{ object_identity }}'
+  register: remove_comp_actual
+
+- name: assert remove computer
+  assert:
+    that:
+    - remove_comp is changed
+    - remove_comp_actual.objects == []
+
+- name: remove computer - idempotent
+  computer:
+    name: MyComputer
+    state: absent
+  register: remove_comp_again
+
+- name: assert remove computer - idempotent
+  assert:
+    that:
+    - not remove_comp_again is changed
+
+- name: create computer with custom options
+  computer:
+    name: MyComputer
+    state: present
+    dns_hostname: MyComputer.domain.com
+    enabled: false
+    managed_by: Domain Admins
+    sam_account_name: SamMyComputer
+    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+  register: custom_comp
+
+- set_fact:
+    object_identity: '{{ custom_comp.object_guid }}'
+
+- name: get result of create computer with custom options
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - dnsHostName
+    - managedBy
+    - objectSid
+    - sAMAccountName
+    - userAccountControl
+  register: custom_comp_actual
+
+- name: assert create computer with custom options
+  assert:
+    that:
+    - custom_comp is changed
+    - custom_comp.distinguished_name == 'CN=MyComputer,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - custom_comp.object_guid == custom_comp_actual.objects[0].ObjectGUID
+    - custom_comp.sid == custom_comp_actual.objects[0].objectSid.Sid
+    - custom_comp_actual.objects[0].DistinguishedName == custom_comp.distinguished_name
+    - custom_comp_actual.objects[0].Name == 'MyComputer'
+    - custom_comp_actual.objects[0].dnsHostName == 'MyComputer.domain.com'
+    - custom_comp_actual.objects[0].managedBy == 'CN=Domain Admins,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - custom_comp_actual.objects[0].sAMAccountName == 'SamMyComputer$'
+    - custom_comp_actual.objects[0].ObjectClass == 'computer'
+    - '"ADS_UF_ACCOUNTDISABLE" in custom_comp_actual.objects[0].userAccountControl_AnsibleFlags'
+
+- name: change computer with custom options
+  computer:
+    name: MyComputer
+    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    dns_hostname: other.domain.com
+    enabled: true
+    sam_account_name: MyComputer2$
+  register: change_comp
+
+- name: get result of change computer with custom options
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - dnsHostName
+    - sAMAccountName
+    - userAccountControl
+  register: change_comp_actual
+
+- name: assert change computer with custom options
+  assert:
+    that:
+    - change_comp is changed
+    - change_comp_actual.objects[0].dnsHostName == 'other.domain.com'
+    - change_comp_actual.objects[0].sAMAccountName == 'MyComputer2$'
+    - '"ADS_UF_ACCOUNTDISABLE" not in change_comp_actual.objects[0].userAccountControl_AnsibleFlags'

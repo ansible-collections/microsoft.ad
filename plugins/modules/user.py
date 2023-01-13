@@ -215,7 +215,7 @@ seealso:
 - module: ansible.active_directory.domain_controller
 - module: ansible.active_directory.object
 - module: ansible.active_directory.object_info
-- module: community.windows.win_domain_computer
+- module: ansible.active_directory.computer
 - module: community.windows.win_domain_group
 author:
 - Jordan Borean (@jborean93)

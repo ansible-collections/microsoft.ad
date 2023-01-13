@@ -491,9 +491,15 @@ Function Invoke-AnsibleADObject {
     .PARAMETER ExtraProperties
     Extra properties to request when getting the AD object.
 
+    .PARAMETER PreAction
+    A scriptblock that is called at the beginning to perform any tasks needed
+    before the module util is run. This is called with the module object,
+    common ad parameters, and the ad object if it was found based on the input
+    options.
+
     .PARAMETER PostAction
     A scriptblock that is called at the end to perform any tasks once the
-    object has been configured. This is called with the module object, commonad
+    object has been configured. This is called with the module object, common
     ad parameters, and the ad object (state=present) else $null (state=absent)
     #>
     [CmdletBinding()]
