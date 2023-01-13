@@ -66,6 +66,16 @@ options:
           attribute.
         default: {}
         type: dict
+  description:
+    description:
+    - The description of the AD object to set.
+    - This is the value set on the C(description) LDAP attribute.
+    type: str
+  display_name:
+    description:
+    - The display name of the AD object to set.
+    - This is the value of the C(displayName) LDAP attribute.
+    type: str
   domain_password:
     description:
     - The password for I(domain_username).
@@ -112,11 +122,23 @@ options:
     - If no path is specified, the default is the C(defaultNamingContext) of
       domain.
     type: str
+  protect_from_deletion:
+    description:
+    - Marks the object as protected from accidental deletion.
+    - This applies a deny access right from deleting the object normally and
+      the protection needs to be removed before the object can be deleted
+      through the GUI or any other tool outside Ansible.
+    - Using I(state=absent) will still delete the AD object even if it is
+      marked as protected from deletion.
+    type: bool
   state:
     description:
     - Set to C(present) to ensure the AD object exists.
     - Set to C(absent) to remove the AD object if it exists.
     - The option I(name) must be set when I(state=present).
+    - Using C(absent) will recursively remove the AD object and any child
+      objects if it's a container. It will also remove the AD object even if
+      the object is marked as protected from accidental deletion.
     choices:
     - absent
     - present

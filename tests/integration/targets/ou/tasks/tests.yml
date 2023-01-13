@@ -1,0 +1,254 @@
+- name: create ou - check
+  ou:
+    name: MyOU
+    state: present
+  register: create_ou_check
+  check_mode: true
+
+- name: get result of create ou - check
+  object_info:
+    identity: '{{ create_ou_check.distinguished_name }}'
+  register: create_ou_check_actual
+
+- name: assert create ou - check
+  assert:
+    that:
+    - create_ou_check is changed
+    - create_ou_check.distinguished_name == 'OU=MyOU,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_ou_check.object_guid == '00000000-0000-0000-0000-000000000000'
+    - create_ou_check_actual.objects == []
+
+- name: create ou
+  ou:
+    name: MyOU
+    state: present
+  register: create_ou
+
+- set_fact:
+    object_identity: '{{ create_ou.object_guid }}'
+
+- name: get result of create ou
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - ProtectedFromAccidentalDeletion
+  register: create_ou_actual
+
+- name: assert create ou
+  assert:
+    that:
+    - create_ou is changed
+    - create_ou_actual.objects | length == 1
+    - create_ou.distinguished_name == 'OU=MyOU,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_ou.distinguished_name == create_ou_actual.objects[0].DistinguishedName
+    - create_ou.object_guid == create_ou_actual.objects[0].ObjectGUID
+    - create_ou_actual.objects[0].Name == 'MyOU'
+    - create_ou_actual.objects[0].ObjectClass == 'organizationalUnit'
+    - create_ou_actual.objects[0].ProtectedFromAccidentalDeletion == true
+
+- name: remove ou - check
+  ou:
+    name: MyOU
+    state: absent
+  register: remove_ou_check
+  check_mode: true
+
+- name: get result of remove ou - check
+  object_info:
+    identity: '{{ object_identity }}'
+  register: remove_ou_check_actual
+
+- name: assert remove ou - check
+  assert:
+    that:
+    - remove_ou_check is changed
+    - remove_ou_check_actual.objects | length == 1
+
+- name: remove ou
+  ou:
+    name: MyOU
+    state: absent
+  register: remove_ou
+
+- name: get result of remove ou
+  object_info:
+    identity: '{{ object_identity }}'
+  register: remove_ou_actual
+
+- name: assert remove ou
+  assert:
+    that:
+    - remove_ou is changed
+    - remove_ou_actual.objects == []
+
+- name: remove ou - idempotent
+  ou:
+    name: MyOU
+    state: absent
+  register: remove_ou_again
+
+- name: assert remove ou - idempotent
+  assert:
+    that:
+    - not remove_ou_again is changed
+
+- name: create parent OU
+  ou:
+    name: MyOU
+    state: present
+  register: parent_ou
+
+- set_fact:
+    object_identity: '{{ parent_ou.object_guid }}'
+
+- name: create ou with custom options
+  ou:
+    name: SubOU
+    path: '{{ parent_ou.distinguished_name }}'
+    state: present
+    city: Brisbane
+    country: AU
+    description: Custom Description
+    display_name: OU Display Name
+    managed_by: Domain Admins
+    postal_code: 4000
+    state_province: QLD
+    street: Main St
+    protect_from_deletion: false
+    attributes:
+      set:
+        postOfficeBox: My Box
+  register: create_ou_custom
+
+- name: get result of create ou with custom options
+  object_info:
+    identity: '{{ create_ou_custom.object_guid }}'
+    properties:
+    - c
+    - Description
+    - DisplayName
+    - l
+    - managedBy
+    - postalcode
+    - postOfficeBox
+    - st
+    - street
+    - ProtectedFromAccidentalDeletion
+  register: create_ou_custom_actual
+
+- name: assert create ou with custom options
+  assert:
+    that:
+    - create_ou_custom is changed
+    - create_ou_custom_actual.objects | length == 1
+    - create_ou_custom.distinguished_name == create_ou_custom_actual.objects[0].DistinguishedName
+    - create_ou_custom.object_guid == create_ou_custom_actual.objects[0].ObjectGUID
+    - create_ou_custom_actual.objects[0].l == 'Brisbane'
+    - create_ou_custom_actual.objects[0].c == 'AU'
+    - create_ou_custom_actual.objects[0].Description == 'Custom Description'
+    - create_ou_custom_actual.objects[0].DisplayName == 'OU Display Name'
+    - create_ou_custom_actual.objects[0].managedBy == 'CN=Domain Admins,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_ou_custom_actual.objects[0].postalcode == '4000'
+    - create_ou_custom_actual.objects[0].st == 'QLD'
+    - create_ou_custom_actual.objects[0].street == 'Main St'
+    - create_ou_custom_actual.objects[0].ProtectedFromAccidentalDeletion == False
+    - create_ou_custom_actual.objects[0].postOfficeBox == 'My Box'
+
+- name: change ou with custom options
+  ou:
+    name: SubOU
+    path: '{{ parent_ou.distinguished_name }}'
+    state: present
+    city: New York
+    country: US
+    description: Custom description
+    display_name: OU display Name
+    managed_by: Domain Users
+    postal_code: 10001
+    state_province: ''
+    street: Main
+    attributes:
+      set:
+        postOfficeBox: My box
+  register: change_ou
+
+- name: get result of change ou with custom options
+  object_info:
+    identity: '{{ create_ou_custom.object_guid }}'
+    properties:
+    - c
+    - Description
+    - DisplayName
+    - l
+    - managedBy
+    - postalcode
+    - postOfficeBox
+    - st
+    - street
+    - ProtectedFromAccidentalDeletion
+  register: change_ou_actual
+
+- name: assert change ou with custom options
+  assert:
+    that:
+    - change_ou is changed
+    - change_ou.distinguished_name == create_ou_custom.distinguished_name
+    - change_ou.object_guid == create_ou_custom.object_guid
+    - change_ou_actual.objects[0].l == 'New York'
+    - change_ou_actual.objects[0].c == 'US'
+    - change_ou_actual.objects[0].Description == 'Custom description'
+    - change_ou_actual.objects[0].DisplayName == 'OU display Name'
+    - change_ou_actual.objects[0].managedBy == 'CN=Domain Users,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - change_ou_actual.objects[0].postalcode == '10001'
+    - change_ou_actual.objects[0].st == None
+    - change_ou_actual.objects[0].street == 'Main'
+    - change_ou_actual.objects[0].ProtectedFromAccidentalDeletion == False
+    - change_ou_actual.objects[0].postOfficeBox == 'My box'
+
+- name: create new sub OU
+  ou:
+    name: NewSubOU
+    path: '{{ parent_ou.distinguished_name }}'
+    state: present
+  register: new_parent_ou
+
+- name: move and rename ou - check
+  ou:
+    name: InnerOU
+    path: '{{ new_parent_ou.distinguished_name }}'
+    identity: '{{ create_ou_custom.object_guid }}'
+  register: move_rename_check
+  check_mode: true
+
+- name: get result of move and rename ou - check
+  object_info:
+    identity: '{{ create_ou_custom.object_guid }}'
+  register: move_rename_check_actual
+
+- name: assert move and rename ou - check
+  assert:
+    that:
+    - move_rename_check is changed
+    - move_rename_check.distinguished_name == 'OU=InnerOU,' ~ new_parent_ou.distinguished_name
+    - move_rename_check_actual.objects[0].Name == 'SubOU'
+    - move_rename_check_actual.objects[0].DistinguishedName == create_ou_custom_actual.objects[0].DistinguishedName
+
+- name: move and rename ou
+  ou:
+    name: InnerOU
+    path: '{{ new_parent_ou.distinguished_name }}'
+    identity: '{{ create_ou_custom.object_guid }}'
+  register: move_rename
+
+- name: get result of move and rename ou
+  object_info:
+    identity: '{{ create_ou_custom.object_guid }}'
+  register: move_rename_actual
+
+- name: assert move and rename ou
+  assert:
+    that:
+    - move_rename is changed
+    - move_rename.distinguished_name == 'OU=InnerOU,' ~ new_parent_ou.distinguished_name
+    - move_rename_actual.objects[0].Name == 'InnerOU'
+    - move_rename_actual.objects[0].DistinguishedName == 'OU=InnerOU,' ~ new_parent_ou.distinguished_name

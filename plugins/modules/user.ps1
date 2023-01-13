@@ -107,18 +107,6 @@ $setParams = @{
         }
 
         [PSCustomObject]@{
-            Name = 'description'
-            Option = @{ type = 'str' }
-            Attribute = 'description'
-        }
-
-        [PSCustomObject]@{
-            Name = 'display_name'
-            Option = @{ type = 'str' }
-            Attribute = 'displayName'
-        }
-
-        [PSCustomObject]@{
             Name = 'email'
             Option = @{ type = 'str' }
             Attribute = 'EmailAddress'

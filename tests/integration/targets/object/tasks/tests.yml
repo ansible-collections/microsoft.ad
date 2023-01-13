@@ -312,6 +312,176 @@
     - remove_again.distinguished_name == None
     - remove_again.object_guid == None
 
+- name: create object protected from deletion
+  object:
+    name: My, Container
+    state: present
+    type: organizationalUnit
+    protect_from_deletion: true
+  register: create_deletion
+
+- set_fact:
+    object_identity: '{{ create_deletion.object_guid }}'
+
+- name: get result of create object protected from deletion
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - ProtectedFromAccidentalDeletion
+  register: create_deletion_actual
+
+- name: assert create object protected from deletion
+  assert:
+    that:
+    - create_deletion is changed
+    - create_deletion.distinguished_name == 'OU=My\, Container,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_deletion_actual.objects[0].ProtectedFromAccidentalDeletion == true
+
+- name: unset protect from deletion
+  object:
+    name: My, Container
+    state: present
+    type: organizationalUnit
+    protect_from_deletion: false
+  register: unset_deletion
+
+- name: get result of unset protect from deletion
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - ProtectedFromAccidentalDeletion
+  register: unset_deletion_actual
+
+- name: assert set protect from deletion
+  assert:
+    that:
+    - unset_deletion is changed
+    - unset_deletion.distinguished_name == 'OU=My\, Container,' ~ setup_domain_info.output[0].defaultNamingContext
+    - unset_deletion_actual.objects[0].ProtectedFromAccidentalDeletion == false
+
+- name: set protect from deletion
+  object:
+    name: My, Container
+    state: present
+    type: organizationalUnit
+    protect_from_deletion: true
+  register: set_deletion
+
+- name: get result of set protect from deletion
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - ProtectedFromAccidentalDeletion
+  register: set_deletion_actual
+
+- name: assert set protect from deletion
+  assert:
+    that:
+    - set_deletion is changed
+    - set_deletion.distinguished_name == 'OU=My\, Container,' ~ setup_domain_info.output[0].defaultNamingContext
+    - set_deletion_actual.objects[0].ProtectedFromAccidentalDeletion == true
+
+- name: create sub ous for move test
+  ou:
+    name: '{{ item }}'
+    path: '{{ set_deletion.distinguished_name }}'
+    state: present
+    protect_from_deletion: true
+  register: sub_ous
+  loop:
+  - SubOU
+  - TestOU
+
+- name: move and rename object that is protected from deletion - check
+  object:
+    name: TestOU 2
+    path: '{{ sub_ous.results[0].distinguished_name }}'
+    identity: '{{ sub_ous.results[1].object_guid }}'
+    type: organizationalUnit
+  register: move_ou_check
+  check_mode: true
+
+- name: get result of move and rename object that is protected from deletion - check
+  object_info:
+    identity: '{{ sub_ous.results[1].object_guid }}'
+    properties:
+    - ProtectedFromAccidentalDeletion
+  register: move_ou_check_actual
+
+- name: assert move and rename object that is protected from deletion - check
+  assert:
+    that:
+    - move_ou_check is changed
+    - move_ou_check.distinguished_name == 'OU=TestOU 2,' ~ sub_ous.results[0].distinguished_name
+    - move_ou_check_actual.objects[0].Name == 'TestOU'
+    - move_ou_check_actual.objects[0].DistinguishedName == sub_ous.results[1].distinguished_name
+    - move_ou_check_actual.objects[0].ProtectedFromAccidentalDeletion == true
+
+- name: move and rename object that is protected from deletion
+  object:
+    name: TestOU 2
+    path: '{{ sub_ous.results[0].distinguished_name }}'
+    identity: '{{ sub_ous.results[1].object_guid }}'
+    type: organizationalUnit
+  register: move_ou
+
+- name: get result of move and rename object that is protected from deletion
+  object_info:
+    identity: '{{ sub_ous.results[1].object_guid }}'
+    properties:
+    - ProtectedFromAccidentalDeletion
+  register: move_ou_actual
+
+- name: assert move and rename object that is protected from deletion
+  assert:
+    that:
+    - move_ou is changed
+    - move_ou.distinguished_name == 'OU=TestOU 2,' ~ sub_ous.results[0].distinguished_name
+    - move_ou_actual.objects[0].Name == 'TestOU 2'
+    - move_ou_actual.objects[0].DistinguishedName == 'OU=TestOU 2,' ~ sub_ous.results[0].distinguished_name
+    - move_ou_actual.objects[0].ProtectedFromAccidentalDeletion == true
+
+- name: remove object that is protected from deletion - check
+  object:
+    name: My, Container
+    state: absent
+    type: organizationalUnit
+  register: remove_deletion_check
+  check_mode: true
+
+- name: get result of remove object that is protected from deletion - check
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - ProtectedFromAccidentalDeletion
+  register: remove_deletion_actual_check
+
+- name: assert remove object that is protected from deletion - check
+  assert:
+    that:
+    - remove_deletion_check is changed
+    - remove_deletion_check.distinguished_name == 'OU=My\, Container,' ~ setup_domain_info.output[0].defaultNamingContext
+    - remove_deletion_actual_check.objects[0].ProtectedFromAccidentalDeletion == true
+
+- name: remove object that is protected from deletion
+  object:
+    name: My, Container
+    state: absent
+    type: organizationalUnit
+  register: remove_deletion
+
+- name: get result of remove object that is protected from deletion
+  object_info:
+    identity: '{{ object_identity }}'
+  register: remove_deletion_actual
+
+- name: assert remove object that is protected from deletion
+  assert:
+    that:
+    - remove_deletion is changed
+    - remove_deletion.distinguished_name == 'OU=My\, Container,' ~ setup_domain_info.output[0].defaultNamingContext
+    - remove_deletion_actual.objects == []
+
 - name: create object with custom path, description, and display_name
   object:
     name: My, Container

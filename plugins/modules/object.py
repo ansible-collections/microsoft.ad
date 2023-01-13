@@ -11,16 +11,6 @@ short_description: Manage Active Directory objects
 description:
 - Manages Active Directory objects and their attributes.
 options:
-  description:
-    description:
-    - The description of the AD object to set.
-    - This is the value set on the C(description) LDAP attribute.
-    type: str
-  display_name:
-    description:
-    - The display name of the AD object to set.
-    - This is the value of the C(displayName) LDAP attribute.
-    type: str
   type:
     description:
     - The object type of the AD object.
