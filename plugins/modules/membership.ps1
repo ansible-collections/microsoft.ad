@@ -11,11 +11,9 @@ $spec = @{
             type = 'str'
         }
         domain_admin_user = @{
-            required = $true
             type = 'str'
         }
         domain_admin_password = @{
-            required = $true
             no_log = $true
             type = 'str'
         }
@@ -24,6 +22,10 @@ $spec = @{
         }
         hostname = @{
             type = 'str'
+        }
+        offline_join_blob = @{
+            type = "str"
+            no_log = $true
         }
         reboot = @{
             default = $false
@@ -38,9 +40,18 @@ $spec = @{
             type = 'str'
         }
     }
+    mutually_exclusive = @(
+        @('offline_join_blob', 'domain_admin_user'),
+        @('offline_join_blob', 'dns_domain_name'),
+        @('offline_join_blob', 'domain_ou_path'),
+        @('offline_join_blob', 'hostname')
+    )
     required_if = @(
-        @('state', 'domain', @(, 'dns_domain_name')),
-        @('state', 'workgroup', @(, 'workgroup_name'))
+        @('state', 'domain', @('domain_admin_user', 'offline_join_blob'), $true),
+        @('state', 'workgroup', @('workgroup_name', 'domain_admin_user', 'domain_admin_password'))
+    )
+    required_together = @(
+        , @('domain_admin_user', 'domain_admin_password')
     )
     supports_check_mode = $true
 }
@@ -61,6 +72,51 @@ $domainOUPath = $module.Params.domain_ou_path
 $hostname = $module.Params.hostname
 $state = $module.Params.state
 $workgroupName = $module.Params.workgroup_name
+
+Add-CSharpType -AnsibleModule $module -References @'
+using System;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+
+namespace ansible.active_directory.membership
+{
+    [Flags]
+    public enum ProvisionOptions
+    {
+        None = 0,
+        NETSETUP_PROVISION_ONLINE_CALLER = 0x40000000,
+    }
+
+    public static class Native
+    {
+        [DllImport("Netapi32.dll", EntryPoint = "NetRequestOfflineDomainJoin")]
+        private static extern int NativeNetRequestOfflineDomainJoin(
+            IntPtr pProvisionBinData,
+            int cbProvisionBinDataSize,
+            int dwOptions,
+            [MarshalAs(UnmanagedType.LPWStr)] string lpWindowsPath);
+
+        public static void NetRequestOfflineDomainJoin(byte[] data, ProvisionOptions options,
+            string windowsPath)
+        {
+            IntPtr buffer = Marshal.AllocHGlobal(data.Length);
+            try
+            {
+                Marshal.Copy(data, 0, buffer, data.Length);
+
+                int res = NativeNetRequestOfflineDomainJoin(buffer, data.Length, (int)options, windowsPath);
+                if (res != 0)
+                {
+                    throw new Win32Exception(res);
+                }
+            }
+            finally {
+                Marshal.FreeHGlobal(buffer);
+            }
+        }
+    }
+}
+'@
 
 Function Get-CurrentState {
     <#
@@ -107,33 +163,55 @@ if (-not $hostname) {
 }
 
 if ($state -eq 'domain') {
-    if ($dnsDomainName -ne $currentState.DnsDomainName) {
-        if ($currentState.PartOfDomain) {
-            $module.FailJson("Host is already joined to '$($currentState.DnsDomainName)', switching domains is not implemented")
-        }
+    if ($module.Params.offline_join_blob) {
+        # FUTURE: Read blob to see what domain it is for.
+        if (-not $currentState.PartOfDomain) {
+            try {
+                if (-not $module.CheckMode) {
+                    [ansible.active_directory.membership.Native]::NetRequestOfflineDomainJoin(
+                        [System.Convert]::FromBase64String($module.Params.offline_join_blob),
+                        "NETSETUP_PROVISION_ONLINE_CALLER",
+                        $env:SystemRoot)
+                }
+            }
+            catch [System.ComponentModel.Win32Exception] {
+                $msg = "Failed to perform offline domain join (0x{0:X8}): {1}" -f $_.Exception.NativeErrorCode, $_.Exception.Message
+                $module.FailJson($msg, $_)
+            }
 
-        $joinParams = @{
-            ComputerName = '.'
-            Credential = $domainCredential
-            DomainName = $dnsDomainName
-            Force = $true
-            WhatIf = $module.CheckMode
+            $module.Result.changed = $true
+            $module.Result.reboot_required = $true
         }
-        if ($hostname -ne $currentState.HostName) {
-            $joinParams.NewName = $hostname
+    }
+    else {
+        if ($dnsDomainName -ne $currentState.DnsDomainName) {
+            if ($currentState.PartOfDomain) {
+                $module.FailJson("Host is already joined to '$($currentState.DnsDomainName)', switching domains is not implemented")
+            }
 
-            # By setting this here, the Rename-Computer call is skipped as
-            # joining the domain will rename the host for us.
-            $hostname = $currentState.HostName
+            $joinParams = @{
+                ComputerName = '.'
+                Credential = $domainCredential
+                DomainName = $dnsDomainName
+                Force = $true
+                WhatIf = $module.CheckMode
+            }
+            if ($hostname -ne $currentState.HostName) {
+                $joinParams.NewName = $hostname
+
+                # By setting this here, the Rename-Computer call is skipped as
+                # joining the domain will rename the host for us.
+                $hostname = $currentState.HostName
+            }
+            if ($domainOUPath) {
+                $joinParams.OUPath = $domainOUPath
+            }
+
+            Add-Computer @joinParams
+
+            $module.Result.changed = $true
+            $module.Result.reboot_required = $true
         }
-        if ($domainOUPath) {
-            $joinParams.OUPath = $domainOUPath
-        }
-
-        Add-Computer @joinParams
-
-        $module.Result.changed = $true
-        $module.Result.reboot_required = $true
     }
 }
 else {

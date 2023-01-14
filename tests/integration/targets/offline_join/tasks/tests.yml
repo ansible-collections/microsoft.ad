@@ -1,0 +1,150 @@
+- name: create computer account
+  computer:
+    name: My, Computer
+    state: present
+    sam_account_name: MyComputer
+  register: comp_account
+
+- set_fact:
+    object_identity: '{{ comp_account.object_guid }}'
+
+- name: get initial password info
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - pwdLastSet
+  register: pwd_info
+
+- name: get blob - check
+  offline_join:
+    name: My, Computer
+  register: blob_check
+  check_mode: true
+
+- name: get result of get blob - check
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - pwdLastSet
+  register: blob_check_actual
+
+- name: assert get blob - check
+  assert:
+    that:
+    - blob_check is changed
+    - blob_check.blob == ''
+    - blob_check_actual.objects[0].pwdLastSet == pwd_info.objects[0].pwdLastSet
+
+- name: get blob
+  offline_join:
+    name: My, Computer
+  register: blob
+
+- name: get result of get blob
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - pwdLastSet
+  register: blob_actual
+
+- name: assert get blob
+  assert:
+    that:
+    - blob is changed
+    - blob.blob != None
+    - blob.blob != ''
+    - blob_actual.objects[0].pwdLastSet > pwd_info.objects[0].pwdLastSet
+
+- block:
+  - name: create blob in file
+    offline_join:
+      identity: '{{ object_identity }}'
+      blob_path: C:\Windows\TEMP\ansible-blob
+      provision_root_ca_certs: true
+    register: blob_path
+
+  - name: get pwd result of create blob in file
+    object_info:
+      identity: '{{ object_identity }}'
+      properties:
+      - pwdLastSet
+    register: blob_path_ad_actual
+
+  - name: get path result of create blob in file
+    ansible.windows.win_stat:
+      path: C:\Windows\TEMP\ansible-blob
+    register: blob_path_file_actual
+
+  - name: assert create blob in file
+    assert:
+      that:
+      - blob_path is changed
+      - blob_path.blob == None
+      - blob_path_ad_actual.objects[0].pwdLastSet > blob_actual.objects[0].pwdLastSet
+      - blob_path_file_actual.stat.exists
+
+  - name: create blob in file - idempotent
+    offline_join:
+      identity: '{{ object_identity }}'
+      blob_path: C:\Windows\TEMP\ansible-blob
+    register: blob_path_again
+
+  - name: get pwd result of create blob in file - idempotent
+    object_info:
+      identity: '{{ object_identity }}'
+      properties:
+      - pwdLastSet
+    register: blob_path_ad_actual_again
+
+  - name: get path result of create blob in file - idempotent
+    ansible.windows.win_stat:
+      path: C:\Windows\TEMP\ansible-blob
+    register: blob_path_file_actual_again
+
+  - name: assert create blob in file - idempotent
+    assert:
+      that:
+      - not blob_path_again is changed
+      - blob_path_again.blob == None
+      - blob_path_ad_actual_again.objects[0].pwdLastSet == blob_path_ad_actual.objects[0].pwdLastSet
+      - blob_path_file_actual_again.stat.size == blob_path_file_actual.stat.size
+      - blob_path_file_actual_again.stat.lastwritetime == blob_path_file_actual.stat.lastwritetime
+
+  always:
+  - name: remove temp blob file
+    ansible.windows.win_file:
+      path: C:\Windows\TEMP\ansible-blob
+      state: absent
+
+- name: move computer object
+  computer:
+    name: My, Computer
+    identity: '{{ object_identity }}'
+    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+
+- name: fail to find computer outside default path
+  offline_join:
+    name: My, Computer
+  register: fail_find
+  failed_when: '("Failed to find domain computer account ''CN=My\, Computer,CN=Computers," ~ setup_domain_info.output[0].defaultNamingContext) not in fail_find.msg'
+
+- name: get blob of computer in different path
+  offline_join:
+    name: My, Computer
+    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+  register: blob_ad_path
+
+- name: get result of get blob of computer in different pth
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - pwdLastSet
+  register: blob_ad_path_actual
+
+- name: assert get blob of computer in different path
+  assert:
+    that:
+    - blob_ad_path is changed
+    - blob_ad_path.blob != None
+    - blob_ad_path.blob != ''
+    - blob_ad_path_actual.objects[0].pwdLastSet > blob_path_ad_actual_again.objects[0].pwdLastSet

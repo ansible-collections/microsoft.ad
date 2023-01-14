@@ -20,6 +20,7 @@ The following modules have been migrated in some shape or form into this collect
 * ``ansible.windows.win_domain`` -> ``ansible.active_directory.domain`` - :ref:`see here <ansible_collections.ansible.active_directory.docsite.guide_migration.migrated_modules.win_domain>`_
 * ``ansible.windows.win_domain_controller`` -> ``ansible.active_directory.domain_controller`` - :ref:`see here <ansible_collections.ansible.active_directory.docsite.guide_migration.migrated_modules.win_domain_controller>`_
 * ``ansible.windows.win_domain_membership`` -> ``ansible.active_directory.membership`` - :ref:`see here <ansible_collections.ansible.active_directory.docsite.guide_migration.migrated_modules.win_domain_membership>`_
+* ``community.windows.win_domain_computer`` -> ``ansible.active_directory.computer`` - :ref:`see here <ansible_collections.ansible.active_directory.docsite.guide_migration.migrated_modules.win_domain_computer>`_
 * ``community.windows.win_domain_object_info`` -> ``ansible.active_directory.object_info`` - :ref:`see here <ansible_collections.ansible.active_directory.docsite.guide_migration.migrated_modules.win_domain_object_info>`_
 * ``community.windows.win_domain_ou`` -> ``ansible.active_directory.ou`` - :ref:`see here <ansible_collections.ansible.active_directory.docsite.guide_migration.migrated_modules.win_domain_ou>`_
 * ``community.windows.win_domain_user`` -> ``ansible.active_directory.user`` - :ref:`see here <ansible_collections.ansible.active_directory.docsite.guide_migration.migrated_modules.win_domain_user>`_
@@ -54,6 +55,38 @@ The following options have been removed:
 * ``log_path`` - Creating a debug log of module actions is not supported
 
 The ``reboot`` option has been added to have the module handle any reboots instead of a separate ``ansible.windows.win_reboot`` task. Due to the operations involved with promoting a domain controller, it is highly recommended to use this option.
+
+.. _ansible_collections.active_directory.docsite.guide_migration.migrated_modules.win_domain_computer:
+
+Module win_domain_computer
+--------------------------
+
+The option ``dns_host_name`` is not required when ``state: present``, the computer object is created without the ``dnsHostName`` LDAP attribute set if it is not defined.
+
+The default for ``enabled`` is nothing, the group will still be enabled when created but it will use the existing status if the option is omitted.
+
+The option ``ou`` is now named ``path`` to match the standard set by other modules.
+
+The options ``offline_domain_join`` and ``odj_blob_path`` has been removed. Use the new module ``ansible.active_directory.offline_join`` to generate the offline join blob. For example:
+
+.. code-block:: yaml
+
+  - name: create computer object
+    ansible.active_directory.computer:
+      name: MyComputer
+      state: present
+    register: computer_obj
+
+  - name: create offline blob
+    ansible.active_directory.offline_join:
+      identity: '{{ computer_obj.object_guid }}'
+    when: computer_obj is changed
+    register: offline_blob
+
+  - name: display offline blob
+    debug:
+      var: offline_blob.blob
+    when: computer_obj is changed
 
 .. _ansible_collections.active_directory.docsite.guide_migration.migrated_modules.win_domain_object_info:
 

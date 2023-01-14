@@ -120,7 +120,10 @@ options:
     description:
     - The path of the OU or the container where the new object should exist in.
     - If no path is specified, the default is the C(defaultNamingContext) of
-      domain.
+      domain for most objects.
+    - The default path for M(ansible.active_directory.computer) and
+      M(ansible.active_directory.user) have their own default path that is
+      configured on the Active Directory domain controller.
     type: str
   protect_from_deletion:
     description:

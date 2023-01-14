@@ -19,3 +19,4 @@ all:
     domain_user_upn: '{{ domain_username }}@{{ domain_realm | upper }}'
     domain_password: VagrantPass1
     domain_realm: ad.test
+    domain_dn_base: DC=ad,DC=test

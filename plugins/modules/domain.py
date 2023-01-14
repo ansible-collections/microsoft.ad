@@ -100,7 +100,7 @@ seealso:
 - module: ansible.active_directory.domain_controller
 - module: ansible.active_directory.membership
 - module: ansible.active_directory.user
-- module: community.windows.win_domain_computer
+- module: ansible.active_directory.computer
 - module: community.windows.win_domain_group
 author:
 - Matt Davis (@nitzmahone)

@@ -1,0 +1,14 @@
+- name: remove temp computer
+  computer:
+    name: My, Computer
+    state: absent
+
+- block:
+  - import_tasks: tests.yml
+
+  always:
+  - name: remove temp computer
+    computer:
+      name: My, Computer
+      identity: '{{ object_identity | default(omit) }}'
+      state: absent

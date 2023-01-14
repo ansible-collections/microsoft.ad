@@ -24,7 +24,7 @@ options:
     type: str
   managed_by:
     description:
-    - The user or group that managed the object.
+    - The user or group that manages the object.
     - The value can be in the form of a C(distinguishedName), C(objectGUID),
       C(objectSid), or sAMAccountName).
     - This is the value set on the C(managedBy) LDAP attribute.
@@ -65,7 +65,7 @@ seealso:
 - module: ansible.active_directory.domain_controller
 - module: ansible.active_directory.object_info
 - module: ansible.active_directory.user
-- module: community.windows.win_domain_computer
+- module: ansible.active_directory.computer
 - module: community.windows.win_domain_group
 author:
 - Jordan Borean (@jborean93)

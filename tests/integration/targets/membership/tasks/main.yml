@@ -257,9 +257,9 @@
     - to_workgroup_ad_actual.output[0]["Enabled"] == False
 
 - name: remove orphaned AD account for later tests
-  ansible.windows.win_powershell:
-    script: |
-      Remove-ADComputer -Identity OTHER$ -Confirm:$false
+  ansible.active_directory.computer:
+    name: OTHER
+    state: absent
   delegate_to: DC
 
 - name: change domain to workgroup - idempotent
@@ -518,7 +518,114 @@
     - to_workgroup_hostname_ad_actual.output[0]["Enabled"] == False
 
 - name: remove orphaned AD account for later tests
+  ansible.active_directory.computer:
+    name: BAR
+    state: absent
+  delegate_to: DC
+
+- name: create computer object
+  ansible.active_directory.computer:
+    name: My, Computer
+    path: CN=Users,{{ domain_dn_base }}
+    sam_account_name: MyComp$
+    state: present
+  delegate_to: DC
+  register: comp_account
+
+- name: get offline join blob
+  ansible.active_directory.offline_join:
+    identity: '{{ comp_account.object_guid }}'
+  delegate_to: DC
+  register: offline_join
+
+- name: get computer object info
+  ansible.active_directory.object_info:
+    identity: '{{ comp_account.object_guid }}'
+    properties:
+    - pwdLastSet
+  delegate_to: DC
+  register: comp_account_pre_join
+
+- name: join domain by offline blob - check
+  ansible.active_directory.membership:
+    offline_join_blob: '{{ offline_join.blob }}'
+    state: domain
+  register: offline_join_check
+  check_mode: true
+
+- name: get result of join domain by offline blob - check
   ansible.windows.win_powershell:
-    script: |
-      Remove-ADComputer -Identity BAR$ -Confirm:$false
+    script: '{{ get_result_script }}'
+  register: offline_join_check_actual
+
+- name: get result of join domain by offline blob comp info - check
+  ansible.active_directory.object_info:
+    identity: '{{ comp_account.object_guid }}'
+    properties:
+    - pwdLastSet
+  delegate_to: DC
+  register: offline_join_check_ad_actual
+
+- name: assert join domain by offline blob - check
+  assert:
+    that:
+    - offline_join_check is changed
+    - offline_join_check.reboot_required == true
+    - offline_join_check_actual.output[0].DnsDomainName == None
+    - offline_join_check_actual.output[0].PartOfDomain == False
+    - offline_join_check_ad_actual.objects[0].pwdLastSet == comp_account_pre_join.objects[0].pwdLastSet
+
+- name: join domain by offline blob
+  ansible.active_directory.membership:
+    offline_join_blob: '{{ offline_join.blob }}'
+    state: domain
+    reboot: true
+  register: offline_join_res
+
+- name: get result of join domain by offline blob
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: offline_join_actual
+
+- name: get result of join domain by offline blob comp info
+  ansible.active_directory.object_info:
+    identity: '{{ comp_account.object_guid }}'
+    properties:
+    - pwdLastSet
+  delegate_to: DC
+  register: offline_join_ad_actual
+
+- name: assert join domain by offline blob
+  assert:
+    that:
+    - offline_join_res is changed
+    - offline_join_res.reboot_required == false
+    - offline_join_actual.output[0].DnsDomainName == domain_realm
+    - offline_join_actual.output[0].PartOfDomain == True
+    - offline_join_ad_actual.objects[0].pwdLastSet > offline_join_check_ad_actual.objects[0].pwdLastSet
+
+- name: join domain by offline blob - idempotent
+  ansible.active_directory.membership:
+    offline_join_blob: '{{ offline_join.blob }}'
+    state: domain
+  register: offline_join_again
+
+- name: assert join domain by offline blob - idempotent
+  assert:
+    that:
+    - not offline_join_again is changed
+
+- name: change domain to workgroup
+  membership:
+    workgroup_name: WORKGROUP
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    state: workgroup
+    reboot: true
+
+- name: remove orphaned AD account for later tests
+  ansible.active_directory.computer:
+    name: My, Computer
+    path: CN=Users,{{ domain_dn_base }}
+    state: absent
   delegate_to: DC
