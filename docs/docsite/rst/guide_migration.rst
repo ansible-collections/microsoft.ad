@@ -32,12 +32,16 @@ While these modules are mostly drop in place compatible there are some breaking 
 Module ``win_domain``
 ---------------------
 
+Migrated to :ref:`microsoft.ad.domain <ansible_collections.microsoft.ad.domain_module>`.
+
 There are no known breaking changes and should work as a drop in replacement. The ``reboot`` option has been added to have the module handle any reboots that are needed instead of a separate ``ansible.windows.win_reboot`` task. Due to the operations involved with promoting a domain controller, it is highly recommended to use this option.
 
 .. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_controller:
 
 Module ``win_domain_controller``
 --------------------------------
+
+Migrated to :ref:`microsoft.ad.domain_controller <ansible_collections.microsoft.ad.domain_controller_module>`.
 
 The following options have been removed:
 
@@ -50,6 +54,8 @@ The ``reboot`` option has been added to have the module handle any reboots inste
 Module ``win_domain_membership``
 --------------------------------
 
+Migrated to :ref:`microsoft.ad.membership <ansible_collections.microsoft.ad.membership_module>`.
+
 The following options have been removed:
 
 * ``log_path`` - Creating a debug log of module actions is not supported
@@ -60,6 +66,8 @@ The ``reboot`` option has been added to have the module handle any reboots inste
 
 Module ``win_domain_computer``
 ------------------------------
+
+Migrated to :ref:`microsoft.ad.computer <ansible_collections.microsoft.ad.computer_module>`.
 
 The option ``dns_host_name`` is not required when ``state: present``, the computer object is created without the ``dnsHostName`` LDAP attribute set if it is not defined.
 
@@ -93,12 +101,16 @@ The options ``offline_domain_join`` and ``odj_blob_path`` has been removed. Use 
 Module ``win_domain_object_info``
 ---------------------------------
 
+Migrated to :ref:`microsoft.ad.object_info <ansible_collections.microsoft.ad.object_info_module>`.
+
 There are no known breaking changes and should work as a drop in replacement.
 
 .. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_ou:
 
 Module ``win_domain_ou``
 ------------------------
+
+Migrated to :ref:`microsoft.ad.ou <ansible_collections.microsoft.ad.ou_module>`.
 
 The following options have changed:
 
@@ -118,6 +130,8 @@ All other return values have been removed, use ``microsoft.ad.object_info`` to g
 
 Module ``win_domain_user``
 --------------------------
+
+Migrated to :ref:`microsoft.ad.user <ansible_collections.microsoft.ad.user_module>`.
 
 The following options have changed:
 
