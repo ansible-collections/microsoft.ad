@@ -29,15 +29,15 @@ While these modules are mostly drop in place compatible there are some breaking 
 
 .. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain:
 
-Module win_domain
------------------
+Module ``win_domain``
+---------------------
 
 There are no known breaking changes and should work as a drop in replacement. The ``reboot`` option has been added to have the module handle any reboots that are needed instead of a separate ``ansible.windows.win_reboot`` task. Due to the operations involved with promoting a domain controller, it is highly recommended to use this option.
 
 .. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_controller:
 
-Module win_domain_controller
-----------------------------
+Module ``win_domain_controller``
+--------------------------------
 
 The following options have been removed:
 
@@ -47,8 +47,8 @@ The ``reboot`` option has been added to have the module handle any reboots inste
 
 .. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_membership:
 
-Module win_domain_membership
-----------------------------
+Module ``win_domain_membership``
+--------------------------------
 
 The following options have been removed:
 
@@ -58,8 +58,8 @@ The ``reboot`` option has been added to have the module handle any reboots inste
 
 .. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_computer:
 
-Module win_domain_computer
---------------------------
+Module ``win_domain_computer``
+------------------------------
 
 The option ``dns_host_name`` is not required when ``state: present``, the computer object is created without the ``dnsHostName`` LDAP attribute set if it is not defined.
 
@@ -90,21 +90,21 @@ The options ``offline_domain_join`` and ``odj_blob_path`` has been removed. Use 
 
 .. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_object_info:
 
-Module win_domain_object_info
------------------------------
+Module ``win_domain_object_info``
+---------------------------------
 
 There are no known breaking changes and should work as a drop in replacement.
 
 .. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_ou:
 
-Module win_domain_ou
-----------------------
+Module ``win_domain_ou``
+------------------------
 
 The following options have changed:
 
 * ``protected`` - Has been renamed to ``protect_from_deletion`` and is now not needed to be unset for ``state: absent`` to remove the OU
 * ``recursive`` - Has been removed and ``state: absent`` will also remove objects recursively
-* ``filter`` - Has been removed, the ``name`` object refers to the OU name and ``identity`` can be used to select the OU by DistinguishedName or ObjectGUID if a rename or move is needed
+* ``filter`` - Has been removed, the ``name`` object refers to the OU name and ``identity`` can be used to select the OU by ``DistinguishedName`` or ``ObjectGUID`` if a rename or move is needed
 * ``properties`` - Has been removed, use the new ``attributes`` option
 
 The return values for ``win_domain_ou`` have also been simplified to only return:
@@ -116,8 +116,8 @@ All other return values have been removed, use ``microsoft.ad.object_info`` to g
 
 .. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_user:
 
-Module win_domain_user
-----------------------
+Module ``win_domain_user``
+--------------------------
 
 The following options have changed:
 
