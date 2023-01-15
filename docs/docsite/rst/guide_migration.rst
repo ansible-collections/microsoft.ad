@@ -125,7 +125,7 @@ The following options have changed:
 * ``groups_action`` - ``replace`` has been renamed to ``set``
 * ``spn_action`` - ``replace`` has been renamed to ``set``
 * ``state`` - No query option - use ``microsoft.ad.object_info`` instead
-* ``enabled`` - Does not default to ``true``. Creating a new user without a password will use ``enable=false`` but setting a password will use ``enable=true``
+* ``enabled`` - Does not default to ``true``. Creating a new user without a password will use ``enabled=false`` but setting a password will use ``enabled=true``
 
 The ``groups_action`` and ``spn_action`` ``set`` value was renamed to align with common practice. The ``state=query`` functionality has been removed to simplify the module and favour ``microsoft.ad.object_info`` which is designed to return information about AD objects. The ``enabled`` default was removed to allow setting other attributes on an existing AD object without always having to specify ``enabled``.
 
