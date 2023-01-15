@@ -121,7 +121,7 @@ Module win_domain_user
 
 The following options have changed:
 
-* ``attributes`` - changed format as outlined in :ref:`Attributes guid <ansible_collections.microsoft.ad.docsite.guide_attributes>`_
+* ``attributes`` - changed format as outlined in :ref:`Attributes guid <ansible_collections.microsoft.ad.docsite.guide_attributes>`
 * ``groups_action`` - ``replace`` has been renamed to ``set``
 * ``spn_action`` - ``replace`` has been renamed to ``set``
 * ``state`` - No query option - use ``microsoft.ad.object_info`` instead
