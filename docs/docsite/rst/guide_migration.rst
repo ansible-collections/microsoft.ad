@@ -17,13 +17,13 @@ Migrated Modules
 
 The following modules have been migrated in some shape or form into this collection
 
-* ``ansible.windows.win_domain`` -> ``microsoft.ad.domain`` - :ref:`see here <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain>`
-* ``ansible.windows.win_domain_controller`` -> ``microsoft.ad.domain_controller`` - :ref:`see here <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_controller>`
-* ``ansible.windows.win_domain_membership`` -> ``microsoft.ad.membership`` - :ref:`see here <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_membership>`
-* ``community.windows.win_domain_computer`` -> ``microsoft.ad.computer`` - :ref:`see here <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_computer>`
-* ``community.windows.win_domain_object_info`` -> ``microsoft.ad.object_info`` - :ref:`see here <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_object_info>`
-* ``community.windows.win_domain_ou`` -> ``microsoft.ad.ou`` - :ref:`see here <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_ou>`
-* ``community.windows.win_domain_user`` -> ``microsoft.ad.user`` - :ref:`see here <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_user>`
+* ``ansible.windows.win_domain`` -> ``microsoft.ad.domain`` - :ref:`details <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain>`
+* ``ansible.windows.win_domain_controller`` -> ``microsoft.ad.domain_controller`` - :ref:`details <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_controller>`
+* ``ansible.windows.win_domain_membership`` -> ``microsoft.ad.membership`` - :ref:`details <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_membership>`
+* ``community.windows.win_domain_computer`` -> ``microsoft.ad.computer`` - :ref:`details <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_computer>`
+* ``community.windows.win_domain_object_info`` -> ``microsoft.ad.object_info`` - :ref:`details <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_object_info>`
+* ``community.windows.win_domain_ou`` -> ``microsoft.ad.ou`` - :ref:`details <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_ou>`
+* ``community.windows.win_domain_user`` -> ``microsoft.ad.user`` - :ref:`details <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_user>`
 
 While these modules are mostly drop in place compatible there are some breaking changes that need to be considered. See each module entry for more information.
 
