@@ -1,4 +1,4 @@
-.. _ansible_collections.ansible.active_directory.docsite.guide_migration:
+.. _ansible_collections.microsoft.ad.docsite.guide_migration:
 
 ***************
 Migration guide
@@ -10,31 +10,31 @@ Some of the modules in this collection have come from the `ansible.windows colle
   :local:
   :depth: 1
 
-.. _ansible_collections.active_directory.docsite.guide_migration.migrated_modules:
+.. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules:
 
 Migrated Modules
 ================
 
 The following modules have been migrated in some shape or form into this collection
 
-* ``ansible.windows.win_domain`` -> ``ansible.active_directory.domain`` - :ref:`see here <ansible_collections.ansible.active_directory.docsite.guide_migration.migrated_modules.win_domain>`_
-* ``ansible.windows.win_domain_controller`` -> ``ansible.active_directory.domain_controller`` - :ref:`see here <ansible_collections.ansible.active_directory.docsite.guide_migration.migrated_modules.win_domain_controller>`_
-* ``ansible.windows.win_domain_membership`` -> ``ansible.active_directory.membership`` - :ref:`see here <ansible_collections.ansible.active_directory.docsite.guide_migration.migrated_modules.win_domain_membership>`_
-* ``community.windows.win_domain_computer`` -> ``ansible.active_directory.computer`` - :ref:`see here <ansible_collections.ansible.active_directory.docsite.guide_migration.migrated_modules.win_domain_computer>`_
-* ``community.windows.win_domain_object_info`` -> ``ansible.active_directory.object_info`` - :ref:`see here <ansible_collections.ansible.active_directory.docsite.guide_migration.migrated_modules.win_domain_object_info>`_
-* ``community.windows.win_domain_ou`` -> ``ansible.active_directory.ou`` - :ref:`see here <ansible_collections.ansible.active_directory.docsite.guide_migration.migrated_modules.win_domain_ou>`_
-* ``community.windows.win_domain_user`` -> ``ansible.active_directory.user`` - :ref:`see here <ansible_collections.ansible.active_directory.docsite.guide_migration.migrated_modules.win_domain_user>`_
+* ``ansible.windows.win_domain`` -> ``microsoft.ad.domain`` - :ref:`see here <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain>`_
+* ``ansible.windows.win_domain_controller`` -> ``microsoft.ad.domain_controller`` - :ref:`see here <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_controller>`_
+* ``ansible.windows.win_domain_membership`` -> ``microsoft.ad.membership`` - :ref:`see here <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_membership>`_
+* ``community.windows.win_domain_computer`` -> ``microsoft.ad.computer`` - :ref:`see here <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_computer>`_
+* ``community.windows.win_domain_object_info`` -> ``microsoft.ad.object_info`` - :ref:`see here <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_object_info>`_
+* ``community.windows.win_domain_ou`` -> ``microsoft.ad.ou`` - :ref:`see here <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_ou>`_
+* ``community.windows.win_domain_user`` -> ``microsoft.ad.user`` - :ref:`see here <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_user>`_
 
 While these modules are mostly drop in place compatible there are some breaking changes that need to be considered. See each module entry for more information.
 
-.. _ansible_collections.active_directory.docsite.guide_migration.migrated_modules.win_domain:
+.. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain:
 
 Module win_domain
 -----------------
 
 There are no known breaking changes and should work as a drop in replacement. The ``reboot`` option has been added to have the module handle any reboots that are needed instead of a separate ``ansible.windows.win_reboot`` task. Due to the operations involved with promoting a domain controller, it is highly recommended to use this option.
 
-.. _ansible_collections.active_directory.docsite.guide_migration.migrated_modules.win_domain_controller:
+.. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_controller:
 
 Module win_domain_controller
 ----------------------------
@@ -45,7 +45,7 @@ The following options have been removed:
 
 The ``reboot`` option has been added to have the module handle any reboots instead of a separate ``ansible.windows.win_reboot`` task. Due to the operations involved with promoting a domain controller, it is highly recommended to use this option.
 
-.. _ansible_collections.active_directory.docsite.guide_migration.migrated_modules.win_domain_membership:
+.. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_membership:
 
 Module win_domain_membership
 ----------------------------
@@ -56,7 +56,7 @@ The following options have been removed:
 
 The ``reboot`` option has been added to have the module handle any reboots instead of a separate ``ansible.windows.win_reboot`` task. Due to the operations involved with promoting a domain controller, it is highly recommended to use this option.
 
-.. _ansible_collections.active_directory.docsite.guide_migration.migrated_modules.win_domain_computer:
+.. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_computer:
 
 Module win_domain_computer
 --------------------------
@@ -67,18 +67,18 @@ The default for ``enabled`` is nothing, the group will still be enabled when cre
 
 The option ``ou`` is now named ``path`` to match the standard set by other modules.
 
-The options ``offline_domain_join`` and ``odj_blob_path`` has been removed. Use the new module ``ansible.active_directory.offline_join`` to generate the offline join blob. For example:
+The options ``offline_domain_join`` and ``odj_blob_path`` has been removed. Use the new module ``microsoft.ad.offline_join`` to generate the offline join blob. For example:
 
 .. code-block:: yaml
 
   - name: create computer object
-    ansible.active_directory.computer:
+    microsoft.ad.computer:
       name: MyComputer
       state: present
     register: computer_obj
 
   - name: create offline blob
-    ansible.active_directory.offline_join:
+    microsoft.ad.offline_join:
       identity: '{{ computer_obj.object_guid }}'
     when: computer_obj is changed
     register: offline_blob
@@ -88,14 +88,14 @@ The options ``offline_domain_join`` and ``odj_blob_path`` has been removed. Use 
       var: offline_blob.blob
     when: computer_obj is changed
 
-.. _ansible_collections.active_directory.docsite.guide_migration.migrated_modules.win_domain_object_info:
+.. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_object_info:
 
 Module win_domain_object_info
 -----------------------------
 
 There are no known breaking changes and should work as a drop in replacement.
 
-.. _ansible_collections.active_directory.docsite.guide_migration.migrated_modules.win_domain_ou:
+.. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_ou:
 
 Module win_domain_ou
 ----------------------
@@ -112,22 +112,22 @@ The return values for ``win_domain_ou`` have also been simplified to only return
 * ``distinguished_name`` - The Distinguished Name (``DN``) of the managed OU
 * ``object_guid`` - The Object GUID of the managed OU
 
-All other return values have been removed, use ``ansible.active_directory.object_info`` to get extra values if needed.
+All other return values have been removed, use ``microsoft.ad.object_info`` to get extra values if needed.
 
-.. _ansible_collections.active_directory.docsite.guide_migration.migrated_modules.win_domain_user:
+.. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_user:
 
 Module win_domain_user
 ----------------------
 
 The following options have changed:
 
-* ``attributes`` - changed format as outlined in :ref:`Attributes guid <ansible_collections.ansible.active_directory.docsite.guide_attributes>`_
+* ``attributes`` - changed format as outlined in :ref:`Attributes guid <ansible_collections.microsoft.ad.docsite.guide_attributes>`_
 * ``groups_action`` - ``replace`` has been renamed to ``set``
 * ``spn_action`` - ``replace`` has been renamed to ``set``
-* ``state`` - No query option - use ``ansible.active_directory.object_info`` instead
+* ``state`` - No query option - use ``microsoft.ad.object_info`` instead
 * ``enabled`` - Does not default to ``true``. Creating a new user without a password will use ``enable=false`` but setting a password will use ``enable=true``
 
-The ``groups_action`` and ``spn_action`` ``set`` value was renamed to align with common practice. The ``state=query`` functionality has been removed to simplify the module and favour ``ansible.active_directory.object_info`` which is designed to return information about AD objects. The ``enabled`` default was removed to allow setting other attributes on an existing AD object without always having to specify ``enabled``.
+The ``groups_action`` and ``spn_action`` ``set`` value was renamed to align with common practice. The ``state=query`` functionality has been removed to simplify the module and favour ``microsoft.ad.object_info`` which is designed to return information about AD objects. The ``enabled`` default was removed to allow setting other attributes on an existing AD object without always having to specify ``enabled``.
 
 The return values for ``win_domain_user`` have also been simplified to only return:
 
@@ -135,4 +135,4 @@ The return values for ``win_domain_user`` have also been simplified to only retu
 * ``object_guid`` - The Object GUID of the managed user
 * ``sid`` - The Security Identifier of the managed user
 
-All other return values have been removed, use ``ansible.active_directory.object_info`` to get extra values if needed.
+All other return values have been removed, use ``microsoft.ad.object_info`` to get extra values if needed.

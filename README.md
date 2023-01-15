@@ -1,9 +1,9 @@
-# Ansible Collection: ansible.active_directory
+# Ansible Collection: microsoft.ad
 
-[![Build Status](https://dev.azure.com/ansible/ansible.active_directory/_apis/build/status/CI?branchName=main)](https://dev.azure.com/ansible/ansible.active_directory/_build/latest?definitionId=24&branchName=main)
-[![codecov](https://codecov.io/gh/ansible-collections/ansible.active_directory/branch/main/graph/badge.svg)](https://codecov.io/gh/ansible-collections/ansible.active_directory)
+[![Build Status](https://dev.azure.com/ansible/microsoft.ad/_apis/build/status/CI?branchName=main)](https://dev.azure.com/ansible/microsoft.ad/_build/latest?definitionId=24&branchName=main)
+[![codecov](https://codecov.io/gh/ansible-collections/microsoft.ad/branch/main/graph/badge.svg)](https://codecov.io/gh/ansible-collections/microsoft.ad)
 
-The `ansible.active_directory` collection includes the plugins supported by Ansible to help the management of Microsoft Active Directory.
+The `microsoft.ad` collection includes the plugins supported by Ansible to help the management of Microsoft Active Directory.
 
 ## Ansible version compatibility
 
@@ -15,11 +15,11 @@ PEP440 is the schema used to describe the versions of Ansible.
 
 ## Collection Documentation
 
-Browsing the [**latest** collection documentation](https://docs.ansible.com/ansible/latest/collections/ansible/active_directory) will show docs for the _latest version released in the Ansible package_ not the latest version of the collection released on Galaxy.
+Browsing the [**latest** collection documentation](https://docs.ansible.com/ansible/latest/collections/microsoft/ad) will show docs for the _latest version released in the Ansible package_ not the latest version of the collection released on Galaxy.
 
-Browsing the [**devel** collection documentation](https://docs.ansible.com/ansible/devel/collections/ansible/active_directory) shows docs for the _latest version released on Galaxy_.
+Browsing the [**devel** collection documentation](https://docs.ansible.com/ansible/devel/collections/microsoft/ad) shows docs for the _latest version released on Galaxy_.
 
-We also separately publish [**latest commit** collection documentation](https://ansible-collections.github.io/ansible.active_directory/branch/main/) which shows docs for the _latest commit in the `main` branch_.
+We also separately publish [**latest commit** collection documentation](https://ansible-collections.github.io/microsoft.ad/branch/main/) which shows docs for the _latest commit in the `main` branch_.
 
 If you use the Ansible package and don't update collections independently, use **latest**, if you install or update this collection directly from Galaxy, use **devel**. If you are looking to contribute, use **latest commit**.
 
@@ -29,18 +29,18 @@ If you use the Ansible package and don't update collections independently, use *
 
 Before using the Active Directory collection, you need to install it with the `ansible-galaxy` CLI:
 
-    ansible-galaxy collection install ansible.active_directory
+    ansible-galaxy collection install microsoft.ad
 
 You can also include it in a `requirements.yml` file and install it via `ansible-galaxy collection install -r requirements.yml` using the format:
 
 ```yaml
 collections:
-- name: ansible.active_directory
+- name: microsoft.ad
 ```
 
 ## Contributing to this collection
 
-We welcome community contributions to this collection. If you find problems, please open an issue or create a PR against the [Ansible Active Directory collection repository](https://github.com/ansible-collections/ansible.active_directory). See [Contributing to Ansible-maintained collections](https://docs.ansible.com/ansible/devel/community/contributing_maintained_collections.html#contributing-maintained-collections) for details.
+We welcome community contributions to this collection. If you find problems, please open an issue or create a PR against the [Ansible Active Directory collection repository](https://github.com/ansible-collections/microsoft.ad). See [Contributing to Ansible-maintained collections](https://docs.ansible.com/ansible/devel/community/contributing_maintained_collections.html#contributing-maintained-collections) for details.
 
 See [Developing modules for Windows](https://docs.ansible.com/ansible/latest/dev_guide/developing_modules_general_windows.html#developing-modules-general-windows) for specifics on Windows modules.
 
@@ -79,9 +79,9 @@ The current process for publishing new versions of the Windows Core Collection i
 * Create a release with the tag that matches the version number
   * The tag is the version number itself, and should not start with anything
   * This will trigger a build and publish the collection to AH and Galaxy
-  * The Zuul job progress will be listed [here](https://ansible.softwarefactory-project.io/zuul/builds?project=ansible-collections%2Fansible.active_directory&skip=0)
+  * The Zuul job progress will be listed [here](https://ansible.softwarefactory-project.io/zuul/builds?project=ansible-collections%2Fmicrosoft.ad&skip=0)
 
-After the version is published, verify it exists on the [Active Directory Galaxy page](https://galaxy.ansible.com/ansible/active_directory).
+After the version is published, verify it exists on the [Active Directory Galaxy page](https://galaxy.ansible.com/microsoft/ad).
 
 
 ## More Information

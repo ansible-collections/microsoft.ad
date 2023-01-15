@@ -22,7 +22,7 @@
 
         Set-Date -Date $date
 
-- name: run ansible.active_directory.domain_controller tests
+- name: run microsoft.ad.domain_controller tests
   hosts: TEST
   gather_facts: no
 

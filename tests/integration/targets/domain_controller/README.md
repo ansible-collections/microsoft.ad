@@ -1,4 +1,4 @@
-# ansible.active_directory.domain_controller tests
+# microsoft.ad.domain_controller tests
 
 As this cannot be run in CI this is a brief guide on how to run these tests locally.
 Run the following:

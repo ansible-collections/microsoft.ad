@@ -257,7 +257,7 @@
     - to_workgroup_ad_actual.output[0]["Enabled"] == False
 
 - name: remove orphaned AD account for later tests
-  ansible.active_directory.computer:
+  microsoft.ad.computer:
     name: OTHER
     state: absent
   delegate_to: DC
@@ -518,13 +518,13 @@
     - to_workgroup_hostname_ad_actual.output[0]["Enabled"] == False
 
 - name: remove orphaned AD account for later tests
-  ansible.active_directory.computer:
+  microsoft.ad.computer:
     name: BAR
     state: absent
   delegate_to: DC
 
 - name: create computer object
-  ansible.active_directory.computer:
+  microsoft.ad.computer:
     name: My, Computer
     path: CN=Users,{{ domain_dn_base }}
     sam_account_name: MyComp$
@@ -533,13 +533,13 @@
   register: comp_account
 
 - name: get offline join blob
-  ansible.active_directory.offline_join:
+  microsoft.ad.offline_join:
     identity: '{{ comp_account.object_guid }}'
   delegate_to: DC
   register: offline_join
 
 - name: get computer object info
-  ansible.active_directory.object_info:
+  microsoft.ad.object_info:
     identity: '{{ comp_account.object_guid }}'
     properties:
     - pwdLastSet
@@ -547,7 +547,7 @@
   register: comp_account_pre_join
 
 - name: join domain by offline blob - check
-  ansible.active_directory.membership:
+  microsoft.ad.membership:
     offline_join_blob: '{{ offline_join.blob }}'
     state: domain
   register: offline_join_check
@@ -559,7 +559,7 @@
   register: offline_join_check_actual
 
 - name: get result of join domain by offline blob comp info - check
-  ansible.active_directory.object_info:
+  microsoft.ad.object_info:
     identity: '{{ comp_account.object_guid }}'
     properties:
     - pwdLastSet
@@ -576,7 +576,7 @@
     - offline_join_check_ad_actual.objects[0].pwdLastSet == comp_account_pre_join.objects[0].pwdLastSet
 
 - name: join domain by offline blob
-  ansible.active_directory.membership:
+  microsoft.ad.membership:
     offline_join_blob: '{{ offline_join.blob }}'
     state: domain
     reboot: true
@@ -588,7 +588,7 @@
   register: offline_join_actual
 
 - name: get result of join domain by offline blob comp info
-  ansible.active_directory.object_info:
+  microsoft.ad.object_info:
     identity: '{{ comp_account.object_guid }}'
     properties:
     - pwdLastSet
@@ -605,7 +605,7 @@
     - offline_join_ad_actual.objects[0].pwdLastSet > offline_join_check_ad_actual.objects[0].pwdLastSet
 
 - name: join domain by offline blob - idempotent
-  ansible.active_directory.membership:
+  microsoft.ad.membership:
     offline_join_blob: '{{ offline_join.blob }}'
     state: domain
   register: offline_join_again
@@ -624,7 +624,7 @@
     reboot: true
 
 - name: remove orphaned AD account for later tests
-  ansible.active_directory.computer:
+  microsoft.ad.computer:
     name: My, Computer
     path: CN=Users,{{ domain_dn_base }}
     state: absent

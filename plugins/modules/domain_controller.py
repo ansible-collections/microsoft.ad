@@ -111,10 +111,10 @@ attributes:
   bypass_host_loop:
     support: none
 seealso:
-- module: ansible.active_directory.domain
-- module: ansible.active_directory.membership
-- module: ansible.active_directory.user
-- module: ansible.active_directory.computer
+- module: microsoft.ad.domain
+- module: microsoft.ad.membership
+- module: microsoft.ad.user
+- module: microsoft.ad.computer
 - module: community.windows.win_domain_group
 author:
 - Matt Davis (@nitzmahone)
@@ -123,7 +123,7 @@ author:
 
 EXAMPLES = r"""
 - name: Ensure a server is a domain controller
-  ansible.active_directory.domain_controller:
+  microsoft.ad.domain_controller:
     dns_domain_name: ansible.vagrant
     domain_admin_user: testguy@ansible.vagrant
     domain_admin_password: password123!
@@ -132,7 +132,7 @@ EXAMPLES = r"""
     reboot: true
 
 - name: Ensure a server is not a domain controller
-  ansible.active_directory.domain_controller:
+  microsoft.ad.domain_controller:
     domain_admin_user: testguy@ansible.vagrant
     domain_admin_password: password123!
     local_admin_password: password123!
@@ -140,7 +140,7 @@ EXAMPLES = r"""
     reboot: true
 
 - name: Promote server as a read only domain controller
-  ansible.active_directory.domain_controller:
+  microsoft.ad.domain_controller:
     dns_domain_name: ansible.vagrant
     domain_admin_user: testguy@ansible.vagrant
     domain_admin_password: password123!
@@ -152,7 +152,7 @@ EXAMPLES = r"""
 
 # This scenario is not recommended, use reboot: true when possible
 - name: Promote server with custom paths with manual reboot task
-  ansible.active_directory.domain_controller:
+  microsoft.ad.domain_controller:
     dns_domain_name: ansible.vagrant
     domain_admin_user: testguy@ansible.vagrant
     domain_admin_password: password123!
@@ -164,7 +164,7 @@ EXAMPLES = r"""
   register: dc_promotion
 
 - name: Reboot after promotion
-  ansible.active_directory.win_reboot:
+  microsoft.ad.win_reboot:
   when: dc_promotion.reboot_required
 """
 

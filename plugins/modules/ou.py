@@ -47,10 +47,10 @@ options:
 notes:
 - When an OU is created, I(protect_from_deletion) defaults to C(True) if not
   specified.
-- See R(win_domain_ou migration,ansible_collections.ansible.active_directory.docsite.guide_migration.migrated_modules.win_domain_ou)
+- See R(win_domain_ou migration,ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_ou)
   for help on migrating from M(community.windows.win_domain_ou) to this module.
 extends_documentation_fragment:
-- ansible.active_directory.ad_object
+- microsoft.ad.ad_object
 - ansible.builtin.action_common_attributes
 attributes:
   check_mode:
@@ -61,11 +61,11 @@ attributes:
     platforms:
     - windows
 seealso:
-- module: ansible.active_directory.domain
-- module: ansible.active_directory.domain_controller
-- module: ansible.active_directory.object_info
-- module: ansible.active_directory.user
-- module: ansible.active_directory.computer
+- module: microsoft.ad.domain
+- module: microsoft.ad.domain_controller
+- module: microsoft.ad.object_info
+- module: microsoft.ad.user
+- module: microsoft.ad.computer
 - module: community.windows.win_domain_group
 author:
 - Jordan Borean (@jborean93)
@@ -73,25 +73,25 @@ author:
 
 EXAMPLES = r"""
 - name: Ensure OU is present & protected
-  ansible.active_directory.ou:
+  microsoft.ad.ou:
     name: AnsibleFest
     state: present
 
 - name: Ensure OU is present & protected
-  ansible.active_directory.ou:
+  microsoft.ad.ou:
     name: EUC Users
     path: DC=euc,DC=vmware,DC=lan
     state: present
     protect_from_deletion: true
 
 - name: Ensure OU is absent
-  ansible.active_directory.ou:
+  microsoft.ad.ou:
     name: EUC Users
     path: DC=euc,DC=vmware,DC=lan
     state: absent
 
 - name: Ensure OU is present with specific properties
-  ansible.active_directory.ou:
+  microsoft.ad.ou:
     name: WS1Users
     path: CN=EUC Users,DC=euc,DC=vmware,DC=lan
     protect_from_deletion: true
@@ -103,7 +103,7 @@ EXAMPLES = r"""
     postal_code: 30189
 
 - name: Ensure OU updated with new properties
-  ansible.active_directory.ou:
+  microsoft.ad.ou:
     name: WS1Users
     path: DC=euc,DC=vmware,DC=lan
     protected: false

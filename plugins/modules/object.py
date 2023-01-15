@@ -25,7 +25,7 @@ notes:
   type when it is created. If a type specific module is available to manage
   that AD object type it is recommend to use that.
 extends_documentation_fragment:
-- ansible.active_directory.ad_object
+- microsoft.ad.ad_object
 - ansible.builtin.action_common_attributes
 attributes:
   check_mode:
@@ -36,11 +36,11 @@ attributes:
     platforms:
     - windows
 seealso:
-- module: ansible.active_directory.domain
-- module: ansible.active_directory.domain_controller
-- module: ansible.active_directory.object_info
-- module: ansible.active_directory.user
-- module: ansible.active_directory.computer
+- module: microsoft.ad.domain
+- module: microsoft.ad.domain_controller
+- module: microsoft.ad.object_info
+- module: microsoft.ad.user
+- module: microsoft.ad.computer
 - module: community.windows.win_domain_group
 author:
 - Jordan Borean (@jborean93)
@@ -54,21 +54,21 @@ EXAMPLES = r"""
 #     Sort-Object
 
 - name: Create a contact object
-  ansible.active_directory.object:
+  microsoft.ad.object:
     name: MyContact
     description: My Contact Description
     type: contact
     state: present
 
 - name: Rename a contact object
-  ansible.active_directory.object:
+  microsoft.ad.object:
     identity: '{{ contact_obj.object_guid }}'
     name: RenamedContact
     type: contact
     state: present
 
 - name: Move a contact object
-  ansible.active_directory.object:
+  microsoft.ad.object:
     identity: '{{ contact_object.object_guid }}'
     name: MyContact
     path: OU=Contacts,DC=domain,DC=test
@@ -76,23 +76,23 @@ EXAMPLES = r"""
     state: present
 
 - name: Remove a contact object in default path
-  ansible.active_directory.object:
+  microsoft.ad.object:
     name: MyContact
     state: absent
 
 - name: Remove a contact object in custom path
-  ansible.active_directory.object:
+  microsoft.ad.object:
     name: MyContact
     path: OU=Contacts,DC=domain,DC=test
     state: absent
 
 - name: Remove a contact by identity
-  ansible.active_directory.object:
+  microsoft.ad.object:
     identity: '{{ contact_obj.object_guid }}'
     state: absent
 
 - name: Create container object with custom attributes
-  ansible.active_directory.object:
+  microsoft.ad.object:
     name: App
     attributes:
       set:
@@ -101,7 +101,7 @@ EXAMPLES = r"""
     state: present
 
 - name: Clear attribute of any value
-  ansible.active_directory.object:
+  microsoft.ad.object:
     name: App
     attributes:
       set:
@@ -110,7 +110,7 @@ EXAMPLES = r"""
     state: present
 
 - name: Edit object security with Everyone Allow All access
-  ansible.active_directory.object:
+  microsoft.ad.object:
     name: App
     attributes:
       add:
@@ -121,7 +121,7 @@ EXAMPLES = r"""
     state: present
 
 - name: Ensure multiple values are present in attribute
-  ansible.active_directory.object:
+  microsoft.ad.object:
     name: App
     attributes:
       add:
@@ -132,7 +132,7 @@ EXAMPLES = r"""
     state: present
 
 - name: Ensure multiple values are not present in attribute
-  ansible.active_directory.object:
+  microsoft.ad.object:
     name: App
     attributes:
       remove:

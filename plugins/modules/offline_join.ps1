@@ -50,7 +50,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-namespace ansible.active_directory.domain_join
+namespace microsoft.ad.domain_join
 {
     [StructLayout(LayoutKind.Sequential)]
     internal struct NETSETUP_PROVISIONING_PARAMS
@@ -166,9 +166,9 @@ $computerName = $computer.SamAccountName.Substring(0,
     $computer.SamAccountName.Length - 1)
 $computerPath = @($computerName.DistinguishedName -split '[^\\],', 2)[-1]
 
-$flags = [ansible.active_directory.domain_join.ProvisionOptions]::NETSETUP_PROVISION_REUSE_ACCOUNT
+$flags = [microsoft.ad.domain_join.ProvisionOptions]::NETSETUP_PROVISION_REUSE_ACCOUNT
 if ($module.Params.provision_root_ca_certs) {
-    $flags = $flags -bor [ansible.active_directory.domain_join.ProvisionOptions]::NETSETUP_PROVISION_ROOT_CA_CERTS
+    $flags = $flags -bor [microsoft.ad.domain_join.ProvisionOptions]::NETSETUP_PROVISION_ROOT_CA_CERTS
 }
 
 $domainInfo = Get-ADDomain @adParams
@@ -178,7 +178,7 @@ if ($module.Params.blob_path -and (Test-Path -LiteralPath $module.Params.blob_pa
 }
 
 if (-not $Module.CheckMode) {
-    $blob = [ansible.active_directory.domain_join.Native]::NetCreateProvisioningPackage(
+    $blob = [microsoft.ad.domain_join.Native]::NetCreateProvisioningPackage(
         $domainInfo.DNSRoot,
         $computerName,
         $computerPath,

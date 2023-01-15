@@ -1,4 +1,4 @@
 - name: remove test domain user
-  ansible.active_directory.user:
+  microsoft.ad.user:
     name: '{{ test_user.distinguished_name }}'
     state: absent

@@ -1,4 +1,4 @@
-.. _ansible_collections.ansible.active_directory.docsite.guide_attributes:
+.. _ansible_collections.microsoft.ad.docsite.guide_attributes:
 
 ****************
 Attributes guide
@@ -10,7 +10,7 @@ A common use case for modules in this collection is to manage various Active Dir
   :local:
   :depth: 1
 
-.. _ansible_collections.active_directory.docsite.guide_attributes.ldap_attributes:
+.. _ansible_collections.microsoft.ad.docsite.guide_attributes.ldap_attributes:
 
 LDAP Attributes
 ===============
@@ -79,7 +79,7 @@ The last example outputs::
 
 This shows the ``sAMAccountName`` is a string that can only have 1 value. The ``o`` attribute is also a string but can store multiple values. The ``objectGUID`` is a byte array value that can only have 1 value and is also read only.
 
-.. _ansible_collections.active_directory.docsite.guide_attributes.setting_attributes:
+.. _ansible_collections.microsoft.ad.docsite.guide_attributes.setting_attributes:
 
 Setting Attributes
 ==================
@@ -94,7 +94,7 @@ Each of these keys contain a dictionary value where the keys are the LDAP attrib
 
 .. code-block:: yaml
 
-    - ansible.active_directory.user:
+    - microsoft.ad.user:
         name: MyUser
         state: present
         attributes:
@@ -111,7 +111,7 @@ The ``add`` key can be used to ensure the LDAP attribute values specified are ad
 
 .. code-block:: yaml
 
-    - ansible.active_directory.user:
+    - microsoft.ad.user:
         name: MyUser
         state: present
         attributes:
@@ -132,7 +132,7 @@ To clear an attribute value, define the attribute under ``set`` and set the valu
 
 .. code-block:: yaml
 
-    - ansible.active_directory.user:
+    - microsoft.ad.user:
         name: MyUser
         state: present
         attributes:
@@ -145,7 +145,7 @@ To clear an attribute value, define the attribute under ``set`` and set the valu
 
 This task will ensure the ``comment``, ``company``, and ``extensionName`` attributes are cleared of any value.
 
-.. _ansible_collections.active_directory.docsite.guide_attributes.attribute_types:
+.. _ansible_collections.microsoft.ad.docsite.guide_attributes.attribute_types:
 
 Attribute Types
 ===============
@@ -184,7 +184,7 @@ This looks like the following:
 
 .. code-block:: yaml
 
-    - ansible.active_directory.user:
+    - microsoft.ad.user:
         name: MyUser
         state: present
         attributes:
@@ -215,7 +215,7 @@ As raw bytes cannot be expressed in YAML, to set an attribute with a byte array 
 
 .. code-block:: yaml
 
-    - ansible.active_directory.user:
+    - microsoft.ad.user:
         name: MyUser
         state: present
         attributes:
@@ -240,7 +240,7 @@ Attributes with datetime values are technically integer values but represent a p
 
 .. code-block:: yaml
 
-    - ansible.active_directory.user:
+    - microsoft.ad.user:
         name: MyUser
         state: present
         attributes:
@@ -269,7 +269,7 @@ A security descriptor is stored as a byte array in the attribute but the ``secur
 
 .. code-block:: yaml
 
-    - ansible.active_directory.user:
+    - microsoft.ad.user:
         name: MyUser
         state: present
         attributes:
