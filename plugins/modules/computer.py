@@ -56,7 +56,7 @@ attributes:
 seealso:
 - module: microsoft.ad.domain
 - module: microsoft.ad.domain_controller
-- module: microsoft.ad.domain_membership
+- module: microsoft.ad.membership
 - module: microsoft.ad.object_info
 - module: microsoft.ad.object
 - module: microsoft.ad.offline_join
