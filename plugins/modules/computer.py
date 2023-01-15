@@ -40,10 +40,10 @@ options:
     - If C($) is omitted, it will be added to the end.
     type: str
 notes:
-- See R(win_domain_computer migration,ansible_collections.ansible.active_directory.docsite.guide_migration.migrated_modules.win_domain_computer)
-  for help on migrating from M(ansible.active_directory.computer) to this module.
+- See R(win_domain_computer migration,ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_computer)
+  for help on migrating from M(microsoft.ad.computer) to this module.
 extends_documentation_fragment:
-- ansible.active_directory.ad_object
+- microsoft.ad.ad_object
 - ansible.builtin.action_common_attributes
 attributes:
   check_mode:
@@ -54,12 +54,12 @@ attributes:
     platforms:
     - windows
 seealso:
-- module: ansible.active_directory.domain
-- module: ansible.active_directory.domain_controller
-- module: ansible.active_directory.domain_membership
-- module: ansible.active_directory.object_info
-- module: ansible.active_directory.object
-- module: ansible.active_directory.offline_join
+- module: microsoft.ad.domain
+- module: microsoft.ad.domain_controller
+- module: microsoft.ad.domain_membership
+- module: microsoft.ad.object_info
+- module: microsoft.ad.object
+- module: microsoft.ad.offline_join
 - module: community.windows.win_domain_group
 author:
 - Jordan Borean (@jborean93)
@@ -67,7 +67,7 @@ author:
 
 EXAMPLES = r"""
 - name: Add linux computer to Active Directory OU using a windows machine
-  ansible.active_directory.computer:
+  microsoft.ad.computer:
     name: one_linux_server
     sam_account_name: linux_server$
     dns_hostname: one_linux_server.my_org.local
@@ -77,7 +77,7 @@ EXAMPLES = r"""
     state: present
 
 - name: Remove linux computer from Active Directory using a windows machine
-  ansible.active_directory.computer:
+  microsoft.ad.computer:
     name: one_linux_server
     state: absent
 """

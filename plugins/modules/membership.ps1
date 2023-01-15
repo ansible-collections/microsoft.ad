@@ -78,7 +78,7 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 
-namespace ansible.active_directory.membership
+namespace microsoft.ad.membership
 {
     [Flags]
     public enum ProvisionOptions
@@ -168,7 +168,7 @@ if ($state -eq 'domain') {
         if (-not $currentState.PartOfDomain) {
             try {
                 if (-not $module.CheckMode) {
-                    [ansible.active_directory.membership.Native]::NetRequestOfflineDomainJoin(
+                    [microsoft.ad.membership.Native]::NetRequestOfflineDomainJoin(
                         [System.Convert]::FromBase64String($module.Params.offline_join_blob),
                         "NETSETUP_PROVISION_ONLINE_CALLER",
                         $env:SystemRoot)

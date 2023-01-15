@@ -86,36 +86,36 @@ notes:
   care that this isn't called under a computer account that has already been
   joined.
 seealso:
-- module: ansible.active_directory.domain
-- module: ansible.active_directory.membership
-- module: ansible.active_directory.computer
+- module: microsoft.ad.domain
+- module: microsoft.ad.membership
+- module: microsoft.ad.computer
 author:
 - Jordan Borean (@jborean93)
 """
 
 EXAMPLES = r"""
 - name: create computer object
-  ansible.active_directory.computer:
+  microsoft.ad.computer:
     name: MyComputer
     state: present
   register: computer_obj
 
 - name: create offline blob
-  ansible.active_directory.offline_join:
+  microsoft.ad.offline_join:
     identity: '{{ computer_obj.object_guid }}'
   when: computer_obj is changed
   register: offline_blob
   no_log: true
 
 - name: join host by offline blob
-  ansible.active_directory.membership:
+  microsoft.ad.membership:
     offline_join_blob: '{{ offline_blob.blob }}'
     state: domain
     reboot: true
   delegate_to: member-host
 
 - name: create blob and store it in a file on the target host
-  ansible.active_directory.offline_join:
+  microsoft.ad.offline_join:
     name: MyComputer
     path: OU=Production,DC=domain,DC=com
     blob_path: C:\Windows\TEMP\offline_blob

@@ -65,7 +65,7 @@ $safe_mode_password = $module.Params.safe_mode_password
 $sysvol_path = $module.Params.sysvol_path
 
 if ([System.Environment]::OSVersion.Version -lt [Version]"6.2") {
-    $module.FailJson("ansible.active_directory.domain requires Windows Server 2012 or higher")
+    $module.FailJson("microsoft.ad.domain requires Windows Server 2012 or higher")
 }
 
 if ($domain_netbios_name -and $domain_netbios_name.Length -gt 15) {

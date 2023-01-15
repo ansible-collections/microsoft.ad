@@ -197,10 +197,10 @@ options:
     - C(no) will allow the user to change their password.
     type: bool
 notes:
-- See R(win_domain_user migration,ansible_collections.ansible.active_directory.docsite.guide_migration.migrated_modules.win_domain_user)
+- See R(win_domain_user migration,ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_user)
   for help on migrating from M(community.windows.win_domain_user) to this module.
 extends_documentation_fragment:
-- ansible.active_directory.ad_object
+- microsoft.ad.ad_object
 - ansible.builtin.action_common_attributes
 attributes:
   check_mode:
@@ -211,11 +211,11 @@ attributes:
     platforms:
     - windows
 seealso:
-- module: ansible.active_directory.domain
-- module: ansible.active_directory.domain_controller
-- module: ansible.active_directory.object
-- module: ansible.active_directory.object_info
-- module: ansible.active_directory.computer
+- module: microsoft.ad.domain
+- module: microsoft.ad.domain_controller
+- module: microsoft.ad.object
+- module: microsoft.ad.object_info
+- module: microsoft.ad.computer
 - module: community.windows.win_domain_group
 author:
 - Jordan Borean (@jborean93)
@@ -223,7 +223,7 @@ author:
 
 EXAMPLES = r"""
 - name: Ensure user bob is present with address information
-  ansible.active_directory.user:
+  microsoft.ad.user:
     name: bob
     firstname: Bob
     surname: Smith
@@ -242,7 +242,7 @@ EXAMPLES = r"""
         telephoneNumber: 555-123456
 
 - name: Ensure user bob is created and use custom credentials to create the user
-  ansible.active_directory.user:
+  microsoft.ad.user:
     name: bob
     firstname: Bob
     surname: Smith
@@ -253,7 +253,7 @@ EXAMPLES = r"""
     domain_server: domain@DOMAIN.COM
 
 - name: Ensure user bob is present in OU ou=test,dc=domain,dc=local
-  ansible.active_directory.user:
+  microsoft.ad.user:
     name: bob
     password: B0bP4ssw0rd
     state: present
@@ -263,26 +263,26 @@ EXAMPLES = r"""
     - Domain Users
 
 - name: Ensure user bob is absent
-  ansible.active_directory.user:
+  microsoft.ad.user:
     name: bob
     state: absent
 
 - name: Ensure user has spn's defined
-  ansible.active_directory.user:
+  microsoft.ad.user:
     name: liz.kenyon
     spn:
     - MSSQLSvc/us99db-svr95:1433
     - MSSQLSvc/us99db-svr95.vmware.com:1433
 
 - name: Ensure user has spn added
-  ansible.active_directory.user:
+  microsoft.ad.user:
     name: liz.kenyon
     spn_action: add
     spn:
     - MSSQLSvc/us99db-svr95:2433
 
 - name: Ensure user is created with delegates and spn's defined
-  ansible.active_directory.user:
+  microsoft.ad.user:
     name: shmemmmy
     password: The3rubberducki33!
     state: present

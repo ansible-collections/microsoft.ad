@@ -97,10 +97,10 @@ attributes:
   bypass_host_loop:
     support: none
 seealso:
-- module: ansible.active_directory.domain_controller
-- module: ansible.active_directory.membership
-- module: ansible.active_directory.user
-- module: ansible.active_directory.computer
+- module: microsoft.ad.domain_controller
+- module: microsoft.ad.membership
+- module: microsoft.ad.user
+- module: microsoft.ad.computer
 - module: community.windows.win_domain_group
 author:
 - Matt Davis (@nitzmahone)
@@ -109,13 +109,13 @@ author:
 
 EXAMPLES = r"""
 - name: Create new domain in a new forest on the target host and reboot
-  ansible.active_directory.domain:
+  microsoft.ad.domain:
     dns_domain_name: ansible.vagrant
     safe_mode_password: password123!
     reboot: true
 
 - name: Create new Windows domain in a new forest with specific parameters and reboot in post task
-  ansible.active_directory.domain:
+  microsoft.ad.domain:
     create_dns_delegation: false
     database_path: C:\Windows\NTDS
     dns_domain_name: ansible.vagrant

@@ -87,7 +87,7 @@ $domainCredential = New-Object -TypeName System.Management.Automation.PSCredenti
 )
 
 if ([System.Environment]::OSVersion.Version -lt [Version]"6.2") {
-    $module.FailJson("ansible.active_directory.domain_controller requires Windows Server 2012 or higher")
+    $module.FailJson("microsoft.ad.domain_controller requires Windows Server 2012 or higher")
 }
 
 # short-circuit "member server" check, since we don't need feature checks for this...

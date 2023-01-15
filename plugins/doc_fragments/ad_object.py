@@ -6,7 +6,7 @@
 
 class ModuleDocFragment:
 
-    # Common options for ansible_collections.ansible.active_directory.plugins.module_utils._ADObject
+    # Common options for ansible_collections.microsoft.ad.plugins.module_utils._ADObject
     DOCUMENTATION = r"""
 requirements:
 - C(ActiveDirectory) PowerShell module
@@ -33,7 +33,7 @@ options:
     - The C(raw) type is the int, string, or boolean value to set.
     - String attribute values are compared using a case sensitive match on the
       AD object being managed.
-    - See R(LDAP attributes help,ansible_collections.ansible.active_directory.docsite.guide_attributes)
+    - See R(LDAP attributes help,ansible_collections.microsoft.ad.docsite.guide_attributes)
       for more information.
     default: {}
     type: dict
@@ -121,8 +121,8 @@ options:
     - The path of the OU or the container where the new object should exist in.
     - If no path is specified, the default is the C(defaultNamingContext) of
       domain for most objects.
-    - The default path for M(ansible.active_directory.computer) and
-      M(ansible.active_directory.user) have their own default path that is
+    - The default path for M(microsoft.ad.computer) and
+      M(microsoft.ad.user) have their own default path that is
       configured on the Active Directory domain controller.
     type: str
   protect_from_deletion:

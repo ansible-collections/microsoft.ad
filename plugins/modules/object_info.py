@@ -98,11 +98,11 @@ attributes:
     platforms:
     - windows
 seealso:
-- module: ansible.active_directory.domain
-- module: ansible.active_directory.domain_controller
-- module: ansible.active_directory.object
-- module: ansible.active_directory.user
-- module: ansible.active_directory.computer
+- module: microsoft.ad.domain
+- module: microsoft.ad.domain_controller
+- module: microsoft.ad.object
+- module: microsoft.ad.user
+- module: microsoft.ad.computer
 - module: community.windows.win_domain_group
 author:
 - Jordan Borean (@jborean93)
@@ -110,24 +110,24 @@ author:
 
 EXAMPLES = r"""
 - name: Get all properties for the specified account using its DistinguishedName
-  ansible.active_directory.object_info:
+  microsoft.ad.object_info:
     identity: CN=Username,CN=Users,DC=domain,DC=com
     properties: '*'
 
 - name: Get the SID for all user accounts as a filter
-  ansible.active_directory.object_info:
+  microsoft.ad.object_info:
     filter: ObjectClass -eq 'user' -and objectCategory -eq 'Person'
     properties:
     - objectSid
 
 - name: Get the SID for all user accounts as a LDAP filter
-  ansible.active_directory.object_info:
+  microsoft.ad.object_info:
     ldap_filter: (&(objectClass=user)(objectCategory=Person))
     properties:
     - objectSid
 
 - name: Search all computer accounts in a specific path that were added after February 1st
-  ansible.active_directory.object_info:
+  microsoft.ad.object_info:
     filter: objectClass -eq 'computer' -and whenCreated -gt '20200201000000.0Z'
     properties: '*'
     search_scope: one_level

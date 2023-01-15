@@ -29,7 +29,7 @@
       - 127.0.0.1
 
   - name: ensure domain exists and DC is promoted as a domain controller
-    ansible.active_directory.domain:
+    microsoft.ad.domain:
       dns_domain_name: '{{ domain_realm }}'
       safe_mode_password: '{{ domain_password }}'
       reboot: true
@@ -39,7 +39,7 @@
       state: present
 
   - name: create domain username
-    ansible.active_directory.user:
+    microsoft.ad.user:
       name: '{{ domain_username }}'
       upn: '{{ domain_user_upn }}'
       description: '{{ domain_username }} Domain Account'

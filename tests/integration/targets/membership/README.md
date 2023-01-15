@@ -1,4 +1,4 @@
-# ansible.active_directory.membership tests
+# microsoft.ad.membership tests
 
 As this cannot be run in CI this is a brief guide on how to run these tests locally.
 Run the following:
