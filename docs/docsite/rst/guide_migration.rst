@@ -54,7 +54,7 @@ The following options have been removed:
 
 * ``log_path`` - Creating a debug log of module actions is not supported
 
-The ``reboot`` option has been added to have the module handle any reboots instead of a separate ``ansible.windows.win_reboot`` task. Due to the operations involved with promoting a domain controller, it is highly recommended to use this option.
+The ``reboot`` option has been added to have the module handle any reboots instead of a separate ``ansible.windows.win_reboot`` task.
 
 .. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_computer:
 
