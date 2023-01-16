@@ -1,5 +1,11 @@
 # Copyright (c) 2023 Ansible Project
-# Simplified BSD License (see licenses/simplified_bsd.txt or https://opensource.org/licenses/BSD-2-Clause)
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+# FOR INTERNAL COLLECTION USE ONLY
+# The interfaces in this file are meant for use within this collection
+# and may not remain stable to outside uses. Changes may be made in ANY release, even a bugfix release.
+# See also: https://github.com/ansible/community/issues/539#issuecomment-780839686
+# Please open an issue if you have questions about this.
 
 #AnsibleRequires -CSharpUtil Ansible.Basic
 
