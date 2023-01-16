@@ -1,6 +1,6 @@
 namespace: microsoft
 name: ad
-version: 0.1.0
+version: 1.0.0
 readme: README.md
 authors:
 - Jordan Borean @jborean93
@@ -9,6 +9,7 @@ description: |
   Ansible collection for Active Directory management
 license_file: COPYING
 tags:
+- active_directory
 - windows
 dependencies: {}
 repository: https://github.com/ansible-collections/microsoft.ad

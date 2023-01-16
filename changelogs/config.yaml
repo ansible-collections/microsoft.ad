@@ -25,5 +25,5 @@ sections:
   - Bugfixes
 - - known_issues
   - Known Issues
-title: Ansible Active Directory
+title: Ansible Microsoft Active Directory
 trivial_section_name: trivial
