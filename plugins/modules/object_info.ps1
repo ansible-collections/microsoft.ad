@@ -60,6 +60,18 @@ using System;
 namespace Ansible.WinDomainObjectInfo
 {
     [Flags]
+    public enum GroupType : uint
+    {
+        GROUP_TYPE_BUILTIN_LOCAL_GROUP = 0x00000001,
+        GROUP_TYPE_ACCOUNT_GROUP = 0x00000002,
+        GROUP_TYPE_RESOURCE_GROUP = 0x00000004,
+        GROUP_TYPE_UNIVERSAL_GROUP = 0x00000008,
+        GROUP_TYPE_APP_BASIC_GROUP = 0x00000010,
+        GROUP_TYPE_APP_QUERY_GROUP = 0x00000020,
+        GROUP_TYPE_SECURITY_ENABLED = 0x80000000,
+    }
+
+    [Flags]
     public enum UserAccountControl : int
     {
         ADS_UF_SCRIPT = 0x00000001,
@@ -274,14 +286,20 @@ $module.Result.objects = @(foreach ($adId in $foundGuids) {
             }
             $filteredObject.$name = $value
 
-            # For these 2 properties, add an _AnsibleFlags attribute which contains the enum strings that are set.
-            if ($name -eq 'sAMAccountType') {
-                $enumValue = [Ansible.WinDomainObjectInfo.sAMAccountType]$value
-                $filteredObject.'sAMAccountType_AnsibleFlags' = $enumValue.ToString() -split ', '
+            # For these 3 properties, add an _AnsibleFlags attribute which contains the enum strings that are set.
+            $enumValue = switch ($name) {
+                groupType {
+                    [Ansible.WinDomainObjectInfo.GroupType]$value
+                }
+                sAMAccountType {
+                    [Ansible.WinDomainObjectInfo.sAMAccountType]$value
+                }
+                userAccountControl {
+                    [Ansible.WinDomainObjectInfo.UserAccountControl]$value
+                }
             }
-            elseif ($name -eq 'userAccountControl') {
-                $enumValue = [Ansible.WinDomainObjectInfo.UserAccountControl]$value
-                $filteredObject.'userAccountControl_AnsibleFlags' = $enumValue.ToString() -split ', '
+            if ($null -ne $enumValue) {
+                $filteredObject."$($name)_AnsibleFlags" = $enumValue.ToString() -split ', '
             }
         }
 

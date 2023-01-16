@@ -111,10 +111,11 @@ attributes:
   bypass_host_loop:
     support: none
 seealso:
+- module: microsoft.ad.computer
 - module: microsoft.ad.domain
+- module: microsoft.ad.group
 - module: microsoft.ad.membership
 - module: microsoft.ad.user
-- module: microsoft.ad.computer
 - ref: Migration guide <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_controller>
   description: This module replaces C(ansible.windows.win_domain_controller). See the migration guide for details.
 - module: ansible.windows.win_domain_controller

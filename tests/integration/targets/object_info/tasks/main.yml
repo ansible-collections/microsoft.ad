@@ -91,6 +91,18 @@
     - by_guid_custom_props.objects[0].userAccountControl == 66050
     - by_guid_custom_props.objects[0].userAccountControl_AnsibleFlags == ['ADS_UF_ACCOUNTDISABLE', 'ADS_UF_NORMAL_ACCOUNT', 'ADS_UF_DONT_EXPIRE_PASSWD']
 
+- name: get the groupType attribute
+  object_info:
+    filter: sAMAccountName -eq 'Domain Admins'
+    properties:
+    - groupType
+  register: group_type_prop
+
+- name: assert get the groupType attribute
+  assert:
+    that:
+    - group_type_prop.objects[0].groupType_AnsibleFlags == ["GROUP_TYPE_ACCOUNT_GROUP", "GROUP_TYPE_SECURITY_ENABLED"]
+
 - name: get invalid property
   object_info:
     filter: sAMAccountName -eq 'Ansible Test'

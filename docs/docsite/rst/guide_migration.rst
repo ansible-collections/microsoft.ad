@@ -21,6 +21,8 @@ The following modules have been migrated in some shape or form into this collect
 * ``ansible.windows.win_domain_controller`` -> ``microsoft.ad.domain_controller`` - :ref:`details <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_controller>`
 * ``ansible.windows.win_domain_membership`` -> ``microsoft.ad.membership`` - :ref:`details <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_membership>`
 * ``community.windows.win_domain_computer`` -> ``microsoft.ad.computer`` - :ref:`details <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_computer>`
+* ``community.windows.win_domain_group`` -> ``microsoft.ad.group`` - :ref:`details <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_group>`
+* ``community.windows.win_domain_group_membership`` -> ``microsoft.ad.group`` - :ref:`details <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_group_membership>`
 * ``community.windows.win_domain_object_info`` -> ``microsoft.ad.object_info`` - :ref:`details <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_object_info>`
 * ``community.windows.win_domain_ou`` -> ``microsoft.ad.ou`` - :ref:`details <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_ou>`
 * ``community.windows.win_domain_user`` -> ``microsoft.ad.user`` - :ref:`details <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_user>`
@@ -95,6 +97,37 @@ The options ``offline_domain_join`` and ``odj_blob_path`` has been removed. Use 
     debug:
       var: offline_blob.blob
     when: computer_obj is changed
+
+.. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_group:
+
+Module ``win_domain_group``
+---------------------------
+
+Migrated to :ref:`microsoft.ad.group <ansible_collections.microsoft.ad.group_module>`.
+
+The following options have changed:
+
+* ``attributes`` - changed format as outlined in :ref:`Attributes guid <ansible_collections.microsoft.ad.docsite.guide_attributes>`
+* ``ignore_protection`` - Has been removed and ``state: absent`` will also remove objects regardless of the protection status
+* ``organizational_unit`` and ``ou`` - Have been removed, use ``path`` instead
+* ``protect`` - Has been renamed to ``protect_from_deletion`` and is now not needed to be unset for ``state: absent`` to remove the group
+
+The return values for ``win_domain_group`` have also been simplified to only return:
+
+* ``distinguished_name`` - The Distinguished Name (``DN``) of the managed OU
+* ``object_guid`` - The Object GUID of the managed OU
+* ``sid`` - The Security Identifier of the managed user
+
+All other return values have been removed, use ``microsoft.ad.object_info`` to get extra values if needed.
+
+.. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_group_membership:
+
+Module ``win_domain_group_membership``
+--------------------------------------
+
+Migrated to :ref:`microsoft.ad.group <ansible_collections.microsoft.ad.group_module>`.
+
+The functionality of this module has been merged with ``microsoft.ad.group``. Use the ``members`` option to ``add``, ``remove``, or ``set`` to add, remove, or set group members respectively.
 
 .. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_object_info:
 

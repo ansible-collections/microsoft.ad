@@ -41,7 +41,7 @@ seealso:
 - module: microsoft.ad.object_info
 - module: microsoft.ad.user
 - module: microsoft.ad.computer
-- module: community.windows.win_domain_group
+- module: microsoft.ad.group
 author:
 - Jordan Borean (@jborean93)
 """
