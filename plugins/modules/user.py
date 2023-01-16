@@ -216,7 +216,9 @@ seealso:
 - module: microsoft.ad.object
 - module: microsoft.ad.object_info
 - module: microsoft.ad.computer
-- module: community.windows.win_domain_group
+- ref: Migration guide <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_user>
+  description: This module replaces C(community.windows.win_domain_user). See the migration guide for details.
+- module: community.windows.win_domain_user
 author:
 - Jordan Borean (@jborean93)
 """

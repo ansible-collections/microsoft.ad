@@ -115,7 +115,9 @@ seealso:
 - module: microsoft.ad.membership
 - module: microsoft.ad.user
 - module: microsoft.ad.computer
-- module: community.windows.win_domain_group
+- ref: Migration guide <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_controller>
+  description: This module replaces C(ansible.windows.win_domain_controller). See the migration guide for details.
+- module: ansible.windows.win_domain_controller
 author:
 - Matt Davis (@nitzmahone)
 - Jordan Borean (@jborean93)
