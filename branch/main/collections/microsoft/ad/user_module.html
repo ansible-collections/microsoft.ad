@@ -263,10 +263,10 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <a class="ansibleOptionLink" href="#parameter-delegates" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-aliases">aliases: principals_allowed_to_delegate</span></p>
 <p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
 </div></td>
-<td><div class="ansible-option-cell"><p>Specifies an array of principal objects the user is allowed to act on behalf for delegation.</p>
+<td><div class="ansible-option-cell"><p>Specifies an array of principal objects that the current AD object can trust for delegation.</p>
 <p>Must be specified as a distinguished name <code class="docutils literal notranslate"><span class="pre">CN=shenetworks,CN=Users,DC=ansible,DC=test</span></code></p>
 <p>This is the value set on the <code class="docutils literal notranslate"><span class="pre">msDS-AllowedToActOnBehalfOfOtherIdentity</span></code> LDAP attribute.</p>
-<p>This is a highly sensitive attribute.</p>
+<p>This is a highly sensitive attribute as it allows the principals specified to impersonate any account when authenticating with the AD user object being managed.</p>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
