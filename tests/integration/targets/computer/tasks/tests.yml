@@ -103,10 +103,21 @@
   computer:
     name: MyComputer
     state: present
+    delegates:
+    - CN=krbtgt,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    kerberos_encryption_types:
+    - aes128
+    - aes256
+    location: Comp Location
     dns_hostname: MyComputer.domain.com
     enabled: false
     managed_by: Domain Admins
     sam_account_name: SamMyComputer
+    spn:
+    - HTTP/MyComputer
+    trusted_for_delegation: true
+    upn: MyComputer@{{ domain_realm }}
     path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
   register: custom_comp
 
@@ -118,11 +129,31 @@
     identity: '{{ object_identity }}'
     properties:
     - dnsHostName
+    - location
     - managedBy
+    - msDS-AllowedToActOnBehalfOfOtherIdentity
+    - msDS-SupportedEncryptionTypes
     - objectSid
     - sAMAccountName
+    - servicePrincipalName
     - userAccountControl
+    - userPrincipalName
   register: custom_comp_actual
+
+- name: convert delegate SDDL to human readable string
+  ansible.windows.win_powershell:
+    parameters:
+      SDDL: '{{ custom_comp_actual.objects[0]["msDS-AllowedToActOnBehalfOfOtherIdentity"] }}'
+    script: |
+      param($SDDL)
+
+      $sd = New-Object -TypeName System.DirectoryServices.ActiveDirectorySecurity
+      $sd.SetSecurityDescriptorSddlForm($SDDL, 'All')
+      $sd.GetAccessRules($true, $false, [Type][System.Security.Principal.NTAccount]
+      ).IdentityReference.Value | ForEach-Object {
+          ($_ -split '\\', 2)[-1]
+      } | Sort-Object
+  register: custom_comp_delegates
 
 - name: assert create computer with custom options
   assert:
@@ -134,18 +165,33 @@
     - custom_comp_actual.objects[0].DistinguishedName == custom_comp.distinguished_name
     - custom_comp_actual.objects[0].Name == 'MyComputer'
     - custom_comp_actual.objects[0].dnsHostName == 'MyComputer.domain.com'
+    - custom_comp_actual.objects[0].location == 'Comp Location'
     - custom_comp_actual.objects[0].managedBy == 'CN=Domain Admins,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - custom_comp_actual.objects[0]['msDS-SupportedEncryptionTypes'] == 24
+    - custom_comp_actual.objects[0]['msDS-SupportedEncryptionTypes_AnsibleFlags'] == ["AES128_CTS_HMAC_SHA1_96", "AES256_CTS_HMAC_SHA1_96"]
     - custom_comp_actual.objects[0].sAMAccountName == 'SamMyComputer$'
     - custom_comp_actual.objects[0].ObjectClass == 'computer'
+    - custom_comp_actual.objects[0].servicePrincipalName == 'HTTP/MyComputer'
+    - custom_comp_actual.objects[0].userPrincipalName == 'MyComputer@' ~ domain_realm
     - '"ADS_UF_ACCOUNTDISABLE" in custom_comp_actual.objects[0].userAccountControl_AnsibleFlags'
+    - '"ADS_UF_TRUSTED_FOR_DELEGATION" in custom_comp_actual.objects[0].userAccountControl_AnsibleFlags'
+    - custom_comp_delegates.output == ["Administrator", "krbtgt"]
 
 - name: change computer with custom options
   computer:
     name: MyComputer
     path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    delegates:
+    - CN=KRBTGT,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
     dns_hostname: other.domain.com
+    kerberos_encryption_types:
+    - aes256
+    - rc4
+    location: comp location
     enabled: true
     sam_account_name: MyComputer2$
+    trusted_for_delegation: false
+    upn: mycomputer@{{ domain_realm }}
   register: change_comp
 
 - name: get result of change computer with custom options
@@ -153,14 +199,108 @@
     identity: '{{ object_identity }}'
     properties:
     - dnsHostName
+    - location
+    - msDS-AllowedToActOnBehalfOfOtherIdentity
+    - msDS-SupportedEncryptionTypes
     - sAMAccountName
     - userAccountControl
+    - userPrincipalName
   register: change_comp_actual
+
+- name: convert delegate SDDL to human readable string
+  ansible.windows.win_powershell:
+    parameters:
+      SDDL: '{{ change_comp_actual.objects[0]["msDS-AllowedToActOnBehalfOfOtherIdentity"] }}'
+    script: |
+      param($SDDL)
+
+      $sd = New-Object -TypeName System.DirectoryServices.ActiveDirectorySecurity
+      $sd.SetSecurityDescriptorSddlForm($SDDL, 'All')
+      $sd.GetAccessRules($true, $false, [Type][System.Security.Principal.NTAccount]
+      ).IdentityReference.Value | ForEach-Object {
+          ($_ -split '\\', 2)[-1]
+      } | Sort-Object
+  register: change_comp_delegates
 
 - name: assert change computer with custom options
   assert:
     that:
     - change_comp is changed
     - change_comp_actual.objects[0].dnsHostName == 'other.domain.com'
+    - change_comp_actual.objects[0].location == 'comp location'
+    - change_comp_actual.objects[0]['msDS-SupportedEncryptionTypes'] == 20
+    - change_comp_actual.objects[0]['msDS-SupportedEncryptionTypes_AnsibleFlags'] == ["RC4_HMAC", "AES256_CTS_HMAC_SHA1_96"]
     - change_comp_actual.objects[0].sAMAccountName == 'MyComputer2$'
+    - change_comp_actual.objects[0].userPrincipalName == 'mycomputer@' ~ domain_realm
     - '"ADS_UF_ACCOUNTDISABLE" not in change_comp_actual.objects[0].userAccountControl_AnsibleFlags'
+    - '"ADS_UF_TRUSTED_FOR_DELEGATION" not in change_comp_actual.objects[0].userAccountControl_AnsibleFlags'
+    - change_comp_delegates.output == ["krbtgt"]
+
+- name: set spns
+  computer:
+    name: MyComputer
+    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    spn:
+    - HTTP/host
+    - HTTP/host.domain
+    - HTTP/host.domain:8080
+  register: spn_set
+
+- name: get result of set spns
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - servicePrincipalName
+  register: spn_set_actual
+
+- name: assert set spns
+  assert:
+    that:
+    - spn_set is changed
+    - spn_set_actual.objects[0].servicePrincipalName == ['HTTP/host.domain:8080', 'HTTP/host.domain', 'HTTP/host']
+
+- name: remove spns
+  computer:
+    name: MyComputer
+    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    spn:
+    - HTTP/fake
+    - HTTP/Host.domain
+    spn_action: remove
+  register: spn_remove
+
+- name: get result of remove spns
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - servicePrincipalName
+  register: spn_remove_actual
+
+- name: assert remove spns
+  assert:
+    that:
+    - spn_remove is changed
+    - spn_remove_actual.objects[0].servicePrincipalName == ['HTTP/host.domain:8080', 'HTTP/host']
+
+- name: add spns
+  computer:
+    name: MyComputer
+    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    spn:
+    - HTTP/Host.domain:8080
+    - HTTP/fake
+    spn_action: add
+  register: spn_add
+
+- name: get result of add spns
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - servicePrincipalName
+  register: spn_add_actual
+
+- name: assert add spns
+  assert:
+    that:
+    - spn_add is changed
+    - spn_add_actual.objects[0].servicePrincipalName == ['HTTP/fake', 'HTTP/host.domain:8080', 'HTTP/host']

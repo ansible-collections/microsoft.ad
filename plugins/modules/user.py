@@ -38,12 +38,15 @@ options:
     type: str
   delegates:
     description:
-    - Specifies an array of principal objects the user is allowed to act on
-      behalf for delegation.
-    - Must be specified as a distinguished name C(CN=shenetworks,CN=Users,DC=ansible,DC=test)
+    - Specifies an array of principal objects that the current AD object can
+      trust for delegation.
+    - Must be specified as a distinguished name
+      C(CN=shenetworks,CN=Users,DC=ansible,DC=test)
     - This is the value set on the C(msDS-AllowedToActOnBehalfOfOtherIdentity)
       LDAP attribute.
-    - This is a highly sensitive attribute.
+    - This is a highly sensitive attribute as it allows the principals
+      specified to impersonate any account when authenticating with the AD
+      user object being managed.
     aliases:
     - principals_allowed_to_delegate
     type: list

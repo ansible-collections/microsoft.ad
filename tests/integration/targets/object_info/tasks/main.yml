@@ -103,6 +103,38 @@
     that:
     - group_type_prop.objects[0].groupType_AnsibleFlags == ["GROUP_TYPE_ACCOUNT_GROUP", "GROUP_TYPE_SECURITY_ENABLED"]
 
+- name: create computer object for enc type test
+  computer:
+    name: MyComputer
+    state: present
+    kerberos_encryption_types:
+    - des
+    - rc4
+    - aes128
+    - aes256
+  register: comp_info
+
+- block:
+  - name: get the supported encryption type attribute
+    object_info:
+      identity: '{{ comp_info.object_guid }}'
+      properties:
+      - msDS-SupportedEncryptionTypes
+    register: enc_type_prop
+
+  - name: assert get the supported encryption type attribute
+    assert:
+      that:
+      - enc_type_prop.objects[0]["msDS-SupportedEncryptionTypes"] == 31
+      - enc_type_prop.objects[0]["msDS-SupportedEncryptionTypes_AnsibleFlags"] == ["DES_CBC_CRC", "DES_CBC_MD5", "RC4_HMAC", "AES128_CTS_HMAC_SHA1_96", "AES256_CTS_HMAC_SHA1_96"]
+
+  always:
+  - name: remove computer object
+    computer:
+      name: MyComputer
+      identity: '{{ comp_info.object_guid }}'
+      state: absent
+
 - name: get invalid property
   object_info:
     filter: sAMAccountName -eq 'Ansible Test'
