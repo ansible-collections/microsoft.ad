@@ -56,11 +56,13 @@ attributes:
 seealso:
 - module: microsoft.ad.domain
 - module: microsoft.ad.domain_controller
-- module: microsoft.ad.domain_membership
+- module: microsoft.ad.membership
 - module: microsoft.ad.object_info
 - module: microsoft.ad.object
 - module: microsoft.ad.offline_join
-- module: community.windows.win_domain_group
+- ref: Migration guide <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_computer>
+  description: This module replaces C(community.windows.win_domain_computer). See the migration guide for details.
+- module: community.windows.win_domain_computer
 author:
 - Jordan Borean (@jborean93)
 """

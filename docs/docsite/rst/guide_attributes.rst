@@ -22,7 +22,7 @@ One core component of Microsoft's Active Directory (``AD``) is a Lightweight Dir
 * ``System-Only`` - Whether the attribute is set by the system, effectively making it read only
 * ``Is-Single-Value`` - Whether the attribute value is a single value or an array/list of values
 
-The ``Ldap-Display-Name`` is the attribute name/key that is referenced by the Ansible module. For example to manage the ``SAM-Account-Name`` attribute, it would be referenced by the key ``sAMAccountName``. Each attribute has at least 1 value associated with it, but some attributes can have multiple values. For example ``sAMAccountName`` is a ``Is-Single-Value`` attribute so only has one value but ``userCert`` can contain multiple values. The ``Active Directory Users and Computers`` snaping (or ``dsa.msc``) can be used to view these LDAP attributes in the advanced mode. This is useful for seeing existing values as well as what attributes can be set on an object.
+The ``Ldap-Display-Name`` is the attribute name/key that is referenced by the Ansible module. For example to manage the ``SAM-Account-Name`` attribute, it would be referenced by the key ``sAMAccountName``. Each attribute has at least 1 value associated with it, but some attributes can have multiple values. For example ``sAMAccountName`` is a ``Is-Single-Value`` attribute so only has one value but ``userCert`` can contain multiple values. The ``Active Directory Users and Computers`` snap-in (or ``dsa.msc``) can be used to view these LDAP attributes in the advanced mode. This is useful for seeing existing values as well as what attributes can be set on an object.
 
 The LDAP schema in AD can also be extended to add custom attributes for an organization. These custom attributes are also supported in the modules in this collection. To get the LDAP schema information for attributes, the following can be run in PowerShell:
 
@@ -165,8 +165,8 @@ Setting a string, integer, or boolean value through an Ansible task is simply do
 .. code-block:: yaml
 
     string: This is a string
-    intteger: 1
-    booleans: true
+    integer: 1
+    boolean: true
 
 .. note::
     Strings are compared in a case sensitive operation, that is ``"String" != "string"``.
@@ -233,10 +233,28 @@ As raw bytes cannot be expressed in YAML, to set an attribute with a byte array 
 
 The value specified here is the bytes encoded as a base64 string.
 
+The :ref:`ansible.builtin.b64encode filter <ansible_collections.ansible.builtin.b64encode_filter>` can be used to encode strings on the fly, and the :ref:`ansible.builtin.file lookup <ansible_collections.ansible.builtin.file_lookup>` could be used to read data from a file.
+
+
+.. code-block:: yaml
+
+    - vars:
+        sig_data: "{{ lookup('ansible.builtin.file', '/path/to/my/sig') }}"
+      microsoft.ad.user:
+        name: MyUser
+        state: present
+        attributes:
+          set:
+            # Attribute with single value
+            dsaSignature:
+              type: bytes
+              value: "{{ sig_data | ansible.builtin.b64encode }}"
+
+
 Dates
 -----
 
-Attributes with datetime values are technically integer values but represent a point in time. For ease of use, these entries can be represented as an ISO 8601 date time and will be internally represented by the integer value. To specify an attribute value in the datetime format, use the same dictionary value structure as above but set the ``type`` to ``date_time``. For example:
+Attributes with datetime values are technically integer values but represent a point in time. For ease of use, these entries can be represented as an ISO 8601 datetime and will be internally represented by the integer value. To specify an attribute value in the datetime format, use the same dictionary value structure as above but set the ``type`` to ``date_time``. For example:
 
 .. code-block:: yaml
 
@@ -249,12 +267,12 @@ Attributes with datetime values are technically integer values but represent a p
               type: date_time
               value: '2019-09-07T15:50:00+00'
             dateAttributeMultipleValue:
-            - type: bytes
+            - type: date_time
               value: '2019-09-07T15:50:00Z'
-            - type: bytes
+            - type: date_time
               value: '2019-09-07T11:50:00-04:00'
 
-Internally the datetime is converted to the UTC time and converted to the number of 100 nanoseconds since 1601-01-01. This PowerShell snippet shows what is happening internally to get the integer value:
+Internally the datetime is converted to the UTC time and converted to the number of 100 nanosecond increments since 1601-01-01. This PowerShell snippet shows what is happening internally to get the integer value:
 
 .. code-block:: PowerShell
 
@@ -278,7 +296,7 @@ A security descriptor is stored as a byte array in the attribute but the ``secur
               type: security_descriptor
               value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)
 
-SDDL strings can be quite complex so building them manually is illadvised. It is recommended to build a test object in the ``Active Directory Users and Computers`` snaping (or ``dsa.msc``) and set the security as needed in the ``Security`` tab. From there the SDDL string can be retrieved by doing the following:
+SDDL strings can be quite complex so building them manually is ill-advised. It is recommended to build a test object in the ``Active Directory Users and Computers`` snap-in (or ``dsa.msc``) and set the security as needed in the ``Security`` tab. From there the SDDL string can be retrieved by doing the following:
 
 .. code-block:: PowerShell
 
