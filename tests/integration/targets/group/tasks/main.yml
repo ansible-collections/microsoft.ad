@@ -1,0 +1,14 @@
+- name: remove temp group
+  group:
+    name: MyGroup
+    state: absent
+
+- block:
+  - import_tasks: tests.yml
+
+  always:
+  - name: remove temp group
+    group:
+      name: MyGroup
+      identity: '{{ object_identity | default(omit) }}'
+      state: absent

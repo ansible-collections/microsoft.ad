@@ -98,6 +98,7 @@ attributes:
     support: none
 seealso:
 - module: microsoft.ad.domain_controller
+- module: microsoft.ad.group
 - module: microsoft.ad.membership
 - module: microsoft.ad.user
 - module: microsoft.ad.computer

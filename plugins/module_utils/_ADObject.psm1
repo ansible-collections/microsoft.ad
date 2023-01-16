@@ -359,9 +359,6 @@ Function Get-AnsibleADObject {
     on Get-ADObject. Try to preparse the value to support more common props
     like sAMAccountName, objectSid, userPrincipalName.
 
-    .PARAMETER GetCommand
-    The Get-AD* cmdlet to use to get the AD object.
-
     .PARAMETER Identity
     The Identity to get.
 
@@ -373,14 +370,13 @@ Function Get-AnsibleADObject {
 
     .PARAMETER Credential
     Custom queries to authenticate with.
+
+    .PARAMETER GetCommand
+    The Get-AD* cmdlet to use to get the AD object. Defaults to Get-ADObject.
     #>
     [OutputType([Microsoft.ActiveDirectory.Management.ADObject])]
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory)]
-        [System.Management.Automation.CommandInfo]
-        $GetCommand,
-
         [Parameter(Mandatory)]
         [string]
         $Identity,
@@ -394,7 +390,11 @@ Function Get-AnsibleADObject {
         $Server,
 
         [PSCredential]
-        $Credential
+        $Credential,
+
+        [Parameter()]
+        [System.Management.Automation.CommandInfo]
+        $GetCommand = $null
     )
 
     $getByteFilterValue = {
@@ -430,12 +430,17 @@ Function Get-AnsibleADObject {
     }
 
     $getParams = $PSBoundParameters
-    $null = $getParams.Remove('GetCommand')
     $null = $getParams.Remove('Identity')
     if ($Properties.Count -eq 0) {
         $null = $getParams.Remove('Properties')
     }
 
+    if ($GetCommand) {
+        $null = $getParams.Remove('GetCommand')
+    }
+    else {
+        $GetCommand = Get-Command -Name Get-ADObject -Module ActiveDirectory
+    }
     & $GetCommand @PSBoundParameters -LDAPFilter $ldapFilter | Select-Object -First 1
 }
 
@@ -774,7 +779,12 @@ Function Invoke-AnsibleADObject {
 
             foreach ($propInfo in $PropertyInfo) {
                 $propValue = $module.Params[$propInfo.Name]
-                if ([string]::IsNullOrWhitespace($propValue)) {
+                if ($propValue -is [System.Collections.IDictionary]) {
+                    if ($propValue.Count -eq 0) {
+                        continue
+                    }
+                }
+                elseif ([string]::IsNullOrWhiteSpace($propValue)) {
                     continue
                 }
 
@@ -943,6 +953,7 @@ Function Invoke-AnsibleADObject {
 
 $exportMembers = @{
     Function = @(
+        "Get-AnsibleADObject"
         "Invoke-AnsibleADObject"
     )
 }

@@ -1,0 +1,491 @@
+- name: fail to create group without scope
+  group:
+    name: MyGroup
+    state: present
+  register: fail_no_scope
+  failed_when: fail_no_scope.msg != "scope must be set when state=present and the group does not exist"
+
+- name: create group - check
+  group:
+    name: MyGroup
+    state: present
+    scope: global
+  register: create_group_check
+  check_mode: true
+
+- name: get result of create group - check
+  object_info:
+    identity: '{{ create_group_check.distinguished_name }}'
+  register: create_group_check_actual
+
+- name: assert create group - check
+  assert:
+    that:
+    - create_group_check is changed
+    - create_group_check.distinguished_name == 'CN=MyGroup,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_group_check.object_guid == '00000000-0000-0000-0000-000000000000'
+    - create_group_check.sid == 'S-1-5-0000'
+    - create_group_check_actual.objects == []
+
+- name: create group
+  group:
+    name: MyGroup
+    state: present
+    scope: global
+  register: create_group
+
+- set_fact:
+    object_identity: '{{ create_group.object_guid }}'
+
+- name: get result of create group
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - groupType
+    - objectSid
+  register: create_group_actual
+
+- name: assert create group
+  assert:
+    that:
+    - create_group is changed
+    - create_group.distinguished_name == 'CN=MyGroup,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_group_actual.objects | length == 1
+    - create_group.object_guid == create_group_actual.objects[0].ObjectGUID
+    - create_group.sid == create_group_actual.objects[0].objectSid.Sid
+    - create_group_actual.objects[0].groupType_AnsibleFlags == ["GROUP_TYPE_ACCOUNT_GROUP", "GROUP_TYPE_SECURITY_ENABLED"]
+
+- name: create group - idempotent
+  group:
+    name: MyGroup
+    state: present
+  register: create_group_again
+
+- name: assert create group - idempotent
+  assert:
+    that:
+    - not create_group_again is changed
+
+- name: create ou to store group members
+  ou:
+    name: MyOU
+    state: present
+  register: ou_info
+
+- block:
+  - name: create test users
+    user:
+      name: My User {{ item }}
+      sam_account_name: my_user_{{ item }}
+      upn: user_{{ item }}@{{ domain_realm }}
+      state: present
+      path: '{{ ou_info.distinguished_name }}'
+    register: test_users
+    loop:
+    - 1
+    - 2
+    - 3
+    - 4
+
+  - name: fail to find members to add to a group
+    group:
+      name: MyGroup
+      state: present
+      members:
+        add:
+        - my_user_1
+        - fake-user
+        - my_user_2
+        - another-user
+    register: fail_invalid_members
+    failed_when: 'fail_invalid_members.msg != "Failed to find the following ad objects for group members: ''fake-user'', ''another-user''"'
+
+  - name: add members to a group - check
+    group:
+      name: MyGroup
+      state: present
+      members:
+        add:
+        - my_user_1
+        - '{{ test_users.results[2].sid }}'
+    register: add_member_check
+    check_mode: true
+
+  - name: get result of add members to a group - check
+    object_info:
+      identity: '{{ object_identity }}'
+      properties:
+      - member
+    register: add_member_check_actual
+
+  - name: assert add members to a group - check
+    assert:
+      that:
+      - add_member_check is changed
+      - add_member_check_actual.objects[0].member == None
+
+  - name: add members to a group
+    group:
+      name: MyGroup
+      state: present
+      members:
+        add:
+        - my_user_1
+        - '{{ test_users.results[2].sid }}'
+    register: add_member
+
+  - name: get result of add members to a group
+    object_info:
+      identity: '{{ object_identity }}'
+      properties:
+      - member
+    register: add_member_actual
+
+  - name: assert add members to a group
+    assert:
+      that:
+      - add_member is changed
+      - add_member_actual.objects[0].member | length == 2
+      - test_users.results[0].distinguished_name in add_member_actual.objects[0].member
+      - test_users.results[2].distinguished_name in add_member_actual.objects[0].member
+
+  - name: add members to a group - idempotent
+    group:
+      name: MyGroup
+      state: present
+      members:
+        add:
+        - user_1@{{ domain_realm }}
+        - '{{ test_users.results[2].object_guid }}'
+    register: add_member_again
+
+  - name: assert add members to a group - idempotent
+    assert:
+      that:
+      - not add_member_again is changed
+
+  - name: remove member from a group
+    group:
+      name: MyGroup
+      state: present
+      members:
+        remove:
+        - '{{ test_users.results[0].distinguished_name | upper }}'
+        - my_user_2
+    register: remove_member
+
+  - name: get result of remove member from a group
+    object_info:
+      identity: '{{ object_identity }}'
+      properties:
+      - member
+    register: remove_member_actual
+
+  - name: assert remove member from a group
+    assert:
+      that:
+      - remove_member is changed
+      - remove_member_actual.objects[0].member == test_users.results[2].distinguished_name
+
+  - name: remove member from a group - idempotent
+    group:
+      name: MyGroup
+      state: present
+      members:
+        remove:
+        - '{{ test_users.results[0].object_guid }}'
+    register: remove_member_again
+
+  - name: assert remove member from a group - idempotent
+    assert:
+      that:
+      - not remove_member_again is changed
+
+  - name: add and remove members from a group
+    group:
+      name: MyGroup
+      state: present
+      members:
+        add:
+        - my_user_1
+        - user_2@{{ domain_realm }}
+        remove:
+        - my_user_3
+        - my_user_4
+    register: add_remove_member
+
+  - name: get result of add and remove members from a group
+    object_info:
+      identity: '{{ object_identity }}'
+      properties:
+      - member
+    register: add_remove_member_actual
+
+  - name: assert add and remove members from a group
+    assert:
+      that:
+      - add_remove_member is changed
+      - add_remove_member_actual.objects[0].member | length == 2
+      - test_users.results[0].distinguished_name in add_remove_member_actual.objects[0].member
+      - test_users.results[1].distinguished_name in add_remove_member_actual.objects[0].member
+
+  - name: set members
+    group:
+      name: MyGroup
+      state: present
+      members:
+        set:
+        - my_user_1
+        - my_user_3
+    register: set_member
+
+  - name: get result of set members
+    object_info:
+      identity: '{{ object_identity }}'
+      properties:
+      - member
+    register: set_member_actual
+
+  - name: assert set members
+    assert:
+      that:
+      - set_member is changed
+      - set_member_actual.objects[0].member | length == 2
+      - test_users.results[0].distinguished_name in set_member_actual.objects[0].member
+      - test_users.results[2].distinguished_name in set_member_actual.objects[0].member
+
+  - name: set members - idempotent
+    group:
+      name: MyGroup
+      state: present
+      members:
+        set:
+        - My_user_1
+        - '{{ test_users.results[2].sid }}'
+    register: set_member_again
+
+  - name: assert set members - idempotent
+    assert:
+      that:
+      - not set_member_again is changed
+
+  - name: unset all members
+    group:
+      name: MyGroup
+      state: present
+      members:
+        set: []
+    register: unset_member
+
+  - name: get result of unset all members
+    object_info:
+      identity: '{{ object_identity }}'
+      properties:
+      - member
+    register: unset_member_actual
+
+  - name: assert unset all members
+    assert:
+      that:
+      - unset_member is changed
+      - unset_member_actual.objects[0].member == None
+
+  - name: unset all members - idempotent
+    group:
+      name: MyGroup
+      state: present
+      members:
+        set: []
+    register: unset_member_again
+
+  - name: assert unset all members - idempotent
+    assert:
+      that:
+      - not unset_member_again is changed
+
+  - name: remove group - check
+    group:
+      name: MyGroup
+      state: absent
+    register: remove_group_check
+    check_mode: true
+
+  - name: get result of remove group - check
+    object_info:
+      identity: '{{ object_identity }}'
+    register: remove_group_check_actual
+
+  - name: assert remove group - check
+    assert:
+      that:
+      - remove_group_check is changed
+      - remove_group_check_actual.objects | length == 1
+
+  - name: remove group
+    group:
+      name: MyGroup
+      state: absent
+    register: remove_group
+
+  - name: get result of remove group
+    object_info:
+      identity: '{{ object_identity }}'
+    register: remove_group_actual
+
+  - name: assert remove group
+    assert:
+      that:
+      - remove_group is changed
+      - remove_group_actual.objects == []
+
+  - name: remove group - idempotent
+    group:
+      name: MyGroup
+      state: absent
+    register: remove_group_again
+
+  - name: assert remove group - idempotent
+    assert:
+      that:
+      - not remove_group_again is changed
+
+  - name: fail to create group with invalid members
+    group:
+      name: MyGroup
+      state: present
+      scope: domainlocal
+      members:
+        add:
+        - my_user_1
+        - fake-user
+        - my_user_2
+        - another-user
+    register: fail_invalid_members
+    failed_when: 'fail_invalid_members.msg != "Failed to find the following ad objects for group members: ''fake-user'', ''another-user''"'
+
+  - name: create group with custom options
+    group:
+      name: MyGroup
+      state: present
+      path: '{{ ou_info.distinguished_name }}'
+      display_name: My Display Name
+      description: My Description
+      scope: domainlocal
+      category: distribution
+      homepage: www.ansible.com
+      managed_by: Domain Admins
+      members:
+        add:
+        - my_user_1
+        - '{{ test_users.results[1].object_guid }}'
+        set:
+        - '{{ test_users.results[2].sid }}'
+      sam_account_name: GroupSAM
+    register: group_custom
+
+  - set_fact:
+      object_identity: '{{ group_custom.object_guid }}'
+
+  - name: get result of create group with custom options
+    object_info:
+      identity: '{{ object_identity }}'
+      properties:
+      - Description
+      - DisplayName
+      - groupType
+      - managedBy
+      - member
+      - objectSid
+      - wWWHomePage
+      - sAMAccountName
+    register: group_custom_actual
+
+  - name: assert create group with custom options
+    assert:
+      that:
+      - group_custom is changed
+      - group_custom.distinguished_name == "CN=MyGroup," ~ ou_info.distinguished_name
+      - group_custom_actual.objects[0].DistinguishedName == group_custom.distinguished_name
+      - group_custom_actual.objects[0].ObjectGUID == group_custom.object_guid
+      - group_custom_actual.objects[0].objectSid.Sid == group_custom.sid
+      - group_custom_actual.objects[0].Description == 'My Description'
+      - group_custom_actual.objects[0].DisplayName == 'My Display Name'
+      - group_custom_actual.objects[0].Name == 'MyGroup'
+      - group_custom_actual.objects[0].groupType_AnsibleFlags == ["GROUP_TYPE_RESOURCE_GROUP"]
+      - group_custom_actual.objects[0].managedBy == "CN=Domain Admins,CN=Users," ~ setup_domain_info.output[0].defaultNamingContext
+      - group_custom_actual.objects[0].member | length == 3
+      - test_users.results[0].distinguished_name in group_custom_actual.objects[0].member
+      - test_users.results[1].distinguished_name in group_custom_actual.objects[0].member
+      - test_users.results[2].distinguished_name in group_custom_actual.objects[0].member
+      - group_custom_actual.objects[0].sAMAccountName == "GroupSAM"
+      - group_custom_actual.objects[0].wWWHomePage == "www.ansible.com"
+
+  - name: edit group
+    group:
+      name: MyGroup
+      state: present
+      path: '{{ ou_info.distinguished_name }}'
+      display_name: my display name
+      description: ''
+      homepage: www.Ansible.com
+      members:
+        set: []
+      sam_account_name: MyGroup
+    register: group_edit
+
+  - name: get result of edit group
+    object_info:
+      identity: '{{ object_identity }}'
+      properties:
+      - Description
+      - DisplayName
+      - groupType
+      - member
+      - objectSid
+      - wWWHomePage
+      - sAMAccountName
+    register: group_edit_actual
+
+  - name: assert edit group
+    assert:
+      that:
+      - group_edit is changed
+      - group_edit_actual.objects[0].DistinguishedName == group_edit.distinguished_name
+      - group_edit_actual.objects[0].ObjectGUID == group_edit.object_guid
+      - group_edit_actual.objects[0].objectSid.Sid == group_edit.sid
+      - group_edit_actual.objects[0].Description == None
+      - group_edit_actual.objects[0].DisplayName == 'my display name'
+      - group_edit_actual.objects[0].Name == 'MyGroup'
+      - group_edit_actual.objects[0].groupType_AnsibleFlags == ["GROUP_TYPE_RESOURCE_GROUP"]
+      - group_edit_actual.objects[0].member == None
+      - group_edit_actual.objects[0].sAMAccountName == "MyGroup"
+      - group_edit_actual.objects[0].wWWHomePage == "www.Ansible.com"
+
+  - name: edit group scope and category
+    group:
+      name: MyGroup
+      state: present
+      path: '{{ ou_info.distinguished_name }}'
+      scope: universal
+      category: security
+    register: edit_scope
+
+  - name: get result of edit group scope and category
+    object_info:
+      identity: '{{ object_identity }}'
+      properties:
+      - groupType
+    register: edit_scope_actual
+
+  - name: assert edit group scope and category
+    assert:
+      that:
+      - edit_scope is changed
+      - edit_scope_actual.objects[0].groupType_AnsibleFlags == ["GROUP_TYPE_UNIVERSAL_GROUP", "GROUP_TYPE_SECURITY_ENABLED"]
+
+  always:
+  - name: remove test ou
+    ou:
+      name: MyOU
+      state: absent
+      identity: '{{ ou_info.object_guid }}'

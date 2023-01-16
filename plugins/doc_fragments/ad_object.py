@@ -121,8 +121,8 @@ options:
     - The path of the OU or the container where the new object should exist in.
     - If no path is specified, the default is the C(defaultNamingContext) of
       domain for most objects.
-    - The default path for M(microsoft.ad.computer) and
-      M(microsoft.ad.user) have their own default path that is
+    - The modules M(microsoft.ad.computer), M(microsoft.ad.user), and
+      M(microsoft.ad.group) have their own default path that is
       configured on the Active Directory domain controller.
     type: str
   protect_from_deletion:

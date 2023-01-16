@@ -93,9 +93,13 @@ attributes:
 seealso:
 - module: microsoft.ad.domain
 - module: microsoft.ad.domain_controller
+- module: microsoft.ad.group
 - module: microsoft.ad.offline_join
 - module: microsoft.ad.user
 - module: microsoft.ad.computer
+- module: ansible.windows.win_group
+- module: ansible.windows.win_group_membership
+- module: ansible.windows.win_user
 - ref: Migration guide <ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_membership>
   description: This module replaces C(ansible.windows.win_domain_membership). See the migration guide for details.
 - module: ansible.windows.win_domain_membership
