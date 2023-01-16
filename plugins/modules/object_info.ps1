@@ -97,6 +97,17 @@ namespace Ansible.WinDomainObjectInfo
         ADS_UF_TRUSTED_TO_AUTHENTICATE_FOR_DELEGATION = 0x01000000,
     }
 
+    [Flags]
+    public enum SupportedEncryptionTypes : int
+    {
+        None = 0x00,
+        DES_CBC_CRC = 0x01,
+        DES_CBC_MD5 = 0x02,
+        RC4_HMAC = 0x04,
+        AES128_CTS_HMAC_SHA1_96 = 0x08,
+        AES256_CTS_HMAC_SHA1_96 = 0x10,
+    }
+
     public enum sAMAccountType : int
     {
         SAM_DOMAIN_OBJECT = 0x00000000,
@@ -290,6 +301,9 @@ $module.Result.objects = @(foreach ($adId in $foundGuids) {
             $enumValue = switch ($name) {
                 groupType {
                     [Ansible.WinDomainObjectInfo.GroupType]$value
+                }
+                'msDS-SupportedEncryptionTypes' {
+                    [Ansible.WinDomainObjectInfo.SupportedEncryptionTypes]$value
                 }
                 sAMAccountType {
                     [Ansible.WinDomainObjectInfo.sAMAccountType]$value

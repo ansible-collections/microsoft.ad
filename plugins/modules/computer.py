@@ -11,6 +11,21 @@ short_description: Manage Active Directory computer objects
 description:
 - Manages Active Directory computer objects and their attributes.
 options:
+  delegates:
+    description:
+    - Specifies an array of principal objects that the current AD object can
+      trust for delegation.
+    - Must be specified as a distinguished name
+      C(CN=shenetworks,CN=Users,DC=ansible,DC=test)
+    - This is the value set on the C(msDS-AllowedToActOnBehalfOfOtherIdentity)
+      LDAP attribute.
+    - This is a highly sensitive attribute as it allows the principals
+      specified to impersonate any account when authenticating with the AD
+      computer object being managed.
+    aliases:
+    - principals_allowed_to_delegate
+    type: list
+    elements: str
   dns_hostname:
     description:
     - Specifies the fully qualified domain name (FQDN) of the computer.
@@ -21,6 +36,28 @@ options:
     - C(yes) will enable the group.
     - C(no) will disable the group.
     type: bool
+  kerberos_encryption_types:
+    description:
+    - Specifies the Kerberos encryption types supported the AD computer
+      account.
+    - This is the value set on the C(msDS-SupportedEncryptionTypes) LDAP
+      attribute.
+    - Use C(none) to remove all encryption types from the account.
+    - Avoid using C(rc4) or C(des) as they are older an insecure encryption
+      protocols.
+    choices:
+    - aes128
+    - aes256
+    - des
+    - none
+    - rc4
+    type: list
+    elements: str
+  location:
+    description:
+    - Sets the location of the computer account.
+    - This is the value set on the C(location) LDAP attribute.
+    type: str
   managed_by:
     description:
     - The user or group that manages the object.
@@ -38,6 +75,39 @@ options:
       created.
     - Note that all computer C(sAMAccountName) values need to end with a C($).
     - If C($) is omitted, it will be added to the end.
+    type: str
+  spn:
+    description:
+    - Specifies the service principal name(s) for the account. This parameter
+      sets the ServicePrincipalNames property of the account.
+    - This is the value set on the C(servicePrincipalName) LDAP attribute.
+    aliases:
+    - spns
+    type: list
+    elements: str
+  spn_action:
+    description:
+    - If C(add), the SPNs are added to the user.
+    - If C(remove), the SPNs are removed from the user.
+    - If C(set), the defined set of SPN's overwrite the current set of SPNs.
+    choices:
+    - add
+    - remove
+    - set
+    default: set
+    type: str
+  trusted_for_delegation:
+    description:
+    - Specifies whether an account is trusted for Kerberos delegation.
+    - This is also known as unconstrained Kerberos delegation.
+    - This sets the C(ADS_UF_TRUSTED_FOR_DELEGATION) flag in the
+      C(userAccountControl) LDAP attribute.
+    type: bool
+  upn:
+    description:
+    - Configures the User Principal Name (UPN) for the account.
+    - The format is C(<username>@<domain>).
+    - This is the value set on the C(userPrincipalName) LDAP attribute.
     type: str
 notes:
 - See R(win_domain_computer migration,ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_computer)
