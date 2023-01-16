@@ -233,6 +233,24 @@ As raw bytes cannot be expressed in YAML, to set an attribute with a byte array 
 
 The value specified here is the bytes encoded as a base64 string.
 
+The :ref:`ansible.builtin.b64encode filter <ansible_collections.ansible.builtin.b64encode_filter>` can be used to encode strings on the fly, and the :ref:`ansible.builtin.file lookup <ansible_collections.ansible.builtin.file_lookup>` could be used to read data from a file.
+
+
+.. code-block:: yaml
+
+    - vars:
+        sig_data: "{{ lookup('ansible.builtin.file', '/path/to/my/sig') }}"
+      microsoft.ad.user:
+        name: MyUser
+        state: present
+        attributes:
+          set:
+            # Attribute with single value
+            dsaSignature:
+              type: bytes
+              value: "{{ sig_data | ansible.builtin.b64encode }}"
+
+
 Dates
 -----
 
