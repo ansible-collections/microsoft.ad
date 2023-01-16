@@ -314,7 +314,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 </div></td>
 <td><div class="ansible-option-cell"><p>The path of the OU or the container where the new object should exist in.</p>
 <p>If no path is specified, the default is the <code class="docutils literal notranslate"><span class="pre">defaultNamingContext</span></code> of domain for most objects.</p>
-<p>The default path for <a class="reference internal" href="#ansible-collections-microsoft-ad-computer-module"><span class="std std-ref">microsoft.ad.computer</span></a> and <a class="reference internal" href="user_module.html#ansible-collections-microsoft-ad-user-module"><span class="std std-ref">microsoft.ad.user</span></a> have their own default path that is configured on the Active Directory domain controller.</p>
+<p>The modules <a class="reference internal" href="#ansible-collections-microsoft-ad-computer-module"><span class="std std-ref">microsoft.ad.computer</span></a>, <a class="reference internal" href="user_module.html#ansible-collections-microsoft-ad-user-module"><span class="std std-ref">microsoft.ad.user</span></a>, and <a class="reference internal" href="group_module.html#ansible-collections-microsoft-ad-group-module"><span class="std std-ref">microsoft.ad.group</span></a> have their own default path that is configured on the Active Directory domain controller.</p>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
@@ -403,7 +403,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
-<li><p>See <a class="reference internal" href="docsite/guide_migration.html#ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-computer"><span class="std std-ref">win_domain_computer migration</span></a> for help on migrating from <a class="reference internal" href="#ansible-collections-microsoft-ad-computer-module"><span class="std std-ref">microsoft.ad.computer</span></a> to this module.</p></li>
+<li><p>See <a class="reference internal" href="docsite/guide_migration.html#ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-computer"><span class="std std-ref">win_domain_computer migration</span></a> for help on migrating from <a class="reference external" href="https://docs.ansible.com/ansible/devel/collections/community/windows/win_domain_computer_module.html#ansible-collections-community-windows-win-domain-computer-module" title="(in Ansible vdevel)"><span class="xref std std-ref">community.windows.win_domain_computer</span></a> to this module.</p></li>
 <li><p>Some LDAP attributes can have only a single value set while others can have multiple. Some attributes are also read only and cannot be changed. It is recommened to look at the schema metadata for an attribute where <code class="docutils literal notranslate"><span class="pre">System-Only</span></code> are read only values and <code class="docutils literal notranslate"><span class="pre">Is-Single-Value</span></code> are attributes with only 1 value.</p></li>
 <li><p>Attempting to set multiple values to a <code class="docutils literal notranslate"><span class="pre">Is-Single-Value</span></code> attribute results in undefined behaviour.</p></li>
 <li><p>If running on a server that is not a Domain Controller, credential delegation through CredSSP or Kerberos with delegation must be used or the <em>domain_username</em>, <em>domain_password</em> must be set.</p></li>
@@ -426,6 +426,8 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <dt><a class="reference internal" href="object_module.html#ansible-collections-microsoft-ad-object-module"><span class="std std-ref">microsoft.ad.object</span></a></dt><dd><p>Manage Active Directory objects.</p>
 </dd>
 <dt><a class="reference internal" href="offline_join_module.html#ansible-collections-microsoft-ad-offline-join-module"><span class="std std-ref">microsoft.ad.offline_join</span></a></dt><dd><p>Get the Offline Domain Join BLOB.</p>
+</dd>
+<dt><a class="reference internal" href="group_module.html#ansible-collections-microsoft-ad-group-module"><span class="std std-ref">microsoft.ad.group</span></a></dt><dd><p>Manage Active Directory group objects.</p>
 </dd>
 <dt><a class="reference internal" href="docsite/guide_migration.html#ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-computer"><span class="std std-ref">Migration guide</span></a></dt><dd><p>This module replaces <code class="docutils literal notranslate"><span class="pre">community.windows.win_domain_computer</span></code>. See the migration guide for details.</p>
 </dd>
