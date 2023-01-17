@@ -178,7 +178,8 @@ These simple types can also be represented by a dictionary with the keys ``type`
 * ``date_time`` - Value is decoded as an ISO 8601 datetime string
 * ``int`` - Value is decoded as an integer
 * ``security_descriptor`` - Value is decoded as a SDDL string
-* ``raw`` - Value is used as is
+* ``string`` - Value is casted to a string
+* ``raw`` - Value is used as is - this is the default type used
 
 This looks like the following:
 
@@ -189,7 +190,7 @@ This looks like the following:
         state: present
         attributes:
           set:
-            # comment: A string
+            # comment: A raw value that is a string
             comment:
               type: raw
               value: A string
@@ -254,7 +255,7 @@ The :ref:`ansible.builtin.b64encode filter <ansible_collections.ansible.builtin.
 Dates
 -----
 
-Attributes with datetime values are technically integer values but represent a point in time. For ease of use, these entries can be represented as an ISO 8601 datetime and will be internally represented by the integer value. To specify an attribute value in the datetime format, use the same dictionary value structure as above but set the ``type`` to ``date_time``. For example:
+Attributes with datetime values are technically integer values but represent a point in time. For ease of use, these entries can be represented as an ISO 8601 extended format datetime and will be internally represented by the integer value. To specify an attribute value in the datetime format, use the same dictionary value structure as above but set the ``type`` to ``date_time``. For example:
 
 .. code-block:: yaml
 
@@ -277,8 +278,14 @@ Internally the datetime is converted to the UTC time and converted to the number
 .. code-block:: PowerShell
 
     $dt = '2019-09-07T15:50:00Z'
-    [DateTime]::Parse($dt, [System.Globalization.CultureInfo]::InvariantCulture).ToFileTimeUtc()
-    # 132123450000000000
+    $dtVal = [DateTimeOffset]::ParseExact(
+        $dt,
+        [string[]]@("yyyy-MM-dd'T'HH:mm:ss.FFFFFFFK"),
+        [System.Globalization.CultureInfo]::InvariantCulture,
+        [System.Globalization.DateTimeStyles]::AssumeUniversal)
+    $dtVal.UtcDateTime.ToFileTimeUtc()
+
+.. note:: If no timezone is specified, it is assumed to be in UTC.
 
 Security Descriptors
 --------------------

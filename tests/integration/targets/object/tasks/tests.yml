@@ -522,10 +522,42 @@
     display_name: Display Name
     attributes:
       add:
-        wWWHomePage: https://ansible.com
-        extensionName:
-        - value 1
-        - value 2
+        ansible-BoolSingle: false
+        ansible-BoolMulti:
+        - false
+        - true
+        ansible-BytesSingle:
+          type: bytes
+          value: Zm9v
+        ansible-BytesMulti:
+        - type: bytes
+          value: Zm9v
+        - type: bytes
+          value: YmFy
+        ansible-DateTimeSingle:
+          type: date_time
+          value: '1970-01-01T00:00:00Z'
+        ansible-DateTimeMulti:
+        - type: date_time
+          value: '1970-01-01T00:00:00+01:00'
+        - type: date_time
+          value: '1601-01-01T00:00:00.1-01:00'
+        ansible-IntSingle: 0
+        ansible-IntMulti:
+        - 0
+        - 1
+        ansible-SDSingle:
+          type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)
+        ansible-SDMulti:
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AN)
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AU)
+        ansible-StringSingle: single
+        ansible-StringMulti:
+        - multi 1
+        - multi 2
     type: contact
     state: present
   register: sub_object
@@ -534,8 +566,18 @@
   object_info:
     identity: '{{ sub_object.object_guid }}'
     properties:
-    - wWWHomePage
-    - extensionName
+    - ansible-BoolSingle
+    - ansible-BoolMulti
+    - ansible-BytesSingle
+    - ansible-BytesMulti
+    - ansible-DateTimeSingle
+    - ansible-DateTimeMulti
+    - ansible-IntSingle
+    - ansible-IntMulti
+    - ansible-SDSingle
+    - ansible-SDMulti
+    - ansible-StringSingle
+    - ansible-StringMulti
   register: sub_object_actual
 
 - name: assert create child object in container with attributes
@@ -543,10 +585,30 @@
     that:
     - sub_object is changed
     - sub_object.distinguished_name == 'CN=Contact,CN=My\, Container,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
-    - sub_object_actual.objects[0].wWWHomePage == 'https://ansible.com'
-    - sub_object_actual.objects[0].extensionName | length == 2
-    - '"value 1" in sub_object_actual.objects[0].extensionName'
-    - '"value 2" in sub_object_actual.objects[0].extensionName'
+    - sub_object_actual.objects[0]['ansible-BoolSingle'] == False
+    - sub_object_actual.objects[0]['ansible-BoolMulti'] | length == 2
+    - True in sub_object_actual.objects[0]['ansible-BoolMulti']
+    - False in sub_object_actual.objects[0]['ansible-BoolMulti']
+    - sub_object_actual.objects[0]['ansible-BytesSingle'] == "Zm9v"
+    - sub_object_actual.objects[0]['ansible-BytesMulti'] | length == 2
+    - "'YmFy' in sub_object_actual.objects[0]['ansible-BytesMulti']"
+    - "'Zm9v' in sub_object_actual.objects[0]['ansible-BytesMulti']"
+    - sub_object_actual.objects[0]['ansible-DateTimeSingle'] == "1970-01-01T00:00:00.0000000Z"
+    - sub_object_actual.objects[0]['ansible-DateTimeMulti'] | length == 2
+    - "'1601-01-01T01:00:00.0000000Z' in sub_object_actual.objects[0]['ansible-DateTimeMulti']"
+    - "'1969-12-31T23:00:00.0000000Z' in sub_object_actual.objects[0]['ansible-DateTimeMulti']"
+    - sub_object_actual.objects[0]['ansible-IntSingle'] == 0
+    - sub_object_actual.objects[0]['ansible-IntMulti'] | length == 2
+    - 0 in sub_object_actual.objects[0]['ansible-IntMulti']
+    - 1 in sub_object_actual.objects[0]['ansible-IntMulti']
+    - sub_object_actual.objects[0]['ansible-SDSingle'] == "O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)"
+    - sub_object_actual.objects[0]['ansible-SDMulti'] | length == 2
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AU)' in sub_object_actual.objects[0]['ansible-SDMulti']"
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AN)' in sub_object_actual.objects[0]['ansible-SDMulti']"
+    - sub_object_actual.objects[0]['ansible-StringSingle'] == "single"
+    - sub_object_actual.objects[0]['ansible-StringMulti'] | length == 2
+    - "'multi 1' in sub_object_actual.objects[0]['ansible-StringMulti']"
+    - "'multi 2' in sub_object_actual.objects[0]['ansible-StringMulti']"
 
 - name: add attribute - check
   object:
@@ -557,20 +619,38 @@
     display_name: display name
     attributes:
       add:
-        adminDescription: Test description
-        attributeCertificateAttribute:
+        ansible-BoolMulti:
+        - false
+        - true
+        ansible-BytesMulti:
         - type: bytes
           value: Zm9v
         - type: bytes
-          value: YmFy
+          value: dGVzdA==
         - type: bytes
-          value: ZGVm
-        extensionName:
-        - value 1
-        - value 3
-        dsaSignature:
-          type: bytes
-          value: Zm9v
+          value: Y2FmZQ==
+        ansible-DateTimeMulti:
+        - type: date_time
+          value: '1970-01-01T00:00:00+01:00'
+        - type: date_time
+          value: '1970-01-01T00:00:00'
+        - type: date_time
+          value: '2023-01-17T16:00:31+00:30'
+        ansible-IntMulti:
+        - 0
+        - 2
+        - 3
+        ansible-SDMulti:
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AN)
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DC)
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DG)
+        ansible-StringMulti:
+        - multi 1
+        - '3'
+        - '4'
     state: present
   register: add_attr_check
   check_mode: true
@@ -579,26 +659,36 @@
   object_info:
     identity: '{{ sub_object.object_guid }}'
     properties:
-    - Description
-    - DisplayName
-    - adminDescription
-    - attributeCertificateAttribute
-    - dsaSignature
-    - extensionName
+    - ansible-BoolMulti
+    - ansible-BytesMulti
+    - ansible-DateTimeMulti
+    - ansible-IntMulti
+    - ansible-SDMulti
+    - ansible-StringMulti
   register: add_attr_check_actual
 
 - name: assert add attribute - check
   assert:
     that:
     - add_attr_check is changed
-    - add_attr_check_actual.objects[0].adminDescription == None
-    - add_attr_check_actual.objects[0].attributeCertificateAttribute == None
-    - add_attr_check_actual.objects[0].Description == 'Test Description'
-    - add_attr_check_actual.objects[0].DisplayName == 'Display Name'
-    - add_attr_check_actual.objects[0].dsaSignature == None
-    - add_attr_check_actual.objects[0].extensionName | length == 2
-    - '"value 1" in add_attr_check_actual.objects[0].extensionName'
-    - '"value 2" in add_attr_check_actual.objects[0].extensionName'
+    - add_attr_check_actual.objects[0]['ansible-BoolMulti'] | length == 2
+    - True in add_attr_check_actual.objects[0]['ansible-BoolMulti']
+    - False in add_attr_check_actual.objects[0]['ansible-BoolMulti']
+    - add_attr_check_actual.objects[0]['ansible-BytesMulti'] | length == 2
+    - "'YmFy' in add_attr_check_actual.objects[0]['ansible-BytesMulti']"
+    - "'Zm9v' in add_attr_check_actual.objects[0]['ansible-BytesMulti']"
+    - add_attr_check_actual.objects[0]['ansible-DateTimeMulti'] | length == 2
+    - "'1601-01-01T01:00:00.0000000Z' in add_attr_check_actual.objects[0]['ansible-DateTimeMulti']"
+    - "'1969-12-31T23:00:00.0000000Z' in add_attr_check_actual.objects[0]['ansible-DateTimeMulti']"
+    - add_attr_check_actual.objects[0]['ansible-IntMulti'] | length == 2
+    - 0 in add_attr_check_actual.objects[0]['ansible-IntMulti']
+    - 1 in add_attr_check_actual.objects[0]['ansible-IntMulti']
+    - add_attr_check_actual.objects[0]['ansible-SDMulti'] | length == 2
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AU)' in add_attr_check_actual.objects[0]['ansible-SDMulti']"
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AN)' in add_attr_check_actual.objects[0]['ansible-SDMulti']"
+    - add_attr_check_actual.objects[0]['ansible-StringMulti'] | length == 2
+    - "'multi 1' in add_attr_check_actual.objects[0]['ansible-StringMulti']"
+    - "'multi 2' in add_attr_check_actual.objects[0]['ansible-StringMulti']"
 
 - name: add attribute
   object:
@@ -609,20 +699,38 @@
     display_name: display name
     attributes:
       add:
-        adminDescription: Test description
-        attributeCertificateAttribute:
+        ansible-BoolMulti:
+        - false
+        - true
+        ansible-BytesMulti:
         - type: bytes
           value: Zm9v
         - type: bytes
-          value: YmFy
+          value: dGVzdA==
         - type: bytes
-          value: ZGVm
-        extensionName:
-        - value 1
-        - value 3
-        dsaSignature:
-          type: bytes
-          value: Zm9v
+          value: Y2FmZQ==
+        ansible-DateTimeMulti:
+        - type: date_time
+          value: '1970-01-01T00:00:00+01:00'
+        - type: date_time
+          value: '1970-01-01T00:00:00'
+        - type: date_time
+          value: '2023-01-17T16:00:31+00:30'
+        ansible-IntMulti:
+        - 0
+        - 2
+        - 3
+        ansible-SDMulti:
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AN)
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DC)
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DG)
+        ansible-StringMulti:
+        - multi 1
+        - '3'
+        - '4'
     state: present
   register: add_attr
 
@@ -630,30 +738,46 @@
   object_info:
     identity: '{{ sub_object.object_guid }}'
     properties:
-    - description
-    - DisplayName
-    - adminDescription
-    - attributeCertificateAttribute
-    - dsaSignature
-    - extensionName
+    - ansible-BoolMulti
+    - ansible-BytesMulti
+    - ansible-DateTimeMulti
+    - ansible-IntMulti
+    - ansible-SDMulti
+    - ansible-StringMulti
   register: add_attr_actual
 
 - name: assert add attribute
   assert:
     that:
     - add_attr is changed
-    - add_attr_actual.objects[0].adminDescription == 'Test description'
-    - add_attr_actual.objects[0].attributeCertificateAttribute | length == 3
-    - '"Zm9v" in add_attr_actual.objects[0].attributeCertificateAttribute'
-    - '"YmFy" in add_attr_actual.objects[0].attributeCertificateAttribute'
-    - '"ZGVm" in add_attr_actual.objects[0].attributeCertificateAttribute'
-    - add_attr_actual.objects[0].Description == 'test description'
-    - add_attr_actual.objects[0].DisplayName == 'display name'
-    - add_attr_actual.objects[0].dsaSignature == 'Zm9v'
-    - add_attr_actual.objects[0].extensionName | length == 3
-    - '"value 1" in add_attr_actual.objects[0].extensionName'
-    - '"value 2" in add_attr_actual.objects[0].extensionName'
-    - '"value 3" in add_attr_actual.objects[0].extensionName'
+    - add_attr_actual.objects[0]['ansible-BoolMulti'] | length == 2
+    - True in add_attr_actual.objects[0]['ansible-BoolMulti']
+    - False in add_attr_actual.objects[0]['ansible-BoolMulti']
+    - add_attr_actual.objects[0]['ansible-BytesMulti'] | length == 4
+    - "'YmFy' in add_attr_actual.objects[0]['ansible-BytesMulti']"
+    - "'Zm9v' in add_attr_actual.objects[0]['ansible-BytesMulti']"
+    - "'dGVzdA==' in add_attr_actual.objects[0]['ansible-BytesMulti']"
+    - "'Y2FmZQ==' in add_attr_actual.objects[0]['ansible-BytesMulti']"
+    - add_attr_actual.objects[0]['ansible-DateTimeMulti'] | length == 4
+    - "'1601-01-01T01:00:00.0000000Z' in add_attr_actual.objects[0]['ansible-DateTimeMulti']"
+    - "'1969-12-31T23:00:00.0000000Z' in add_attr_actual.objects[0]['ansible-DateTimeMulti']"
+    - "'1970-01-01T00:00:00.0000000Z' in add_attr_actual.objects[0]['ansible-DateTimeMulti']"
+    - "'2023-01-17T15:30:31.0000000Z' in add_attr_actual.objects[0]['ansible-DateTimeMulti']"
+    - add_attr_actual.objects[0]['ansible-IntMulti'] | length == 4
+    - 0 in add_attr_actual.objects[0]['ansible-IntMulti']
+    - 1 in add_attr_actual.objects[0]['ansible-IntMulti']
+    - 2 in add_attr_actual.objects[0]['ansible-IntMulti']
+    - 3 in add_attr_actual.objects[0]['ansible-IntMulti']
+    - add_attr_actual.objects[0]['ansible-SDMulti'] | length == 4
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AU)' in add_attr_actual.objects[0]['ansible-SDMulti']"
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AN)' in add_attr_actual.objects[0]['ansible-SDMulti']"
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DC)' in add_attr_actual.objects[0]['ansible-SDMulti']"
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DG)' in add_attr_actual.objects[0]['ansible-SDMulti']"
+    - add_attr_actual.objects[0]['ansible-StringMulti'] | length == 4
+    - "'multi 1' in add_attr_actual.objects[0]['ansible-StringMulti']"
+    - "'multi 2' in add_attr_actual.objects[0]['ansible-StringMulti']"
+    - "'3' in add_attr_actual.objects[0]['ansible-StringMulti']"
+    - "'4' in add_attr_actual.objects[0]['ansible-StringMulti']"
 
 - name: add attribute - idempotent
   object:
@@ -664,20 +788,38 @@
     display_name: display name
     attributes:
       add:
-        adminDescription: Test description
-        attributeCertificateAttribute:
+        ansible-BoolMulti:
+        - false
+        - true
+        ansible-BytesMulti:
         - type: bytes
           value: Zm9v
         - type: bytes
-          value: YmFy
+          value: dGVzdA==
         - type: bytes
-          value: ZGVm
-        extensionName:
-        - value 1
-        - value 3
-        dsaSignature:
-          type: bytes
-          value: Zm9v
+          value: Y2FmZQ==
+        ansible-DateTimeMulti:
+        - type: date_time
+          value: '1970-01-01T00:00:00+01:00'
+        - type: date_time
+          value: '1970-01-01T00:00:00'
+        - type: date_time
+          value: '2023-01-17T16:00:31+00:30'
+        ansible-IntMulti:
+        - 0
+        - 2
+        - 3
+        ansible-SDMulti:
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AN)
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DC)
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DG)
+        ansible-StringMulti:
+        - multi 1
+        - '3'
+        - '4'
     state: present
   register: add_attr_again
 
@@ -693,11 +835,35 @@
     type: contact
     attributes:
       remove:
-        attributeCertificateAttribute:
+        ansible-BoolMulti:
+        - type: bool
+          value: ''  # Will be false when casted
+        ansible-BytesMulti:
         - type: bytes
-          value: YmFy
-        extensionName:
-        - value 2
+          value: dGVzdA==
+        - type: bytes
+          value: Y2FmZQ==
+        ansible-DateTimeMulti:
+        - type: date_time
+          value: '1970-01-01T00:00:00'
+        - type: date_time
+          value: '2023-01-17T16:00:31+00:30'
+        ansible-IntMulti:
+        - type: int
+          value: '2'
+        - type: raw
+          value: 3
+        ansible-SDMulti:
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DC)
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DG)
+        ansible-StringMulti:
+        - multi 1
+        - type: string
+          value: 3
+        - type: raw
+          value: '4'
     state: present
   register: remove_attr_check
   check_mode: true
@@ -706,22 +872,46 @@
   object_info:
     identity: '{{ sub_object.object_guid }}'
     properties:
-    - attributeCertificateAttribute
-    - extensionName
+    - ansible-BoolMulti
+    - ansible-BytesMulti
+    - ansible-DateTimeMulti
+    - ansible-IntMulti
+    - ansible-SDMulti
+    - ansible-StringMulti
   register: remove_attr_check_actual
 
 - name: assert remove attribute - check
   assert:
     that:
     - remove_attr_check is changed
-    - remove_attr_check_actual.objects[0].attributeCertificateAttribute | length == 3
-    - '"Zm9v" in remove_attr_check_actual.objects[0].attributeCertificateAttribute'
-    - '"YmFy" in remove_attr_check_actual.objects[0].attributeCertificateAttribute'
-    - '"ZGVm" in remove_attr_check_actual.objects[0].attributeCertificateAttribute'
-    - remove_attr_check_actual.objects[0].extensionName | length == 3
-    - '"value 1" in remove_attr_check_actual.objects[0].extensionName'
-    - '"value 2" in remove_attr_check_actual.objects[0].extensionName'
-    - '"value 3" in remove_attr_check_actual.objects[0].extensionName'
+    - remove_attr_check_actual.objects[0]['ansible-BoolMulti'] | length == 2
+    - True in remove_attr_check_actual.objects[0]['ansible-BoolMulti']
+    - False in remove_attr_check_actual.objects[0]['ansible-BoolMulti']
+    - remove_attr_check_actual.objects[0]['ansible-BytesMulti'] | length == 4
+    - "'YmFy' in remove_attr_check_actual.objects[0]['ansible-BytesMulti']"
+    - "'Zm9v' in remove_attr_check_actual.objects[0]['ansible-BytesMulti']"
+    - "'dGVzdA==' in remove_attr_check_actual.objects[0]['ansible-BytesMulti']"
+    - "'Y2FmZQ==' in remove_attr_check_actual.objects[0]['ansible-BytesMulti']"
+    - remove_attr_check_actual.objects[0]['ansible-DateTimeMulti'] | length == 4
+    - "'1601-01-01T01:00:00.0000000Z' in remove_attr_check_actual.objects[0]['ansible-DateTimeMulti']"
+    - "'1969-12-31T23:00:00.0000000Z' in remove_attr_check_actual.objects[0]['ansible-DateTimeMulti']"
+    - "'1970-01-01T00:00:00.0000000Z' in remove_attr_check_actual.objects[0]['ansible-DateTimeMulti']"
+    - "'2023-01-17T15:30:31.0000000Z' in remove_attr_check_actual.objects[0]['ansible-DateTimeMulti']"
+    - remove_attr_check_actual.objects[0]['ansible-IntMulti'] | length == 4
+    - 0 in remove_attr_check_actual.objects[0]['ansible-IntMulti']
+    - 1 in remove_attr_check_actual.objects[0]['ansible-IntMulti']
+    - 2 in remove_attr_check_actual.objects[0]['ansible-IntMulti']
+    - 3 in remove_attr_check_actual.objects[0]['ansible-IntMulti']
+    - remove_attr_check_actual.objects[0]['ansible-SDMulti'] | length == 4
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AU)' in remove_attr_check_actual.objects[0]['ansible-SDMulti']"
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AN)' in remove_attr_check_actual.objects[0]['ansible-SDMulti']"
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DC)' in remove_attr_check_actual.objects[0]['ansible-SDMulti']"
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DG)' in remove_attr_check_actual.objects[0]['ansible-SDMulti']"
+    - remove_attr_check_actual.objects[0]['ansible-StringMulti'] | length == 4
+    - "'multi 1' in remove_attr_check_actual.objects[0]['ansible-StringMulti']"
+    - "'multi 2' in remove_attr_check_actual.objects[0]['ansible-StringMulti']"
+    - "'3' in remove_attr_check_actual.objects[0]['ansible-StringMulti']"
+    - "'4' in remove_attr_check_actual.objects[0]['ansible-StringMulti']"
 
 - name: remove attribute
   object:
@@ -730,11 +920,34 @@
     type: contact
     attributes:
       remove:
-        attributeCertificateAttribute:
+        ansible-BoolMulti:
+        - type: bool
+          value: ''  # Will be false when casted
+        ansible-BytesMulti:
         - type: bytes
-          value: YmFy
-        extensionName:
-        - value 2
+          value: dGVzdA==
+        - type: bytes
+          value: Y2FmZQ==
+        ansible-DateTimeMulti:
+        - type: date_time
+          value: '1970-01-01T00:00:00'
+        - type: date_time
+          value: '2023-01-17T16:00:31+00:30'
+        ansible-IntMulti:
+        - type: int
+          value: '2'
+        - type: raw
+          value: 3
+        ansible-SDMulti:
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DC)
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DG)
+        ansible-StringMulti:
+        - type: string
+          value: 3
+        - type: raw
+          value: '4'
     state: present
   register: remove_attr
 
@@ -742,20 +955,34 @@
   object_info:
     identity: '{{ sub_object.object_guid }}'
     properties:
-    - attributeCertificateAttribute
-    - extensionName
+    - ansible-BoolMulti
+    - ansible-BytesMulti
+    - ansible-DateTimeMulti
+    - ansible-IntMulti
+    - ansible-SDMulti
+    - ansible-StringMulti
   register: remove_attr_actual
 
 - name: assert remove attribute
   assert:
     that:
     - remove_attr is changed
-    - remove_attr_actual.objects[0].attributeCertificateAttribute | length == 2
-    - '"Zm9v" in remove_attr_actual.objects[0].attributeCertificateAttribute'
-    - '"ZGVm" in remove_attr_actual.objects[0].attributeCertificateAttribute'
-    - remove_attr_actual.objects[0].extensionName | length == 2
-    - '"value 1" in remove_attr_actual.objects[0].extensionName'
-    - '"value 3" in remove_attr_actual.objects[0].extensionName'
+    - remove_attr_actual.objects[0]['ansible-BoolMulti'] == True
+    - remove_attr_actual.objects[0]['ansible-BytesMulti'] | length == 2
+    - "'YmFy' in remove_attr_actual.objects[0]['ansible-BytesMulti']"
+    - "'Zm9v' in remove_attr_actual.objects[0]['ansible-BytesMulti']"
+    - remove_attr_actual.objects[0]['ansible-DateTimeMulti'] | length == 2
+    - "'1601-01-01T01:00:00.0000000Z' in remove_attr_actual.objects[0]['ansible-DateTimeMulti']"
+    - "'1969-12-31T23:00:00.0000000Z' in remove_attr_actual.objects[0]['ansible-DateTimeMulti']"
+    - remove_attr_actual.objects[0]['ansible-IntMulti'] | length == 2
+    - 0 in remove_attr_actual.objects[0]['ansible-IntMulti']
+    - 1 in remove_attr_actual.objects[0]['ansible-IntMulti']
+    - remove_attr_actual.objects[0]['ansible-SDMulti'] | length == 2
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AU)' in remove_attr_actual.objects[0]['ansible-SDMulti']"
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AN)' in remove_attr_actual.objects[0]['ansible-SDMulti']"
+    - remove_attr_actual.objects[0]['ansible-StringMulti'] | length == 2
+    - "'multi 1' in remove_attr_actual.objects[0]['ansible-StringMulti']"
+    - "'multi 2' in remove_attr_actual.objects[0]['ansible-StringMulti']"
 
 - name: remove attribute - idempotent
   object:
@@ -764,11 +991,34 @@
     type: contact
     attributes:
       remove:
-        attributeCertificateAttribute:
+        ansible-BoolMulti:
+        - type: bool
+          value: ''  # Will be false when casted
+        ansible-BytesMulti:
         - type: bytes
-          value: YmFy
-        extensionName:
-        - value 2
+          value: dGVzdA==
+        - type: bytes
+          value: Y2FmZQ==
+        ansible-DateTimeMulti:
+        - type: date_time
+          value: '1970-01-01T00:00:00'
+        - type: date_time
+          value: '2023-01-17T16:00:31+00:30'
+        ansible-IntMulti:
+        - type: int
+          value: '2'
+        - type: raw
+          value: 3
+        ansible-SDMulti:
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DC)
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DG)
+        ansible-StringMulti:
+        - type: string
+          value: 3
+        - type: raw
+          value: '4'
     state: present
   register: remove_attr_again
 
@@ -784,18 +1034,40 @@
     type: contact
     attributes:
       set:
-        adminDescription: Test Description
-        attributeCertificateAttribute:
-        - type: bytes
-          value: Zm9v
-        - type: bytes
-          value: YmFy
-        extensionName:
-        - value 1
-        - value 2
-        dsaSignature:
+        ansible-BoolSingle: true
+        ansible-BoolMulti: false
+        ansible-BytesSingle:
           type: bytes
           value: YmFy
+        ansible-BytesMulti:
+        - type: bytes
+          value: dGVzdA==
+        - type: bytes
+          value: YmFy
+        ansible-DateTimeSingle:
+          type: date_time
+          value: '1601-01-01T00:00:00Z'
+        ansible-DateTimeMulti:
+        - type: date_time
+          value: '1970-01-01T00:00:00'
+        - type: date_time
+          value: '1601-01-01T00:01:00.1-02:00'
+        ansible-IntSingle: 1
+        ansible-IntMulti:
+        - 0
+        - 3
+        ansible-SDSingle:
+          type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AN)
+        ansible-SDMulti:
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DC)
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AU)
+        ansible-StringSingle: Single
+        ansible-StringMulti:
+        - multi 1
+        - multi 3
     state: present
   register: set_attr_check
   check_mode: true
@@ -804,28 +1076,46 @@
   object_info:
     identity: '{{ sub_object.object_guid }}'
     properties:
-    - description
-    - DisplayName
-    - adminDescription
-    - attributeCertificateAttribute
-    - dsaSignature
-    - extensionName
+    - ansible-BoolSingle
+    - ansible-BoolMulti
+    - ansible-BytesSingle
+    - ansible-BytesMulti
+    - ansible-DateTimeSingle
+    - ansible-DateTimeMulti
+    - ansible-IntSingle
+    - ansible-IntMulti
+    - ansible-SDSingle
+    - ansible-SDMulti
+    - ansible-StringSingle
+    - ansible-StringMulti
   register: set_attr_check_actual
 
 - name: assert set attribute - check
   assert:
     that:
     - set_attr_check is changed
-    - set_attr_check_actual.objects[0].adminDescription == 'Test description'
-    - set_attr_check_actual.objects[0].attributeCertificateAttribute | length == 2
-    - '"Zm9v" in set_attr_check_actual.objects[0].attributeCertificateAttribute'
-    - '"ZGVm" in set_attr_check_actual.objects[0].attributeCertificateAttribute'
-    - set_attr_check_actual.objects[0].Description == 'test description'
-    - set_attr_check_actual.objects[0].DisplayName == 'display name'
-    - set_attr_check_actual.objects[0].dsaSignature == 'Zm9v'
-    - set_attr_check_actual.objects[0].extensionName | length == 2
-    - '"value 1" in set_attr_check_actual.objects[0].extensionName'
-    - '"value 3" in set_attr_check_actual.objects[0].extensionName'
+    - set_attr_check_actual.objects[0]['ansible-BoolSingle'] == False
+    - set_attr_check_actual.objects[0]['ansible-BoolMulti'] == True
+    - set_attr_check_actual.objects[0]['ansible-BytesSingle'] == "Zm9v"
+    - set_attr_check_actual.objects[0]['ansible-BytesMulti'] | length == 2
+    - "'YmFy' in set_attr_check_actual.objects[0]['ansible-BytesMulti']"
+    - "'Zm9v' in set_attr_check_actual.objects[0]['ansible-BytesMulti']"
+    - set_attr_check_actual.objects[0]['ansible-DateTimeSingle'] == "1970-01-01T00:00:00.0000000Z"
+    - set_attr_check_actual.objects[0]['ansible-DateTimeMulti'] | length == 2
+    - "'1601-01-01T01:00:00.0000000Z' in set_attr_check_actual.objects[0]['ansible-DateTimeMulti']"
+    - "'1969-12-31T23:00:00.0000000Z' in set_attr_check_actual.objects[0]['ansible-DateTimeMulti']"
+    - set_attr_check_actual.objects[0]['ansible-IntSingle'] == 0
+    - set_attr_check_actual.objects[0]['ansible-IntMulti'] | length == 2
+    - 0 in set_attr_check_actual.objects[0]['ansible-IntMulti']
+    - 1 in set_attr_check_actual.objects[0]['ansible-IntMulti']
+    - set_attr_check_actual.objects[0]['ansible-SDSingle'] == "O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)"
+    - set_attr_check_actual.objects[0]['ansible-SDMulti'] | length == 2
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AU)' in set_attr_check_actual.objects[0]['ansible-SDMulti']"
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AN)' in set_attr_check_actual.objects[0]['ansible-SDMulti']"
+    - set_attr_check_actual.objects[0]['ansible-StringSingle'] == "single"
+    - set_attr_check_actual.objects[0]['ansible-StringMulti'] | length == 2
+    - "'multi 1' in set_attr_check_actual.objects[0]['ansible-StringMulti']"
+    - "'multi 2' in set_attr_check_actual.objects[0]['ansible-StringMulti']"
 
 - name: set attribute
   object:
@@ -834,18 +1124,40 @@
     type: contact
     attributes:
       set:
-        adminDescription: Test Description
-        attributeCertificateAttribute:
-        - type: bytes
-          value: Zm9v
-        - type: bytes
-          value: YmFy
-        extensionName:
-        - value 1
-        - value 2
-        dsaSignature:
+        ansible-BoolSingle: true
+        ansible-BoolMulti: false
+        ansible-BytesSingle:
           type: bytes
           value: YmFy
+        ansible-BytesMulti:
+        - type: bytes
+          value: dGVzdA==
+        - type: bytes
+          value: YmFy
+        ansible-DateTimeSingle:
+          type: date_time
+          value: '1601-01-01T00:00:00Z'
+        ansible-DateTimeMulti:
+        - type: date_time
+          value: '1970-01-01T00:00:00'
+        - type: date_time
+          value: '1601-01-01T00:01:00.0-02:00'
+        ansible-IntSingle: 1
+        ansible-IntMulti:
+        - 0
+        - 3
+        ansible-SDSingle:
+          type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AN)
+        ansible-SDMulti:
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DC)
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AU)
+        ansible-StringSingle: Single
+        ansible-StringMulti:
+        - multi 1
+        - multi 3
     state: present
   register: set_attr
 
@@ -853,28 +1165,46 @@
   object_info:
     identity: '{{ sub_object.object_guid }}'
     properties:
-    - description
-    - DisplayName
-    - adminDescription
-    - attributeCertificateAttribute
-    - dsaSignature
-    - extensionName
+    - ansible-BoolSingle
+    - ansible-BoolMulti
+    - ansible-BytesSingle
+    - ansible-BytesMulti
+    - ansible-DateTimeSingle
+    - ansible-DateTimeMulti
+    - ansible-IntSingle
+    - ansible-IntMulti
+    - ansible-SDSingle
+    - ansible-SDMulti
+    - ansible-StringSingle
+    - ansible-StringMulti
   register: set_attr_actual
 
 - name: assert set attribute
   assert:
     that:
     - set_attr is changed
-    - set_attr_actual.objects[0].adminDescription == 'Test Description'
-    - set_attr_actual.objects[0].attributeCertificateAttribute | length == 2
-    - '"Zm9v" in set_attr_actual.objects[0].attributeCertificateAttribute'
-    - '"YmFy" in set_attr_actual.objects[0].attributeCertificateAttribute'
-    - set_attr_actual.objects[0].Description == 'test description'
-    - set_attr_actual.objects[0].DisplayName == 'display name'
-    - set_attr_actual.objects[0].dsaSignature == 'YmFy'
-    - set_attr_actual.objects[0].extensionName | length == 2
-    - '"value 1" in set_attr_actual.objects[0].extensionName'
-    - '"value 2" in set_attr_actual.objects[0].extensionName'
+    - set_attr_actual.objects[0]['ansible-BoolSingle'] == True
+    - set_attr_actual.objects[0]['ansible-BoolMulti'] == False
+    - set_attr_actual.objects[0]['ansible-BytesSingle'] == "YmFy"
+    - set_attr_actual.objects[0]['ansible-BytesMulti'] | length == 2
+    - "'YmFy' in set_attr_actual.objects[0]['ansible-BytesMulti']"
+    - "'dGVzdA==' in set_attr_actual.objects[0]['ansible-BytesMulti']"
+    - set_attr_actual.objects[0]['ansible-DateTimeSingle'] == "1601-01-01T00:00:00.0000000Z"
+    - set_attr_actual.objects[0]['ansible-DateTimeMulti'] | length == 2
+    - "'1601-01-01T02:01:00.0000000Z' in set_attr_actual.objects[0]['ansible-DateTimeMulti']"
+    - "'1970-01-01T00:00:00.0000000Z' in set_attr_actual.objects[0]['ansible-DateTimeMulti']"
+    - set_attr_actual.objects[0]['ansible-IntSingle'] == 1
+    - set_attr_actual.objects[0]['ansible-IntMulti'] | length == 2
+    - 0 in set_attr_actual.objects[0]['ansible-IntMulti']
+    - 3 in set_attr_actual.objects[0]['ansible-IntMulti']
+    - set_attr_actual.objects[0]['ansible-SDSingle'] == "O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AN)"
+    - set_attr_actual.objects[0]['ansible-SDMulti'] | length == 2
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AU)' in set_attr_actual.objects[0]['ansible-SDMulti']"
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DC)' in set_attr_actual.objects[0]['ansible-SDMulti']"
+    - set_attr_actual.objects[0]['ansible-StringSingle'] == "Single"
+    - set_attr_actual.objects[0]['ansible-StringMulti'] | length == 2
+    - "'multi 1' in set_attr_actual.objects[0]['ansible-StringMulti']"
+    - "'multi 3' in set_attr_actual.objects[0]['ansible-StringMulti']"
 
 - name: set attribute - idempotent
   object:
@@ -883,18 +1213,40 @@
     type: contact
     attributes:
       set:
-        adminDescription: Test Description
-        attributeCertificateAttribute:
-        - type: bytes
-          value: Zm9v
-        - type: bytes
-          value: YmFy
-        extensionName:
-        - value 1
-        - value 2
-        dsaSignature:
+        ansible-BoolSingle: true
+        ansible-BoolMulti: false
+        ansible-BytesSingle:
           type: bytes
           value: YmFy
+        ansible-BytesMulti:
+        - type: bytes
+          value: dGVzdA==
+        - type: bytes
+          value: YmFy
+        ansible-DateTimeSingle:
+          type: date_time
+          value: '1601-01-01T00:00:00Z'
+        ansible-DateTimeMulti:
+        - type: date_time
+          value: '1970-01-01T00:00:00'
+        - type: date_time
+          value: '1601-01-01T00:01:00.0-02:00'
+        ansible-IntSingle: 1
+        ansible-IntMulti:
+        - 0
+        - 3
+        ansible-SDSingle:
+          type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AN)
+        ansible-SDMulti:
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DC)
+        - type: security_descriptor
+          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AU)
+        ansible-StringSingle: Single
+        ansible-StringMulti:
+        - multi 1
+        - multi 3
     state: present
   register: set_attr_again
 
@@ -903,7 +1255,6 @@
     that:
     - not set_attr_again is changed
 
-
 - name: clear attribute - check
   object:
     name: Contact
@@ -911,10 +1262,18 @@
     type: contact
     attributes:
       set:
-        adminDescription:
-        attributeCertificateAttribute: []
-        extensionName:
-        dsaSignature: []
+        ansible-BoolSingle:
+        ansible-BoolMulti:
+        ansible-BytesSingle: []
+        ansible-BytesMulti: []
+        ansible-DateTimeSingle: ~
+        ansible-DateTimeMulti: ~
+        ansible-IntSingle:
+        ansible-IntMulti:
+        ansible-SDSingle:
+        ansible-SDMulti:
+        ansible-StringSingle:
+        ansible-StringMulti:
     state: present
   register: clear_attr_check
   check_mode: true
@@ -923,28 +1282,46 @@
   object_info:
     identity: '{{ sub_object.object_guid }}'
     properties:
-    - description
-    - DisplayName
-    - adminDescription
-    - attributeCertificateAttribute
-    - dsaSignature
-    - extensionName
+    - ansible-BoolSingle
+    - ansible-BoolMulti
+    - ansible-BytesSingle
+    - ansible-BytesMulti
+    - ansible-DateTimeSingle
+    - ansible-DateTimeMulti
+    - ansible-IntSingle
+    - ansible-IntMulti
+    - ansible-SDSingle
+    - ansible-SDMulti
+    - ansible-StringSingle
+    - ansible-StringMulti
   register: clear_attr_check_actual
 
 - name: assert clear attribute - check
   assert:
     that:
     - clear_attr_check is changed
-    - clear_attr_check_actual.objects[0].adminDescription == 'Test Description'
-    - clear_attr_check_actual.objects[0].attributeCertificateAttribute | length == 2
-    - '"Zm9v" in clear_attr_check_actual.objects[0].attributeCertificateAttribute'
-    - '"YmFy" in clear_attr_check_actual.objects[0].attributeCertificateAttribute'
-    - clear_attr_check_actual.objects[0].Description == 'test description'
-    - clear_attr_check_actual.objects[0].DisplayName == 'display name'
-    - clear_attr_check_actual.objects[0].dsaSignature == 'YmFy'
-    - clear_attr_check_actual.objects[0].extensionName | length == 2
-    - '"value 1" in clear_attr_check_actual.objects[0].extensionName'
-    - '"value 2" in clear_attr_check_actual.objects[0].extensionName'
+    - clear_attr_check_actual.objects[0]['ansible-BoolSingle'] == True
+    - clear_attr_check_actual.objects[0]['ansible-BoolMulti'] == False
+    - clear_attr_check_actual.objects[0]['ansible-BytesSingle'] == "YmFy"
+    - clear_attr_check_actual.objects[0]['ansible-BytesMulti'] | length == 2
+    - "'YmFy' in clear_attr_check_actual.objects[0]['ansible-BytesMulti']"
+    - "'dGVzdA==' in clear_attr_check_actual.objects[0]['ansible-BytesMulti']"
+    - clear_attr_check_actual.objects[0]['ansible-DateTimeSingle'] == "1601-01-01T00:00:00.0000000Z"
+    - clear_attr_check_actual.objects[0]['ansible-DateTimeMulti'] | length == 2
+    - "'1601-01-01T02:01:00.0000000Z' in clear_attr_check_actual.objects[0]['ansible-DateTimeMulti']"
+    - "'1970-01-01T00:00:00.0000000Z' in clear_attr_check_actual.objects[0]['ansible-DateTimeMulti']"
+    - clear_attr_check_actual.objects[0]['ansible-IntSingle'] == 1
+    - clear_attr_check_actual.objects[0]['ansible-IntMulti'] | length == 2
+    - 0 in clear_attr_check_actual.objects[0]['ansible-IntMulti']
+    - 3 in clear_attr_check_actual.objects[0]['ansible-IntMulti']
+    - clear_attr_check_actual.objects[0]['ansible-SDSingle'] == "O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AN)"
+    - clear_attr_check_actual.objects[0]['ansible-SDMulti'] | length == 2
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;AU)' in clear_attr_check_actual.objects[0]['ansible-SDMulti']"
+    - "'O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;DC)' in clear_attr_check_actual.objects[0]['ansible-SDMulti']"
+    - clear_attr_check_actual.objects[0]['ansible-StringSingle'] == "Single"
+    - clear_attr_check_actual.objects[0]['ansible-StringMulti'] | length == 2
+    - "'multi 1' in clear_attr_check_actual.objects[0]['ansible-StringMulti']"
+    - "'multi 3' in clear_attr_check_actual.objects[0]['ansible-StringMulti']"
 
 - name: clear attribute
   object:
@@ -953,10 +1330,18 @@
     type: contact
     attributes:
       set:
-        adminDescription:
-        attributeCertificateAttribute: []
-        extensionName:
-        dsaSignature: []
+        ansible-BoolSingle:
+        ansible-BoolMulti:
+        ansible-BytesSingle: []
+        ansible-BytesMulti: []
+        ansible-DateTimeSingle: ~
+        ansible-DateTimeMulti: ~
+        ansible-IntSingle:
+        ansible-IntMulti:
+        ansible-SDSingle:
+        ansible-SDMulti:
+        ansible-StringSingle:
+        ansible-StringMulti:
     state: present
   register: clear_attr
 
@@ -964,22 +1349,36 @@
   object_info:
     identity: '{{ sub_object.object_guid }}'
     properties:
-    - description
-    - DisplayName
-    - adminDescription
-    - attributeCertificateAttribute
-    - dsaSignature
-    - extensionName
+    - ansible-BoolSingle
+    - ansible-BoolMulti
+    - ansible-BytesSingle
+    - ansible-BytesMulti
+    - ansible-DateTimeSingle
+    - ansible-DateTimeMulti
+    - ansible-IntSingle
+    - ansible-IntMulti
+    - ansible-SDSingle
+    - ansible-SDMulti
+    - ansible-StringSingle
+    - ansible-StringMulti
   register: clear_attr_actual
 
 - name: assert clear attribute
   assert:
     that:
     - clear_attr is changed
-    - clear_attr_actual.objects[0].adminDescription == None
-    - clear_attr_actual.objects[0].attributeCertificateAttribute == None
-    - clear_attr_actual.objects[0].dsaSignature == None
-    - clear_attr_actual.objects[0].extensionName == None
+    - clear_attr_actual.objects[0]['ansible-BoolSingle'] == None
+    - clear_attr_actual.objects[0]['ansible-BoolMulti'] == None
+    - clear_attr_actual.objects[0]['ansible-BytesSingle'] == None
+    - clear_attr_actual.objects[0]['ansible-BytesMulti'] == None
+    - clear_attr_actual.objects[0]['ansible-DateTimeSingle'] == None
+    - clear_attr_actual.objects[0]['ansible-DateTimeMulti'] == None
+    - clear_attr_actual.objects[0]['ansible-IntSingle'] == None
+    - clear_attr_actual.objects[0]['ansible-IntMulti'] == None
+    - clear_attr_actual.objects[0]['ansible-SDSingle'] == None
+    - clear_attr_actual.objects[0]['ansible-SDMulti'] == None
+    - clear_attr_actual.objects[0]['ansible-StringSingle'] == None
+    - clear_attr_actual.objects[0]['ansible-StringMulti'] == None
 
 - name: clear attribute - idempotent
   object:
@@ -988,10 +1387,18 @@
     type: contact
     attributes:
       set:
-        adminDescription:
-        attributeCertificateAttribute: []
-        extensionName:
-        dsaSignature: []
+        ansible-BoolSingle:
+        ansible-BoolMulti:
+        ansible-BytesSingle: []
+        ansible-BytesMulti: []
+        ansible-DateTimeSingle: ~
+        ansible-DateTimeMulti: ~
+        ansible-IntSingle:
+        ansible-IntMulti:
+        ansible-SDSingle:
+        ansible-SDMulti:
+        ansible-StringSingle:
+        ansible-StringMulti:
     state: present
   register: clear_attr_again
 
@@ -999,51 +1406,6 @@
   assert:
     that:
     - not clear_attr_again is changed
-
-- name: set security descriptor attr
-  object:
-    name: Contact
-    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
-    type: contact
-    attributes:
-      set:
-        nTSecurityDescriptor:
-          type: security_descriptor
-          value: O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)
-    state: present
-  register: set_sd
-
-- name: get result of set security descriptor attr
-  object_info:
-    identity: '{{ sub_object.object_guid }}'
-    properties:
-    - nTSecurityDescriptor
-  register: set_sd_actual
-
-- name: assert set security descriptor attr
-  assert:
-    that:
-    - set_sd is changed
-    # It might change the owner, we only care about the DACL bit
-    - set_sd_actual.objects[0].nTSecurityDescriptor.endswith('D:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)')
-
-- name: set security descriptor attr - idempotent
-  object:
-    name: Contact
-    path: CN=My\, Container,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
-    type: contact
-    attributes:
-      set:
-        nTSecurityDescriptor:
-          type: security_descriptor
-          value: '{{ set_sd_actual.objects[0].nTSecurityDescriptor }}'
-    state: present
-  register: set_sd_again
-
-- name: assert set security descriptor attr - idemnpotent
-  assert:
-    that:
-    - not set_sd_again is changed
 
 - name: unset display and description
   object:
