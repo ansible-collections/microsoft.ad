@@ -282,7 +282,8 @@ The common types are:</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">date_time</span></code> - Value is decoded as an ISO 8601 datetime string</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">int</span></code> - Value is decoded as an integer</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">security_descriptor</span></code> - Value is decoded as a SDDL string</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">raw</span></code> - Value is used as is</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">string</span></code> - Value is casted to a string</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">raw</span></code> - Value is used as is - this is the default type used</p></li>
 </ul>
 <p>This looks like the following:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
@@ -290,7 +291,7 @@ The common types are:</p>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
 <span class="w">    </span><span class="nt">attributes</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">set</span><span class="p">:</span>
-<span class="w">        </span><span class="c1"># comment: A string</span>
+<span class="w">        </span><span class="c1"># comment: A raw value that is a string</span>
 <span class="w">        </span><span class="nt">comment</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raw</span>
 <span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A string</span>
@@ -347,7 +348,7 @@ The common types are:</p>
 </section>
 <section id="dates">
 <h3>Dates<a class="headerlink" href="#dates" title="Permalink to this heading"></a></h3>
-<p>Attributes with datetime values are technically integer values but represent a point in time. For ease of use, these entries can be represented as an ISO 8601 datetime and will be internally represented by the integer value. To specify an attribute value in the datetime format, use the same dictionary value structure as above but set the <code class="docutils literal notranslate"><span class="pre">type</span></code> to <code class="docutils literal notranslate"><span class="pre">date_time</span></code>. For example:</p>
+<p>Attributes with datetime values are technically integer values but represent a point in time. For ease of use, these entries can be represented as an ISO 8601 extended format datetime and will be internally represented by the integer value. To specify an attribute value in the datetime format, use the same dictionary value structure as above but set the <code class="docutils literal notranslate"><span class="pre">type</span></code> to <code class="docutils literal notranslate"><span class="pre">date_time</span></code>. For example:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyUser</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
@@ -365,9 +366,17 @@ The common types are:</p>
 </div>
 <p>Internally the datetime is converted to the UTC time and converted to the number of 100 nanosecond increments since 1601-01-01. This PowerShell snippet shows what is happening internally to get the integer value:</p>
 <div class="highlight-PowerShell notranslate"><div class="highlight"><pre><span></span><span class="nv">$dt</span> <span class="p">=</span> <span class="s1">&#39;2019-09-07T15:50:00Z&#39;</span>
-<span class="no">[DateTime]</span><span class="p">::</span><span class="n">Parse</span><span class="p">(</span><span class="nv">$dt</span><span class="p">,</span> <span class="no">[System.Globalization.CultureInfo]</span><span class="p">::</span><span class="n">InvariantCulture</span><span class="p">).</span><span class="n">ToFileTimeUtc</span><span class="p">()</span>
-<span class="c"># 132123450000000000</span>
+<span class="nv">$dtVal</span> <span class="p">=</span> <span class="no">[DateTimeOffset]</span><span class="p">::</span><span class="n">ParseExact</span><span class="p">(</span>
+    <span class="nv">$dt</span><span class="p">,</span>
+    <span class="no">[string[]]</span><span class="p">@(</span><span class="s2">&quot;yyyy-MM-dd&#39;T&#39;HH:mm:ss.FFFFFFFK&quot;</span><span class="p">),</span>
+    <span class="no">[System.Globalization.CultureInfo]</span><span class="p">::</span><span class="n">InvariantCulture</span><span class="p">,</span>
+    <span class="no">[System.Globalization.DateTimeStyles]</span><span class="p">::</span><span class="n">AssumeUniversal</span><span class="p">)</span>
+<span class="nv">$dtVal</span><span class="p">.</span><span class="n">UtcDateTime</span><span class="p">.</span><span class="n">ToFileTimeUtc</span><span class="p">()</span>
 </pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If no timezone is specified, it is assumed to be in UTC.</p>
 </div>
 </section>
 <section id="security-descriptors">
