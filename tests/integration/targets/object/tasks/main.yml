@@ -1,3 +1,158 @@
+- name: add test attributes to the schema
+  object:
+    name: '{{ item.name }}'
+    path: '{{ setup_domain_info.output[0].schemaNamingContext }}'
+    state: present
+    type: attributeSchema
+    attributes:
+      set:
+        adminDescription: '{{ item.description }}'
+        lDAPDisplayName: '{{ item.name }}'
+        attributeId: 1.3.6.1.4.1.2312.99999.{{ item.id }}
+        attributeSyntax: '{{ item.syntax }}'
+        omSyntax: '{{ item.om_syntax }}'
+        isSingleValued: '{{ item.single_value }}'
+        systemOnly: false
+        isMemberOfPartialAttributeSet: false
+        searchFlags: 0
+        showInAdvancedViewOnly: false
+  loop:
+  # https://social.technet.microsoft.com/wiki/contents/articles/52570.active-directory-syntaxes-of-attributes.aspx
+  - name: ansible-BoolSingle
+    description: Test Attribute for Boolean Single
+    id: 1
+    syntax: 2.5.5.8
+    om_syntax: 1
+    single_value: true
+  - name: ansible-BoolMulti
+    description: Test Attribute for Boolean Multi
+    id: 2
+    syntax: 2.5.5.8
+    om_syntax: 1
+    single_value: false
+
+  - name: ansible-BytesSingle
+    description: Test Attribute for Bytes Single
+    id: 3
+    syntax: 2.5.5.10
+    om_syntax: 4
+    single_value: true
+  - name: ansible-BytesMulti
+    description: Test Attribute for Bytes Multi
+    id: 4
+    syntax: 2.5.5.10
+    om_syntax: 4
+    single_value: false
+
+  - name: ansible-DateTimeSingle
+    description: Test Attribute for DateTime Single
+    id: 5
+    syntax: 2.5.5.11
+    om_syntax: 24
+    single_value: true
+  - name: ansible-DateTimeMulti
+    description: Test Attribute for DateTime Multi
+    id: 6
+    syntax: 2.5.5.11
+    om_syntax: 24
+    single_value: false
+
+  - name: ansible-IntSingle
+    description: Test Attribute for Integer Single
+    id: 7
+    syntax: 2.5.5.16
+    om_syntax: 65
+    single_value: true
+  - name: ansible-IntMulti
+    description: Test Attribute for Integer Multi
+    id: 8
+    syntax: 2.5.5.16
+    om_syntax: 65
+    single_value: false
+
+  - name: ansible-SDSingle
+    description: Test Attribute for SD Single
+    id: 9
+    syntax: 2.5.5.15
+    om_syntax: 66
+    single_value: true
+  - name: ansible-SDMulti
+    description: Test Attribute for SD Multi
+    id: 10
+    syntax: 2.5.5.15
+    om_syntax: 66
+    single_value: false
+
+  - name: ansible-StringSingle
+    description: Test Attribute for String Single
+    id: 11
+    syntax: 2.5.5.12
+    om_syntax: 64
+    single_value: true
+  - name: ansible-StringMulti
+    description: Test Attribute for String Multi
+    id: 12
+    syntax: 2.5.5.12
+    om_syntax: 64
+    single_value: false
+
+  register: schema_attributes
+  become: true
+  become_method: runas
+  become_user: SYSTEM
+
+- name: create auxilary class to house the new attributes
+  object:
+    name: ansibleTesting
+    path: '{{ setup_domain_info.output[0].schemaNamingContext }}'
+    type: classSchema
+    attributes:
+      set:
+        adminDescription: Test auxilary class for Ansible microsoft.ad attribute tests
+        adminDisplayName: ansibleTesting
+        lDAPDisplayName: ansibleTesting
+        governsId: 1.3.6.1.4.1.2312.99999
+        objectClassCategory: 3
+        systemOnly: false
+        subclassOf: top
+        # This is unfortunately not idempotent, the set must be the OID but
+        # Get-ADObject returns the lDAPDisplayName
+        mayContain: '{{ schema_attributes.results | map(attribute="item.id") | map("regex_replace", "^(.*)$", "1.3.6.1.4.1.2312.99999.\1") | list }}'
+  when: schema_attributes is changed
+  register: schema_class
+  become: true
+  become_method: runas
+  become_user: SYSTEM
+
+- name: add auxilary class to the contact class
+  object:
+    name: Contact
+    path: '{{ setup_domain_info.output[0].schemaNamingContext }}'
+    type: classSchema
+    attributes:
+      add:
+        auxiliaryClass: 1.3.6.1.4.1.2312.99999
+  register: aux_reg
+  become: true
+  become_method: runas
+  become_user: SYSTEM
+  when: schema_class is changed
+
+- name: update schema
+  ansible.windows.win_powershell:
+    parameters:
+      Name: '{{ setup_domain_info.output[0].dnsHostName }}'
+    script: |
+      param($Name)
+
+      $dse = New-Object -TypeName System.DirectoryServices.DirectoryEntry -ArgumentList "LDAP://$Name/RootDSE"
+      $dse.Put("SchemaUpdateNow", 1)
+      $dse.SetInfo()
+  become: true
+  become_method: runas
+  become_user: SYSTEM
+  when: aux_reg is changed
+
 - block:
   - import_tasks: tests.yml
 

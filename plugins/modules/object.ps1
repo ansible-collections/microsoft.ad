@@ -23,6 +23,8 @@ $setParams = @{
             Set = {
                 param ($Module, $ADParams, $SetParams, $ADObject)
 
+                $Module.Diff.after.type = $ADObject.ObjectClass
+
                 if ($ADObject.ObjectClass -ne $Module.Params.type) {
                     $msg = -join @(
                         "Cannot change object type $($ADObject.ObjectClass) of existing object "

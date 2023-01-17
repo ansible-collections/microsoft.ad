@@ -74,6 +74,9 @@ Function Compare-AnsibleADAttribute {
         if ($_ -is [System.Byte[]]) {
             [System.Convert]::ToBase64String($_)
         }
+        elseif ($_ -is [System.DateTime]) {
+            $_.ToUniversalTime().ToString('o')
+        }
         elseif ($_ -is [System.DirectoryServices.ActiveDirectorySecurity]) {
             $_.GetSecurityDescriptorSddlForm([System.Security.AccessControl.AccessControlSections]::All)
         }
@@ -84,7 +87,7 @@ Function Compare-AnsibleADAttribute {
     }
 
     $existingAttributes = [System.Collections.Generic.List[object]]@()
-    if ($ADObject -and $ADObject.$Name) {
+    if ($ADObject -and $null -ne $ADObject.$Name) {
         $existingValues = $ADObject.$Name
         if ($null -ne $existingValues) {
             if (
@@ -128,10 +131,12 @@ Function Compare-AnsibleADAttribute {
                 $desiredAttributes.Add([System.Convert]::FromBase64String($value))
             }
             date_time {
-                $dtVal = [DateTime]::Parse(
+                $dtVal = [DateTimeOffset]::ParseExact(
                     $value,
-                    [System.Globalization.CultureInfo]::InvariantCulture)
-                $desiredAttributes.Add($dtVal.ToFileTimeUtc())
+                    [string[]]@("yyyy-MM-dd'T'HH:mm:ss.FFFFFFFK"),
+                    [System.Globalization.CultureInfo]::InvariantCulture,
+                    [System.Globalization.DateTimeStyles]::AssumeUniversal)
+                $desiredAttributes.Add($dtVal.UtcDateTime)
             }
             int {
                 $desiredAttributes.Add([Int64]$value)
@@ -141,7 +146,15 @@ Function Compare-AnsibleADAttribute {
                 $sd.SetSecurityDescriptorSddlForm($value)
                 $desiredAttributes.Add($sd)
             }
+            string {
+                $desiredAttributes.Add($value.ToString())
+            }
             raw {
+                # If the value is an Int32 we need it to be Int64 to ensure
+                # the values are all the same type.
+                if ($value -is [int]) {
+                    $value = [Int64]$value
+                }
                 $desiredAttributes.Add($value)
             }
             default { throw "Attribute type '$type' must be bytes, date_time, int, security_descriptor, or raw" }
@@ -403,42 +416,44 @@ Function Get-AnsibleADObject {
         $GetCommand = $null
     )
 
-    $getByteFilterValue = {
-        @($args[0] | ForEach-Object {
-                '\' + [System.BitConverter]::ToString($_).ToLowerInvariant()
-            }) -join ''
+    $getParams = @{}
+    if ($Properties.Count) {
+        $getParams.Properties = $Properties
+    }
+    if ($Server) {
+        $getParams.Server = $Server
+    }
+    if ($Credential) {
+        $getParams.Credential = $Credential
     }
 
-    $ldapFilter = $null
-
+    # The -Identity parameter is used where possible as LDAPFilter is limited
+    # to just the defaultNamingContext as defined by -SearchBase.
     $objectGuid = [Guid]::Empty
     if ([System.Guid]::TryParse($Identity, [ref]$objectGuid)) {
-        $value = &$getByteFilterValue $objectGuid.ToByteArray()
-        $ldapFilter = "(objectGUID=$value)"
+        $getParams.Identity = $objectGuid
     }
     elseif ($Identity -match '^.*\@.*\..*$') {
-        $ldapFilter = "(userPrincipalName=$($Matches[0]))"
+        $getParams.LDAPFilter = "(userPrincipalName=$($Matches[0]))"
     }
     elseif ($Identity -match '^(?:[^:*?""<>|\/\\]+\\)?(?<username>[^;:""<>|?,=\*\+\\\(\)]{1,20})$') {
-        $ldapFilter = "(sAMAccountName=$($Matches.username))"
+        $getParams.LDAPFilter = "(sAMAccountName=$($Matches.username))"
     }
     else {
         try {
             $sid = New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList $Identity
             $sidBytes = New-Object -TypeName System.Byte[] -ArgumentList $sid.BinaryLength
             $sid.GetBinaryForm($sidBytes, 0)
-            $value = &$getByteFilterValue $sidBytes
-            $ldapFilter = "(objectSid=$value)"
+
+            $value = @($sidBytes | ForEach-Object {
+                    '\' + [System.BitConverter]::ToString($_).ToLowerInvariant()
+                }) -join ''
+            $getParams.LDAPFilter = "(objectSid=$value)"
         }
         catch [System.ArgumentException] {
-            $ldapFilter = "(distinguishedName=$Identity)"
+            # Finally fallback to DistinguishedName.
+            $getParams.Identity = $Identity
         }
-    }
-
-    $getParams = $PSBoundParameters
-    $null = $getParams.Remove('Identity')
-    if ($Properties.Count -eq 0) {
-        $null = $getParams.Remove('Properties')
     }
 
     if ($GetCommand) {
@@ -447,7 +462,14 @@ Function Get-AnsibleADObject {
     else {
         $GetCommand = Get-Command -Name Get-ADObject -Module ActiveDirectory
     }
-    & $GetCommand @PSBoundParameters -LDAPFilter $ldapFilter | Select-Object -First 1
+    try {
+        $obj = & $GetCommand @getParams | Select-Object -First 1
+    }
+    catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+        $obj = $null
+    }
+
+    $obj
 }
 
 Function Invoke-AnsibleADObject {
@@ -931,6 +953,7 @@ Function Invoke-AnsibleADObject {
             }
 
             if ($setParams.Count) {
+                # throw "Test: $(ConvertTo-Json -InputObject $setParams -Compress)"
                 $finalADObject = & $setCommand @commonParams @setParams @adParams
                 $module.Result.changed = $true
             }
