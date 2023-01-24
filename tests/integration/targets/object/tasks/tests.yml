@@ -96,7 +96,7 @@
     - rename_check_actual.objects[0].DistinguishedName == object_dn
     - rename_check_actual.objects[0].Name == object_name
 
-- name: rename and set display name of object[]
+- name: rename and set display name of object
   object:
     name: My, Contact 2
     identity: '{{ object_identity }}'

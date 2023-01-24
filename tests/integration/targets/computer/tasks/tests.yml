@@ -104,18 +104,21 @@
     name: MyComputer
     state: present
     delegates:
-    - CN=krbtgt,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
-    - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      set:
+      - CN=krbtgt,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
     kerberos_encryption_types:
-    - aes128
-    - aes256
+      set:
+      - aes128
+      - aes256
     location: Comp Location
     dns_hostname: MyComputer.domain.com
     enabled: false
     managed_by: Domain Admins
     sam_account_name: SamMyComputer
     spn:
-    - HTTP/MyComputer
+      set:
+      - HTTP/MyComputer
     trusted_for_delegation: true
     upn: MyComputer@{{ domain_realm }}
     path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
@@ -151,7 +154,7 @@
       $sd.SetSecurityDescriptorSddlForm($SDDL, 'All')
       $sd.GetAccessRules($true, $false, [Type][System.Security.Principal.NTAccount]
       ).IdentityReference.Value | ForEach-Object {
-          ($_ -split '\\', 2)[-1]
+          ($_ -split '\\', 2)[-1].ToLowerInvariant()
       } | Sort-Object
   register: custom_comp_delegates
 
@@ -175,18 +178,20 @@
     - custom_comp_actual.objects[0].userPrincipalName == 'MyComputer@' ~ domain_realm
     - '"ADS_UF_ACCOUNTDISABLE" in custom_comp_actual.objects[0].userAccountControl_AnsibleFlags'
     - '"ADS_UF_TRUSTED_FOR_DELEGATION" in custom_comp_actual.objects[0].userAccountControl_AnsibleFlags'
-    - custom_comp_delegates.output == ["Administrator", "krbtgt"]
+    - custom_comp_delegates.output == ["administrator", "krbtgt"]
 
 - name: change computer with custom options
   computer:
     name: MyComputer
     path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
     delegates:
-    - CN=KRBTGT,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      set:
+      - CN=KRBTGT,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
     dns_hostname: other.domain.com
     kerberos_encryption_types:
-    - aes256
-    - rc4
+      set:
+      - aes256
+      - rc4
     location: comp location
     enabled: true
     sam_account_name: MyComputer2$
@@ -218,7 +223,7 @@
       $sd.SetSecurityDescriptorSddlForm($SDDL, 'All')
       $sd.GetAccessRules($true, $false, [Type][System.Security.Principal.NTAccount]
       ).IdentityReference.Value | ForEach-Object {
-          ($_ -split '\\', 2)[-1]
+          ($_ -split '\\', 2)[-1].ToLowerInvariant()
       } | Sort-Object
   register: change_comp_delegates
 
@@ -236,14 +241,128 @@
     - '"ADS_UF_TRUSTED_FOR_DELEGATION" not in change_comp_actual.objects[0].userAccountControl_AnsibleFlags'
     - change_comp_delegates.output == ["krbtgt"]
 
+- name: add and remove list options
+  computer:
+    name: MyComputer
+    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    delegates:
+      add:
+      - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      remove:
+      - CN=KRBTGT,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      - CN=Missing,{{ setup_domain_info.output[0].defaultNamingContext }}
+    kerberos_encryption_types:
+      add:
+      - aes128
+      - aes256
+      remove:
+      - rc4
+  register: add_remove_list
+
+- name: get result of add and remove list options
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - msDS-AllowedToActOnBehalfOfOtherIdentity
+    - msDS-SupportedEncryptionTypes
+  register: add_remove_list_actual
+
+- name: convert delegate SDDL to human readable string
+  ansible.windows.win_powershell:
+    parameters:
+      SDDL: '{{ add_remove_list_actual.objects[0]["msDS-AllowedToActOnBehalfOfOtherIdentity"] }}'
+    script: |
+      param($SDDL)
+
+      $sd = New-Object -TypeName System.DirectoryServices.ActiveDirectorySecurity
+      $sd.SetSecurityDescriptorSddlForm($SDDL, 'All')
+      $sd.GetAccessRules($true, $false, [Type][System.Security.Principal.NTAccount]
+      ).IdentityReference.Value | ForEach-Object {
+          ($_ -split '\\', 2)[-1].ToLowerInvariant()
+      } | Sort-Object
+  register: add_remove_list_delegation
+
+- name: assert add and remove list options
+  assert:
+    that:
+    - add_remove_list is changed
+    - add_remove_list_actual.objects[0]['msDS-SupportedEncryptionTypes'] == 24
+    - add_remove_list_actual.objects[0]['msDS-SupportedEncryptionTypes_AnsibleFlags'] == ["AES128_CTS_HMAC_SHA1_96", "AES256_CTS_HMAC_SHA1_96"]
+    - add_remove_list_delegation.output == ["administrator"]
+
+- name: add and remove list options - idempotent
+  computer:
+    name: MyComputer
+    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    delegates:
+      add:
+      - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      remove:
+      - CN=KRBTGT,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      - CN=Missing,{{ setup_domain_info.output[0].defaultNamingContext }}
+    kerberos_encryption_types:
+      add:
+      - aes128
+      - aes256
+      remove:
+      - rc4
+  register: add_remove_list_again
+
+- name: assert add and remove list options - idempotent
+  assert:
+    that:
+    - not add_remove_list_again is changed
+
+- name: unset list options
+  computer:
+    name: MyComputer
+    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    delegates:
+      set: []
+    kerberos_encryption_types:
+      set: []
+  register: unset_list_options
+
+- name: get result of unset list options
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - msDS-AllowedToActOnBehalfOfOtherIdentity
+    - msDS-SupportedEncryptionTypes
+  register: unset_list_options_actual
+
+- name: assert unset list options
+  assert:
+    that:
+    - unset_list_options is changed
+    - unset_list_options_actual.objects[0]['msDS-AllowedToActOnBehalfOfOtherIdentity'] == None
+    - unset_list_options_actual.objects[0]['msDS-SupportedEncryptionTypes'] == 0
+    - unset_list_options_actual.objects[0]['msDS-SupportedEncryptionTypes_AnsibleFlags'] == ["None"]
+
+- name: unset list options - idempotent
+  computer:
+    name: MyComputer
+    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    delegates:
+      set: []
+    kerberos_encryption_types:
+      set: []
+  register: unset_list_options_again
+
+- name: assert unset list options - idempotent
+  assert:
+    that:
+    - not unset_list_options_again is changed
+
 - name: set spns
   computer:
     name: MyComputer
     path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
     spn:
-    - HTTP/host
-    - HTTP/host.domain
-    - HTTP/host.domain:8080
+      set:
+      - HTTP/host
+      - HTTP/host.domain
+      - HTTP/host.domain:8080
   register: spn_set
 
 - name: get result of set spns
@@ -264,9 +383,9 @@
     name: MyComputer
     path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
     spn:
-    - HTTP/fake
-    - HTTP/Host.domain
-    spn_action: remove
+      remove:
+      - HTTP/fake
+      - HTTP/Host.domain
   register: spn_remove
 
 - name: get result of remove spns
@@ -286,10 +405,10 @@
   computer:
     name: MyComputer
     path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
-    spn:
-    - HTTP/Host.domain:8080
-    - HTTP/fake
-    spn_action: add
+    spns:
+      add:
+      - HTTP/Host.domain:8080
+      - HTTP/fake
   register: spn_add
 
 - name: get result of add spns

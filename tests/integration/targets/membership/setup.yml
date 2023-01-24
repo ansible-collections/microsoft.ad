@@ -47,8 +47,8 @@
       password_never_expires: yes
       update_password: when_changed
       groups:
-      - Domain Admins
-      - Domain Users
+        add:
+        - Domain Admins
       state: present
 
 - name: setup test host

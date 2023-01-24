@@ -99,8 +99,12 @@ $setParams = @{
             Name = 'delegates'
             Option = @{
                 aliases = 'principals_allowed_to_delegate'
-                type = 'list'
-                elements = 'str'
+                type = 'dict'
+                options = @{
+                    add = @{ type = 'list'; elements = 'str' }
+                    remove = @{ type = 'list'; elements = 'str' }
+                    set = @{ type = 'list'; elements = 'str' }
+                }
             }
             Attribute = 'PrincipalsAllowedToDelegateToAccount'
             CaseInsensitive = $true
@@ -127,26 +131,17 @@ $setParams = @{
         [PSCustomObject]@{
             Name = 'groups'
             Option = @{
-                elements = 'str'
-                type = 'list'
-            }
-        }
-
-        [PSCustomObject]@{
-            Name = 'groups_action'
-            Option = @{
-                choices = 'add', 'remove', 'set'
-                default = 'set'
-                type = 'str'
-            }
-        }
-
-        [PSCustomObject]@{
-            Name = 'groups_missing_behaviour'
-            Option = @{
-                choices = 'fail', 'ignore', 'warn'
-                default = 'fail'
-                type = 'str'
+                type = 'dict'
+                options = @{
+                    add = @{ type = 'list'; elements = 'str' }
+                    remove = @{ type = 'list'; elements = 'str' }
+                    set = @{ type = 'list'; elements = 'str' }
+                    missing_behaviour = @{
+                        choices = 'fail', 'ignore', 'warn'
+                        default = 'fail'
+                        type = 'str'
+                    }
+                }
             }
         }
 
@@ -239,62 +234,45 @@ $setParams = @{
         [PSCustomObject]@{
             Name = 'spn'
             Option = @{
-                type = 'list'
-                elements = 'str'
                 aliases = 'spns'
+                type = 'dict'
+                options = @{
+                    add = @{ type = 'list'; elements = 'str' }
+                    remove = @{ type = 'list'; elements = 'str' }
+                    set = @{ type = 'list'; elements = 'str' }
+                }
             }
-            Attribute = 'servicePrincipalNames'
+            Attribute = 'ServicePrincipalNames'
+            New = {
+                param($Module, $ADParams, $NewParams)
+
+                $spns = @(
+                    $Module.Params.spn.add
+                    $Module.Params.spn.set
+                ) | Select-Object -Unique
+
+                $NewParams.ServicePrincipalNames = $spns
+                $Module.Diff.after.spn = $spns
+            }
             Set = {
                 param($Module, $ADParams, $SetParams, $ADObject)
 
-                [string[]]$existing = @($ADObject.servicePrincipalNames.Value)
-                [string[]]$desired = @($Module.Params.spn)
-
-                $ignoreCase = [System.StringComparer]::OrdinalIgnoreCase
-
-                [string[]]$toAdd = @()
-                [string[]]$toRemove = @()
-                [string[]]$diffAfter = @()
-                switch ($Module.Params.spn_action) {
-                    add {
-                        $toAdd = [System.Linq.Enumerable]::Except($desired, $existing, $ignoreCase)
-                        $diffAfter = [System.Linq.Enumerable]::Union($desired, $existing, $ignoreCase)
+                $desired = $Module.Params.spn
+                $compareParams = @{
+                    Existing = $ADObject.ServicePrincipalNames
+                    CaseInsensitive = $true
+                }
+                $res = Compare-AnsibleADIdempotentList @compareParams @desired
+                if ($res.Changed) {
+                    $SetParams.ServicePrincipalNames = @{}
+                    if ($res.ToAdd) {
+                        $SetParams.ServicePrincipalNames.Add = $res.ToAdd
                     }
-                    remove {
-                        $toRemove = [System.Linq.Enumerable]::Intersect($desired, $existing, $ignoreCase)
-                        $diffAfter = [System.Linq.Enumerable]::Except($existing, $desired, $ignoreCase)
-                    }
-                    set {
-                        $toAdd = [System.Linq.Enumerable]::Except($desired, $existing, $ignoreCase)
-                        $toRemove = [System.Linq.Enumerable]::Except($existing, $desired, $ignoreCase)
-                        $diffAfter = $desired
+                    if ($res.ToRemove) {
+                        $SetParams.ServicePrincipalNames.Remove = $res.ToRemove
                     }
                 }
-
-                $spnValue = @{}
-                if ($toAdd) {
-                    # For whatever reason the Set-ADUser doesn't like a tainted
-                    # [string[]] typed array, use ForEach-Object to bypass this
-                    $spnValue.Add = $toAdd | ForEach-Object { "$_" }
-                }
-                if ($toRemove) {
-                    $spnValue.Remove = $toRemove | ForEach-Object { "$_" }
-                }
-
-                if ($spnValue.Count) {
-                    $SetParams.ServicePrincipalNames = $spnValue
-                }
-
-                $Module.Diff.after.spn = @($diffAfter | Sort-Object)
-            }
-        }
-
-        [PSCustomObject]@{
-            Name = 'spn_action'
-            Option = @{
-                choices = 'add', 'remove', 'set'
-                default = 'set'
-                type = 'str'
+                $module.Diff.after.kerberos_encryption_types = @($res.Value | Sort-Object)
             }
         }
 
@@ -378,25 +356,24 @@ $setParams = @{
             $Module.Result.sid = 'S-1-5-0000'
         }
 
-        if ($null -eq $Module.Params.groups -or $Module.Params.state -eq 'absent') {
+        if ($null -eq $Module.Params.groups -or $Module.Params.groups.Count -eq 0 -or $Module.Params.state -eq 'absent') {
             return
         }
 
-        [string[]]$desiredGroups = @(
-            foreach ($group in $Module.Params.groups) {
-                try {
-                    (Get-ADGroup -Identity $group @ADParams).DistinguishedName
+        $groupMissingBehaviour = $Module.Params.groups.missing_behaviour
+        $lookupGroup = {
+            try {
+                (Get-ADGroup -Identity $args[0] @ADParams).DistinguishedName
+            }
+            catch {
+                if ($groupMissingBehaviour -eq "fail") {
+                    $module.FailJson("Failed to locate group $($args[0]): $($_.Exception.Message)", $_)
                 }
-                catch {
-                    if ($Module.Params.groups_missing_behaviour -eq "fail") {
-                        $module.FailJson("Failed to locate group $($group): $($_.Exception.Message)", $_)
-                    }
-                    elseif ($Module.Params.groups_missing_behaviour -eq "warn") {
-                        $module.Warn("Failed to locate group $($group) but continuing on: $($_.Exception.Message)")
-                    }
+                elseif ($groupMissingBehaviour -eq "warn") {
+                    $module.Warn("Failed to locate group $($args[0]) but continuing on: $($_.Exception.Message)")
                 }
             }
-        )
+        }
 
         [string[]]$existingGroups = @(
             # In check mode the ADObject won't be given
@@ -415,60 +392,61 @@ $setParams = @{
             $Module.Diff.before.groups = @($existingGroups | Sort-Object)
         }
 
-        $ignoreCase = [System.StringComparer]::OrdinalIgnoreCase
-        [string[]]$toAdd = @()
-        [string[]]$toRemove = @()
-        [string[]]$diffAfter = @()
-        switch ($Module.Params.groups_action) {
-            add {
-                $toAdd = [System.Linq.Enumerable]::Except($desiredGroups, $existingGroups, $ignoreCase)
-                $diffAfter = [System.Linq.Enumerable]::Union($desiredGroups, $existingGroups, $ignoreCase)
-            }
-            remove {
-                $toRemove = [System.Linq.Enumerable]::Intersect($desiredGroups, $existingGroups, $ignoreCase)
-                $diffAfter = [System.Linq.Enumerable]::Except($existingGroups, $desiredGroups, $ignoreCase)
-            }
-            set {
-                $toAdd = [System.Linq.Enumerable]::Except($desiredGroups, $existingGroups, $ignoreCase)
-                $toRemove = [System.Linq.Enumerable]::Except($existingGroups, $desiredGroups, $ignoreCase)
-                $diffAfter = $desiredGroups
+        $compareParams = @{
+            CaseInsensitive = $true
+            Existing = $existingGroups
+        }
+        'add', 'remove', 'set' | ForEach-Object -Process {
+            if ($null -ne $Module.Params.groups[$_]) {
+                $compareParams[$_] = @(
+                    foreach ($group in $Module.Params.groups[$_]) {
+                        & $lookupGroup $group
+                    }
+                )
             }
         }
 
-        $Module.Diff.after.groups = $diffAfter
-        $commonParams = @{
-            Confirm = $false
-            WhatIf = $Module.CheckMode
-        }
-        foreach ($member in $toAdd) {
-            if ($ADObject) {
-                Add-ADGroupMember -Identity $member -Members $ADObject.ObjectGUID @ADParams @commonParams
+        $res = Compare-AnsibleADIdempotentList @compareParams
+        $Module.Diff.after.groups = $res.Value
+
+        if ($res.Changed) {
+            $commonParams = @{
+                Confirm = $false
+                WhatIf = $Module.CheckMode
             }
-            $Module.Result.changed = $true
-        }
-        foreach ($member in $toRemove) {
-            if ($ADObject) {
-                try {
-                    Remove-ADGroupMember -Identity $member -Members $ADObject.ObjectGUID @ADParams @commonParams
+            foreach ($member in $res.ToAdd) {
+                if ($ADObject) {
+                    Add-ADGroupMember -Identity $member -Members $ADObject.ObjectGUID @ADParams @commonParams
                 }
-                catch [Microsoft.ActiveDirectory.Management.ADException] {
-                    if ($_.Exception.ErrorCode -eq 0x0000055E) {
-                        # ERROR_MEMBERS_PRIMARY_GROUP - win_domain_user didn't
-                        # fail in this scenario. To preserve compatibility just
-                        # display a warning.
-                        $Module.Warn("Cannot remove group '$member' as it's the primary group of the user, skipping: $($_.Exception.Message)")
-                        $Module.Diff.after.groups = @($Module.Diff.after.groups; $member)
-                    }
-                    else {
-                        throw
-                    }
-                }
+                $Module.Result.changed = $true
             }
-            $Module.Result.changed = $true
+            foreach ($member in $res.ToRemove) {
+                if ($ADObject) {
+                    try {
+                        Remove-ADGroupMember -Identity $member -Members $ADObject.ObjectGUID @ADParams @commonParams
+                    }
+                    catch [Microsoft.ActiveDirectory.Management.ADException] {
+                        if ($_.Exception.ErrorCode -eq 0x0000055E) {
+                            # ERROR_MEMBERS_PRIMARY_GROUP - win_domain_user didn't
+                            # fail in this scenario. To preserve compatibility just
+                            # display a warning. The warning isn't added if set
+                            # was an empty list.
+                            if ($null -eq $Module.Params.groups -or $Module.Params.groups.set.Length -ne 0) {
+                                $Module.Warn("Cannot remove group '$member' as it's the primary group of the user, skipping: $($_.Exception.Message)")
+                            }
+                            $Module.Diff.after.groups = @($Module.Diff.after.groups; $member)
+                        }
+                        else {
+                            throw
+                        }
+                    }
+                }
+                $Module.Result.changed = $true
+            }
         }
 
         # Ensure it's in alphabetical order to match before state as much as possible
-        $Module.Diff.after.groups = @($Module.Diff.after.groups | Sort-Object)
+        $Module.Diff.after.groups = @($res.Value | Sort-Object)
     }
 }
 Invoke-AnsibleADObject @setParams

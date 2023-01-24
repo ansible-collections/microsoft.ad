@@ -38,19 +38,47 @@ options:
     type: str
   delegates:
     description:
-    - Specifies an array of principal objects that the current AD object can
-      trust for delegation.
-    - Must be specified as a distinguished name
+    - The principal objects that the current AD object can trust for
+      delegation to either add, remove or set.
+    - The values for each sub option must be specified as a distinguished name
       C(CN=shenetworks,CN=Users,DC=ansible,DC=test)
     - This is the value set on the C(msDS-AllowedToActOnBehalfOfOtherIdentity)
       LDAP attribute.
     - This is a highly sensitive attribute as it allows the principals
       specified to impersonate any account when authenticating with the AD
-      user object being managed.
+      computer object being managed.
+    - To clear all principals, use I(set) with an empty list.
+    - See R(Setting list option values,ansible_collections.microsoft.ad.docsite.guide_list_values)
+      for more information on how to add/remove/set list options.
     aliases:
     - principals_allowed_to_delegate
-    type: list
-    elements: str
+    type: dict
+    suboptions:
+      add:
+        description:
+        - The AD objects by their C(DistinguishedName) to add as a principal
+          allowed to delegate.
+        - Any existing principals not specified by I(add) will be untouched
+          unless specified by I(remove) or not in I(set).
+        type: list
+        elements: str
+      remove:
+        description:
+        - The AD objects by their C(DistinguishedName) to remove as a principal
+          allowed to delegate.
+        - Any existing pricipals not specified by I(remove) will be untouched
+          unless I(set) is defined.
+        type: list
+        elements: str
+      set:
+        description:
+        - The AD objects by their C(DistinguishedName) to set as the only
+          principals allowed to delegate.
+        - This will remove any existing principals if not specified in this
+          list.
+        - Specify an empty list to remove all principals allowed to delegate.
+        type: list
+        elements: str
   email:
     description:
     - Configures the user's email address.
@@ -72,41 +100,46 @@ options:
     type: str
   groups:
     description:
-    - Adds or removes the user from this list of groups, depending on the value
-      of I(groups_action).
-    - To remove all but the Principal Group, set
-      C(groups=<principal group name>) and C(groups_action=set).
+    - Specifies the group membership the user is added, removed, or set to.
+    - To clear all group memberhips, use I(set) with an empty list.
     - Note that users cannot be removed from their principal group (for
       example, "Domain Users"). Attempting to do so will display a warning.
-    type: list
-    elements: str
-  groups_action:
-    description:
-    - If C(add), the user is added to each group in I(groups) where not already
-      a member.
-    - If C(remove), the user is removed from each group in I(groups).
-    - If C(set), the user is added as a member of each group in I(groups)
-      and removed from any other groups.
-    choices:
-    - add
-    - remove
-    - set
-    default: set
-    type: str
-  groups_missing_behaviour:
-    description:
-    - Controls what happens when a group specified by C(groups) is an invalid
-      group name.
-    - C(fail) is the default and will return an error any groups do not exist.
-    - C(ignore) will ignore any groups that does not exist.
-    - C(warn) will display a warning for any groups that do not exist but will
-      continue without failing.
-    choices:
-    - fail
-    - ignore
-    - warn
-    default: fail
-    type: str
+    - See R(Setting list option values,ansible_collections.microsoft.ad.docsite.guide_list_values)
+      for more information on how to add/remove/set list options.
+    type: dict
+    suboptions:
+      add:
+        description:
+        - The groups to add the user to.
+        type: list
+        elements: str
+      remove:
+        description:
+        - The groups to remove the user from.
+        type: list
+        elements: str
+      set:
+        description:
+        - The only groups the user is a member of.
+        - This will clear out any existing groups if not in the specified list.
+        - Set to an empty list to clear all group membership of the user.
+        type: list
+        elements: str
+      missing_behaviour:
+        description:
+        - Controls what happens when a group specified by C(groups) is an
+          invalid group name.
+        - C(fail) is the default and will return an error any groups do not
+          exist.
+        - C(ignore) will ignore any groups that does not exist.
+        - C(warn) will display a warning for any groups that do not exist but
+          will continue without failing.
+        choices:
+        - fail
+        - ignore
+        - warn
+        default: fail
+        type: str
   password:
     description:
     - Optionally set the user's password to this (plain text) value.
@@ -139,24 +172,33 @@ options:
     type: str
   spn:
     description:
-    - Specifies the service principal name(s) for the account. This parameter
-      sets the ServicePrincipalNames property of the account.
+    - Specifies the service principal name(s) for the account to add, remove or
+      set.
     - This is the value set on the C(servicePrincipalName) LDAP attribute.
+    - To clear all service principal names, use I(set) with an empty list.
+    - See R(Setting list option values,ansible_collections.microsoft.ad.docsite.guide_list_values)
+      for more information on how to add/remove/set list options.
     aliases:
     - spns
-    type: list
-    elements: str
-  spn_action:
-    description:
-    - If C(add), the SPNs are added to the user.
-    - If C(remove), the SPNs are removed from the user.
-    - If C(set), the defined set of SPN's overwrite the current set of SPNs.
-    choices:
-    - add
-    - remove
-    - set
-    default: set
-    type: str
+    type: dict
+    suboptions:
+      add:
+        description:
+        - The SPNs to add to C(servicePrincipalName).
+        type: list
+        elements: str
+      remove:
+        description:
+        - The SPNs to remove from C(servicePrincipalName).
+        type: list
+        elements: str
+      set:
+        description:
+        - The SPNs to set as the only values in C(servicePrincipalName).
+        - This will clear out any existing SPNs if not in the specified list.
+        - Set to an empty list to clear all SPNs on the AD object.
+        type: list
+        elements: str
   state_province:
     description:
     - Configures the user's state.
@@ -237,7 +279,8 @@ EXAMPLES = r"""
     password: B0bP4ssw0rd
     state: present
     groups:
-    - Domain Admins
+      set:
+      - Domain Admins
     street: 123 4th St.
     city: Sometown
     state_province: IN
@@ -265,27 +308,29 @@ EXAMPLES = r"""
     state: present
     path: ou=test,dc=domain,dc=local
     groups:
-    - Domain Admins
-    - Domain Users
+      set:
+      - Domain Admins
+      - Domain Users
 
 - name: Ensure user bob is absent
   microsoft.ad.user:
     name: bob
     state: absent
 
-- name: Ensure user has spn's defined
+- name: Ensure user has only these spn's defined
   microsoft.ad.user:
     name: liz.kenyon
     spn:
-    - MSSQLSvc/us99db-svr95:1433
-    - MSSQLSvc/us99db-svr95.vmware.com:1433
+      set:
+      - MSSQLSvc/us99db-svr95:1433
+      - MSSQLSvc/us99db-svr95.vmware.com:1433
 
 - name: Ensure user has spn added
   microsoft.ad.user:
     name: liz.kenyon
-    spn_action: add
     spn:
-    - MSSQLSvc/us99db-svr95:2433
+      add:
+      - MSSQLSvc/us99db-svr95:2433
 
 - name: Ensure user is created with delegates and spn's defined
   microsoft.ad.user:
@@ -293,15 +338,18 @@ EXAMPLES = r"""
     password: The3rubberducki33!
     state: present
     groups:
-    - Domain Admins
-    - Domain Users
-    - Enterprise Admins
+      set:
+      - Domain Admins
+      - Domain Users
+      - Enterprise Admins
     delegates:
-    - CN=shenetworks,CN=Users,DC=ansible,DC=test
-    - CN=mk.ai,CN=Users,DC=ansible,DC=test
-    - CN=jessiedotjs,CN=Users,DC=ansible,DC=test
+      set:
+      - CN=shenetworks,CN=Users,DC=ansible,DC=test
+      - CN=mk.ai,CN=Users,DC=ansible,DC=test
+      - CN=jessiedotjs,CN=Users,DC=ansible,DC=test
     spn:
-    - MSSQLSvc/us99db-svr95:2433
+      set:
+      - MSSQLSvc/us99db-svr95:2433
 """
 
 RETURN = r"""
