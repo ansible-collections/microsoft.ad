@@ -261,15 +261,45 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <div class="ansibleOptionAnchor" id="parameter-delegates"></div>
 <div class="ansibleOptionAnchor" id="parameter-principals_allowed_to_delegate"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-principals-allowed-to-delegate"><span id="ansible-collections-microsoft-ad-user-module-parameter-delegates"></span><strong>delegates</strong></p>
 <a class="ansibleOptionLink" href="#parameter-delegates" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-aliases">aliases: principals_allowed_to_delegate</span></p>
-<p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+<p class="ansible-option-type-line"><span class="ansible-option-type">dictionary</span></p>
 </div></td>
-<td><div class="ansible-option-cell"><p>Specifies an array of principal objects that the current AD object can trust for delegation.</p>
-<p>Must be specified as a distinguished name <code class="docutils literal notranslate"><span class="pre">CN=shenetworks,CN=Users,DC=ansible,DC=test</span></code></p>
+<td><div class="ansible-option-cell"><p>The principal objects that the current AD object can trust for delegation to either add, remove or set.</p>
+<p>The values for each sub option must be specified as a distinguished name <code class="docutils literal notranslate"><span class="pre">CN=shenetworks,CN=Users,DC=ansible,DC=test</span></code></p>
 <p>This is the value set on the <code class="docutils literal notranslate"><span class="pre">msDS-AllowedToActOnBehalfOfOtherIdentity</span></code> LDAP attribute.</p>
-<p>This is a highly sensitive attribute as it allows the principals specified to impersonate any account when authenticating with the AD user object being managed.</p>
+<p>This is a highly sensitive attribute as it allows the principals specified to impersonate any account when authenticating with the AD computer object being managed.</p>
+<p>To clear all principals, use <em>set</em> with an empty list.</p>
+<p>See <a class="reference internal" href="docsite/guide_list_values.html#ansible-collections-microsoft-ad-docsite-guide-list-values"><span class="std std-ref">Setting list option values</span></a> for more information on how to add/remove/set list options.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-delegates/add"></div>
+<div class="ansibleOptionAnchor" id="parameter-principals_allowed_to_delegate/add"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-principals-allowed-to-delegate-add"><span id="ansible-collections-microsoft-ad-user-module-parameter-delegates-add"></span><strong>add</strong></p>
+<a class="ansibleOptionLink" href="#parameter-delegates/add" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The AD objects by their <code class="docutils literal notranslate"><span class="pre">DistinguishedName</span></code> to add as a principal allowed to delegate.</p>
+<p>Any existing principals not specified by <em>add</em> will be untouched unless specified by <em>remove</em> or not in <em>set</em>.</p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-delegates/remove"></div>
+<div class="ansibleOptionAnchor" id="parameter-principals_allowed_to_delegate/remove"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-principals-allowed-to-delegate-remove"><span id="ansible-collections-microsoft-ad-user-module-parameter-delegates-remove"></span><strong>remove</strong></p>
+<a class="ansibleOptionLink" href="#parameter-delegates/remove" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The AD objects by their <code class="docutils literal notranslate"><span class="pre">DistinguishedName</span></code> to remove as a principal allowed to delegate.</p>
+<p>Any existing pricipals not specified by <em>remove</em> will be untouched unless <em>set</em> is defined.</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-delegates/set"></div>
+<div class="ansibleOptionAnchor" id="parameter-principals_allowed_to_delegate/set"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-principals-allowed-to-delegate-set"><span id="ansible-collections-microsoft-ad-user-module-parameter-delegates-set"></span><strong>set</strong></p>
+<a class="ansibleOptionLink" href="#parameter-delegates/set" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The AD objects by their <code class="docutils literal notranslate"><span class="pre">DistinguishedName</span></code> to set as the only principals allowed to delegate.</p>
+<p>This will remove any existing principals if not specified in this list.</p>
+<p>Specify an empty list to remove all principals allowed to delegate.</p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-description"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-description"><strong>description</strong></p>
 <a class="ansibleOptionLink" href="#parameter-description" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -277,7 +307,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <p>This is the value set on the <code class="docutils literal notranslate"><span class="pre">description</span></code> LDAP attribute.</p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-display_name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-display-name"><strong>display_name</strong></p>
 <a class="ansibleOptionLink" href="#parameter-display_name" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -285,14 +315,14 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <p>This is the value of the <code class="docutils literal notranslate"><span class="pre">displayName</span></code> LDAP attribute.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-domain_password"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-domain-password"><strong>domain_password</strong></p>
 <a class="ansibleOptionLink" href="#parameter-domain_password" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The password for <em>domain_username</em>.</p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-domain_server"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-domain-server"><strong>domain_server</strong></p>
 <a class="ansibleOptionLink" href="#parameter-domain_server" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -301,7 +331,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <p>If not specified then the value is based on the default domain of the computer running PowerShell.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-domain_username"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-domain-username"><strong>domain_username</strong></p>
 <a class="ansibleOptionLink" href="#parameter-domain_username" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -310,7 +340,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <p>Ansible will be unable to use the connection user unless auth is Kerberos with credential delegation or CredSSP, or become is used on the task.</p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-email"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-email"><strong>email</strong></p>
 <a class="ansibleOptionLink" href="#parameter-email" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -319,7 +349,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <p>This is the value set on the <code class="docutils literal notranslate"><span class="pre">mail</span></code> LDAP attribute.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-enabled"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-enabled"><strong>enabled</strong></p>
 <a class="ansibleOptionLink" href="#parameter-enabled" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
 </div></td>
@@ -333,7 +363,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 </ul>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-firstname"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-firstname"><strong>firstname</strong></p>
 <a class="ansibleOptionLink" href="#parameter-firstname" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -341,35 +371,28 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <p>This is the value set on the <code class="docutils literal notranslate"><span class="pre">givenName</span></code> LDAP attribute.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-groups"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-groups"><strong>groups</strong></p>
-<a class="ansibleOptionLink" href="#parameter-groups" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
-</div></td>
-<td><div class="ansible-option-cell"><p>Adds or removes the user from this list of groups, depending on the value of <em>groups_action</em>.</p>
-<p>To remove all but the Principal Group, set <code class="docutils literal notranslate"><span class="pre">groups=&lt;principal</span> <span class="pre">group</span> <span class="pre">name&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">groups_action=set</span></code>.</p>
-<p>Note that users cannot be removed from their principal group (for example, “Domain Users”). Attempting to do so will display a warning.</p>
-</div></td>
-</tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-groups_action"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-groups-action"><strong>groups_action</strong></p>
-<a class="ansibleOptionLink" href="#parameter-groups_action" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+<div class="ansibleOptionAnchor" id="parameter-groups"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-groups"><strong>groups</strong></p>
+<a class="ansibleOptionLink" href="#parameter-groups" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">dictionary</span></p>
 </div></td>
-<td><div class="ansible-option-cell"><p>If <code class="docutils literal notranslate"><span class="pre">add</span></code>, the user is added to each group in <em>groups</em> where not already a member.</p>
-<p>If <code class="docutils literal notranslate"><span class="pre">remove</span></code>, the user is removed from each group in <em>groups</em>.</p>
-<p>If <code class="docutils literal notranslate"><span class="pre">set</span></code>, the user is added as a member of each group in <em>groups</em> and removed from any other groups.</p>
-<p class="ansible-option-line"><span class="ansible-option-choices">Choices:</span></p>
-<ul class="simple">
-<li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;add&quot;</span></code></p></li>
-<li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;remove&quot;</span></code></p></li>
-<li><p><code class="ansible-option-default-bold docutils literal notranslate"><span class="pre">&quot;set&quot;</span></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
-</ul>
+<td><div class="ansible-option-cell"><p>Specifies the group membership the user is added, removed, or set to.</p>
+<p>To clear all group memberhips, use <em>set</em> with an empty list.</p>
+<p>Note that users cannot be removed from their principal group (for example, “Domain Users”). Attempting to do so will display a warning.</p>
+<p>See <a class="reference internal" href="docsite/guide_list_values.html#ansible-collections-microsoft-ad-docsite-guide-list-values"><span class="std std-ref">Setting list option values</span></a> for more information on how to add/remove/set list options.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-groups_missing_behaviour"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-groups-missing-behaviour"><strong>groups_missing_behaviour</strong></p>
-<a class="ansibleOptionLink" href="#parameter-groups_missing_behaviour" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-groups/add"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-groups-add"><strong>add</strong></p>
+<a class="ansibleOptionLink" href="#parameter-groups/add" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
 </div></td>
-<td><div class="ansible-option-cell"><p>Controls what happens when a group specified by <code class="docutils literal notranslate"><span class="pre">groups</span></code> is an invalid group name.</p>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The groups to add the user to.</p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-groups/missing_behaviour"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-groups-missing-behaviour"><strong>missing_behaviour</strong></p>
+<a class="ansibleOptionLink" href="#parameter-groups/missing_behaviour" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>Controls what happens when a group specified by <code class="docutils literal notranslate"><span class="pre">groups</span></code> is an invalid group name.</p>
 <p><code class="docutils literal notranslate"><span class="pre">fail</span></code> is the default and will return an error any groups do not exist.</p>
 <p><code class="docutils literal notranslate"><span class="pre">ignore</span></code> will ignore any groups that does not exist.</p>
 <p><code class="docutils literal notranslate"><span class="pre">warn</span></code> will display a warning for any groups that do not exist but will continue without failing.</p>
@@ -381,7 +404,23 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 </ul>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-groups/remove"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-groups-remove"><strong>remove</strong></p>
+<a class="ansibleOptionLink" href="#parameter-groups/remove" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The groups to remove the user from.</p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-groups/set"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-groups-set"><strong>set</strong></p>
+<a class="ansibleOptionLink" href="#parameter-groups/set" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The only groups the user is a member of.</p>
+<p>This will clear out any existing groups if not in the specified list.</p>
+<p>Set to an empty list to clear all group membership of the user.</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-identity"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-identity"><strong>identity</strong></p>
 <a class="ansibleOptionLink" href="#parameter-identity" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -391,7 +430,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <p>If omitted, the AD object to managed is selected by the <code class="docutils literal notranslate"><span class="pre">distinguishedName</span></code> using the format <code class="docutils literal notranslate"><span class="pre">CN={{</span> <span class="pre">name</span> <span class="pre">}},{{</span> <span class="pre">path</span> <span class="pre">}}</span></code>. If <em>path</em> is not defined, the <code class="docutils literal notranslate"><span class="pre">defaultNamingContext</span></code> is used instead.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-name"><strong>name</strong></p>
 <a class="ansibleOptionLink" href="#parameter-name" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -401,7 +440,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <p>This is not always going to be the same as the <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> for user objects. It is strictly the <code class="docutils literal notranslate"><span class="pre">name</span></code> of the object in the path specified. Use <em>identity</em> to select an object to manage by <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code>.</p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-password"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-password"><strong>password</strong></p>
 <a class="ansibleOptionLink" href="#parameter-password" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -410,7 +449,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <p>Use the <em>update_password</em> option to control how a password is checked for idempotency.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-password_expired"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-password-expired"><strong>password_expired</strong></p>
 <a class="ansibleOptionLink" href="#parameter-password_expired" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
 </div></td>
@@ -424,7 +463,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 </ul>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-password_never_expires"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-password-never-expires"><strong>password_never_expires</strong></p>
 <a class="ansibleOptionLink" href="#parameter-password_never_expires" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
 </div></td>
@@ -438,7 +477,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 </ul>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-path"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-path"><strong>path</strong></p>
 <a class="ansibleOptionLink" href="#parameter-path" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -447,7 +486,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <p>The modules <a class="reference internal" href="computer_module.html#ansible-collections-microsoft-ad-computer-module"><span class="std std-ref">microsoft.ad.computer</span></a>, <a class="reference internal" href="#ansible-collections-microsoft-ad-user-module"><span class="std std-ref">microsoft.ad.user</span></a>, and <a class="reference internal" href="group_module.html#ansible-collections-microsoft-ad-group-module"><span class="std std-ref">microsoft.ad.group</span></a> have their own default path that is configured on the Active Directory domain controller.</p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-postal_code"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-postal-code"><strong>postal_code</strong></p>
 <a class="ansibleOptionLink" href="#parameter-postal_code" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -455,7 +494,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <p>This is the value set on the <code class="docutils literal notranslate"><span class="pre">postalcode</span></code> LDAP attribute.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-protect_from_deletion"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-protect-from-deletion"><strong>protect_from_deletion</strong></p>
 <a class="ansibleOptionLink" href="#parameter-protect_from_deletion" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
 </div></td>
@@ -469,7 +508,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 </ul>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-sam_account_name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-sam-account-name"><strong>sam_account_name</strong></p>
 <a class="ansibleOptionLink" href="#parameter-sam_account_name" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -477,32 +516,45 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <p>If omitted, the <em>name</em> value is used when creating a new user.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-spn"></div>
 <div class="ansibleOptionAnchor" id="parameter-spns"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-spns"><span id="ansible-collections-microsoft-ad-user-module-parameter-spn"></span><strong>spn</strong></p>
 <a class="ansibleOptionLink" href="#parameter-spn" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-aliases">aliases: spns</span></p>
-<p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+<p class="ansible-option-type-line"><span class="ansible-option-type">dictionary</span></p>
 </div></td>
-<td><div class="ansible-option-cell"><p>Specifies the service principal name(s) for the account. This parameter sets the ServicePrincipalNames property of the account.</p>
+<td><div class="ansible-option-cell"><p>Specifies the service principal name(s) for the account to add, remove or set.</p>
 <p>This is the value set on the <code class="docutils literal notranslate"><span class="pre">servicePrincipalName</span></code> LDAP attribute.</p>
+<p>To clear all service principal names, use <em>set</em> with an empty list.</p>
+<p>See <a class="reference internal" href="docsite/guide_list_values.html#ansible-collections-microsoft-ad-docsite-guide-list-values"><span class="std std-ref">Setting list option values</span></a> for more information on how to add/remove/set list options.</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-spn/add"></div>
+<div class="ansibleOptionAnchor" id="parameter-spns/add"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-spns-add"><span id="ansible-collections-microsoft-ad-user-module-parameter-spn-add"></span><strong>add</strong></p>
+<a class="ansibleOptionLink" href="#parameter-spn/add" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The SPNs to add to <code class="docutils literal notranslate"><span class="pre">servicePrincipalName</span></code>.</p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-spn/remove"></div>
+<div class="ansibleOptionAnchor" id="parameter-spns/remove"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-spns-remove"><span id="ansible-collections-microsoft-ad-user-module-parameter-spn-remove"></span><strong>remove</strong></p>
+<a class="ansibleOptionLink" href="#parameter-spn/remove" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The SPNs to remove from <code class="docutils literal notranslate"><span class="pre">servicePrincipalName</span></code>.</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-spn/set"></div>
+<div class="ansibleOptionAnchor" id="parameter-spns/set"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-spns-set"><span id="ansible-collections-microsoft-ad-user-module-parameter-spn-set"></span><strong>set</strong></p>
+<a class="ansibleOptionLink" href="#parameter-spn/set" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The SPNs to set as the only values in <code class="docutils literal notranslate"><span class="pre">servicePrincipalName</span></code>.</p>
+<p>This will clear out any existing SPNs if not in the specified list.</p>
+<p>Set to an empty list to clear all SPNs on the AD object.</p>
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-spn_action"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-spn-action"><strong>spn_action</strong></p>
-<a class="ansibleOptionLink" href="#parameter-spn_action" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
-</div></td>
-<td><div class="ansible-option-cell"><p>If <code class="docutils literal notranslate"><span class="pre">add</span></code>, the SPNs are added to the user.</p>
-<p>If <code class="docutils literal notranslate"><span class="pre">remove</span></code>, the SPNs are removed from the user.</p>
-<p>If <code class="docutils literal notranslate"><span class="pre">set</span></code>, the defined set of SPN’s overwrite the current set of SPNs.</p>
-<p class="ansible-option-line"><span class="ansible-option-choices">Choices:</span></p>
-<ul class="simple">
-<li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;add&quot;</span></code></p></li>
-<li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;remove&quot;</span></code></p></li>
-<li><p><code class="ansible-option-default-bold docutils literal notranslate"><span class="pre">&quot;set&quot;</span></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
-</ul>
-</div></td>
-</tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-state"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-state"><strong>state</strong></p>
 <a class="ansibleOptionLink" href="#parameter-state" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -517,7 +569,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 </ul>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-state_province"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-state-province"><strong>state_province</strong></p>
 <a class="ansibleOptionLink" href="#parameter-state_province" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -525,7 +577,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <p>This is the value set on the <code class="docutils literal notranslate"><span class="pre">state</span></code> LDAP attribute.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-street"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-street"><strong>street</strong></p>
 <a class="ansibleOptionLink" href="#parameter-street" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -533,7 +585,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <p>This is the value set on the <code class="docutils literal notranslate"><span class="pre">streetaddress</span></code> LDAP attribute.</p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-surname"></div>
 <div class="ansibleOptionAnchor" id="parameter-lastname"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-surname"><span id="ansible-collections-microsoft-ad-user-module-parameter-lastname"></span><strong>surname</strong></p>
 <a class="ansibleOptionLink" href="#parameter-surname" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-aliases">aliases: lastname</span></p>
@@ -543,7 +595,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <p>This is the value set on the <code class="docutils literal notranslate"><span class="pre">sn</span></code> LDAP attribute.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-update_password"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-update-password"><strong>update_password</strong></p>
 <a class="ansibleOptionLink" href="#parameter-update_password" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -559,7 +611,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 </ul>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-upn"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-upn"><strong>upn</strong></p>
 <a class="ansibleOptionLink" href="#parameter-upn" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -569,7 +621,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <p>This is the value set on the <code class="docutils literal notranslate"><span class="pre">userPrincipalName</span></code> LDAP attribute.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-user_cannot_change_password"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-user-cannot-change-password"><strong>user_cannot_change_password</strong></p>
 <a class="ansibleOptionLink" href="#parameter-user_cannot_change_password" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
 </div></td>
@@ -669,7 +721,8 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">B0bP4ssw0rd</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
 <span class="w">    </span><span class="nt">groups</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Admins</span>
+<span class="w">      </span><span class="nt">set</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Admins</span>
 <span class="w">    </span><span class="nt">street</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">123 4th St.</span>
 <span class="w">    </span><span class="nt">city</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Sometown</span>
 <span class="w">    </span><span class="nt">state_province</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IN</span>
@@ -697,27 +750,29 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
 <span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ou=test,dc=domain,dc=local</span>
 <span class="w">    </span><span class="nt">groups</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Admins</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Users</span>
+<span class="w">      </span><span class="nt">set</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Admins</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Users</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ensure user bob is absent</span>
 <span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bob</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">absent</span>
 
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ensure user has spn&#39;s defined</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ensure user has only these spn&#39;s defined</span>
 <span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">liz.kenyon</span>
 <span class="w">    </span><span class="nt">spn</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MSSQLSvc/us99db-svr95:1433</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MSSQLSvc/us99db-svr95.vmware.com:1433</span>
+<span class="w">      </span><span class="nt">set</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MSSQLSvc/us99db-svr95:1433</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MSSQLSvc/us99db-svr95.vmware.com:1433</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ensure user has spn added</span>
 <span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">liz.kenyon</span>
-<span class="w">    </span><span class="nt">spn_action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">add</span>
 <span class="w">    </span><span class="nt">spn</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MSSQLSvc/us99db-svr95:2433</span>
+<span class="w">      </span><span class="nt">add</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MSSQLSvc/us99db-svr95:2433</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ensure user is created with delegates and spn&#39;s defined</span>
 <span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
@@ -725,15 +780,18 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">The3rubberducki33!</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
 <span class="w">    </span><span class="nt">groups</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Admins</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Users</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Enterprise Admins</span>
+<span class="w">      </span><span class="nt">set</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Admins</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Users</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Enterprise Admins</span>
 <span class="w">    </span><span class="nt">delegates</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=shenetworks,CN=Users,DC=ansible,DC=test</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=mk.ai,CN=Users,DC=ansible,DC=test</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=jessiedotjs,CN=Users,DC=ansible,DC=test</span>
+<span class="w">      </span><span class="nt">set</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=shenetworks,CN=Users,DC=ansible,DC=test</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=mk.ai,CN=Users,DC=ansible,DC=test</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=jessiedotjs,CN=Users,DC=ansible,DC=test</span>
 <span class="w">    </span><span class="nt">spn</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MSSQLSvc/us99db-svr95:2433</span>
+<span class="w">      </span><span class="nt">set</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MSSQLSvc/us99db-svr95:2433</span>
 </pre></div>
 </div>
 </section>

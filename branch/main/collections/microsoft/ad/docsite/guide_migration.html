@@ -23,7 +23,7 @@
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="search" title="Search" href="../../../../search.html" />
     <link rel="next" title="microsoft.ad.computer module – Manage Active Directory computer objects" href="../computer_module.html" />
-    <link rel="prev" title="Attributes guide" href="guide_attributes.html" /><!-- extra head elements for Ansible beyond RTD Sphinx Theme -->
+    <link rel="prev" title="Setting list option values guide" href="guide_list_values.html" /><!-- extra head elements for Ansible beyond RTD Sphinx Theme -->
 
 
 
@@ -248,8 +248,12 @@
 <p>The following options have changed:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">attributes</span></code> - changed format as outlined in <a class="reference internal" href="guide_attributes.html#ansible-collections-microsoft-ad-docsite-guide-attributes"><span class="std std-ref">Attributes guid</span></a></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">groups_action</span></code> - <code class="docutils literal notranslate"><span class="pre">replace</span></code> has been renamed to <code class="docutils literal notranslate"><span class="pre">set</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">spn_action</span></code> - <code class="docutils literal notranslate"><span class="pre">replace</span></code> has been renamed to <code class="docutils literal notranslate"><span class="pre">set</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">delegates</span></code> - changed format as outlined in <a class="reference internal" href="guide_list_values.html#ansible-collections-microsoft-ad-docsite-guide-list-values"><span class="std std-ref">Setting list values</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">groups</span></code> - changed format as outlined in <a class="reference internal" href="guide_list_values.html#ansible-collections-microsoft-ad-docsite-guide-list-values"><span class="std std-ref">Setting list values</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">groups_action</span></code> - has been removed in favour of the new <code class="docutils literal notranslate"><span class="pre">groups</span></code> format</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">groups_missing_behaviour</span></code> - has been moved into the <code class="docutils literal notranslate"><span class="pre">group</span></code> dictionary value as <code class="docutils literal notranslate"><span class="pre">missing_behaviour</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">spn</span></code>- changed format as outlined in <a class="reference internal" href="guide_list_values.html#ansible-collections-microsoft-ad-docsite-guide-list-values"><span class="std std-ref">Setting list values</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">spn_action</span></code> - has been removed in favour of the new <code class="docutils literal notranslate"><span class="pre">spn</span></code> format</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">state</span></code> - No query option - use <code class="docutils literal notranslate"><span class="pre">microsoft.ad.object_info</span></code> instead</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">enabled</span></code> - Does not default to <code class="docutils literal notranslate"><span class="pre">true</span></code>. Creating a new user without a password will use <code class="docutils literal notranslate"><span class="pre">enabled=false</span></code> but setting a password will use <code class="docutils literal notranslate"><span class="pre">enabled=true</span></code></p></li>
 </ul>
@@ -271,7 +275,7 @@
           
 
 <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="guide_attributes.html" class="btn btn-neutral float-left" title="Attributes guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="guide_list_values.html" class="btn btn-neutral float-left" title="Setting list option values guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="../computer_module.html" class="btn btn-neutral float-right" title="microsoft.ad.computer module – Manage Active Directory computer objects" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
