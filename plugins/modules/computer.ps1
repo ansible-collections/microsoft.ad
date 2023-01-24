@@ -12,8 +12,12 @@ $setParams = @{
             Name = 'delegates'
             Option = @{
                 aliases = 'principals_allowed_to_delegate'
-                type = 'list'
-                elements = 'str'
+                type = 'dict'
+                options = @{
+                    add = @{ type = 'list'; elements = 'str' }
+                    remove = @{ type = 'list'; elements = 'str' }
+                    set = @{ type = 'list'; elements = 'str' }
+                }
             }
             Attribute = 'PrincipalsAllowedToDelegateToAccount'
             CaseInsensitive = $true
@@ -31,12 +35,70 @@ $setParams = @{
         [PSCustomObject]@{
             Name = 'kerberos_encryption_types'
             Option = @{
-                choices = 'aes128', 'aes256', 'des', 'none', 'rc4'
-                type = 'list'
-                elements = 'str'
+                type = 'dict'
+                options = @{
+                    add = @{
+                        choices = 'aes128', 'aes256', 'des', 'rc4'
+                        type = 'list'
+                        elements = 'str'
+                    }
+                    remove = @{
+                        choices = 'aes128', 'aes256', 'des', 'rc4'
+                        type = 'list'
+                        elements = 'str'
+                    }
+                    set = @{
+                        choices = 'aes128', 'aes256', 'des', 'rc4'
+                        type = 'list'
+                        elements = 'str'
+                    }
+                }
             }
             Attribute = 'KerberosEncryptionType'
             CaseInsensitive = $true
+
+            New = {
+                param($Module, $ADParams, $NewParams)
+
+                $encTypes = @(
+                    $Module.Params.kerberos_encryption_types.add
+                    $Module.Params.kerberos_encryption_types.set
+                ) | Select-Object -Unique
+
+                $NewParams.KerberosEncryptionType = $encTypes
+                $Module.Diff.after.kerberos_encryption_types = $MencTypes
+            }
+            Set = {
+                param($Module, $ADParams, $SetParams, $ADObject)
+
+                # This is an enum value and needs custom handling for things like
+                # unsetting the values with none.
+                $rawValue = $ADObject.KerberosEncryptionType.Value
+
+                $existing = foreach ($v in [System.Enum]::GetValues($rawValue.GetType())) {
+                    if ($rawValue -band $v) { $v.ToString() }
+                }
+                if ($existing -eq 'None') {
+                    $existing = @()
+                }
+                $module.Diff.before.kerberos_encryption_types = $existing
+
+                $desired = $Module.Params.kerberos_encryption_types
+                $compareParams = @{
+                    Existing = $existing
+                    CaseInsensitive = $true
+                }
+                $res = Compare-AnsibleADIdempotentList @compareParams @desired
+                if ($res.Changed) {
+                    if ($res.Value) {
+                        $SetParams.KerberosEncryptionType = $res.Value -join ', '
+                    }
+                    else {
+                        $SetParams.KerberosEncryptionType = 'None'
+                    }
+                }
+                $module.Diff.after.kerberos_encryption_types = $res.Value
+            }
         }
         [PSCustomObject]@{
             Name = 'location'
@@ -56,62 +118,45 @@ $setParams = @{
         [PSCustomObject]@{
             Name = 'spn'
             Option = @{
-                type = 'list'
-                elements = 'str'
                 aliases = 'spns'
+                type = 'dict'
+                options = @{
+                    add = @{ type = 'list'; elements = 'str' }
+                    remove = @{ type = 'list'; elements = 'str' }
+                    set = @{ type = 'list'; elements = 'str' }
+                }
             }
-            Attribute = 'servicePrincipalNames'
+            Attribute = 'ServicePrincipalNames'
+            New = {
+                param($Module, $ADParams, $NewParams)
+
+                $spns = @(
+                    $Module.Params.spn.add
+                    $Module.Params.spn.set
+                ) | Select-Object -Unique
+
+                $NewParams.ServicePrincipalNames = $spns
+                $Module.Diff.after.spn = $spns
+            }
             Set = {
                 param($Module, $ADParams, $SetParams, $ADObject)
 
-                [string[]]$existing = @($ADObject.servicePrincipalNames.Value)
-                [string[]]$desired = @($Module.Params.spn)
-
-                $ignoreCase = [System.StringComparer]::OrdinalIgnoreCase
-
-                [string[]]$toAdd = @()
-                [string[]]$toRemove = @()
-                [string[]]$diffAfter = @()
-                switch ($Module.Params.spn_action) {
-                    add {
-                        $toAdd = [System.Linq.Enumerable]::Except($desired, $existing, $ignoreCase)
-                        $diffAfter = [System.Linq.Enumerable]::Union($desired, $existing, $ignoreCase)
+                $desired = $Module.Params.spn
+                $compareParams = @{
+                    Existing = $ADObject.ServicePrincipalNames
+                    CaseInsensitive = $true
+                }
+                $res = Compare-AnsibleADIdempotentList @compareParams @desired
+                if ($res.Changed) {
+                    $SetParams.ServicePrincipalNames = @{}
+                    if ($res.ToAdd) {
+                        $SetParams.ServicePrincipalNames.Add = $res.ToAdd
                     }
-                    remove {
-                        $toRemove = [System.Linq.Enumerable]::Intersect($desired, $existing, $ignoreCase)
-                        $diffAfter = [System.Linq.Enumerable]::Except($existing, $desired, $ignoreCase)
-                    }
-                    set {
-                        $toAdd = [System.Linq.Enumerable]::Except($desired, $existing, $ignoreCase)
-                        $toRemove = [System.Linq.Enumerable]::Except($existing, $desired, $ignoreCase)
-                        $diffAfter = $desired
+                    if ($res.ToRemove) {
+                        $SetParams.ServicePrincipalNames.Remove = $res.ToRemove
                     }
                 }
-
-                $spnValue = @{}
-                if ($toAdd) {
-                    # For whatever reason the Set-ADComputer doesn't like a
-                    # tainted [string[]] typed array, use ForEach-Object to
-                    # bypass this
-                    $spnValue.Add = $toAdd | ForEach-Object { "$_" }
-                }
-                if ($toRemove) {
-                    $spnValue.Remove = $toRemove | ForEach-Object { "$_" }
-                }
-
-                if ($spnValue.Count) {
-                    $SetParams.ServicePrincipalNames = $spnValue
-                }
-
-                $Module.Diff.after.spn = @($diffAfter | Sort-Object)
-            }
-        }
-        [PSCustomObject]@{
-            Name = 'spn_action'
-            Option = @{
-                choices = 'add', 'remove', 'set'
-                default = 'set'
-                type = 'str'
+                $module.Diff.after.kerberos_encryption_types = @($res.Value | Sort-Object)
             }
         }
         [PSCustomObject]@{

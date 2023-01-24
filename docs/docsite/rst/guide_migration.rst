@@ -169,8 +169,12 @@ Migrated to :ref:`microsoft.ad.user <ansible_collections.microsoft.ad.user_modul
 The following options have changed:
 
 * ``attributes`` - changed format as outlined in :ref:`Attributes guid <ansible_collections.microsoft.ad.docsite.guide_attributes>`
-* ``groups_action`` - ``replace`` has been renamed to ``set``
-* ``spn_action`` - ``replace`` has been renamed to ``set``
+* ``delegates`` - changed format as outlined in :ref:`Setting list values <ansible_collections.microsoft.ad.docsite.guide_list_values>`
+* ``groups`` - changed format as outlined in :ref:`Setting list values <ansible_collections.microsoft.ad.docsite.guide_list_values>`
+* ``groups_action`` - has been removed in favour of the new ``groups`` format
+* ``groups_missing_behaviour`` - has been moved into the ``group`` dictionary value as ``missing_behaviour``
+* ``spn``- changed format as outlined in :ref:`Setting list values <ansible_collections.microsoft.ad.docsite.guide_list_values>`
+* ``spn_action`` - has been removed in favour of the new ``spn`` format
 * ``state`` - No query option - use ``microsoft.ad.object_info`` instead
 * ``enabled`` - Does not default to ``true``. Creating a new user without a password will use ``enabled=false`` but setting a password will use ``enabled=true``
 

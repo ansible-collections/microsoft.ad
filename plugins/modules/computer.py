@@ -13,19 +13,47 @@ description:
 options:
   delegates:
     description:
-    - Specifies an array of principal objects that the current AD object can
-      trust for delegation.
-    - Must be specified as a distinguished name
+    - The principal objects that the current AD object can trust for
+      delegation to either add, remove or set.
+    - The values for each sub option must be specified as a distinguished name
       C(CN=shenetworks,CN=Users,DC=ansible,DC=test)
     - This is the value set on the C(msDS-AllowedToActOnBehalfOfOtherIdentity)
       LDAP attribute.
     - This is a highly sensitive attribute as it allows the principals
       specified to impersonate any account when authenticating with the AD
       computer object being managed.
+    - To clear all principals, use I(set) with an empty list.
+    - See R(Setting list option values,ansible_collections.microsoft.ad.docsite.guide_list_values)
+      for more information on how to add/remove/set list options.
     aliases:
     - principals_allowed_to_delegate
-    type: list
-    elements: str
+    type: dict
+    suboptions:
+      add:
+        description:
+        - The AD objects by their C(DistinguishedName) to add as a principal
+          allowed to delegate.
+        - Any existing principals not specified by I(add) will be untouched
+          unless specified by I(remove) or not in I(set).
+        type: list
+        elements: str
+      remove:
+        description:
+        - The AD objects by their C(DistinguishedName) to remove as a principal
+          allowed to delegate.
+        - Any existing pricipals not specified by I(remove) will be untouched
+          unless I(set) is defined.
+        type: list
+        elements: str
+      set:
+        description:
+        - The AD objects by their C(DistinguishedName) to set as the only
+          principals allowed to delegate.
+        - This will remove any existing principals if not specified in this
+          list.
+        - Specify an empty list to remove all principals allowed to delegate.
+        type: list
+        elements: str
   dns_hostname:
     description:
     - Specifies the fully qualified domain name (FQDN) of the computer.
@@ -42,17 +70,51 @@ options:
       account.
     - This is the value set on the C(msDS-SupportedEncryptionTypes) LDAP
       attribute.
-    - Use C(none) to remove all encryption types from the account.
     - Avoid using C(rc4) or C(des) as they are older an insecure encryption
       protocols.
-    choices:
-    - aes128
-    - aes256
-    - des
-    - none
-    - rc4
-    type: list
-    elements: str
+    - To clear all encryption types, use I(set) with an empty list.
+    - See R(Setting list option values,ansible_collections.microsoft.ad.docsite.guide_list_values)
+      for more information on how to add/remove/set list options.
+    type: dict
+    suboptions:
+      add:
+        description:
+        - The encryption types to add to the existing set.
+        - Any existing encryption types not specified by I(add) will be
+          untouched unless specified by I(remove) or not in I(set).
+        choices:
+        - aes128
+        - aes256
+        - des
+        - rc4
+        type: list
+        elements: str
+      remove:
+        description:
+        - The encryption types to remove from the existing set.
+        - Any existing encryption types not specified by I(remove) will be
+          untouched unless I(set) is defined.
+        choices:
+        - aes128
+        - aes256
+        - des
+        - rc4
+        type: list
+        elements: str
+      set:
+        description:
+        - The encryption types to set as the only encryption types allowed
+          by the AD computer.
+        - This will remove any existing encryption types if not specified in
+          this list.
+        - Specify an empty list to remove all encryption types.
+        choices:
+        - aes128
+        - aes256
+        - des
+        - rc4
+        type: list
+        elements: str
   location:
     description:
     - Sets the location of the computer account.
@@ -78,24 +140,33 @@ options:
     type: str
   spn:
     description:
-    - Specifies the service principal name(s) for the account. This parameter
-      sets the ServicePrincipalNames property of the account.
+    - Specifies the service principal name(s) for the account to add, remove or
+      set.
     - This is the value set on the C(servicePrincipalName) LDAP attribute.
+    - To clear all service principal names, use I(set) with an empty list.
+    - See R(Setting list option values,ansible_collections.microsoft.ad.docsite.guide_list_values)
+      for more information on how to add/remove/set list options.
     aliases:
     - spns
-    type: list
-    elements: str
-  spn_action:
-    description:
-    - If C(add), the SPNs are added to the user.
-    - If C(remove), the SPNs are removed from the user.
-    - If C(set), the defined set of SPN's overwrite the current set of SPNs.
-    choices:
-    - add
-    - remove
-    - set
-    default: set
-    type: str
+    type: dict
+    suboptions:
+      add:
+        description:
+        - The SPNs to add to C(servicePrincipalName).
+        type: list
+        elements: str
+      remove:
+        description:
+        - The SPNs to remove from C(servicePrincipalName).
+        type: list
+        elements: str
+      set:
+        description:
+        - The SPNs to set as the only values in C(servicePrincipalName).
+        - This will clear out any existing SPNs if not in the specified list.
+        - Set to an empty list to clear all SPNs on the AD object.
+        type: list
+        elements: str
   trusted_for_delegation:
     description:
     - Specifies whether an account is trusted for Kerberos delegation.
@@ -154,6 +225,32 @@ EXAMPLES = r"""
   microsoft.ad.computer:
     name: one_linux_server
     state: absent
+
+- name: Add SPNs to computer
+  microsoft.ad.computer:
+    name: TheComputer
+    spn:
+      add:
+      - HOST/TheComputer
+      - HOST/TheComputer.domain.test
+      - HOST/TheComputer.domain.test:1234
+
+- name: Remove SPNs on the computer
+  microsoft.ad.computer:
+    name: TheComputer
+    spn:
+      remove:
+      - HOST/TheComputer
+      - HOST/TheComputer.domain.test
+      - HOST/TheComputer.domain.test:1234
+
+- name: Set the principals the computer trusts for delegation from
+  microsoft.ad.computer:
+    name: TheComputer
+    delegates:
+      set:
+      - CN=FileShare,OU=Computers,DC=domain,DC=test
+      - CN=DC,OU=Domain Controllers,DC=domain,DC=test
 """
 
 RETURN = r"""

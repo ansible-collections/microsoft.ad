@@ -8,7 +8,8 @@
     state: present
     password_never_expires: yes
     groups:
-    - Domain Users
+      set:
+      - Domain Users
     enabled: false
   register: test_user
   notify: remove test domain user
@@ -108,10 +109,11 @@
     name: MyComputer
     state: present
     kerberos_encryption_types:
-    - des
-    - rc4
-    - aes128
-    - aes256
+      set:
+      - des
+      - rc4
+      - aes128
+      - aes256
   register: comp_info
 
 - block:

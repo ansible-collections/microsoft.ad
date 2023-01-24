@@ -371,6 +371,129 @@ Function Update-AnsibleADSetADObjectParam {
     $changed
 }
 
+
+Function Compare-AnsibleADIdempotentList {
+    <#
+    .SYNOPSIS
+    Common code to compare AD property values with an add/remove/set collection.
+
+    .PARAMETER Existing
+    The existing values for the property.
+
+    .PARAMETER Add
+    A list of values to add
+
+    .PARAMETER Remove
+    A list of values to remove
+
+    .PARAMETER Set
+    A list of files to set, will remove existing values if they are not in the
+    list and add ones that are not in the existing values.
+
+    .PARAMETER CaseInsensitive
+    Whether to perform a case insensitive comparison check.
+    #>
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
+        [AllowNull()]
+        [object[]]
+        $Existing,
+
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyCollection()]
+        [object[]]
+        $Add,
+
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyCollection()]
+        [object[]]
+        $Remove,
+
+        [Parameter()]
+        [AllowNull()]
+        [AllowEmptyCollection()]
+        [object[]]
+        $Set,
+
+        [Parameter()]
+        [switch]
+        $CaseInsensitive
+    )
+
+    # It's easier to compare with strings.
+    $existingString = [string[]]@(if ($Existing) { $Existing | ForEach-Object ToString })
+    $comparer = if ($CaseInsensitive) {
+        [System.StringComparer]::OrdinalIgnoreCase
+    }
+    else {
+        [System.StringComparer]::CurrentCulture
+    }
+
+    $value = [System.Collections.Generic.List[Object]]@()
+    $toAdd = [System.Collections.Generic.List[Object]]@()
+    $toRemove = [System.Collections.Generic.List[Object]]@()
+
+    if ($null -ne $Set) {
+        $setString = [string[]]@($Set | ForEach-Object ToString)
+        $value.AddRange($Set)
+
+        for ($i = 0; $i -lt $setString.Length; $i++) {
+            $setElement = $setString[$i]
+            if (-not [System.Linq.Enumerable]::Contains($existingString, $setElement, $comparer)) {
+                $toAdd.Add($Set[$i])
+            }
+        }
+        for ($i = 0; $i -lt $existingString.Length; $i++) {
+            $existingElement = $existingString[$i]
+            if (-not [System.Linq.Enumerable]::Contains($setString, $existingElement, $comparer)) {
+                $toRemove.Add($Existing[$i])
+            }
+        }
+    }
+    else {
+        if ($Remove) {
+            $removeString = [string[]]@($Remove | ForEach-Object ToString)
+
+            for ($i = 0; $i -lt $existingString.Length; $i++) {
+                $existingElement = $existingString[$i]
+                if ([System.Linq.Enumerable]::Contains($removeString, $existingElement, $comparer)) {
+                    $toRemove.Add($Existing[$i])
+                }
+                else {
+                    $value.Add($Existing[$i])
+                }
+            }
+        }
+        else {
+            $value.AddRange($Existing)
+        }
+
+        if ($Add) {
+            $addString = [string[]]@($Add | ForEach-Object ToString)
+
+            for ($i = 0; $i -lt $addString.Length; $i++) {
+                $addElement = $addString[$i]
+                if (-not [System.Linq.Enumerable]::Contains($existingString, $addElement, $comparer)) {
+                    $toAdd.Add($Add[$i])
+                    $value.Add($Add[$i])
+                }
+            }
+        }
+    }
+
+    [PSCustomObject]@{
+        Value = if ($value.Count) { $value.ToArray() } else { $null }
+        # Also returned if the API doesn't support explicitly setting 1 value
+        ToAdd = $toAdd.ToArray()
+        ToRemove = $toRemove.ToArray()
+        Changed = [bool]($toAdd.Count -or $toRemove.Count)
+    }
+}
+
 Function Get-AnsibleADObject {
     <#
     .SYNOPSIS
@@ -820,6 +943,10 @@ Function Invoke-AnsibleADObject {
                     $null = & $propInfo.New $module $adParams $newParams
                 }
                 elseif ($propInfo.Attribute) {
+                    if ($propValue -is [System.Collections.IDictionary]) {
+                        $propValue = @($propValue['add']; $propValue['set']) | Select-Object -Unique
+                    }
+
                     $newParams[$propInfo.Attribute] = $propValue
 
                     if ($propInfo.Option.no_log) {
@@ -832,7 +959,14 @@ Function Invoke-AnsibleADObject {
                 }
             }
 
-            $adObject = & $newCommand @newParams @adParams
+            try {
+                $adObject = & $newCommand @newParams @adParams
+            }
+            catch {
+                # Using FailJson means other useful debugging information
+                # like the diff output is returned
+                $module.FailJson("New-$ModuleNoun failed: $_", $_)
+            }
             $module.Result.changed = $true
 
             if ($module.CheckMode) {
@@ -879,45 +1013,45 @@ Function Invoke-AnsibleADObject {
                 }
                 elseif ($propInfo.Attribute) {
                     $actualValue = $adObject[$propInfo.Attribute]
-                    $propChanged = $false
 
-                    # Comparing strings is a lot easier
-                    if ($PropInfo.CaseInsensitive) {
-                        $stringComparer = [System.StringComparer]::OrdinalIgnoreCase
+                    $compareParams = @{
+                        Existing = $actualValue
+                        CaseInsensitive = $propInfo.CaseInsensitive
+                    }
+
+                    if ($propValue -is [System.Collections.IDictionary]) {
+                        $compareParams.Add = $propValue['add']
+                        $compareParams.Remove = $propValue['remove']
+                        $compareParams.Set = $propValue['set']
+                    }
+                    elseif ([string]::IsNullOrWhiteSpace($propValue)) {
+                        $compareParams.Set = @()
                     }
                     else {
-                        $stringComparer = [System.StringComparer]::CurrentCulture
+                        $compareParams.Set = @($propValue)
                     }
 
-                    $existing = [string[]]@($actualValue)
-                    $desired = [string[]]@(if (-not [string]::IsNullOrWhiteSpace($propValue)) { $propValue })
-
-                    $toAdd = [string[]][System.Linq.Enumerable]::Except($desired, $existing, $stringComparer)
-                    $toRemove = [string[]][System.Linq.Enumerable]::Except($existing, $desired, $stringComparer)
-                    if ($toAdd.Length -or $toRemove.Length) {
-                        if ([String]::IsNullOrWhiteSpace($propValue)) {
-                            $propValue = $null
-                        }
-                        $setParams[$propInfo.Attribute] = $propValue
-
-                        $propChanged = $true
+                    $res = Compare-AnsibleADIdempotentList @compareParams
+                    $newValue = $res.Value
+                    if ($res.Changed) {
+                        $setParams[$propInfo.Attribute] = $newValue
                     }
 
                     $noLog = $propInfo.Option.no_log
-                    if ($propValue) {
-                        if ($propChanged -and $noLog) {
-                            $propValue = 'VALUE_SPECIFIED_IN_NO_LOG_PARAMETER - changed'
+                    if ($newValue) {
+                        if ($res.Changed -and $noLog) {
+                            $newValue = 'VALUE_SPECIFIED_IN_NO_LOG_PARAMETER - changed'
                         }
                         elseif ($noLog) {
-                            $propValue = 'VALUE_SPECIFIED_IN_NO_LOG_PARAMETER'
+                            $newValue = 'VALUE_SPECIFIED_IN_NO_LOG_PARAMETER'
                         }
 
-                        if ($propValue -is [System.Collections.IList]) {
-                            $propValue = @($propValue | Sort-Object)
+                        if ($newValue -is [System.Collections.IList]) {
+                            $newValue = @($newValue | Sort-Object)
                         }
                     }
 
-                    $module.Diff.after[$propInfo.Name] = $propValue
+                    $module.Diff.after[$propInfo.Name] = $newValue
                 }
             }
 
@@ -953,8 +1087,14 @@ Function Invoke-AnsibleADObject {
             }
 
             if ($setParams.Count) {
-                # throw "Test: $(ConvertTo-Json -InputObject $setParams -Compress)"
-                $finalADObject = & $setCommand @commonParams @setParams @adParams
+                try {
+                    $finalADObject = & $setCommand @commonParams @setParams @adParams
+                }
+                catch {
+                    # Using FailJson means other useful debugging information
+                    # like the diff output is returned
+                    $module.FailJson("Set-$ModuleNoun failed: $_", $_)
+                }
                 $module.Result.changed = $true
             }
 
@@ -982,6 +1122,7 @@ Function Invoke-AnsibleADObject {
 
 $exportMembers = @{
     Function = @(
+        "Compare-AnsibleADIdempotentList"
         "Get-AnsibleADObject"
         "Invoke-AnsibleADObject"
     )

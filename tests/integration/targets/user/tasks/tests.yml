@@ -328,22 +328,25 @@
     company: Red Hat
     country: au
     delegates:
-    - CN=krbtgt,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
-    - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      set:
+      - CN=krbtgt,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
     description: User Description
     display_name: User Name
     email: user@EMAIL.COM
     firstname: FirstName
     groups:
-    - Domain Admins
-    - Domain Users
+      set:
+      - Domain Admins
+      - Domain Users
     password: Password123!
     password_never_expires: true
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     postal_code: 4000
     sam_account_name: MyUserSam
     spn:
-    - HTTP/MyUser
+      set:
+      - HTTP/MyUser
     state_province: QLD
     street: Main
     surname: LastName
@@ -374,22 +377,25 @@
     company: Red Hat
     country: au
     delegates:
-    - CN=krbtgt,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
-    - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      set:
+      - CN=krbtgt,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
     description: User Description
     display_name: User Name
     email: user@EMAIL.COM
     firstname: FirstName
     groups:
-    - Domain Admins
-    - Domain Users
+      set:
+      - Domain Admins
+      - Domain Users
     password: Password123!
     password_never_expires: true
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     postal_code: 4000
     sam_account_name: MyUserSam
     spn:
-    - HTTP/MyUser
+      set:
+      - HTTP/MyUser
     state_province: QLD
     street: Main
     surname: LastName
@@ -442,7 +448,7 @@
       $sd.SetSecurityDescriptorSddlForm($SDDL, 'All')
       $sd.GetAccessRules($true, $false, [Type][System.Security.Principal.NTAccount]
       ).IdentityReference.Value | ForEach-Object {
-          ($_ -split '\\', 2)[-1]
+          ($_ -split '\\', 2)[-1].ToLowerInvariant()
       } | Sort-Object
   register: create_user_delegates
 
@@ -475,7 +481,7 @@
     - create_user_actual.objects[0].streetaddress == 'Main'
     - create_user_actual.objects[0].userPrincipalName == 'User@' ~ domain_realm
     - create_user_actual.objects[0].userAccountControl_AnsibleFlags == ["ADS_UF_NORMAL_ACCOUNT", "ADS_UF_DONT_EXPIRE_PASSWD"]
-    - create_user_delegates.output == ["Administrator", "krbtgt"]
+    - create_user_delegates.output == ["administrator", "krbtgt"]
 
 - name: create user with extra info - idempotent
   user:
@@ -485,22 +491,25 @@
     company: Red Hat
     country: au
     delegates:
-    - CN=krbtgt,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
-    - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      set:
+      - CN=krbtgt,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
     description: User Description
     display_name: User Name
     email: user@EMAIL.COM
     firstname: FirstName
     groups:
-    - Domain Admins
-    - Domain Users
+      set:
+      - Domain Admins
+      - Domain Users
     password: Password123!
     password_never_expires: true
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     postal_code: 4000
     sam_account_name: MyUserSam
     spn:
-    - HTTP/MyUser
+      set:
+      - HTTP/MyUser
     state_province: QLD
     street: Main
     surname: LastName
@@ -525,20 +534,23 @@
     company: Ansible
     country: us
     delegates:
-    - CN=KRBTGT,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      set:
+      - CN=KRBTGT,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
     description: User description
     display_name: User name
     email: User@EMAIL.COM
     firstname: firstName
     groups:
-    - Domain Users
+      set:
+      - Domain Users
     password: Password123!
     password_never_expires: false
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     postal_code: 10001
     sam_account_name: myUserSam
     spn:
-    - HTTP/myUser
+      set:
+      - HTTP/myUser
     state_province: NY
     street: main
     surname: lastName
@@ -616,20 +628,23 @@
     company: Ansible
     country: us
     delegates:
-    - CN=KRBTGT,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      set:
+      - CN=KRBTGT,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
     description: User description
     display_name: User name
     email: User@EMAIL.COM
     firstname: firstName
     groups:
-    - Domain Users
+      set:
+      - Domain Users
     password: Password123!
     password_never_expires: false
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     postal_code: 10001
     sam_account_name: myUserSam
     spn:
-    - HTTP/myUser
+      set:
+      - HTTP/myUser
     state_province: NY
     street: main
     surname: lastName
@@ -679,7 +694,7 @@
       $sd.SetSecurityDescriptorSddlForm($SDDL, 'All')
       $sd.GetAccessRules($true, $false, [Type][System.Security.Principal.NTAccount]
       ).IdentityReference.Value | ForEach-Object {
-          ($_ -split '\\', 2)[-1]
+          ($_ -split '\\', 2)[-1].ToLowerInvariant()
       } | Sort-Object
   register: update_user_delegates
 
@@ -718,7 +733,8 @@
     name: MyUser
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     delegates:
-    - CN=KrbTGT,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      set:
+      - CN=KrbTGT,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
   register: update_delegates_insensitive
 
 - name: assert update delegates case insensitive
@@ -731,8 +747,9 @@
     name: MyUser
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     delegates:
-    - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
-    - CN=Enterprise Admins,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      set:
+      - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      - CN=Enterprise Admins,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
   register: update_delegates
 
 - name: get result of update delegates
@@ -753,7 +770,7 @@
       $sd.SetSecurityDescriptorSddlForm($SDDL, 'All')
       $sd.GetAccessRules($true, $false, [Type][System.Security.Principal.NTAccount]
       ).IdentityReference.Value | ForEach-Object {
-          ($_ -split '\\', 2)[-1]
+          ($_ -split '\\', 2)[-1].ToLowerInvariant()
       } | Sort-Object
   register: update_delegates_actual
 
@@ -761,7 +778,7 @@
   assert:
     that:
     - update_delegates is changed
-    - update_delegates_actual.output == ["Administrator", "Enterprise Admins"]
+    - update_delegates_actual.output == ["administrator", "enterprise admins"]
 
 - name: unset string option
   user:
@@ -788,7 +805,8 @@
     name: MyUser
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     groups:
-    - Domain Admins
+      set:
+      - Domain Admins
   register: set_groups_check
   check_mode: true
 
@@ -812,7 +830,8 @@
     name: MyUser
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     groups:
-    - Domain Admins
+      set:
+      - Domain Admins
   register: set_groups
 
 - name: get result of set groups
@@ -837,8 +856,8 @@
     name: MyUser
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     groups:
-    - Invalid
-    groups_action: add
+      add:
+      - Invalid
   register: fail_missing_group
   failed_when:
   - '"Failed to locate group Invalid: Cannot find an object with identity" not in fail_missing_group.msg'
@@ -848,9 +867,9 @@
     name: MyUser
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     groups:
-    - Invalid
-    groups_action: add
-    groups_missing_behaviour: warn
+      add:
+      - Invalid
+      missing_behaviour: warn
   register: warn_missing_group
 
 - name: assert warn on group that is missing
@@ -865,9 +884,9 @@
     name: MyUser
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     groups:
-    - Invalid
-    groups_action: add
-    groups_missing_behaviour: ignore
+      add:
+      - Invalid
+      missing_behaviour: ignore
   register: ignore_missing_group
 
 - name: assert ignore on group that is missing
@@ -881,9 +900,9 @@
     name: MyUser
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     groups:
-    - domain admins
-    - Enterprise Admins
-    groups_action: remove
+      remove:
+      - domain admins
+      - Enterprise Admins
   register: groups_remove
 
 - name: get result of remove groups
@@ -906,9 +925,9 @@
     name: MyUser
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     groups:
-    - domain users
-    - domain admins
-    groups_action: add
+      add:
+      - domain users
+      - domain admins
   register: groups_add
 
 - name: get result of add groups
@@ -931,9 +950,10 @@
     name: MyUser
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     spn:
-    - HTTP/host
-    - HTTP/host.domain
-    - HTTP/host.domain:8080
+      set:
+      - HTTP/host
+      - HTTP/host.domain
+      - HTTP/host.domain:8080
   register: spn_set
 
 - name: get result of set spns
@@ -954,9 +974,9 @@
     name: MyUser
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     spn:
-    - HTTP/fake
-    - HTTP/Host.domain
-    spn_action: remove
+      remove:
+      - HTTP/fake
+      - HTTP/Host.domain
   register: spn_remove
 
 - name: get result of remove spns
@@ -977,9 +997,9 @@
     name: MyUser
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     spn:
-    - HTTP/Host.domain:8080
-    - HTTP/fake
-    spn_action: add
+      add:
+      - HTTP/Host.domain:8080
+      - HTTP/fake
   register: spn_add
 
 - name: get result of add spns
