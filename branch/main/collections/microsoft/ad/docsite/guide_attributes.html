@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Attributes guide &mdash; Ansible collections  documentation</title>
@@ -14,10 +14,8 @@
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/underscore.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../../_static/doctools.js"></script>
         <script src="../../../../_static/sphinx_highlight.js"></script>
     <script src="../../../../_static/js/theme.js"></script>
@@ -53,7 +51,11 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../../index.html" class="icon icon-home"> Ansible collections
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Ansible collections
           </a><!--- Based on https://github.com/rtfd/sphinx_rtd_theme/pull/438/files -->
 
 <div class="version">
@@ -110,7 +112,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../../index.html" class="icon icon-home"></a></li>
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../../index.html">Collection Index</a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Collections in the Microsoft Namespace</a></li>
           <li class="breadcrumb-item"><a href="../index.html">Microsoft.Ad</a></li>
@@ -128,15 +130,15 @@
   <section id="attributes-guide">
 <span id="ansible-collections-microsoft-ad-docsite-guide-attributes"></span><h1>Attributes guide<a class="headerlink" href="#attributes-guide" title="Permalink to this heading"></a></h1>
 <p>A common use case for modules in this collection is to manage various Active Directory objects, such as users, groups, computers, and more. Some of these options are exposed as direct module options but other attributes might need to be set through the <code class="docutils literal notranslate"><span class="pre">attributes</span></code> option common to most modules in this collection.</p>
-<div class="contents local topic" id="contents">
+<nav class="contents local" id="contents">
 <ul class="simple">
 <li><p><a class="reference internal" href="#ldap-attributes" id="id1">LDAP Attributes</a></p></li>
 <li><p><a class="reference internal" href="#setting-attributes" id="id2">Setting Attributes</a></p></li>
 <li><p><a class="reference internal" href="#attribute-types" id="id3">Attribute Types</a></p></li>
 </ul>
-</div>
+</nav>
 <section id="ldap-attributes">
-<span id="ansible-collections-microsoft-ad-docsite-guide-attributes-ldap-attributes"></span><h2><a class="toc-backref" href="#id1">LDAP Attributes</a><a class="headerlink" href="#ldap-attributes" title="Permalink to this heading"></a></h2>
+<span id="ansible-collections-microsoft-ad-docsite-guide-attributes-ldap-attributes"></span><h2><a class="toc-backref" href="#id1" role="doc-backlink">LDAP Attributes</a><a class="headerlink" href="#ldap-attributes" title="Permalink to this heading"></a></h2>
 <p>One core component of Microsoft’s Active Directory (<code class="docutils literal notranslate"><span class="pre">AD</span></code>) is a Lightweight Directory Access Protocol (<code class="docutils literal notranslate"><span class="pre">LDAP</span></code>) database. This database contains all the information relevant to an AD environment such as users, computers, organizational units, and more. Each object contains a dynamic set of attributes to describe the object and conform to a schema. For example users contain attributes like <code class="docutils literal notranslate"><span class="pre">firstName</span></code>, <code class="docutils literal notranslate"><span class="pre">country</span></code>, <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> to describe the object itself. Microsoft document all the builtin attributes in AD in their <a class="reference external" href="https://learn.microsoft.com/en-us/windows/win32/adschema/attributes-all">AD Attribute Schema</a>. For example the <a class="reference external" href="https://learn.microsoft.com/en-us/windows/win32/adschema/a-samaccountname">SAM-Account-Name attribute</a> contains the metadata around this attribute. It includes fields like:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Ldap-Display-Name</span></code> - The LDAP display name</p></li>
@@ -198,7 +200,7 @@
 <p>This shows the <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> is a string that can only have 1 value. The <code class="docutils literal notranslate"><span class="pre">o</span></code> attribute is also a string but can store multiple values. The <code class="docutils literal notranslate"><span class="pre">objectGUID</span></code> is a byte array value that can only have 1 value and is also read only.</p>
 </section>
 <section id="setting-attributes">
-<span id="ansible-collections-microsoft-ad-docsite-guide-attributes-setting-attributes"></span><h2><a class="toc-backref" href="#id2">Setting Attributes</a><a class="headerlink" href="#setting-attributes" title="Permalink to this heading"></a></h2>
+<span id="ansible-collections-microsoft-ad-docsite-guide-attributes-setting-attributes"></span><h2><a class="toc-backref" href="#id2" role="doc-backlink">Setting Attributes</a><a class="headerlink" href="#setting-attributes" title="Permalink to this heading"></a></h2>
 <p>Each module that manages an Active Directory object will have an <code class="docutils literal notranslate"><span class="pre">attributes</span></code> option which is used to configure LDAP attributes directly. The dictionary accepts three keys:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">add</span></code> - Adds the attribute values if not present</p></li>
@@ -254,7 +256,7 @@
 <p>This task will ensure the <code class="docutils literal notranslate"><span class="pre">comment</span></code>, <code class="docutils literal notranslate"><span class="pre">company</span></code>, and <code class="docutils literal notranslate"><span class="pre">extensionName</span></code> attributes are cleared of any value.</p>
 </section>
 <section id="attribute-types">
-<span id="ansible-collections-microsoft-ad-docsite-guide-attributes-attribute-types"></span><h2><a class="toc-backref" href="#id3">Attribute Types</a><a class="headerlink" href="#attribute-types" title="Permalink to this heading"></a></h2>
+<span id="ansible-collections-microsoft-ad-docsite-guide-attributes-attribute-types"></span><h2><a class="toc-backref" href="#id3" role="doc-backlink">Attribute Types</a><a class="headerlink" href="#attribute-types" title="Permalink to this heading"></a></h2>
 <p>There are a few different value types that can be stored in an attribute.
 The common types are:</p>
 <ul class="simple">
