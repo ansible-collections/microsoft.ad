@@ -1,5 +1,14 @@
-Will be updated by antsibull-changelog. Do not edit this manually!
+================================================
+Ansible Microsoft Active Directory Release Notes
+================================================
 
-See https://github.com/ansible-community/antsibull-changelog/blob/main/docs/changelogs.rst for information on how to use antsibull-changelog.
+.. contents:: Topics
 
-Check out ``changelogs/config.yaml`` for its configuration. You need to change at least the ``title`` field in there.
+
+v1.0.0
+======
+
+Release Summary
+---------------
+
+This is the first release of the ``microsoft.ad`` Ansible collection which contains modules that can be used to managed a Microsoft Active Directory environment.

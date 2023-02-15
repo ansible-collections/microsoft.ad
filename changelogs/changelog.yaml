@@ -1,0 +1,10 @@
+ancestor: null
+releases:
+  1.0.0:
+    changes:
+      release_summary: This is the first release of the ``microsoft.ad`` Ansible collection
+        which contains modules that can be used to managed a Microsoft Active Directory
+        environment.
+    fragments:
+    - release-summary.yml
+    release_date: '2023-02-15'
