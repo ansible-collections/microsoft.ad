@@ -7,5 +7,7 @@ sections:
 - title: Scenario Guides
   toctree:
   - guide_attributes
+  - guide_ldap_connection
+  - guide_ldap_inventory
   - guide_list_values
   - guide_migration

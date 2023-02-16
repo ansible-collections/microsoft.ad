@@ -1,0 +1,196 @@
+- name: install Active Directory Certificate Services
+  ansible.windows.win_feature:
+    name: AD-Certificate
+    state: present
+  register: adcs_setup_res
+
+- name: reboot after ADCS install
+  ansible.windows.win_reboot:
+  when: adcs_setup_res.reboot_required
+
+- name: configure ADCS certification authority
+  ansible.windows.win_powershell:
+    script: |
+      $ErrorActionPreference = 'Stop'
+      $Ansible.Changed = $false
+
+      $caParams = @{
+          CAType             = 'EnterpriseRootCa'
+          CryptoProviderName = 'RSA#Microsoft Software Key Storage Provider'
+          KeyLength          = 2048
+          HashAlgorithmName  = 'SHA256'
+          Force              = $true
+      }
+      try {
+          Install-AdcsCertificationAuthority @caParams
+          $Ansible.Changed = $true
+      }
+      catch [Microsoft.CertificateServices.Deployment.Common.CertificateServicesBaseSetupException] {
+          if ($_.Exception.Message -like 'The Certification Authority is already installed.*') {
+              return
+          }
+          throw
+      }
+  become: true
+  become_method: runas
+  become_user: SYSTEM
+
+- name: name ensure local cert dir exists
+  ansible.builtin.file:
+    path: '{{ cert_path }}'
+    state: directory
+  delegate_to: localhost
+
+- name: check if certificates have been generated
+  ansible.windows.win_stat:
+    path: C:\Windows\TEMP\ca.pem
+  register: cert_info
+
+- name: fetch CA cert from remote
+  ansible.builtin.fetch:
+    src: C:\Windows\TEMP\ca.pem
+    dest: '{{ cert_path }}/ca.pem'
+    flat: true
+  when: cert_info.stat.exists
+
+- name: generate CA and LDAPS certs
+  when: not cert_info.stat.exists
+  block:
+  - name: generate TLS certificates
+    ansible.builtin.script:
+      cmd: generate_cert.sh {{ dc_name | quote }} password
+      creates: '{{ cert_path }}/ca.pem'
+      chdir: '{{ cert_path }}'
+    delegate_to: localhost
+
+  - name: copy across CA and LDAPS cert to remote target
+    ansible.windows.win_copy:
+      src: '{{ cert_path }}/{{ item }}'
+      dest: C:\Windows\TEMP\{{ item }}
+    loop:
+    - ca.pem
+    - ldaps.pfx
+
+- name: import CA certificate to trusted root CA
+  ansible.windows.win_certificate_store:
+    path: C:\Windows\TEMP\ca.pem
+    state: present
+    store_location: LocalMachine
+    store_name: Root
+
+- name: add custom CA to Forest NTAuthStore
+  ansible.windows.win_powershell:
+    script: |
+      $ErrorActionPreference = 'Stop'
+      $Ansible.Changed = $false
+
+      $caCert = New-Object -TypeName System.Security.Cryptography.X509Certificates.X509Certificate2 -ArgumentList 'C:\Windows\TEMP\ca.pem'
+      $configRoot = (Get-ADRootDSE).configurationNamingContext
+
+      $dn = "CN=NTAuthCertificates,CN=Public Key Services,CN=Services,$configRoot"
+      $obj = Get-ADObject -Identity $dn -Properties cACertificate
+
+      $found = $false
+      foreach ($certBytes in $obj.cACertificate) {
+          $cert = New-Object -TypeName System.Security.Cryptography.X509Certificates.X509Certificate2 -ArgumentList @(,$certBytes)
+          if ($cert.Thumbprint -eq $caCert.Thumbprint) {
+              $found = $true
+              break
+          }
+      }
+
+      if (-not $found) {
+          certutil.exe -dspublish C:\Windows\TEMP\ca.pem NTAuthCA
+          $Ansible.Changed = $true
+      }
+  become: true
+  become_method: runas
+  become_user: SYSTEM
+
+- name: create domain user
+  microsoft.ad.user:
+    name: ldap-test
+    upn: ldap-test@{{ domain_realm }}
+    description: ldap-test Domain Account
+    password: '{{ domain_password }}'
+    password_never_expires: true
+    update_password: when_changed
+    groups:
+      set:
+      - Domain Admins
+      - Domain Users
+      - Enterprise Admins
+    state: present
+  notify: remove test user
+
+- name: request User certificate
+  ansible.windows.win_powershell:
+    parameters:
+      Path: C:\Windows\TEMP\user.pfx
+      CertPass: '{{ domain_password }}'
+    script: |
+      [CmdletBinding()]
+      param (
+          [string]
+          $Path,
+
+          [string]
+          $CertPass
+      )
+      $ErrorActionPreference = 'Stop'
+      $Ansible.Changed = $false
+
+      if (Test-Path -LiteralPath $Path) {
+          return
+      }
+
+      Push-Location Cert:\CurrentUser\My
+      $result = Get-Certificate -Template User -Url ldap:
+      Pop-Location
+
+      if ($result.Status -ne "Issued") {
+          throw "Failed to request User certificate: $($result.Status)"
+      }
+      $Ansible.Changed = $true
+
+      $cert = $result.Certificate
+      $certBytes = $result.Certificate.Export("Pfx", $CertPass)
+      [System.IO.File]::WriteAllBytes($Path, $certBytes)
+  notify: remove test user cert
+  vars:
+    ansible_become: true
+    ansible_become_method: runas
+    ansible_become_user: ldap-test@{{ domain_realm }}
+    ansible_become_pass: '{{ domain_password }}'
+
+- name: fetch certificate for user cert authentication
+  ansible.builtin.fetch:
+    src: C:\Windows\TEMP\user.pfx
+    dest: '{{ cert_path }}/user.pfx'
+    flat: true
+
+- name: import LDAPS certificate
+  ansible.windows.win_certificate_store:
+    path: C:\Windows\TEMP\ldaps.pfx
+    password: password
+    key_exportable: false
+    key_storage: machine
+    state: present
+    store_type: service
+    store_location: NTDS
+    store_name: My
+  register: ldaps_cert_info
+
+- name: register LDAPS certificate
+  ansible.windows.win_powershell:
+    script: |
+      $ErrorActionPreference = 'Stop'
+      $dse = [adsi]'LDAP://localhost/rootDSE'
+      [void]$dse.Properties['renewServerCertificate'].Add(1)
+      $dse.CommitChanges()
+  when: ldaps_cert_info is changed
+  vars:
+    ansible_become: true
+    ansible_become_method: runas
+    ansible_become_user: ldap-test@{{ domain_realm }}
+    ansible_become_pass: '{{ domain_password }}'

@@ -1,0 +1,3 @@
+# Needed for microsoft.ad.ldap
+pyspnego >= 0.8.0
+sansldap
