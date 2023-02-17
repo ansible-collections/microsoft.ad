@@ -1,12 +1,8 @@
----
 # Copyright (c) Ansible Project
 # GNU General Public License v3.0+ (see LICENSES/GPL-3.0-or-later.txt or https://www.gnu.org/licenses/gpl-3.0.txt)
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-sections:
-- title: Scenario Guides
-  toctree:
-  - guide_attributes
-  - guide_ldap
-  - guide_list_values
-  - guide_migration
+gcc [platform:rpm compile]
+krb5-devel [platform:rpm compile]
+krb5-libs [platform:rpm]
+python38-devel [platform:rpm compile]

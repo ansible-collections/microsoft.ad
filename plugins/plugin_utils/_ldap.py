@@ -23,6 +23,7 @@ import threading
 import typing as t
 
 import sansldap
+import spnego
 
 
 # cryptography is used for TLS channel binding with SPNEGO.
@@ -52,16 +53,6 @@ try:
     HAS_KRB5 = True
 except Exception:
     HAS_KRB5 = False
-
-# spnego is used for Negotiate/Kerberos/NTLM authentication.
-try:
-    import spnego
-
-    HAS_SPNEGO = True
-    SPNEGO_IMP_ERR = None
-except Exception as e:
-    HAS_SPNEGO = False
-    SPNEGO_IMP_ERR = e
 
 
 MessageType = t.TypeVar("MessageType", bound=sansldap.LDAPMessage)
@@ -111,11 +102,6 @@ class NegotiateCredential(Credential):
         protocol: str = "negotiate",
         encrypt: bool = True,
     ) -> None:
-        if not HAS_SPNEGO:
-            raise ImportError(
-                f"Cannot use NegotiateCredential without pyspnego installed: {SPNEGO_IMP_ERR}"
-            ) from SPNEGO_IMP_ERR
-
         self.username = username
         self.password = password
         self.protocol = protocol
@@ -678,11 +664,6 @@ def _lookup_server() -> tuple[str, int]:
             # Will raise if not configured and the krb5 library cannot
             # determine the default.
             pass
-
-    if not default_realm:
-        host_fqdn = socket.getfqdn()
-        if "." in host_fqdn:
-            default_realm = host_fqdn.partition(".")[2]
 
     if not default_realm:
         raise Exception("Failed to find default domain realm, cannot lookup server")
