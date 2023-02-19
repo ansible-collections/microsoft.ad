@@ -232,7 +232,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-object
 <div class="ansibleOptionAnchor" id="parameter-ldap_filter"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-object-info-module-parameter-ldap-filter"><strong>ldap_filter</strong></p>
 <a class="ansibleOptionLink" href="#parameter-ldap_filter" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
-<td><div class="ansible-option-cell"><p>Like <em>filter</em> but this is a tradiitional LDAP query string to filter the objects to return.</p>
+<td><div class="ansible-option-cell"><p>Like <em>filter</em> but this is a traditional LDAP query string to filter the objects to return.</p>
 <p>This is mutually exclusive with <em>filter</em> and <em>identity</em>.</p>
 </div></td>
 </tr>
@@ -254,7 +254,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-object
 </div></td>
 <td><div class="ansible-option-cell"><p>Specify the Active Directory path to search for objects in.</p>
 <p>This cannot be set with <em>identity</em>.</p>
-<p>By default the search base is the default naming context of the target AD instance which is the DN returned by “(Get-ADRootDSE).defaultNamingContext”.</p>
+<p>By default the search base is the default naming context of the target AD instance which is the DN returned by <code class="docutils literal notranslate"><span class="pre">Get-ADRootDSE</span> <span class="pre">|</span> <span class="pre">Select-Object</span> <span class="pre">-ExpandProperty</span> <span class="pre">defaultNamingContext</span></code>.</p>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">

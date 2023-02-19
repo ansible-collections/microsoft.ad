@@ -288,7 +288,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <a class="ansibleOptionLink" href="#parameter-delegates/remove" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The AD objects by their <code class="docutils literal notranslate"><span class="pre">DistinguishedName</span></code> to remove as a principal allowed to delegate.</p>
-<p>Any existing pricipals not specified by <em>remove</em> will be untouched unless <em>set</em> is defined.</p>
+<p>Any existing principals not specified by <em>remove</em> will be untouched unless <em>set</em> is defined.</p>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
@@ -378,7 +378,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <a class="ansibleOptionLink" href="#parameter-groups" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">dictionary</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>Specifies the group membership the user is added, removed, or set to.</p>
-<p>To clear all group memberhips, use <em>set</em> with an empty list.</p>
+<p>To clear all group memberships, use <em>set</em> with an empty list.</p>
 <p>Note that users cannot be removed from their principal group (for example, “Domain Users”). Attempting to do so will display a warning.</p>
 <p>See <a class="reference internal" href="docsite/guide_list_values.html#ansible-collections-microsoft-ad-docsite-guide-list-values"><span class="std std-ref">Setting list option values</span></a> for more information on how to add/remove/set list options.</p>
 </div></td>
@@ -682,7 +682,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <p class="admonition-title">Note</p>
 <ul class="simple">
 <li><p>See <a class="reference internal" href="docsite/guide_migration.html#ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-user"><span class="std std-ref">win_domain_user migration</span></a> for help on migrating from <a class="reference external" href="https://docs.ansible.com/ansible/devel/collections/community/windows/win_domain_user_module.html#ansible-collections-community-windows-win-domain-user-module" title="(in Ansible vdevel)"><span class="xref std std-ref">community.windows.win_domain_user</span></a> to this module.</p></li>
-<li><p>Some LDAP attributes can have only a single value set while others can have multiple. Some attributes are also read only and cannot be changed. It is recommened to look at the schema metadata for an attribute where <code class="docutils literal notranslate"><span class="pre">System-Only</span></code> are read only values and <code class="docutils literal notranslate"><span class="pre">Is-Single-Value</span></code> are attributes with only 1 value.</p></li>
+<li><p>Some LDAP attributes can have only a single value set while others can have multiple. Some attributes are also read only and cannot be changed. It is recommended to look at the schema metadata for an attribute where <code class="docutils literal notranslate"><span class="pre">System-Only</span></code> are read only values and <code class="docutils literal notranslate"><span class="pre">Is-Single-Value</span></code> are attributes with only 1 value.</p></li>
 <li><p>Attempting to set multiple values to a <code class="docutils literal notranslate"><span class="pre">Is-Single-Value</span></code> attribute results in undefined behaviour.</p></li>
 <li><p>If running on a server that is not a Domain Controller, credential delegation through CredSSP or Kerberos with delegation must be used or the <em>domain_username</em>, <em>domain_password</em> must be set.</p></li>
 </ul>
