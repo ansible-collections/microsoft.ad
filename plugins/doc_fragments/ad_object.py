@@ -150,7 +150,7 @@ options:
 notes:
 - Some LDAP attributes can have only a single value set while others can have
   multiple. Some attributes are also read only and cannot be changed. It is
-  recommened to look at the schema metadata for an attribute where
+  recommended to look at the schema metadata for an attribute where
   C(System-Only) are read only values and C(Is-Single-Value) are attributes
   with only 1 value.
 - Attempting to set multiple values to a C(Is-Single-Value) attribute results

@@ -50,7 +50,7 @@ options:
     type: bool
   ldap_filter:
     description:
-    - Like I(filter) but this is a tradiitional LDAP query string to filter the objects to return.
+    - Like I(filter) but this is a traditional LDAP query string to filter the objects to return.
     - This is mutually exclusive with I(filter) and I(identity).
     type: str
   properties:
@@ -68,7 +68,7 @@ options:
     - Specify the Active Directory path to search for objects in.
     - This cannot be set with I(identity).
     - By default the search base is the default naming context of the target AD instance which is the DN returned by
-      "(Get-ADRootDSE).defaultNamingContext".
+      C(Get-ADRootDSE | Select-Object -ExpandProperty defaultNamingContext).
     type: str
   search_scope:
     description:
