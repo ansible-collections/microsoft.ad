@@ -16,7 +16,7 @@ options:
     - The category of the group.
     - If a new group is created then C(security) will be used by default.
     - A C(security) group can be associated with access control lists whereas
-      C(distibution) groups are typically associated with mailing distribution
+      C(distribution) groups are typically associated with mailing distribution
       lists.
     - This is the value set on the C(groupType) LDAP attributes.
     choices:

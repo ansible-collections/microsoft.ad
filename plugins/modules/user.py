@@ -66,7 +66,7 @@ options:
         description:
         - The AD objects by their C(DistinguishedName) to remove as a principal
           allowed to delegate.
-        - Any existing pricipals not specified by I(remove) will be untouched
+        - Any existing principals not specified by I(remove) will be untouched
           unless I(set) is defined.
         type: list
         elements: str
@@ -101,7 +101,7 @@ options:
   groups:
     description:
     - Specifies the group membership the user is added, removed, or set to.
-    - To clear all group memberhips, use I(set) with an empty list.
+    - To clear all group memberships, use I(set) with an empty list.
     - Note that users cannot be removed from their principal group (for
       example, "Domain Users"). Attempting to do so will display a warning.
     - See R(Setting list option values,ansible_collections.microsoft.ad.docsite.guide_list_values)
