@@ -6,7 +6,7 @@ from __future__ import annotations
 DOCUMENTATION = """
 name: laps_password
 author: Jordan Borean (@jborean93)
-short_description: Retrieves the LAPS password for a server.
+short_description: Retrieves the LAPS password for a server
 description:
 - This lookup returns the LAPS password set for a server from the Active Directory database.
 options:

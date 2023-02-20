@@ -556,6 +556,46 @@ class SyncLDAPClient:
         self._sock.sendall(data)
 
 
+class SrvRecord(t.NamedTuple):
+    target: str
+    port: int
+    weight: int
+    priority: int
+
+    @classmethod
+    def lookup(
+        cls,
+        service: str,
+        proto: str,
+        name: str,
+    ) -> t.List[SrvRecord]:
+        """Performs an SRV lookup.
+
+        Args:
+            service: The SRV service.
+            proto: The SRV protocol.
+            name: The SRV name.
+
+        Returns:
+            List[SrvRecord]: A list of records ordered by priority and weight.
+        """
+        record = f"_{service}._{proto}.{name}"
+
+        answers: t.List[SrvRecord] = []
+        for answer in dns.resolver.resolve(record, "SRV"):
+            answers.append(
+                SrvRecord(
+                    target=str(answer.target),
+                    port=answer.port,
+                    weight=answer.weight,
+                    priority=answer.priority,
+                )
+            )
+
+        # Sorts the array by lowest priority then highest weight.
+        return sorted(answers, key=lambda a: (a.priority, -a.weight))
+
+
 def create_connection(
     auth_protocol: t.Optional[str] = None,
     ca_cert: t.Optional[str] = None,
@@ -652,23 +692,26 @@ def create_connection(
 
 
 def _lookup_server() -> tuple[str, int]:
-    if not HAS_DNSPYTHON:
-        raise Exception("Cannot lookup server without dnspython being installed")
+    """Attempts to lookup LDAP server.
 
-    default_realm: t.Optional[str] = None
-    if HAS_KRB5:
-        ctx = krb5.init_context()
-        try:
-            default_realm = krb5.get_default_realm(ctx).decode("utf-8")
-        except krb5.Krb5Error:
-            # Will raise if not configured and the krb5 library cannot
-            # determine the default.
-            pass
+    Attempts to lookup LDAP server based on the current Kerberos host
+    configuration. Will them perform an SRV lookup for
+    '_ldap._tcp.dc._msdcs.{realm}' to get the LDAP server hostname nad port.
 
-    if not default_realm:
-        raise Exception("Failed to find default domain realm, cannot lookup server")
+    Returns:
+        tuple[str, int]: The LDAP hostname and port.
 
-    srv_record = f"_ldap._tcp.dc._msdcs.{default_realm}"
+    Raises:
+        ImportError: Missing krb5 or dnspython.
+        krb5.Krb5Error: Kerberos configuration problem
+        dns.exception.DNSException: DNS lookup error.
+    """
+    required_libs = [(HAS_KRB5, "krb5"), (HAS_DNSPYTHON, "dnspython")]
+    missing_libs = [lib for present, lib in required_libs if not present]
+    if missing_libs:
+        raise ImportError(f"Cannot lookup server without the python libraries {', '.join(missing_libs)}")
 
-    answer = next(dns.resolver.resolve(srv_record, "SRV").__iter__())
-    return str(answer.target), answer.port
+    ctx = krb5.init_context()
+    default_realm = krb5.get_default_realm(ctx).decode("utf-8")
+    answer = SrvRecord.lookup("ldap", "tcp", f"dc._msdcs.{default_realm}")[0]
+    return answer.target, answer.port

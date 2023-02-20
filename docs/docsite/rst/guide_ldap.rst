@@ -4,7 +4,7 @@
 LDAP Connection guide
 *********************
 
-This guide covers information about communicating with an LDAP server, like Microsoft Active Directory, from the Ansible host. Unlike Windows host, there is no builtin mechanism to communicate and authenticate with an LDAP server so the plugins that run on the Ansible host require some extra configuration to get working.
+This guide covers information about communicating with an LDAP server, like Microsoft Active Directory, from the Ansible host. Unlike Windows hosts, there are no builtin mechanisms to communicate and authenticate with an LDAP server so the plugins that run on the Ansible host require some extra configuration to get working.
 
 .. note::
   This guide covers LDAP communication from the Ansible host. This does not apply to the modules that run on the remote Windows hosts.
@@ -57,7 +57,7 @@ Other Linux distributions require the same packages listed above but they are li
 
 The :ref:`microsoft.ad.debug_ldap_client <ansible_collections.microsoft.ad.debug_ldap_client_module>`. action plugin can be used to debug the Ansible host information and its LDAP capabilities. It includes details such as:
 
-* The Python packages related to LDAP that are installed, or import information
+* The Python packages related to LDAP that are installed, or import failure messages if not installed
 * The Kerberos host and credential cache information if the Kerberos extras are installed
 * The SRV lookup information if ``dnspython`` and Kerberos extras are installed
 
@@ -82,7 +82,7 @@ Connecting to a Microsoft Active Directory or LDAP server requires information l
 +---------------+--------------------------------+--------------------------------------------+
 | port          | 389 or 686 if tls_mode=ldaps   | The LDAP port                              |
 +---------------+--------------------------------+--------------------------------------------+
-| tls_mode      | LDAPS if port=686              | TLS details - LDAP, LDAP + StartTLS, LDAPS |
+| tls_mode      | LDAPS if port=686 else None    | TLS details - LDAP, LDAP + StartTLS, LDAPS |
 +---------------+--------------------------------+--------------------------------------------+
 | auth_protocol | Negotiate                      | Authentication protocol                    |
 +---------------+--------------------------------+--------------------------------------------+
@@ -135,7 +135,7 @@ A critical component of LDAP connections is how the user authenticates itself to
 
 Unless otherwise specified, the default authentication protocol used is ``negotiate`` which relies on the ``pyspnego`` library. See :ref:`requirements <ansible_collections.microsoft.ad.guide_ldap.requirements>` for more information on how to install this requirement.
 
-Any protocol that does not support encryption must either be used with LDAPS or StartTLS or explicitly disable the encryption checks. Disabling encryption is not recommended as it will send the credentials without any protection and any of the data exchanged can be seen by anyone. It also requires the target server to allow unencrypted connections as they can reject unprotected connections.
+Any protocol that does not support encryption must either be used with LDAPS or StartTLS or they must explicitly disable the encryption checks. Disabling encryption is not recommended as it will send the credentials without any protection and any of the data exchanged can be seen by anyone. It also requires the target server to allow unencrypted connections as they can reject unprotected connections.
 
 Implicit credential support documents whether the authentication protocol can authenticate without an explicit ``username`` and ``password`` specified. Currently only ``simple`` and ``negotiate/kerberos`` supports implicit credentials. See each protocol section for more details.
 
