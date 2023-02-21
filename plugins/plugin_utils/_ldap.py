@@ -16,6 +16,8 @@ interface is not final and could be subject to change.
 
 from __future__ import annotations
 
+import base64
+import dataclasses
 import socket
 import ssl
 import struct
@@ -283,6 +285,13 @@ class ResponseHandler(t.Generic[MessageType]):
                     self._condition.wait()
 
 
+@dataclasses.dataclass
+class RootDSE:
+    default_naming_context: str
+    subschema_subentry: str
+    supported_controls: t.List[str]
+
+
 class SyncLDAPClient:
     def __init__(
         self,
@@ -301,7 +310,45 @@ class SyncLDAPClient:
         )
         self._reader_task.start()
         self._wait_tls: t.Optional[threading.Event] = None
-        self._default_naming_context: t.Optional[str] = None
+        self._root_dse: t.Optional[RootDSE] = None
+
+    @property
+    def root_dse(self) -> RootDSE:
+        if not self._root_dse:
+            default_naming_context = ""
+            subschema_subentry = ""
+            supported_controls: t.List[str] = []
+
+            for res in self._search_request(
+                base_object="",
+                scope=sansldap.SearchScope.BASE,
+                filter=sansldap.FilterPresent("objectClass"),
+                attributes=[
+                    "defaultNamingContext",
+                    "subschemaSubentry",
+                    "supportedControl",
+                ],
+            ):
+                if not isinstance(res, sansldap.SearchResultEntry):
+                    continue
+
+                for attr in res.attributes:
+                    if attr.name == "defaultNamingContext":
+                        default_naming_context = attr.values[0].decode("utf-8")
+
+                    elif attr.name == "subschemaSubentry":
+                        subschema_subentry = attr.values[0].decode("utf-8")
+
+                    elif attr.name == "supportedControl":
+                        supported_controls = [v.decode("utf-8") for v in attr.values]
+
+            self._root_dse = RootDSE(
+                default_naming_context=default_naming_context,
+                subschema_subentry=subschema_subentry,
+                supported_controls=supported_controls,
+            )
+
+        return self._root_dse
 
     def __enter__(self) -> SyncLDAPClient:
         return self
@@ -367,14 +414,15 @@ class SyncLDAPClient:
         filter: t.Union[str, sansldap.LDAPFilter],
         attributes: t.List[str],
         search_base: t.Optional[str] = None,
+        search_scope: sansldap.SearchScope = sansldap.SearchScope.SUBTREE,
     ) -> t.Dict[str, t.Dict[str, t.List[bytes]]]:
         if search_base is None:
-            search_base = self._get_default_namining_context()
+            search_base = self.root_dse.default_naming_context
 
         res: t.Dict[str, t.Dict[str, t.List[bytes]]] = {}
         for entry in self._search_request(
             base_object=search_base,
-            scope=sansldap.SearchScope.SUBTREE,
+            scope=search_scope,
             filter=filter,
             attributes=attributes,
         ):
@@ -387,27 +435,6 @@ class SyncLDAPClient:
                 entry_attr.extend(attr.values)
 
         return res
-
-    def _get_default_namining_context(self) -> str:
-        if self._default_naming_context is None:
-            default_naming_context = ""
-            for res in self._search_request(
-                base_object="",
-                scope=sansldap.SearchScope.BASE,
-                filter=sansldap.FilterPresent("objectClass"),
-                attributes=["defaultNamingContext"],
-            ):
-                if not isinstance(res, sansldap.SearchResultEntry):
-                    continue
-
-                for attr in res.attributes:
-                    if attr.name == "defaultNamingContext":
-                        default_naming_context = attr.values[0].decode("utf-8")
-                        break
-
-            self._default_naming_context = default_naming_context
-
-        return self._default_naming_context
 
     def _search_request(
         self,
@@ -554,6 +581,58 @@ class SyncLDAPClient:
             data = self._encryptor.wrap(data)
 
         self._sock.sendall(data)
+
+
+class LDAPSchema:
+    def __init__(
+        self,
+        attribute_types: t.Dict[str, sansldap.schema.AttributeTypeDescription],
+    ) -> None:
+        self.attribute_types = attribute_types
+
+    @classmethod
+    def load_schema(cls, client: SyncLDAPClient) -> LDAPSchema:
+        root_dse = client.root_dse
+        attribute_types = list(
+            client.search(
+                filter=sansldap.FilterPresent("objectClass"),
+                attributes=["attributeTypes"],
+                search_base=root_dse.subschema_subentry,
+                search_scope=sansldap.SearchScope.BASE,
+            ).values()
+        )[0]["attributeTypes"]
+
+        attribute_info: t.Dict[str, sansldap.schema.AttributeTypeDescription] = {}
+        for info in attribute_types:
+            type_description = sansldap.schema.AttributeTypeDescription.from_string(info.decode("utf-8"))
+            if type_description.names:
+                attribute_info[type_description.names[0].lower()] = type_description
+
+        return LDAPSchema(attribute_info)
+
+    def cast_object(
+        self,
+        attribute: str,
+        values: t.List[bytes],
+    ) -> t.Any:
+        info = self.attribute_types.get(attribute.lower(), None)
+        if not info or not info.syntax:
+            return values
+
+        # FIXME: See what other types are used in AD and if they need to be here.
+        caster: t.Callable[[bytes], t.Any] = {
+            "1.3.6.1.4.1.1466.115.121.1.27": lambda v: int(v),
+            "1.3.6.1.4.1.1466.115.121.1.40": lambda v: base64.b64encode(v).decode(),
+            "1.2.840.113556.1.4.906": lambda v: int(v),
+            "1.2.840.113556.1.4.907": lambda v: base64.b64encode(v).decode(),
+            "OctetString": lambda v: base64.b64encode(v).decode(),
+        }.get(info.syntax, lambda v: v.decode("utf-8", errors="surrogateescape"))
+
+        casted_values: t.List = []
+        for v in values:
+            casted_values.append(caster(v))
+
+        return casted_values[0] if info.single_value else casted_values
 
 
 class SrvRecord(t.NamedTuple):
