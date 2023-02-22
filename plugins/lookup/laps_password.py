@@ -46,7 +46,7 @@ from ansible.plugins.lookup import LookupBase
 
 try:
     import sansldap
-    from ..plugin_utils import _ldap as ldap
+    from ..plugin_utils._ldap import create_ldap_connection
 
     HAS_LDAP = True
     LDAP_IMP_ERR = None
@@ -67,7 +67,7 @@ class LookupModule(LookupBase):
 
         self.set_options(var_options=variables, direct=kwargs)
 
-        with ldap.create_connection(**self.get_options()) as client:
+        with create_ldap_connection(**self.get_options()) as client:
 
             host_filter = sansldap.FilterOr(filters=[])
 

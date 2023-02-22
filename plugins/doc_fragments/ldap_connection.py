@@ -10,6 +10,8 @@ options:
   auth_protocol:
     description:
     - The authentication protocol to use when connecting to the LDAP host.
+    - Defaults to C(certificate) if LDAPS/StartTLS is used and I(certificate)
+      has been specified. Otherwise it defaults to C(negotiate).
     - C(simple) is simple authentication where the user and password are sent
       in plaintext. It does not support any encryption so either must be used
       with LDAPS, or StartTLS. If using over a plaintext LDAP connection
@@ -37,7 +39,6 @@ options:
     - negotiate
     - kerberos
     - ntlm
-    default: negotiate
     type: str
   ca_cert:
     description:

@@ -11,7 +11,8 @@ dnspython
 # For krb5 default_realm lookups
 krb5
 
-# For LDAP negotiate authentication
+# For LDAP negotiate authentication. 0.8.0 is needed for the no_integrity
+# context_req used by LDAP.
 pyspnego[kerberos] >= 0.8.0
 
 # For LDAP protocol logic

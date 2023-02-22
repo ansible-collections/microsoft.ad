@@ -14,30 +14,23 @@ options:
   attributes:
     description:
     - The LDAP attributes to retrieve.
+    - The keys specified are the LDAP attributes requested and the values for
+      each attribute is a dictionary that reflects what host var to set it to
+      and how.
+    - Each keys of the attribute value is the host variable name to set and the
+      value is the template to use to derive the value. If not value is
+      explicitly set then it will use the attribute value as returned by LDAP.
     - Attributes that are denoted as single value in the LDAP schema ar
       returned as that single value, multi values attributes are returned as a
       list of values.
     - The type of the attribute value is dependent on the LDAP schema
       definition.
-    default: []
-    type: list
-    elements: str
+    default: {}
+    type: dict
   filter:
     description:
     - The LDAP filter string used to query the computer objects
-    default: '(objectClass=computer)'
-    type: str
-  hostvars_prefix:
-    description:
-    - The prefix used for host variables.
-    - This prefix is applied to all variables set by this inventory plugin.
-    default: ""
-    type: str
-  hostvars_suffix:
-    description:
-    - The suffix used for host variables.
-    - This suffix is applied to all variables set by this inventory plugin.
-    default: ""
+    - This will be combined with "(objectClass=computer)".
     type: str
   search_base:
     description:
@@ -77,10 +70,12 @@ from ansible.inventory.data import InventoryData
 from ansible.module_utils.basic import missing_required_lib
 from ansible.parsing.dataloader import DataLoader
 from ansible.plugins.inventory import BaseInventoryPlugin, Constructable
+from ansible.utils.unsafe_proxy import wrap_var
 
 try:
     import sansldap
-    from ..plugin_utils import _ldap as ldap
+    from ..plugin_utils._ldap import create_ldap_connection
+    from ..plugin_utils._ldap.schema import LDAPSchema
 
     HAS_LDAP = True
     LDAP_IMP_ERR = None
@@ -120,11 +115,10 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
         compose = self.get_option("compose")
         groups = self.get_option("groups")
         keyed_groups = self.get_option("keyed_groups")
+        ldap_filter = self.get_option("filter")
         search_base = self.get_option("search_base")
         search_scope = self.get_option("search_scope")
         strict = self.get_option("strict")
-        vars_prefix = self.get_option("hostvars_prefix")
-        vars_suffix = self.get_option("hostvars_suffix")
 
         ldap_search_scope = {
             "base": sansldap.SearchScope.BASE,
@@ -132,15 +126,26 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
             "subtree": sansldap.SearchScope.SUBTREE,
         }[search_scope]
 
-        ldap_filter = sansldap.LDAPFilter.from_string(self.get_option("filter"))
+        computer_filter = sansldap.FilterEquality("objectClass", b"computer")
+        final_filter: sansldap.LDAPFilter
+        if ldap_filter:
+            final_filter = sansldap.FilterAnd(
+                filters=[
+                    computer_filter,
+                    sansldap.LDAPFilter.from_string(ldap_filter),
+                ]
+            )
+        else:
+            final_filter = computer_filter
 
-        custom_attributes = self.get_option("attributes")
-        attributes = {"name", "dnshostname"}.union([c.lower() for c in custom_attributes])
-        with ldap.create_connection(**self.get_options()) as client:
-            schema = ldap.LDAPSchema.load_schema(client)
+        custom_attributes = self._get_custom_attributes()
+        attributes = {"name", "dnshostname"}.union([a.lower() for a in custom_attributes.keys()])
+
+        with create_ldap_connection(**self.get_options()) as client:
+            schema = LDAPSchema.load_schema(client)
 
             for info in client.search(
-                filter=ldap_filter,
+                filter=final_filter,
                 attributes=list(attributes),
                 search_base=search_base,
                 search_scope=ldap_search_scope,
@@ -155,13 +160,55 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
                     inventory.set_variable(host_name, "ansible_host", dns_host_name[0].decode("utf-8"))
 
                 host_vars: t.Dict[str, t.Any] = {}
-                for name in custom_attributes:
-                    values = schema.cast_object(name, insenstive_info.get(name.lower(), []))
-                    var_name = f"{vars_prefix}{name}{vars_suffix}"
+                for name, var_info in custom_attributes.items():
+                    raw_values = insenstive_info.get(name.lower(), [])
+                    values = schema.cast_object(name, raw_values)
 
-                    host_vars[var_name] = values
-                    inventory.set_variable(host_name, var_name, values)
+                    host_vars["raw"] = wrap_var(raw_values)
+                    host_vars["this"] = wrap_var(values)
+
+                    for n, v in var_info.items():
+                        try:
+                            composite = self._compose(v, host_vars)
+                        except Exception as e:
+                            if strict:
+                                raise AnsibleError(f"Could not set {n} for host {host_name}: {e}") from e
+                            continue
+
+                        host_vars[n] = composite
+                        inventory.set_variable(host_name, n, composite)
+
+                    host_vars.pop("raw")
+                    host_vars.pop("this")
 
                 self._set_composite_vars(compose, host_vars, host_name, strict=strict)
                 self._add_host_to_composed_groups(groups, host_vars, host_name, strict=strict)
                 self._add_host_to_keyed_groups(keyed_groups, host_vars, host_name, strict=strict)
+
+    def _get_custom_attributes(self) -> t.Dict[str, t.Dict[str, str]]:
+        custom_attributes = self.get_option("attributes")
+
+        processed_attributes: t.Dict[str, t.Dict[str, str]] = {}
+        for name, info in custom_attributes.items():
+            if not info:
+                info = {name.replace("-", "_"): "this"}
+            elif isinstance(info, str):
+                info = {name.replace("-", "_"): info}
+            elif not isinstance(info, dict):
+                raise AnsibleError(
+                    f"Value for attribute {name} was {type(info).__name__} but was expecting a dictionary"
+                )
+
+            for var_name in list(info.keys()):
+                var_template = info[var_name]
+                if not var_template:
+                    info[var_name] = "this"
+
+                elif not isinstance(var_template, str):
+                    raise AnsibleError(
+                        f"Template value for attribute {name}.{var_name} was {type(var_template).__name__} but was expecting a string"
+                    )
+
+            processed_attributes[name] = info
+
+        return processed_attributes
