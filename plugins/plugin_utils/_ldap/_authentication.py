@@ -7,17 +7,23 @@
 # See also: https://github.com/ansible/community/issues/539#issuecomment-780839686
 # Please open an issue if you have questions about this.
 
-from __future__ import annotations
-
 import ssl
 import struct
 import typing as t
 
-import sansldap
-import spnego
+try:
+    import sansldap
+except Exception:
+    pass  # Check is in __init__.py
 
-from .client import SyncLDAPClient, MessageEncryptor, Credential
+try:
+    import spnego
 
+    SPNEGO_IMPORT_ERR = None
+except Exception as e:
+    SPNEGO_IMPORT_ERR = e
+
+from .client import Credential, MessageEncryptor, SyncLDAPClient
 
 # cryptography is used for TLS channel binding with SPNEGO.
 try:
@@ -65,6 +71,9 @@ class NegotiateCredential(Credential):
         protocol: str = "negotiate",
         encrypt: bool = True,
     ) -> None:
+        if SPNEGO_IMPORT_ERR:
+            raise ImportError(str(SPNEGO_IMPORT_ERR)) from SPNEGO_IMPORT_ERR
+
         self.username = username
         self.password = password
         self.protocol = protocol
@@ -123,7 +132,7 @@ class NegotiateCredential(Credential):
     def _get_tls_channel_bindings(
         self,
         tls_sock: t.Optional[ssl.SSLSocket] = None,
-    ) -> t.Optional[spnego.channel_bindings.GssChannelBindings]:
+    ) -> t.Optional["spnego.channel_bindings.GssChannelBindings"]:
         if not HAS_CRYPTOGRAPHY or not tls_sock:
             return None
 
@@ -155,7 +164,10 @@ class NegotiateCredential(Credential):
 
 
 class SpnegoEncryptor(MessageEncryptor):
-    def __init__(self, context: spnego.ContextProxy) -> None:
+    def __init__(
+        self,
+        context: "spnego.ContextProxy",
+    ) -> None:
         self.context = context
 
     def wrap(

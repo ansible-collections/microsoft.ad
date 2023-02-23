@@ -14,15 +14,20 @@ interface is not final and could be subject to change.
 # See also: https://github.com/ansible/community/issues/539#issuecomment-780839686
 # Please open an issue if you have questions about this.
 
-from __future__ import annotations
-
 import socket
 import ssl
 import typing as t
 
-from .client import SyncLDAPClient, Credential
+try:
+    import sansldap
+
+    LDAP_IMP_ERR = None
+except Exception as e:
+    LDAP_IMP_ERR = e
+
+from ._authentication import ClientCertificate, NegotiateCredential, SimpleCredential
 from ._lookup import lookup_ldap_server
-from ._authentication import SimpleCredential, NegotiateCredential, ClientCertificate
+from .client import Credential, SyncLDAPClient
 
 
 def create_ldap_connection(
@@ -68,6 +73,9 @@ def create_ldap_connection(
     Returns:
         LDAPClient: The LDAP client.
     """
+    if LDAP_IMP_ERR:
+        raise ImportError(str(LDAP_IMP_ERR)) from LDAP_IMP_ERR
+
     if not server:
         server, lookup_port = lookup_ldap_server()
         if not port:
@@ -122,13 +130,14 @@ def create_ldap_connection(
             encrypt=encrypt,
         )
 
+    protocol = sansldap.LDAPClient()
     tls_sock: t.Optional[ssl.SSLSocket] = None
     sock = socket.create_connection((server, port))
 
     if ssl_context and tls_mode == "ldaps":
         tls_sock = sock = ssl_context.wrap_socket(sock, server_hostname=server)
 
-    client = SyncLDAPClient(server, sock)
+    client = SyncLDAPClient(server, protocol, sock)
     try:
         if ssl_context and tls_mode == "start_tls":
             tls_sock = client.start_tls(ssl_context)
@@ -136,6 +145,6 @@ def create_ldap_connection(
         credential.authenticate(client, tls_sock=tls_sock)
 
         return client
-    except:
+    except Exception:
         client.close()
         raise

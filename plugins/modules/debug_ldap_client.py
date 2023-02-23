@@ -71,6 +71,10 @@ dns:
       type: str
       sample: ""
     records:
+      description:
+      - The SRV records that were found during the LDAP server lookup.
+      returned: dnspython is installed
+      type: list
       contains:
         port:
           description:

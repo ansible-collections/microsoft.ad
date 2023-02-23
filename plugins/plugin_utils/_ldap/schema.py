@@ -7,25 +7,27 @@
 # See also: https://github.com/ansible/community/issues/539#issuecomment-780839686
 # Please open an issue if you have questions about this.
 
-from __future__ import annotations
-
 import base64
 import typing as t
 
-import sansldap
+try:
+    import sansldap
+except Exception:
+    pass  # Check is in __init__.py
 
+from ...filter.ldap_converters import as_guid, as_sid
 from .client import SyncLDAPClient
 
 
 class LDAPSchema:
     def __init__(
         self,
-        attribute_types: t.Dict[str, sansldap.schema.AttributeTypeDescription],
+        attribute_types: t.Dict[str, "sansldap.schema.AttributeTypeDescription"],
     ) -> None:
         self.attribute_types = attribute_types
 
     @classmethod
-    def load_schema(cls, client: SyncLDAPClient) -> LDAPSchema:
+    def load_schema(cls, client: SyncLDAPClient) -> "LDAPSchema":
         root_dse = client.root_dse
         attribute_types = list(
             client.search(
@@ -53,14 +55,24 @@ class LDAPSchema:
         if not info or not info.syntax:
             return values
 
-        # FIXME: See what other types are used in AD and if they need to be here.
-        caster: t.Callable[[bytes], t.Any] = {
-            "1.3.6.1.4.1.1466.115.121.1.27": lambda v: int(v),
-            "1.3.6.1.4.1.1466.115.121.1.40": lambda v: base64.b64encode(v).decode(),
-            "1.2.840.113556.1.4.906": lambda v: int(v),
-            "1.2.840.113556.1.4.907": lambda v: base64.b64encode(v).decode(),
-            "OctetString": lambda v: base64.b64encode(v).decode(),
-        }.get(info.syntax, lambda v: v.decode("utf-8", errors="surrogateescape"))
+        caster: t.Callable[[bytes], t.Any]
+        if attribute == "objectSid":
+            caster = as_sid
+
+        elif attribute == "objectGuid":
+            caster = as_guid
+
+        elif info.syntax == "1.3.6.1.4.1.1466.115.121.1.7":
+            caster = _as_bool
+
+        elif info.syntax in ["1.3.6.1.4.1.1466.115.121.1.27", "1.2.840.113556.1.4.906"]:
+            caster = _as_int
+
+        elif info.syntax in ["1.3.6.1.4.1.1466.115.121.1.40", "1.2.840.113556.1.4.907", "OctetString"]:
+            caster = _as_bytes
+
+        else:
+            caster = _as_str
 
         casted_values: t.List = []
         for v in values:
@@ -70,3 +82,19 @@ class LDAPSchema:
             return casted_values[0] if casted_values else None
         else:
             return casted_values
+
+
+def _as_bool(value: bytes) -> bool:
+    return value == b"TRUE"
+
+
+def _as_int(value: bytes) -> int:
+    return int(value)
+
+
+def _as_bytes(value: bytes) -> str:
+    return base64.b64encode(value).decode()
+
+
+def _as_str(value: bytes) -> str:
+    return value.decode("utf-8", errors="surrogateescape")

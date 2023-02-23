@@ -31,7 +31,7 @@ options:
     - C(negotiate), C(kerberos), and C(ntlm) require the C(pyspnego) Python
       library to be installed. For C(kerberos), and for C(negotiate) to try
       Kerberos, the C(pyspnego[kerberos]) extras is also required.
-    - See R(LDAP authentication,ansible_collections.microsoft.ad.docsite.guide_ldap.authentication)
+    - See R(LDAP authentication,ansible_collections.microsoft.ad.docsite.guide_ldap_connection.authentication)
       for more information.
     choices:
     - simple

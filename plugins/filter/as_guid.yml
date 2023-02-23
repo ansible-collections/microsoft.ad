@@ -28,11 +28,6 @@ DOCUMENTATION:
 EXAMPLES: |
   # This is an example used in the microsoft.ad.inventory plugin
 
-  # Converting from the coerced value
-  attributes:
-    objectGuid: this | microsoft.ad.as_guid
-
-  # Converting from the raw bytes value
   attributes:
     objectGuid: raw | microsoft.ad.as_guid
 

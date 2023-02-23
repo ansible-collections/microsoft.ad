@@ -1,4 +1,4 @@
-.. _ansible_collections.microsoft.ad.docsite.guide_ldap:
+.. _ansible_collections.microsoft.ad.docsite.guide_ldap_connection:
 
 *********************
 LDAP Connection guide
@@ -13,7 +13,7 @@ This guide covers information about communicating with an LDAP server, like Micr
   :local:
   :depth: 1
 
-.. _ansible_collections.microsoft.ad.docsite.guide_ldap.requirements:
+.. _ansible_collections.microsoft.ad.docsite.guide_ldap_connection.requirements:
 
 Requirements
 ============
@@ -68,7 +68,7 @@ To use this module simply run
     $ ansible localhost -m microsoft.ad.debug_ldap_client
 
 
-.. _ansible_collections.microsoft.ad.docsite.guide_ldap.connection_options:
+.. _ansible_collections.microsoft.ad.docsite.guide_ldap_connection.connection_options:
 
 Connection options
 ==================
@@ -90,7 +90,7 @@ Connecting to a Microsoft Active Directory or LDAP server requires information l
 The server lookup details are described below. The port defaults to ``389`` unless ``tls_mode: ldaps`` is specified. The TLS mode defaults to ``ldaps`` if the port is explicitly set to ``686`` else it defaults to no TLS. The authentication protocol defaults to ``negotiate`` while attempting to use the implicit credential if it's available.
 
 
-.. _ansible_collections.microsoft.ad.docsite.guide_ldap.server_lookup:
+.. _ansible_collections.microsoft.ad.docsite.guide_ldap_connection.server_lookup:
 
 Server lookup
 -------------
@@ -112,7 +112,7 @@ If none of the above are true, the connection will fail and an explicit server m
   If an explicit port is specified, it will take priority over the port returned by the SRV record.
 
 
-.. _ansible_collections.microsoft.ad.docsite.guide_ldap.authentication:
+.. _ansible_collections.microsoft.ad.docsite.guide_ldap_connection.authentication:
 
 Authentication
 ==============
@@ -133,7 +133,7 @@ A critical component of LDAP connections is how the user authenticates itself to
 | ntlm           | Yes                 | No                         |
 +----------------+---------------------+----------------------------+
 
-Unless otherwise specified, the default authentication protocol used is ``negotiate`` which relies on the ``pyspnego`` library. See :ref:`requirements <ansible_collections.microsoft.ad.guide_ldap.requirements>` for more information on how to install this requirement.
+Unless otherwise specified, the default authentication protocol used is ``negotiate`` which relies on the ``pyspnego`` library. See :ref:`requirements <ansible_collections.microsoft.ad.guide_ldap_connection.requirements>` for more information on how to install this requirement.
 
 Any protocol that does not support encryption must either be used with LDAPS or StartTLS or they must explicitly disable the encryption checks. Disabling encryption is not recommended as it will send the credentials without any protection and any of the data exchanged can be seen by anyone. It also requires the target server to allow unencrypted connections as they can reject unprotected connections.
 
@@ -168,7 +168,7 @@ This defines the three options described. If the key and certificate are in the 
 Negotiate
 ---------
 
-Negotiate authentication is the default authentication protocol used by LDAP connections. It is a combination of both ``kerberos`` and ``ntlm`` with the client negotiating which one to use. It will favor ``kerberos`` if it is available and fallback to ``ntlm`` if not. The ``pyspnego`` Python package provides ``negotiate`` with just ``ntlm`` support, ``kerberos`` support is provided by the ``pyspnego[kerberos]`` extras option. See :ref:`requirements <ansible_collections.microsoft.ad.guide_ldap.requirements>` for more information on how to install this requirement.
+Negotiate authentication is the default authentication protocol used by LDAP connections. It is a combination of both ``kerberos`` and ``ntlm`` with the client negotiating which one to use. It will favor ``kerberos`` if it is available and fallback to ``ntlm`` if not. The ``pyspnego`` Python package provides ``negotiate`` with just ``ntlm`` support, ``kerberos`` support is provided by the ``pyspnego[kerberos]`` extras option. See :ref:`requirements <ansible_collections.microsoft.ad.guide_ldap_connection.requirements>` for more information on how to install this requirement.
 
 Kerberos
 --------
@@ -199,7 +199,7 @@ NTLM authentication is a simple authentication protocol that can be used by itse
   While NTLM does support encryption it is considered weak by modern standards. It is recommended to only use NTLM with an LDAPS or StartTLS connection where the stronger encryption and server checks provided by TLS mitigate the weaknesses in NTLM.
 
 
-.. _ansible_collections.microsoft.ad.docsite.guide_ldap.cert_verification:
+.. _ansible_collections.microsoft.ad.docsite.guide_ldap_connection.cert_verification:
 
 Certificate verification
 ========================

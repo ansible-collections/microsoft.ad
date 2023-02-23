@@ -1,15 +1,19 @@
 # Copyright: (c) 2023, Ansible Project
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-from __future__ import annotations
-
 DOCUMENTATION = """
-name: inventory
+name: ldap
 author: Jordan Borean (@jborean93)
 short_description: Inventory plugin for Active Directory
 description:
 - Inventory plugin for Active Directory or other LDAP sources.
 - Uses a YAML configuration file that ends with C(microsoft.ad.{yml|yaml}).
+- Each host that is added will set the C(inventory_hostname) to the C(name) of
+  the LDAP computer object and C(ansible_hostname) to the value of the
+  C(dNSHostName) LDAP attribute if set. If the C(dNSHostName) attribute is not
+  set on the computer object then C(ansible_hostname) is not set.
+- Any other fact that is needed, needs to be defined in the I(attributes)
+  option.
 options:
   attributes:
     description:
@@ -17,20 +21,21 @@ options:
     - The keys specified are the LDAP attributes requested and the values for
       each attribute is a dictionary that reflects what host var to set it to
       and how.
-    - Each keys of the attribute value is the host variable name to set and the
-      value is the template to use to derive the value. If not value is
-      explicitly set then it will use the attribute value as returned by LDAP.
-    - Attributes that are denoted as single value in the LDAP schema ar
+    - Each key of the inner dictionary value is the host variable name to set
+      and the value is the template to use to derive the value. If no value is
+      explicitly set then it will use the coerced value as returned from the
+      LDAP attribute.
+    - Attributes that are denoted as single value in the LDAP schema are
       returned as that single value, multi values attributes are returned as a
       list of values.
-    - The type of the attribute value is dependent on the LDAP schema
-      definition.
+    - See R(LDAP inventory attributes,ansible_collections.microsoft.ad.docsite.guide_ldap_inventory.attributes)
+      for more information.
     default: {}
     type: dict
   filter:
     description:
-    - The LDAP filter string used to query the computer objects
-    - This will be combined with "(objectClass=computer)".
+    - The LDAP filter string used to query the computer objects.
+    - This will be combined with the filter "(objectClass=computer)".
     type: str
   search_base:
     description:
@@ -55,6 +60,9 @@ options:
     - subtree
     default: subtree
     type: str
+notes:
+- See R(LDAP inventory,ansible_collections.microsoft.ad.docsite.guide_ldap_inventory)
+  for more details on how to use this inventory plugin.
 extends_documentation_fragment:
 - constructed
 - microsoft.ad.ldap_connection
@@ -63,6 +71,7 @@ extends_documentation_fragment:
 EXAMPLES = """
 """
 
+import base64
 import typing as t
 
 from ansible.errors import AnsibleError
@@ -74,6 +83,7 @@ from ansible.utils.unsafe_proxy import wrap_var
 
 try:
     import sansldap
+
     from ..plugin_utils._ldap import create_ldap_connection
     from ..plugin_utils._ldap.schema import LDAPSchema
 
@@ -85,11 +95,11 @@ except Exception as e:
 
 
 class InventoryModule(BaseInventoryPlugin, Constructable):
-    NAME = "microsoft.ad.inventory"
+    NAME = "microsoft.ad.ldap"
 
     def verify_file(self, path: str) -> bool:
         if super().verify_file(path):
-            return path.endswith(("microsoft.ad.yml", "microsoft.ad.yaml"))
+            return path.endswith(("microsoft.ad.ldap.yml", "microsoft.ad.ldap.yaml"))
 
         return False
 
@@ -164,7 +174,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
                     raw_values = insenstive_info.get(name.lower(), [])
                     values = schema.cast_object(name, raw_values)
 
-                    host_vars["raw"] = wrap_var(raw_values)
+                    host_vars["raw"] = wrap_var([base64.b64encode(r).decode() for r in raw_values])
                     host_vars["this"] = wrap_var(values)
 
                     for n, v in var_info.items():
@@ -195,9 +205,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
             elif isinstance(info, str):
                 info = {name.replace("-", "_"): info}
             elif not isinstance(info, dict):
-                raise AnsibleError(
-                    f"Value for attribute {name} was {type(info).__name__} but was expecting a dictionary"
-                )
+                raise AnsibleError(f"Attribute {name} value was {type(info).__name__} but was expecting a dictionary")
 
             for var_name in list(info.keys()):
                 var_template = info[var_name]
@@ -206,7 +214,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
 
                 elif not isinstance(var_template, str):
                     raise AnsibleError(
-                        f"Template value for attribute {name}.{var_name} was {type(var_template).__name__} but was expecting a string"
+                        f"Attribute {name}.{var_name} template value was {type(var_template).__name__} but was expecting a string"
                     )
 
             processed_attributes[name] = info

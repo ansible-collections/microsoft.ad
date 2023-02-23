@@ -27,12 +27,7 @@ DOCUMENTATION:
 
 EXAMPLES: |
   # This is an example used in the microsoft.ad.inventory plugin
-
-  # Converting from the coerced value
-  attributes:
-    objectSid: this | microsoft.ad.as_sid
-
-  # Converting from the raw bytes value
+  
   attributes:
     objectSid: raw | microsoft.ad.as_sid
 

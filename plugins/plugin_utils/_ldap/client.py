@@ -7,18 +7,19 @@
 # See also: https://github.com/ansible/community/issues/539#issuecomment-780839686
 # Please open an issue if you have questions about this.
 
-from __future__ import annotations
-
 import dataclasses
 import socket
 import ssl
 import threading
 import typing as t
 
-import sansldap
+try:
+    import sansldap
+except Exception:
+    pass  # Check is in __init__.py
 
 
-MessageType = t.TypeVar("MessageType", bound=sansldap.LDAPMessage)
+MessageType = t.TypeVar("MessageType", bound="sansldap.LDAPMessage")
 
 
 class Credential:
@@ -29,7 +30,7 @@ class Credential:
 
     def authenticate(
         self,
-        client: SyncLDAPClient,
+        client: "SyncLDAPClient",
         *,
         tls_sock: t.Optional[ssl.SSLSocket] = None,
     ) -> None:
@@ -59,7 +60,7 @@ class LDAPResultError(Exception):
     def __init__(
         self,
         msg: str,
-        result: sansldap.LDAPResult,
+        result: "sansldap.LDAPResult",
     ) -> None:
         super().__init__(msg)
         self.result = result
@@ -132,11 +133,12 @@ class SyncLDAPClient:
     def __init__(
         self,
         server: str,
+        protocol: "sansldap.LDAPClient",
         sock: t.Union[socket.socket, ssl.SSLSocket],
     ) -> None:
         self.server = server
 
-        self._protocol = sansldap.LDAPClient()
+        self._protocol = protocol
         self._sock = sock
         self._response_handler: t.List[ResponseHandler] = []
         self._encryptor: t.Optional[MessageEncryptor] = None
@@ -186,7 +188,7 @@ class SyncLDAPClient:
 
         return self._root_dse
 
-    def __enter__(self) -> SyncLDAPClient:
+    def __enter__(self) -> "SyncLDAPClient":
         return self
 
     def __exit__(self, *args: t.Any, **kwargs: t.Any) -> None:
@@ -195,7 +197,7 @@ class SyncLDAPClient:
     def bind(
         self,
         dn: str,
-        credential: sansldap.AuthenticationCredential,
+        credential: "sansldap.AuthenticationCredential",
         success_only: bool = True,
     ) -> t.Optional[bytes]:
         msg_id = self._protocol.bind(dn, credential)
@@ -247,10 +249,10 @@ class SyncLDAPClient:
 
     def search(
         self,
-        filter: t.Union[str, sansldap.LDAPFilter],
+        filter: t.Union[str, "sansldap.LDAPFilter"],
         attributes: t.List[str],
         search_base: t.Optional[str] = None,
-        search_scope: sansldap.SearchScope = sansldap.SearchScope.SUBTREE,
+        search_scope: t.Optional["sansldap.SearchScope"] = None,
     ) -> t.Dict[str, t.Dict[str, t.List[bytes]]]:
         if search_base is None:
             search_base = self.root_dse.default_naming_context
@@ -300,25 +302,29 @@ class SyncLDAPClient:
     def _search_request(
         self,
         base_object: t.Optional[str] = None,
-        scope: t.Union[int, sansldap.SearchScope] = sansldap.SearchScope.SUBTREE,
-        dereferencing_policy: t.Union[int, sansldap.DereferencingPolicy] = sansldap.DereferencingPolicy.NEVER,
+        scope: t.Optional[t.Union[int, "sansldap.SearchScope"]] = None,
+        dereferencing_policy: t.Optional[t.Union[int, "sansldap.DereferencingPolicy"]] = None,
         size_limit: int = 0,
         time_limit: int = 0,
         types_only: bool = False,
-        filter: t.Optional[t.Union[str, sansldap.LDAPFilter]] = None,
+        filter: t.Optional[t.Union[str, "sansldap.LDAPFilter"]] = None,
         attributes: t.Optional[t.List[str]] = None,
-        controls: t.Optional[t.List[sansldap.LDAPControl]] = None,
-    ) -> t.Iterator[t.Union[sansldap.SearchResultReference, sansldap.SearchResultEntry, sansldap.SearchResultDone]]:
+        controls: t.Optional[t.List["sansldap.LDAPControl"]] = None,
+    ) -> t.Iterator[
+        t.Union["sansldap.SearchResultReference", "sansldap.SearchResultEntry", "sansldap.SearchResultDone"]
+    ]:
         ldap_filter: t.Optional[sansldap.LDAPFilter] = None
         if isinstance(filter, sansldap.LDAPFilter):
             ldap_filter = filter
         elif filter:
             ldap_filter = sansldap.LDAPFilter.from_string(filter)
 
+        deref = dereferencing_policy if dereferencing_policy is not None else sansldap.DereferencingPolicy.NEVER
+
         msg_id = self._protocol.search_request(
             base_object=base_object,
-            scope=scope,
-            dereferencing_policy=dereferencing_policy,
+            scope=scope if scope is not None else sansldap.SearchScope.SUBTREE,
+            dereferencing_policy=deref,
             size_limit=size_limit,
             time_limit=time_limit,
             types_only=types_only,
@@ -409,7 +415,7 @@ class SyncLDAPClient:
 
     def _valid_result(
         self,
-        result: sansldap.LDAPResult,
+        result: "sansldap.LDAPResult",
         msg: str,
     ) -> None:
         if result.result_code != sansldap.LDAPResultCode.SUCCESS:

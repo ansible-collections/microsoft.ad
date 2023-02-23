@@ -91,7 +91,7 @@ class ActionModule(ActionBase):
 
     def _get_kerberos_cc_info(
         self,
-        ctx: krb5.Context,
+        ctx: "krb5.Context",
     ) -> t.Dict[str, t.Any]:
         creds: t.List[t.Dict[str, t.Any]] = []
         res: t.Dict[str, t.Any] = {

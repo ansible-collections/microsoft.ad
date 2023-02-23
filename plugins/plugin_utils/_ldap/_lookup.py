@@ -7,8 +7,6 @@
 # See also: https://github.com/ansible/community/issues/539#issuecomment-780839686
 # Please open an issue if you have questions about this.
 
-from __future__ import annotations
-
 import typing as t
 
 # dnspython is used for dynamic server lookups
@@ -41,7 +39,7 @@ class SrvRecord(t.NamedTuple):
         service: str,
         proto: str,
         name: str,
-    ) -> t.List[SrvRecord]:
+    ) -> t.List["SrvRecord"]:
         """Performs an SRV lookup.
 
         Args:
