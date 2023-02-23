@@ -7,12 +7,15 @@ DOCUMENTATION:
   - Jordan Borean (@jborean93)
   short_description: Converts an LDAP value to a datetime string
   seealso:
-  - filter: microsoft.ad.as_guid
-  - filter: microsoft.ad.as_sid
-  - inventory: microsoft.ad.inventory
+  - ref: microsoft.ad.as_guid <ansible_collections.microsoft.ad.as_guid_filter>
+    description: microsoft.ad.as_guid filter
+  - ref: microsoft.ad.as_sid <ansible_collections.microsoft.ad.as_sid_filter>
+    description: microsoft.ad.as_sid filter
+  - ref: microsoft.ad.ldap <ansible_collections.microsoft.ad.ldap_inventory>
+    description: microsoft.ad.ldap inventory
   description:
   - Converts an LDAP integer or raw value to a datetime string.
-  - Should be used with the C(microsoft.ad.inventory) plugin to convert
+  - Should be used with the C(microsoft.ad.ldap) plugin to convert
     attribute values to a datetime string.
   positional: _input
   options:
@@ -33,7 +36,7 @@ DOCUMENTATION:
       type: str
 
 EXAMPLES: |
-  # This is an example used in the microsoft.ad.inventory plugin
+  # This is an example used in the microsoft.ad.ldap plugin
 
   # Converting from the coerced value
   attributes:

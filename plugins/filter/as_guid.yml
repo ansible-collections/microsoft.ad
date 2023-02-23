@@ -7,12 +7,15 @@ DOCUMENTATION:
   - Jordan Borean (@jborean93)
   short_description: Converts an LDAP value to a GUID string
   seealso:
-  - filter: microsoft.ad.as_datetime
-  - filter: microsoft.ad.as_sid
-  - inventory: microsoft.ad.inventory
+  - ref: microsoft.ad.as_datetime <ansible_collections.microsoft.ad.as_datetime_filter>
+    description: microsoft.ad.as_datetime filter
+  - ref: microsoft.ad.as_sid <ansible_collections.microsoft.ad.as_sid_filter>
+    description: microsoft.ad.as_sid filter
+  - ref: microsoft.ad.ldap <ansible_collections.microsoft.ad.ldap_inventory>
+    description: microsoft.ad.ldap inventory
   description:
   - Converts an LDAP string or raw value to a guid string.
-  - Should be used with the C(microsoft.ad.inventory) plugin to convert
+  - Should be used with the C(microsoft.ad.ldap) plugin to convert
     attribute values to a guid string.
   positional: _input
   options:
@@ -26,7 +29,7 @@ DOCUMENTATION:
       required: true
 
 EXAMPLES: |
-  # This is an example used in the microsoft.ad.inventory plugin
+  # This is an example used in the microsoft.ad.ldap plugin
 
   attributes:
     objectGuid: raw | microsoft.ad.as_guid

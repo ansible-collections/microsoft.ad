@@ -13,7 +13,7 @@ description:
   their capabilities.
 options: {}
 notes:
-- See R(LDAP connection help,ansible_collections.microsoft.ad.docsite.guide_ldap)
+- See R(LDAP connection help,ansible_collections.microsoft.ad.docsite.guide_ldap_connection)
   for more information about LDAP connections.
 - The return values are not part of any contract and can change in the future.
   It is defined to give a snapshot of the Ansible host that can help debug LDAP

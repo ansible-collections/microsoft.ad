@@ -53,7 +53,7 @@ options:
     - This can be set to C(always), or C(ignore).
     - C(always) will perform certificate hostname and CA verification.
     - C(ignore) will ignore any certificate errors.
-    - See R(Certificate verification,ansible_collections.microsoft.ad.docsite.guid_ldap.cert_verification)
+    - See R(Certificate verification,ansible_collections.microsoft.ad.docsite.guide_ldap_connection.cert_verification)
       for more information.
     choices:
     - always
@@ -111,7 +111,7 @@ options:
     - The domain controller/server to connect to.
     - If not specified the server will be derived from the current krb5.conf
       C(default_realm) setting and with an SRV DNS lookup.
-    - See R(Server lookup,ansible_collections.microsoft.ad.docsite.guid_ldap.server_lookup)
+    - See R(Server lookup,ansible_collections.microsoft.ad.docsite.guide_ldap_connection.server_lookup)
       for more information.
     type: str
   tls_mode:
@@ -137,7 +137,7 @@ options:
       if available, for example one retrieved by C(kinit).
     type: str
 notes:
-- See R(LDAP connection help,ansible_collections.microsoft.ad.docsite.guide_ldap)
+- See R(LDAP connection help,ansible_collections.microsoft.ad.docsite.guide_ldap_connection)
   for more information about LDAP connections.
 requirements:
 - dnspython - For option server lookup support

@@ -56,6 +56,15 @@ Empty string or null
 
 In this case each of the attribute values will be set as a host fact as they are coerced by the LDAP schema, see :ref:`value types and templating <ansible_collections.microsoft.ad.docsite.guide_ldap_inventory.value_types>`. The name of each fact will be based on the attribute name with ``-`` being replaced by ``_``. In the above example the host facts ``comment``, ``objectSid``, and ``ms_Mcs_AdmPwd`` will be set to the coerced values.
 
+.. code-block:: yaml
+
+    # ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml
+
+    ansible_host: MYHOST.domain.com
+    comment: test comment
+    ms_Mcs_AdmPwd: Password123!
+    objectSid: S-1-5-21-1234-1108
+
 
 Templatable string
 ------------------
@@ -64,10 +73,20 @@ Templatable string
 
     attributes:
       comment: this
-      objectSid: raw | microsoft.ad.to_sid
+      objectSid: raw | microsoft.ad.as_sid
       ms-Mcs-AdmPwd: raw | first
 
 This format will set the host fact based on the template value specified. Each template is implicitly wrapped with ``{{ ... }}`` and processed through Jinja2 to produce a result which means it can be used with filters provided by Ansible and other collections to convert the raw LDAP value into something more useful when it is set as the host fact. The ``this`` variable refers to the coerced LDAP attribute value and ``raw`` refers to a list of base64 encoded byte strings of the raw LDAP attribute value. See :ref:`value types and templating <ansible_collections.microsoft.ad.docsite.guide_ldap_inventory.value_types>` for more information around what can be done inside the templates. Each host fact will be named after the attribute name with ``-`` being replaced by ``_``. In the above example the host facts ``command``, ``objectSid``, and ``ms_Mcs_AdmPwd``.
+
+.. code-block:: yaml
+
+    # ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml
+
+    ansible_host: MYHOST.domain.com
+    comment: test comment
+    ms_Mcs_AdmPwd: UGFzc3dvcmQxMjMh
+    objectSid:
+    - S-1-5-21-1234-1108
 
 
 Dictionary
@@ -77,10 +96,12 @@ Dictionary
 
     attributes:
       comment:
-        my_command:
+        # Jinja2 native types will automatically convert this to a dict as
+        # the value is a json string.
+        my_comment:
         other_var: this | from_json
       objectSid:
-        sid: raw | microsoft.ad.to_sid | first
+        sid: raw | microsoft.ad.as_sid | first
       ms-Mcs-AdmPwd:
         ansible_password: this
 
@@ -90,6 +111,18 @@ The final value that can be set on each attribute values is a dictionary where t
 * ``other_var`` - a dictionary created from the coerced value of ``comment`` if it was a json string
 * ``sid`` - the computer SID value as a string derived from ``objectSid``
 * ``ansible_password`` - the LAPS password coerced value derived from ``ms-Mcs-AdmPwd``
+
+.. code-block:: yaml
+
+    # ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml
+
+    ansible_host: MYHOST.domain.com
+    ansible_password: Password123!
+    my_comment:
+      foo: bar
+    other_var:
+      foo: bar
+    sid: S-1-5-21-1234-1108
 
 .. note::
     The host fact names are used literally, there are no conversions from ``-`` to ``_`` when using this format.
@@ -123,9 +156,9 @@ LDAP attribute values may also be marked as a a single or multiple value attribu
       servicePrincipalName:
 
 
-.. code-block:: shell-session
+.. code-block:: yaml
 
-    $ ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml
+    # ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml
 
     ansible_host: MYHOST.domain.com
     comment: test comment
@@ -146,9 +179,9 @@ Some attributes like ``pwdLastSet`` are typically represented as a datetime valu
 
 The following filters can be used as an easy way to further convert the coerced values into something more readable:
 
-* :ref:`microsoft.ad.as_datetime <ansible_collections.microsoft.ad.as_datetime_filter>`.
-* :ref:`microsoft.ad.as_guid <ansible_collections.microsoft.ad.as_guid_filter>`.
-* :ref:`microsoft.ad.as_sid <ansible_collections.microsoft.ad.as_sid_filter>`.
+* :ref:`microsoft.ad.as_datetime <ansible_collections.microsoft.ad.as_datetime_filter>`
+* :ref:`microsoft.ad.as_guid <ansible_collections.microsoft.ad.as_guid_filter>`
+* :ref:`microsoft.ad.as_sid <ansible_collections.microsoft.ad.as_sid_filter>`
 
 An example of these filters being used in the ``attributes`` option can be seen below:
 
@@ -161,9 +194,9 @@ An example of these filters being used in the ``attributes`` option can be seen 
         password_last_set_int: this
         password_last_set_datetime: this | microsoft.ad.as_datetime
 
-.. code-block:: shell-session
+.. code-block:: yaml
 
-    $ ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml
+    # ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml
 
     ansible_host: MYHOST.domain.com
     password_last_set_datetime: 2023-02-06T07:39:09.195321+0000
@@ -203,9 +236,9 @@ The ``this`` variable refers to the coerced LDAP attribute value while ``raw`` r
     compose:
       comment2: comment
 
-.. code-block:: shell-session
+.. code-block:: yaml
 
-    $ ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml
+    # ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml
 
     ansible_host: MYHOST.domain.com
     comment: test comment
