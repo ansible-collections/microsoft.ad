@@ -1,7 +1,7 @@
 # Copyright: (c) 2023, Ansible Project
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-DOCUMENTATION = """
+DOCUMENTATION = r"""
 name: ldap
 author: Jordan Borean (@jborean93)
 short_description: Inventory plugin for Active Directory
@@ -70,7 +70,7 @@ extends_documentation_fragment:
 - microsoft.ad.ldap_connection
 """
 
-EXAMPLES = """
+EXAMPLES = r"""
 # Set in the file ending with microsoft.ad.ldap.yml or microsoft.ad.ldap.yaml
 plugin: microsoft.ad.ldap
 
