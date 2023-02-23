@@ -180,7 +180,7 @@ class SpnegoEncryptor(MessageEncryptor):
     def unwrap(
         self,
         data: bytes,
-    ) -> tuple[bytes, int]:
+    ) -> t.Tuple[bytes, int]:
         data_view = memoryview(data)
         data_len = struct.unpack(">I", data_view[:4])[0]
         data_view = data_view[4:]

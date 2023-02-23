@@ -52,7 +52,7 @@ class MessageEncryptor:
     def unwrap(
         self,
         data: bytes,
-    ) -> tuple[bytes, int]:
+    ) -> t.Tuple[bytes, int]:
         raise NotImplementedError()
 
 

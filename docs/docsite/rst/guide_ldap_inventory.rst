@@ -64,6 +64,7 @@ In this case each of the attribute values will be set as a host fact as they are
     comment: test comment
     ms_Mcs_AdmPwd: Password123!
     objectSid: S-1-5-21-1234-1108
+    microsoft_ad_distinguished_name: CN=MYHOST,CN=Computers,DC=domain,DC=com
 
 
 Templatable string
@@ -87,6 +88,7 @@ This format will set the host fact based on the template value specified. Each t
     ms_Mcs_AdmPwd: UGFzc3dvcmQxMjMh
     objectSid:
     - S-1-5-21-1234-1108
+    microsoft_ad_distinguished_name: CN=MYHOST,CN=Computers,DC=domain,DC=com
 
 
 Dictionary
@@ -123,6 +125,7 @@ The final value that can be set on each attribute values is a dictionary where t
     other_var:
       foo: bar
     sid: S-1-5-21-1234-1108
+    microsoft_ad_distinguished_name: CN=MYHOST,CN=Computers,DC=domain,DC=com
 
 .. note::
     The host fact names are used literally, there are no conversions from ``-`` to ``_`` when using this format.
@@ -171,6 +174,7 @@ LDAP attribute values may also be marked as a a single or multiple value attribu
     - HOST/MYHOST
     - RestrictedKrbHost/MYHOST.domain.com
     - HOST/MYHOST.domain.com
+    microsoft_ad_distinguished_name: CN=MYHOST,CN=Computers,DC=domain,DC=com
 
 Some attributes like ``pwdLastSet`` are typically represented as a datetime value but internally are stored as integers. As there is no metadata in the LDAP schema to denote these integer values as datetime objects they will only be coerced into integer values.
 
@@ -201,6 +205,7 @@ An example of these filters being used in the ``attributes`` option can be seen 
     ansible_host: MYHOST.domain.com
     password_last_set_datetime: 2023-02-06T07:39:09.195321+0000
     password_last_set_int: 133201427491953218
+    microsoft_ad_distinguished_name: CN=MYHOST,CN=Computers,DC=domain,DC=com
 
 The templates can also reference other filters that exist outside the collection, like the Ansible builtin ``from_json`` and more. The value is simply what would be placed inside ``{{ ... }}`` during a normal templating operation.
 
@@ -250,3 +255,4 @@ The ``this`` variable refers to the coerced LDAP attribute value while ``raw`` r
     sid_raw:
     - AQMAAAAAAAUVAAAA0gQAAFQEAAA=
     sid_raw_filtered: S-1-5-21-1234-1108
+    microsoft_ad_distinguished_name: CN=MYHOST,CN=Computers,DC=domain,DC=com

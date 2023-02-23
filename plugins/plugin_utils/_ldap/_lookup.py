@@ -67,7 +67,7 @@ class SrvRecord(t.NamedTuple):
         return sorted(answers, key=lambda a: (a.priority, -a.weight))
 
 
-def lookup_ldap_server() -> tuple[str, int]:
+def lookup_ldap_server() -> t.Tuple[str, int]:
     """Attempts to lookup LDAP server.
 
     Attempts to lookup LDAP server based on the current Kerberos host
@@ -75,7 +75,7 @@ def lookup_ldap_server() -> tuple[str, int]:
     '_ldap._tcp.dc._msdcs.{realm}' to get the LDAP server hostname nad port.
 
     Returns:
-        tuple[str, int]: The LDAP hostname and port.
+        Tuple[str, int]: The LDAP hostname and port.
 
     Raises:
         ImportError: Missing krb5 or dnspython.

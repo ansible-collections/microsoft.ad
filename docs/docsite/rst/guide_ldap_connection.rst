@@ -133,7 +133,7 @@ A critical component of LDAP connections is how the user authenticates itself to
 | ntlm           | Yes                 | No                         |
 +----------------+---------------------+----------------------------+
 
-Unless otherwise specified, the default authentication protocol used is ``negotiate`` which relies on the ``pyspnego`` library. See :ref:`requirements <ansible_collections.microsoft.ad.guide_ldap_connection.requirements>` for more information on how to install this requirement.
+Unless otherwise specified, the default authentication protocol used is ``negotiate`` which relies on the ``pyspnego`` library. See :ref:`requirements <ansible_collections.microsoft.ad.docsite.guide_ldap_connection.requirements>` for more information on how to install this requirement.
 
 Any protocol that does not support encryption must either be used with LDAPS or StartTLS or they must explicitly disable the encryption checks. Disabling encryption is not recommended as it will send the credentials without any protection and any of the data exchanged can be seen by anyone. It also requires the target server to allow unencrypted connections as they can reject unprotected connections.
 
@@ -168,7 +168,7 @@ This defines the three options described. If the key and certificate are in the 
 Negotiate
 ---------
 
-Negotiate authentication is the default authentication protocol used by LDAP connections. It is a combination of both ``kerberos`` and ``ntlm`` with the client negotiating which one to use. It will favor ``kerberos`` if it is available and fallback to ``ntlm`` if not. The ``pyspnego`` Python package provides ``negotiate`` with just ``ntlm`` support, ``kerberos`` support is provided by the ``pyspnego[kerberos]`` extras option. See :ref:`requirements <ansible_collections.microsoft.ad.guide_ldap_connection.requirements>` for more information on how to install this requirement.
+Negotiate authentication is the default authentication protocol used by LDAP connections. It is a combination of both ``kerberos`` and ``ntlm`` with the client negotiating which one to use. It will favor ``kerberos`` if it is available and fallback to ``ntlm`` if not. The ``pyspnego`` Python package provides ``negotiate`` with just ``ntlm`` support, ``kerberos`` support is provided by the ``pyspnego[kerberos]`` extras option. See :ref:`requirements <ansible_collections.microsoft.ad.docsite.guide_ldap_connection.requirements>` for more information on how to install this requirement.
 
 Kerberos
 --------

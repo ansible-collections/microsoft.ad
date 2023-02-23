@@ -12,6 +12,8 @@ description:
   the LDAP computer object and C(ansible_hostname) to the value of the
   C(dNSHostName) LDAP attribute if set. If the C(dNSHostName) attribute is not
   set on the computer object then C(ansible_hostname) is not set.
+- The host fact C(microsoft_ad_distinguished_name) will also be set to the
+  distinguished name of the host that was used to derive the host entry.
 - Any other fact that is needed, needs to be defined in the I(attributes)
   option.
 options:
@@ -69,6 +71,100 @@ extends_documentation_fragment:
 """
 
 EXAMPLES = """
+# Set in the file ending with microsoft.ad.ldap.yml or microsoft.ad.ldap.yaml
+plugin: microsoft.ad.ldap
+
+
+####################################################################
+#                        Connection Options                        #
+#                                                                  #
+# These options control how the plugin connects to the LDAP server #
+####################################################################
+
+# Connects to ldap://dc01.domain.com:389
+server: dc01.domain.com
+port: 389
+
+# Connects to ldaps://dc01.domain.com:636
+server: dc01.domain.com
+tls_mode: ldaps
+
+# Connects to the global catalog
+# ldap://dc01.domain.com:3268
+server: dc01.domain.com
+port: 3268
+
+# Provides explicit user, will use the current Kerberos ticket if no credential
+# is provided.
+username: domain-user@DOMAIN.COM
+password: Password123!
+
+# Only allow Kerberos authentication.
+auth_protocol: kerberos
+
+# Verify LDAPS CA chain with custom CA chain.
+tls_mode: ldaps
+ca_cert: /home/user/certs/ldap.pem
+
+
+##############################################
+#               Search Options               #
+#                                            #
+# These options control the searching rules  #
+##############################################
+
+# Search for computer accounts in the Workshop OU.
+search_base: OU=Workshop A,DC=domain,DC=com
+
+# Filter the computer accounts returned for only ones with the dNSDomainName
+# attribute set.
+filter: (dNSDomainName=*)
+
+# Filter computer accounts returned for ones starting with PROD and with the
+# LAPS password set.
+filter: (&(sAMAccountName=PROD*)(ms-Mcs-AdmPwd=*))
+
+# See documentation for more details
+attributes:
+  sAMAccountName:
+    sam_account_name:
+  objectSid:
+    computer_sid:
+  pwdLastSet:
+    password_last_set: this | microsoft.ad.as_datetime
+  comment:
+    host_comment
+  memberOf:
+    computer_membership: this | map("regex_search", '^CN=(?P<name>.+?)((?<!\\),)', '\g<name>') | flatten
+  location:
+
+
+#####################################################################
+#                        Constructed Options                        #
+#                                                                   #
+# These options control the constructed values like vars and groups #
+#####################################################################
+
+# Build composed host variables. Requires attributes to be set in the
+# attributes option to be referenced here.
+compose:
+  host_var: computer_sid
+
+# Conditionals that adds found hosts to the groups specified.
+groups:
+  # Adds all hosts to the windows group
+  windows: true
+
+  # Uses the memberOf fact documented above to place the host in the production
+  # group if it's a member of that group
+  production: '"Production Group" in computer_membership'
+
+# Adds the host to a group site_{{ location }} with the default group of
+# site_unknown if the location isn't defined
+keyed_groups:
+- key: location | default(omit)
+  prefix: site
+  default_value: unknown
 """
 
 import base64
@@ -154,16 +250,17 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
         with create_ldap_connection(**self.get_options()) as client:
             schema = LDAPSchema.load_schema(client)
 
-            for info in client.search(
+            for dn, info in client.search(
                 filter=final_filter,
                 attributes=list(attributes),
                 search_base=search_base,
                 search_scope=ldap_search_scope,
-            ).values():
+            ).items():
                 insenstive_info = {k.lower(): v for k, v in info.items()}
 
                 host_name = insenstive_info["name"][0].decode("utf-8")
                 inventory.add_host(host_name)
+                inventory.set_variable(host_name, "microsoft_ad_distinguished_name", dn)
 
                 dns_host_name = insenstive_info.get("dnshostname", None)
                 if dns_host_name:
