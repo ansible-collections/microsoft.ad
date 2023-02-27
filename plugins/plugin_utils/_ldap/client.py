@@ -147,7 +147,6 @@ class SyncLDAPClient:
             name=f"LDAP({server})",
         )
         self._reader_task.start()
-        self._wait_tls: t.Optional[threading.Event] = None
         self._root_dse: t.Optional[RootDSE] = None
 
     @property
@@ -194,6 +193,25 @@ class SyncLDAPClient:
     def __exit__(self, *args: t.Any, **kwargs: t.Any) -> None:
         self.close()
 
+    @classmethod
+    def start_tls(
+        cls,
+        protocol: "sansldap.LDAPClient",
+        sock: socket.socket,
+    ) -> None:
+        protocol.extended_request(sansldap.ExtendedOperations.LDAP_START_TLS)
+        data = protocol.data_to_send()
+        sock.sendall(data)
+
+        while True:
+            data = sock.recv(4096)
+            for msg in protocol.receive(data):
+                msg = t.cast(sansldap.ExtendedResponse, msg)
+                if msg.result.result_code != sansldap.LDAPResultCode.SUCCESS:
+                    raise LDAPResultError("StartTLS failed", msg.result)
+
+                break
+
     def bind(
         self,
         dn: str,
@@ -226,26 +244,6 @@ class SyncLDAPClient:
         encryptor: MessageEncryptor,
     ) -> None:
         self._encryptor = encryptor
-
-    def start_tls(
-        self,
-        options: ssl.SSLContext,
-        *,
-        server_hostname: t.Optional[str] = None,
-    ) -> ssl.SSLSocket:
-        msg_id = self._protocol.extended_request(sansldap.ExtendedOperations.LDAP_START_TLS)
-        self._wait_tls = wait_event = threading.Event()
-        try:
-            response = self._write_and_wait_one(msg_id, sansldap.ExtendedResponse)
-            self._valid_result(response.result, "StartTLS failed")
-
-            self._sock = options.wrap_socket(
-                self._sock,
-                server_hostname=server_hostname or self.server,
-            )
-            return self._sock
-        finally:
-            wait_event.set()
 
     def search(
         self,
@@ -375,17 +373,6 @@ class SyncLDAPClient:
                     for msg in self._protocol.receive(dec_data):
                         for handler in self._response_handler:
                             handler.append(msg)
-
-                        if (
-                            isinstance(msg, sansldap.ExtendedResponse)
-                            and msg.name == sansldap.ExtendedOperations.LDAP_START_TLS.value
-                            and self._wait_tls
-                        ):
-                            # Need to wait until the sock object has been
-                            # updated in start_tls() before issuing another
-                            # recv.
-                            self._wait_tls.wait()
-                            self._wait_tls = None
 
             except sansldap.ProtocolError as e:
                 if e.response:

@@ -12,11 +12,11 @@ from ansible.module_utils.common.collections import is_sequence
 
 
 def per_sequence(func: t.Callable[[t.Any], t.Any]) -> t.Any:
-    def wrapper(value: t.Any) -> t.Any:
+    def wrapper(value: t.Any, *args: t.Any, **kwargs: t.Any) -> t.Any:
         if is_sequence(value):
-            return [func(v) for v in value]
+            return [func(v, *args, **kwargs) for v in value]
         else:
-            return func(value)
+            return func(value, *args, **kwargs)
 
     return wrapper
 

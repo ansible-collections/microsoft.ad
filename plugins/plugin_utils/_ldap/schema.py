@@ -52,8 +52,6 @@ class LDAPSchema:
         values: t.List[bytes],
     ) -> t.Any:
         info = self.attribute_types.get(attribute.lower(), None)
-        if not info or not info.syntax:
-            return values
 
         caster: t.Callable[[bytes], t.Any]
         if attribute == "objectSid":
@@ -61,6 +59,9 @@ class LDAPSchema:
 
         elif attribute == "objectGuid":
             caster = as_guid
+
+        elif not info or not info.syntax:
+            caster = _as_str
 
         elif info.syntax == "1.3.6.1.4.1.1466.115.121.1.7":
             caster = _as_bool
@@ -78,7 +79,7 @@ class LDAPSchema:
         for v in values:
             casted_values.append(caster(v))
 
-        if info.single_value:
+        if info and info.single_value:
             return casted_values[0] if casted_values else None
         else:
             return casted_values

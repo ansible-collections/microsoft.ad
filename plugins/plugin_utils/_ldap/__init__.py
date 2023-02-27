@@ -101,26 +101,32 @@ def create_ldap_connection(
     if not auth_protocol:
         auth_protocol = "certificate" if certificate and ssl_context else "negotiate"
 
-    credential: Credential
+    credential: t.Optional[Credential] = None
     if auth_protocol == "simple":
         if encrypt and not ssl_context:
-            raise Exception("Cannot use simple with encryption.")
+            raise ValueError("Cannot use simple with encryption.")
 
         credential = SimpleCredential(username, password)
 
     elif auth_protocol == "certificate":
         if not ssl_context:
-            raise Exception("TLS must be used for certificate authentication")
+            raise ValueError("TLS must be used for certificate authentication")
 
         if not certificate:
-            raise Exception("A certificate must be specified for certificate authentication")
+            raise ValueError("A certificate must be specified for certificate authentication")
 
         ssl_context.load_cert_chain(
             certificate,
             keyfile=certificate_key,
             password=certificate_password,
         )
-        credential = ClientCertificate()
+
+        # If the client establishes the SSL/TLS-protected connection by means of connecting on a protected LDAPS port,
+        # then the connection is considered to be immediately authenticated (bound) as the credentials represented
+        # by the client certificate. An EXTERNAL bind is not allowed, and the bind will be rejected with an error.
+        # https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/8e73932f-70cf-46d6-88b1-8d9f86235e81
+        if tls_mode == "start_tls":
+            credential = ClientCertificate()
 
     else:
         credential = NegotiateCredential(
@@ -137,12 +143,24 @@ def create_ldap_connection(
     if ssl_context and tls_mode == "ldaps":
         tls_sock = sock = ssl_context.wrap_socket(sock, server_hostname=server)
 
-    client = SyncLDAPClient(server, protocol, sock)
     try:
         if ssl_context and tls_mode == "start_tls":
-            tls_sock = client.start_tls(ssl_context)
+            SyncLDAPClient.start_tls(protocol, sock)
+            tls_sock = sock = ssl_context.wrap_socket(sock, server_hostname=server)
 
-        credential.authenticate(client, tls_sock=tls_sock)
+        client = SyncLDAPClient(server, protocol, sock)
+    except Exception:
+        try:
+            sock.shutdown(socket.SHUT_RDWR)
+        except OSError:
+            # The socket has already been shutdown for some other reason
+            pass
+        sock.close()
+        raise
+
+    try:
+        if credential:
+            credential.authenticate(client, tls_sock=tls_sock)
 
         return client
     except Exception:

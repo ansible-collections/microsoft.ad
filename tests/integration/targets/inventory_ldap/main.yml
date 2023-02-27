@@ -1,0 +1,8 @@
+- name: run microsoft.ad.ldap tests
+  hosts: windows
+  gather_facts: false
+
+  tasks:
+  - name: setup domain controller
+    import_role:
+      name: ../../setup_domain
