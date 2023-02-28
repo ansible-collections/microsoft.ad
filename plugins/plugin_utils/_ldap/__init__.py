@@ -26,6 +26,7 @@ except Exception as e:
     LDAP_IMP_ERR = e
 
 from ._authentication import ClientCertificate, NegotiateCredential, SimpleCredential
+from ._certificate import load_client_certificate, load_trust_certificate
 from ._lookup import lookup_ldap_server
 from .client import Credential, SyncLDAPClient
 
@@ -91,8 +92,7 @@ def create_ldap_connection(
     if tls_mode:
         ssl_context = ssl.create_default_context()
         if ca_cert:
-            # FIXME: Check if file/dir/cert contents
-            ssl_context.load_verify_locations(cafile=ca_cert)
+            load_trust_certificate(ssl_context, ca_cert)
 
         if cert_verification == "ignore":
             ssl_context.check_hostname = False
@@ -115,9 +115,10 @@ def create_ldap_connection(
         if not certificate:
             raise ValueError("A certificate must be specified for certificate authentication")
 
-        ssl_context.load_cert_chain(
+        load_client_certificate(
+            ssl_context,
             certificate,
-            keyfile=certificate_key,
+            key=certificate_key,
             password=certificate_password,
         )
 

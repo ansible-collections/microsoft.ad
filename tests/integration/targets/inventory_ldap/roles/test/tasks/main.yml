@@ -1,0 +1,107 @@
+- name: get domain controller info
+  microsoft.ad.object_info:
+    ldap_filter: '(objectClass=computer)'
+    properties:
+    - dNSHostName
+  register: dc_info_raw
+
+- name: make sure only 1 computer is present for start of tests
+  assert:
+    that:
+    - dc_info_raw.objects | length == 1
+
+- set_fact:
+    dc_info: '{{ dc_info_raw.objects[0] }}'
+
+- import_tasks: invoke.yml
+  vars:
+    scenario: LDAP
+    inventory:
+      plugin: microsoft.ad.ldap
+      server: '{{ ldap_server }}'
+      username: '{{ ldap_user }}'
+      password: '{{ ldap_pass }}'
+
+- name: assert LDAP inventory
+  assert:
+    that: &default-assertion
+    - inventory_out._meta.hostvars | length == 1
+    - (inventory_out._meta.hostvars.keys() | list) == [dc_info.Name]
+    - (inventory_out._meta.hostvars[dc_info.Name].keys() | list) == ['ansible_host', 'microsoft_ad_distinguished_name']
+    - inventory_out._meta.hostvars[dc_info.Name]['ansible_host'] == dc_info.dNSHostName
+    - inventory_out._meta.hostvars[dc_info.Name]['microsoft_ad_distinguished_name'] == dc_info.DistinguishedName
+    - inventory_out.ungrouped.hosts == [dc_info.Name]
+
+- import_tasks: invoke.yml
+  vars:
+    scenario: LDAPS
+    inventory:
+      plugin: microsoft.ad.ldap
+      server: '{{ ldap_server }}'
+      tls_mode: ldaps
+      cert_verification: ignore
+      username: '{{ ldap_user }}'
+      password: '{{ ldap_pass }}'
+
+- name: assert LDAPS inventory
+  assert:
+    that: *default-assertion
+
+# - name: StartTLS
+#   import_tasks: invoke.yml
+#   vars:
+#     inventory:
+#       plugin: microsoft.ad.ldap
+#       server: '{{ ldap_server }}'
+#       tls_mode: start_tls
+#       cert_verification: ignore
+#       username: '{{ ldap_user }}'
+#       password: '{{ ldap_pass }}'
+
+# - debug:
+#     var: inventory_out
+
+- import_tasks: invoke.yml
+  vars:
+    scenario: Simple auth
+    inventory:
+      plugin: microsoft.ad.ldap
+      server: '{{ ldap_server }}'
+      tls_mode: ldaps
+      cert_verification: ignore
+      username: '{{ ldap_user }}'
+      password: '{{ ldap_pass }}'
+      auth_protocol: simple
+
+- name: assert Simple auth inventory
+  assert:
+    that: *default-assertion
+
+# - name: Certificate auth
+#   import_tasks: invoke.yml
+#   vars:
+#     inventory:
+#       plugin: microsoft.ad.ldap
+#       server: '{{ ldap_server }}'
+#       tls_mode: start_tls
+#       certificate_verify: ignore
+#       username: '{{ ldap_user }}'
+#       password: '{{ ldap_pass }}'
+
+# - debug:
+#     var: inventory_out
+
+# Invalid server - timeout
+# Blocked port
+# LDAPS - ignore cert
+# LDAPS - CA cert as file
+# LDAPS - CA cert as var
+# Cert auth with pfx
+# Cert auth with file
+# Cert auth with separate files
+# Cert auth with password
+# Simple auth fails without encrypt=False
+# With filter
+# With custom search base
+# With attributes
+# With compose and grouping
