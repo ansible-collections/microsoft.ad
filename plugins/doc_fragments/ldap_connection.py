@@ -5,7 +5,7 @@
 class ModuleDocFragment:
 
     # associated with plugin_utils._ldap.create_connection
-    DOCUMENTATION = """
+    DOCUMENTATION = r"""
 options:
   auth_protocol:
     description:
@@ -42,44 +42,57 @@ options:
     type: str
   ca_cert:
     description:
-    - The path to a CA certificate PEM file to use for certificate
-      verification.
+    - Can be the path to a CA certificate PEM or DER file or the CA certificate
+      PEM string that is used for certificate verification.
     - If omitted, the default CA store used for verification is dependent on
       the current Python settings.
     type: str
-  cert_verification:
+  cert_validation:
     description:
     - The certificate verification behaviour when using a TLS connection.
-    - This can be set to C(always), or C(ignore).
+    - This can be set to C(always), C(ignore), C(ignore_hostname).
     - C(always) will perform certificate hostname and CA verification.
     - C(ignore) will ignore any certificate errors.
-    - See R(Certificate verification,ansible_collections.microsoft.ad.docsite.guide_ldap_connection.cert_verification)
+    - C(ignore_hostname) will validate the CA trust chain but will ignore any
+      hostname checks performed by TLS.
+    - See R(Certificate verification,ansible_collections.microsoft.ad.docsite.guide_ldap_connection.cert_validation)
       for more information.
     choices:
     - always
     - ignore
+    - ignore_hostname
     default: always
     type: str
   certificate:
     description:
-    - The path to the certificate bundle to use for certificate authentication.
-    - This file can contain the certificate and key or just the certificate
-      itself. Use I(certificate_key) if a separate file is used to contain the
-      certificate key.
+    - The certificate or certificate with key bundle that is used for
+      certificate authentication.
+    - The value can either be a path to a file containing the certificate or
+      the PEM encoded certificate or certificate and key bundle.
+    - If using a path to a certificate file, the file can be a PEM encoded
+      certificate, a PEM encoded certificate and key bundle, a DER encoded
+      certificate, or a PFX/PKCS12 encoded certificate and key bundle.
+    - Use I(certificate_key) if the certificate specified does not contain the
+      key.
+    - Use I(certificate_password) if the key is encrypted with a password.
     type: str
   certificate_key:
     description:
-    - The path to the certificate key to use for certificate authentication.
-    - If set, the certificate key is sourced from this file and I(certificate)
-      should be the path to a file with just the certificate PEM.
-    - If the key is encrypted, use I(certificate_password) to specify the
-      password used to decrypt the key.
+    - The certificate key that is used for certificate authenticatoin.
+    - The value can either be a path to a file containing the key in PEM or
+      DER encoded form, or it can be the string of a PEM encoded key.
+    - Use I(certificate_password) if the key is encrypted with a password.
     type: str
   certificate_password:
     description:
     - The password used to decrypt the certificate key specified by
       I(certificate) or I(certificate_key).
     type: str
+  connection_timeout:
+    description:
+    - The timeout in seconds to wait until the connection is established.
+    default: 5
+    type: int
   encrypt:
     description:
     - Whether encryption is required for the connection.

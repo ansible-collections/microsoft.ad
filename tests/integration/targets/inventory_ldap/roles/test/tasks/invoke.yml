@@ -6,9 +6,9 @@
 
 - name: '{{ scenario }} - run ansible-inventory'
   ansible.builtin.command: ansible-inventory -i /tmp/tmp-microsoft.ad.ldap.yml --list
-  register: raw_out
+  register: inventory_out_raw
   delegate_to: localhost
 
 - name: '{{ scenario }} - get ansible-inventory output'
   set_fact:
-    inventory_out: '{{ raw_out.stdout | from_json }}'
+    inventory_out: '{{ inventory_out_raw.stdout | from_json }}'

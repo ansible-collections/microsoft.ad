@@ -203,13 +203,15 @@ class SyncLDAPClient:
         data = protocol.data_to_send()
         sock.sendall(data)
 
-        while True:
+        done = False
+        while not done:
             data = sock.recv(4096)
             for msg in protocol.receive(data):
                 msg = t.cast(sansldap.ExtendedResponse, msg)
                 if msg.result.result_code != sansldap.LDAPResultCode.SUCCESS:
                     raise LDAPResultError("StartTLS failed", msg.result)
 
+                done = True
                 break
 
     def bind(

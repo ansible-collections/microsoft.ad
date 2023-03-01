@@ -21,5 +21,5 @@
       ldap_server: '{{ ansible_host | default(inventory_hostname) }}'
       ldap_user: ldap-test@{{ domain_realm }}
       ldap_pass: '{{ domain_password }}'
-      ldap_user_cert: /tmp/microsoft-ad-{{ inventory_hostname }}user.pfx
+      ldap_user_cert: /tmp/microsoft.ad-{{ inventory_hostname }}/user.pfx
       ldap_ca_cert: /tmp/microsoft.ad-{{ inventory_hostname }}/ca.pem

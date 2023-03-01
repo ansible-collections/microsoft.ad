@@ -30,14 +30,17 @@ from ._certificate import load_client_certificate, load_trust_certificate
 from ._lookup import lookup_ldap_server
 from .client import Credential, SyncLDAPClient
 
+from ansible.errors import AnsibleError
+
 
 def create_ldap_connection(
     auth_protocol: t.Optional[str] = None,
     ca_cert: t.Optional[str] = None,
-    cert_verification: t.Optional[str] = None,
+    cert_validation: t.Optional[str] = None,
     certificate: t.Optional[str] = None,
     certificate_key: t.Optional[str] = None,
     certificate_password: t.Optional[str] = None,
+    connection_timeout: int = 5,
     encrypt: bool = True,
     password: t.Optional[str] = None,
     port: t.Optional[int] = None,
@@ -55,14 +58,16 @@ def create_ldap_connection(
         auth_protocol: The authentication protocol to use, can be simple,
             certificate, negotiate, keberos, or ntlm.
         ca_cert: The CA PEM path to use for certificate verification.
-        cert_verification: Controls the certificate verification behaviour, can
-            be always or ignore.
+        cert_validation: Controls the certificate verification behaviour, can
+            be always, ignore, or ignore_hostname.
         certificate: The client certificate PEM file (optionally key) to use for
             certificate authentication.
         certificate_key: The client certificate PEM key to use for certificate
             authentication.
         certificate_password: The password used to decrypt the client
             certificate key if it is encrypted.
+        connection_timeout: The timeout in seconds to wait for connecting to a
+            host.
         encrypt: The connection should be encrypted, whether through TLS or
             with authentication encryption.
         password: The password to authenticate with.
@@ -94,9 +99,12 @@ def create_ldap_connection(
         if ca_cert:
             load_trust_certificate(ssl_context, ca_cert)
 
-        if cert_verification == "ignore":
+        if cert_validation == "ignore":
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.VerifyMode.CERT_NONE
+
+        elif cert_validation == "ignore_hostname":
+            ssl_context.check_hostname = False
 
     if not auth_protocol:
         auth_protocol = "certificate" if certificate and ssl_context else "negotiate"
@@ -104,7 +112,7 @@ def create_ldap_connection(
     credential: t.Optional[Credential] = None
     if auth_protocol == "simple":
         if encrypt and not ssl_context:
-            raise ValueError("Cannot use simple with encryption.")
+            raise ValueError("Cannot use simple auth with encryption.")
 
         credential = SimpleCredential(username, password)
 
@@ -139,7 +147,11 @@ def create_ldap_connection(
 
     protocol = sansldap.LDAPClient()
     tls_sock: t.Optional[ssl.SSLSocket] = None
-    sock = socket.create_connection((server, port))
+    try:
+        sock = socket.create_connection((server, port), timeout=connection_timeout)
+    except OSError as e:
+        raise AnsibleError(f"Failed to connect to {server}:{port}: {e}") from e
+    sock.settimeout(None)  # Set socket into blocking mode
 
     if ssl_context and tls_mode == "ldaps":
         tls_sock = sock = ssl_context.wrap_socket(sock, server_hostname=server)

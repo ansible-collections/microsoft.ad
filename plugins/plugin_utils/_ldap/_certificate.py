@@ -13,20 +13,63 @@ import ssl
 import tempfile
 import typing as t
 
+# Cryptography is used for the TLS channel binding data and to convert PKCS8/12
+# certs to a PEM file required by OpenSSL.
 try:
     from cryptography import x509
-
-    from cryptography.hazmat.primitives.serialization import (
-        Encoding,
-        PrivateFormat,
-        load_der_private_key,
-        BestAvailableEncryption,
-    )
-    from cryptography.hazmat.primitives.serialization.pkcs12 import load_key_and_certificates
+    from cryptography.exceptions import UnsupportedAlgorithm
+    from cryptography.hazmat.primitives import hashes, serialization
+    from cryptography.hazmat.primitives.serialization import pkcs12
 
     HAS_CRYPTOGRAPHY = True
 except Exception:
     HAS_CRYPTOGRAPHY = False
+
+
+class _PrivateKey(t.Protocol):
+    def private_bytes(
+        self,
+        encoding: "serialization.Encoding",
+        format: "serialization.PrivateFormat",
+        encryption_algorithm: "serialization.KeySerializationEncryption",
+    ) -> bytes:
+        ...
+
+
+def get_tls_server_end_point_data(
+    certificate: t.Optional[bytes],
+) -> t.Optional[bytes]:
+    """Get the TLS channel binding data.
+
+    Gets the TLS channel binding data for tls-server-end-point used in
+    Negotiate authentication.
+
+    Args:
+        tls_sock: The SSLSocket to get the binding data for.
+
+    Returns:
+        Optional[bytes]: The tls-server-end-point data used in the channel
+        bindings application data value. Can return None if the cryptography
+        isn't installed or it failed to get the certificate info.
+    """
+    if not HAS_CRYPTOGRAPHY or not certificate:
+        return None
+
+    cert = x509.load_der_x509_certificate(certificate)
+    try:
+        hash_algorithm = cert.signature_hash_algorithm
+    except UnsupportedAlgorithm:
+        hash_algorithm = None
+
+    # If the cert signature algorithm is unknown, md5, or sha1 then use sha256
+    # otherwise use the signature algorithm of the cert itself.
+    if not hash_algorithm or hash_algorithm.name in ["md5", "sha1"]:
+        digest = hashes.Hash(hashes.SHA256())
+    else:
+        digest = hashes.Hash(hash_algorithm)
+
+    digest.update(certificate)
+    return b"tls-server-end-point:" + digest.finalize()
 
 
 def load_trust_certificate(
@@ -116,6 +159,10 @@ def load_client_certificate(
         if der_key:
             key, b_password = der_key
 
+    # Specifying an empty b"" stops OpenSSL from promting for the password if
+    # it was required. Instead it will just fail to load.
+    b_password = b_password or b""
+
     # load_cert_chain does not expose a way to load a certificate/key from
     # memory so a temporary directory is used in the cases where a pfx or
     # string supplied cert is used.
@@ -145,41 +192,41 @@ def load_client_certificate(
 def _try_load_der_cert(
     data: bytes,
 ) -> t.Optional[str]:
+    if not HAS_CRYPTOGRAPHY:
+        return None
+
     try:
         cert = x509.load_der_x509_certificate(data)
     except ValueError:
         return None
     else:
-        return cert.public_bytes(encoding=Encoding.PEM).decode()
+        return cert.public_bytes(encoding=serialization.Encoding.PEM).decode()
 
 
 def _try_load_der_key(
     data: bytes,
     password: t.Optional[bytes],
 ) -> t.Optional[t.Tuple[str, bytes]]:
+    if not HAS_CRYPTOGRAPHY:
+        return None
+
     try:
-        key = load_der_private_key(data, password=password)
+        key = serialization.load_der_private_key(data, password=password)
     except ValueError:
         return None
     else:
-        password = password or secrets.token_bytes(32)
-
-        return (
-            key.private_bytes(
-                Encoding.PEM,
-                PrivateFormat.PKCS8,
-                encryption_algorithm=BestAvailableEncryption(password),
-            ).decode(),
-            password,
-        )
+        return _serialize_key_with_password(key, password)
 
 
 def _try_load_pfx_cert(
     data: bytes,
     password: t.Optional[bytes],
 ) -> t.Optional[t.Tuple[str, str, bytes]]:
+    if not HAS_CRYPTOGRAPHY:
+        return None
+
     try:
-        pfx = load_key_and_certificates(data, password)
+        pfx = pkcs12.load_key_and_certificates(data, password)
     except ValueError:
         pfx = None
 
@@ -188,15 +235,23 @@ def _try_load_pfx_cert(
 
     password = password or secrets.token_bytes(32)
 
-    certificate = pfx[1].public_bytes(encoding=Encoding.PEM).decode()
-    key = (
-        pfx[0]
-        .private_bytes(
-            Encoding.PEM,
-            PrivateFormat.PKCS8,
-            encryption_algorithm=BestAvailableEncryption(password),
-        )
-        .decode()
-    )
+    certificate = pfx[1].public_bytes(encoding=serialization.Encoding.PEM).decode()
+    key, password = _serialize_key_with_password(pfx[0], password)
 
     return certificate, key, password
+
+
+def _serialize_key_with_password(
+    key: _PrivateKey,
+    password: t.Optional[bytes],
+) -> t.Tuple[str, bytes]:
+    password = password or secrets.token_bytes(32)
+
+    return (
+        key.private_bytes(
+            serialization.Encoding.PEM,
+            serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.BestAvailableEncryption(password),
+        ).decode(),
+        password,
+    )

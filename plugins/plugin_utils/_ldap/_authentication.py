@@ -23,18 +23,8 @@ try:
 except Exception as e:
     SPNEGO_IMPORT_ERR = e
 
+from ._certificate import get_tls_server_end_point_data
 from .client import Credential, MessageEncryptor, SyncLDAPClient
-
-# cryptography is used for TLS channel binding with SPNEGO.
-try:
-    from cryptography import x509
-    from cryptography.exceptions import UnsupportedAlgorithm
-    from cryptography.hazmat.backends import default_backend
-    from cryptography.hazmat.primitives import hashes
-
-    HAS_CRYPTOGRAPHY = True
-except Exception:
-    HAS_CRYPTOGRAPHY = False
 
 
 class SimpleCredential(Credential):
@@ -113,7 +103,12 @@ class NegotiateCredential(Credential):
             context_req=context_req,
         )
 
-        cbt = self._get_tls_channel_bindings(tls_sock)
+        cbt = None
+        if tls_sock:
+            app_data = get_tls_server_end_point_data(tls_sock.getpeercert(True))
+            if app_data:
+                cbt = spnego.channel_bindings.GssChannelBindings(application_data=app_data)
+
         in_token: t.Optional[bytes] = None
         while not ctx.complete:
             out_token = ctx.step(in_token=in_token, channel_bindings=cbt)
@@ -128,39 +123,6 @@ class NegotiateCredential(Credential):
 
         if needs_encryptor:
             client.register_encryptor(SpnegoEncryptor(ctx))
-
-    def _get_tls_channel_bindings(
-        self,
-        tls_sock: t.Optional[ssl.SSLSocket] = None,
-    ) -> t.Optional["spnego.channel_bindings.GssChannelBindings"]:
-        if not HAS_CRYPTOGRAPHY or not tls_sock:
-            return None
-
-        cert_bytes = tls_sock.getpeercert(True)
-        if not cert_bytes:
-            return None
-
-        backend = default_backend()
-
-        cert = x509.load_der_x509_certificate(cert_bytes, backend)
-        try:
-            hash_algorithm = cert.signature_hash_algorithm
-        except UnsupportedAlgorithm:
-            hash_algorithm = None
-
-        # If the cert signature algorithm is unknown, md5, or sha1 then use sha256 otherwise use the signature
-        # algorithm of the cert itself.
-        if not hash_algorithm or hash_algorithm.name in ["md5", "sha1"]:
-            digest = hashes.Hash(hashes.SHA256(), backend)
-        else:
-            digest = hashes.Hash(hash_algorithm, backend)
-
-        digest.update(cert_bytes)
-        cert_hash = digest.finalize()
-
-        return spnego.channel_bindings.GssChannelBindings(
-            application_data=b"tls-server-end-point:" + cert_hash,
-        )
 
 
 class SpnegoEncryptor(MessageEncryptor):

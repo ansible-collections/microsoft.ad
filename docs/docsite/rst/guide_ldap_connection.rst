@@ -151,15 +151,13 @@ Simple authentication is the most basic authentication protocol supported. It wo
 Certificate
 -----------
 
-Certificate authentication uses TLS client authentication as part of the TLS handshake to authenticate the user to the host. As it is part of the TLS handshake, it can only be used over an LDAPS connection or with StartTLS. It uses a certificate and certificate key of the user to authenticate as. The certificate and key are provided in the PEM format either in the same file or in separate files. The ``certificate`` option exposed by plugins is the path to the file containing the certificate and key PEM data. The ``certificate_key`` option can also be specified as the path to the certificate key if it is in a separate file from the certificate itself. The ``certificate_password`` option can be set to the key used to decrypt the certificate key if it has been encrypted. For example:
+Certificate authentication uses TLS client authentication as part of the TLS handshake to authenticate the user to the host. As it is part of the TLS handshake, it can only be used over an LDAPS connection or with StartTLS. It uses a certificate and certificate key of the user to authenticate as. There are three options that can be used to specify a client certificate to use for authentication:
 
-.. code-block:: yaml
+* ``certificate`` - The certificate, and optionally bundled key
+* ``certificate_key`` - The certificate key if not bundled in ``certificate``
+* ``certificate_password`` - The password used to decrypt the certificate key
 
-    certificate: /home/ansible/data/cert.pem
-    certificate_key: /home/ansible/data/cert.key
-    certificate_password: CertificatePassword
-
-This defines the three options described. If the key and certificate are in the same file then ``certificate_key`` can be omitted. If the key is not encrypted then ``certificate_password`` can be omitted. The password is not the password for something like ``ansible-vault`` but the password used to encrypt the private key itself.
+The ``certificate`` and ``certificate_key`` can either be a file path to the certificate and key or they can be a string of the PEM encoded certificate or key. The ``certificate`` file path can be a PEM, DER, or PKCS12/PFX encoded certificate with optional key bundle whereas ``certificate_key`` file path can be a PEM or DER encoded key. If the key inside the PEM, DER, or PKCS12/PFX content is encrypted, the ``certificate_password`` can be used to specify the password used to decrypt the key.
 
 .. note::
     Setting these options are dependent on the plugin itself, the keys here reflect the option name and not necessarily Ansible variables that can be set and read automatically by a plugin.
@@ -199,10 +197,10 @@ NTLM authentication is a simple authentication protocol that can be used by itse
   While NTLM does support encryption it is considered weak by modern standards. It is recommended to only use NTLM with an LDAPS or StartTLS connection where the stronger encryption and server checks provided by TLS mitigate the weaknesses in NTLM.
 
 
-.. _ansible_collections.microsoft.ad.docsite.guide_ldap_connection.cert_verification:
+.. _ansible_collections.microsoft.ad.docsite.guide_ldap_connection.cert_validation:
 
-Certificate verification
-========================
+Certificate validation
+======================
 
 Using LDAPS or LDAP over StartTLS will perform a TLS handshake which by default has the client attempting to validate the certificate presented by the server. If the certificate chain cannot be trusted, or the hostname does not match the one being requested the connection will fail with an error indicating why. The default trust store location is dependent on the Python configuration and what SSL library it has been linked to. Typically it would be the OS' default trust store but when in doubt the following Python code can be used to verify the LDAPS certificate. Make sure to change ``hostname`` to the hostname of the LDAP server that should be tested.
 
@@ -221,7 +219,7 @@ Using LDAPS or LDAP over StartTLS will perform a TLS handshake which by default 
 
 The ``ca_cert`` connection option can also be set to the path of a certificate CA bundle that will be used as the trust store instead of the defaults. This is useful if the CA bundle is not part of the OS settings but located somewhere else on the filesystem.
 
-It is also possible to disable certificate verification using the ``cert_verification`` connection option. The default is ``always`` but can be set to ``ignore`` to disable the checks. This can be useful for test environments that use self signed certificates but it should not be used in a production environment.
+It is also possible to disable certificate verification using the ``cert_validation`` connection option. The default is ``always`` but can be set to ``ignore`` to disable all checks or ``ignore_hostname`` to disable just the hostname check. This can be useful for test environments that use self signed certificates but it should not be used in a production environment.
 
 .. warning::
     Disabling certificate verification removes a lot of the benefits that TLS offers. There is no way to verify the target server is who it says that it is.
