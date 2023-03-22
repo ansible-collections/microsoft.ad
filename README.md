@@ -23,6 +23,17 @@ We also separately publish [**latest commit** collection documentation](https://
 
 If you use the Ansible package and don't update collections independently, use **latest**, if you install or update this collection directly from Galaxy, use **devel**. If you are looking to contribute, use **latest commit**.
 
+## Release Policy
+
+This collection follows semantic versioning (`major`.`minor`.`patch`) which in short means:
+
+* A `patch` release can only contain bug fixes
+* A `minor` release can contain bug fixes, features, and new deprecations
+* A `major` release can contain bug fixes, features, new deprecations, removal of features, and other breaking changes
+
+Deprecated features can be removed only 2 years after the deprecation warning was added.
+Once a deprecation warning has lasted for 2 years, they will be removed in the next `major` release.
+
 ## Installation and Usage
 
 ### Installing the Collection from Ansible Galaxy
@@ -67,7 +78,7 @@ You can run the collection's test suites with the commands:
 
 ## Publishing New Version
 
-The current process for publishing new versions of the Windows Core Collection is manual, and requires a user who has access to the `ansible` namespace on Ansible Galaxy and Automation Hub to publish the build artifact.
+The current process for publishing new versions of the Microsoft AD Collection is done through a tagged release which triggers a Zuul run. Before the tag is set, the following steps must be done.
 
 * Update `galaxy.yml` with the new version for the collection.
 * Update the `CHANGELOG`:
