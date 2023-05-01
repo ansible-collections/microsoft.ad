@@ -266,7 +266,7 @@ Attributes with datetime values are technically integer values but represent a p
           set:
             dateAttributeSingleValue:
               type: date_time
-              value: '2019-09-07T15:50:00+00'
+              value: '2019-09-07T15:50:00+00:00'
             dateAttributeMultipleValue:
             - type: date_time
               value: '2019-09-07T15:50:00Z'
