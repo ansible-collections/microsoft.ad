@@ -320,6 +320,55 @@
     that:
     - not remove_user_again is changed
 
+# https://github.com/ansible-collections/microsoft.ad/issues/25
+- name: create user with expired password
+  user:
+    name: MyUser
+    password: Password123!
+    password_expired: true
+    state: present
+  register: create_user_pass_expired
+
+- set_fact:
+    object_identity: '{{ create_user_pass_expired.object_guid }}'
+    object_sid: '{{ create_user_pass_expired.sid }}'
+
+- name: get result of create user with expired password
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - pwdLastSet
+  register: create_user_pass_expired_actual
+
+- name: assert create user with expired password
+  assert:
+    that:
+    - create_user_pass_expired_actual.objects[0].pwdLastSet == 0
+
+- name: remove expired password flag on existing user
+  user:
+    name: MyUser
+    password_expired: false
+    state: present
+  register: remove_password_expiry
+
+- name: get result of remove expired password flag on existing user
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - pwdLastSet
+  register: remove_password_expiry_actual
+
+- name: assert remove expired password flag on existing user
+  assert:
+    that:
+    - remove_password_expiry_actual.objects[0].pwdLastSet > 0
+
+- name: remove user
+  user:
+    name: MyUser
+    state: absent
+
 - name: create user with extra info - check
   user:
     name: MyUser

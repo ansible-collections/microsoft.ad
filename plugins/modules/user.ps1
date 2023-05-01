@@ -202,6 +202,12 @@ $setParams = @{
             Name = 'password_expired'
             Option = @{ type = 'bool' }
             Attribute = 'PasswordExpired'
+            New = {
+                param($Module, $ADParams, $NewParams)
+
+                $NewParams.ChangePasswordAtLogon = $module.Params.password_expired
+                $Module.Diff.after.password_expired = $module.Params.password_expired
+            }
             Set = {
                 param($Module, $ADParams, $SetParams, $ADObject)
 
