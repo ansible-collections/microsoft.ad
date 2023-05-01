@@ -1,0 +1,10 @@
+- name: remove test user
+  microsoft.ad.user:
+    name: ldap-test
+    state: absent
+
+- name: remove test user cert
+  ansible.windows.win_file:
+    path: C:\Windows\TEMP\user.pfx
+    state: absent
+  

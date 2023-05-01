@@ -1,0 +1,17 @@
+# It's hard to ensure there's a common test environment with the same module
+# versions so just test that the plugin runs and has the base level return
+# values.
+
+- name: make sure module can run
+  debug_ldap_client:
+  register: res
+
+- name: assert return values
+  assert:
+    that:
+    - res.dns is defined
+    - res.kerberos is defined
+    - res.packages.dnspython is defined
+    - res.packages.krb5 is defined
+    - res.packages.pyspnego is defined
+    - res.packages.sansldap is defined

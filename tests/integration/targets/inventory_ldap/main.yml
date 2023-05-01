@@ -1,0 +1,25 @@
+- name: run microsoft.ad.ldap tests
+  hosts: windows
+  gather_facts: false
+
+  tasks:
+  - name: setup domain controller
+    import_role:
+      name: ../../setup_domain
+
+  - name: setup domain certificates
+    import_role:
+      name: setup_certificate
+    vars:
+      dc_name: '{{ setup_domain_info.output[0].dnsHostName }}'
+      cert_path: /tmp/microsoft.ad-{{ inventory_hostname }}
+
+  - name: run tests
+    import_role:
+      name: test
+    vars:
+      ldap_server: '{{ ansible_host | default(inventory_hostname) }}'
+      ldap_user: ldap-test@{{ domain_realm }}
+      ldap_pass: '{{ domain_password }}'
+      ldap_user_cert: /tmp/microsoft.ad-{{ inventory_hostname }}/user.pfx
+      ldap_ca_cert: /tmp/microsoft.ad-{{ inventory_hostname }}/ca.pem

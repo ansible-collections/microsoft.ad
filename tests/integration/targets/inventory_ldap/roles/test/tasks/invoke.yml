@@ -1,0 +1,14 @@
+- name: '{{ scenario }} - create temp inventory file'
+  ansible.builtin.copy:
+    content: '{{ inventory | to_nice_yaml(sort_keys=False) }}'
+    dest: /tmp/tmp-microsoft.ad.ldap.yml
+  delegate_to: localhost
+
+- name: '{{ scenario }} - run ansible-inventory'
+  ansible.builtin.command: ansible-inventory -i /tmp/tmp-microsoft.ad.ldap.yml --list
+  register: inventory_out_raw
+  delegate_to: localhost
+
+- name: '{{ scenario }} - get ansible-inventory output'
+  set_fact:
+    inventory_out: '{{ inventory_out_raw.stdout | from_json }}'

@@ -1,0 +1,492 @@
+- name: get domain controller info
+  microsoft.ad.object_info:
+    ldap_filter: '(objectClass=computer)'
+    properties:
+    - dNSHostName
+  register: dc_info_raw
+
+- name: make sure only 1 computer is present for start of tests
+  assert:
+    that:
+    - dc_info_raw.objects | length == 1
+
+- set_fact:
+    dc_info: '{{ dc_info_raw.objects[0] }}'
+
+- import_tasks: invoke.yml
+  vars:
+    scenario: Failure connection invalid hostname
+    inventory:
+      plugin: microsoft.ad.ldap
+      server: failed
+      username: '{{ ldap_user }}'
+      password: '{{ ldap_pass }}'
+
+- name: assert failure connection invalid hostname
+  assert:
+    that:
+    - inventory_out._meta.hostvars == {}
+    - '"Failed to connect to failed:389" in inventory_out_raw.stderr'
+
+- import_tasks: invoke.yml
+  vars:
+    scenario: Failure connection blocked port
+    inventory:
+      plugin: microsoft.ad.ldap
+      server: '{{ ldap_server }}'
+      port: 1234
+      username: '{{ ldap_user }}'
+      password: '{{ ldap_pass }}'
+
+- name: assert failure connection blocked port
+  assert:
+    that:
+    - inventory_out._meta.hostvars == {}
+    - '"Failed to connect to " ~ ldap_server ~ ":1234" in inventory_out_raw.stderr'
+
+- import_tasks: invoke.yml
+  vars:
+    scenario: Failure connection invalid port
+    inventory:
+      plugin: microsoft.ad.ldap
+      server: '{{ ldap_server }}'
+      port: 5985
+      username: '{{ ldap_user }}'
+      password: '{{ ldap_pass }}'
+
+- name: assert failure connection invalid port
+  assert:
+    that:
+    - inventory_out._meta.hostvars == {}
+    - '"Received invalid data from the peer" in inventory_out_raw.stderr'
+
+- import_tasks: invoke.yml
+  vars:
+    scenario: LDAP
+    inventory:
+      plugin: microsoft.ad.ldap
+      server: '{{ ldap_server }}'
+      username: '{{ ldap_user }}'
+      password: '{{ ldap_pass }}'
+
+- name: assert LDAP inventory
+  assert:
+    that: &default-assertion
+    - inventory_out._meta.hostvars | length == 1
+    - (inventory_out._meta.hostvars.keys() | list) == [dc_info.Name]
+    - (inventory_out._meta.hostvars[dc_info.Name].keys() | list) == ['ansible_host', 'microsoft_ad_distinguished_name']
+    - inventory_out._meta.hostvars[dc_info.Name]['ansible_host'] == dc_info.dNSHostName
+    - inventory_out._meta.hostvars[dc_info.Name]['microsoft_ad_distinguished_name'] == dc_info.DistinguishedName
+    - inventory_out.ungrouped.hosts == [dc_info.Name]
+
+- import_tasks: invoke.yml
+  vars:
+    scenario: LDAPS
+    inventory:
+      plugin: microsoft.ad.ldap
+      server: '{{ ldap_server }}'
+      tls_mode: ldaps
+      ca_cert: '{{ ldap_ca_cert }}'
+      cert_validation: ignore_hostname
+      username: '{{ ldap_user }}'
+      password: '{{ ldap_pass }}'
+
+- name: assert LDAPS inventory
+  assert:
+    that: *default-assertion
+
+- import_tasks: invoke.yml
+  vars:
+    scenario: StartTLS
+    inventory:
+      plugin: microsoft.ad.ldap
+      server: '{{ ldap_server }}'
+      tls_mode: start_tls
+      ca_cert: '{{ ldap_ca_cert }}'
+      cert_validation: ignore_hostname
+      username: '{{ ldap_user }}'
+      password: '{{ ldap_pass }}'
+
+- name: assert StartTLS inventory
+  assert:
+    that: *default-assertion
+
+- import_tasks: invoke.yml
+  vars:
+    scenario: Simple auth
+    inventory:
+      plugin: microsoft.ad.ldap
+      server: '{{ ldap_server }}'
+      tls_mode: ldaps
+      ca_cert: '{{ lookup("file", ldap_ca_cert) }}'
+      cert_validation: ignore_hostname
+      username: '{{ ldap_user }}'
+      password: '{{ ldap_pass }}'
+      auth_protocol: simple
+
+- name: assert Simple auth inventory
+  assert:
+    that: *default-assertion
+
+- import_tasks: invoke.yml
+  vars:
+    scenario: Simple auth fails over LDAP
+    inventory:
+      plugin: microsoft.ad.ldap
+      server: '{{ ldap_server }}'
+      username: '{{ ldap_user }}'
+      password: '{{ ldap_pass }}'
+      auth_protocol: simple
+
+- name: assert simple auth failure over LDAP
+  assert:
+    that:
+    - inventory_out._meta.hostvars == {}
+    - '"Cannot use simple auth with encryption" in inventory_out_raw.stderr'
+
+- import_tasks: invoke.yml
+  vars:
+    scenario: Simple auth over LDAP with no encryption
+    inventory:
+      plugin: microsoft.ad.ldap
+      server: '{{ ldap_server }}'
+      username: '{{ ldap_user }}'
+      password: '{{ ldap_pass }}'
+      auth_protocol: simple
+      encrypt: false
+
+- name: assert Simple auth over LDAP with no encryption
+  assert:
+    that: *default-assertion
+
+- import_tasks: invoke.yml
+  vars:
+    scenario: Certificate auth with LDAPS
+    inventory:
+      plugin: microsoft.ad.ldap
+      server: '{{ ldap_server }}'
+      tls_mode: ldaps
+      ca_cert: '{{ ldap_ca_cert }}'
+      cert_validation: ignore_hostname
+      certificate: '{{ ldap_user_cert }}'
+      certificate_password: '{{ ldap_pass }}'
+      username: '{{ ldap_user }}'
+      password: '{{ ldap_pass }}'
+
+- name: assert Certificate auth inventory with LDAPS
+  assert:
+    that: *default-assertion
+
+- import_tasks: invoke.yml
+  vars:
+    scenario: Certificate auth with StartTLS
+    inventory:
+      plugin: microsoft.ad.ldap
+      server: '{{ ldap_server }}'
+      tls_mode: start_tls
+      ca_cert: '{{ ldap_ca_cert }}'
+      cert_validation: ignore_hostname
+      certificate: '{{ ldap_user_cert }}'
+      certificate_password: '{{ ldap_pass }}'
+      username: '{{ ldap_user }}'
+      password: '{{ ldap_pass }}'
+
+- name: assert Certificate auth inventory with StartTLS
+  assert:
+    that: *default-assertion
+
+- import_tasks: invoke.yml
+  vars:
+    scenario: TLS ignoring cert validation
+    inventory:
+      plugin: microsoft.ad.ldap
+      server: '{{ ldap_server }}'
+      tls_mode: ldaps
+      cert_validation: ignore
+      username: '{{ ldap_user }}'
+      password: '{{ ldap_pass }}'
+
+- name: assert TLS ignoring cert validation
+  assert:
+    that: *default-assertion
+
+- block:
+  - name: setup custom server data
+    ansible.windows.win_powershell:
+      depth: 3
+      script: |
+        $ErrorActionPreference = 'Stop'
+
+        $ou = New-ADOrganizationalUnit -Name '<My OU, !test''>' -PassThru
+        $adParams = @{
+            Path = $ou.DistinguishedName
+            PassThru = $true
+        }
+        $subOU = New-ADOrganizationalUnit -Name SubOU @adParams
+
+        $group1 = New-ADGroup -Name Group1 -GroupCategory Security -GroupScope Global @adParams
+        $group2 = New-ADGroup -Name Group2 -GroupCategory Security -GroupScope Global @adParams
+
+        $comp1 = New-ADComputer -Name Comp1 -DNSHostName CustomName -OtherAttributes @{
+            comment = 'comment 1'
+            'msDS-AllowedToDelegateTo' = 'dns 1'
+            location = 'my_location'
+        } @adParams
+        $comp2 = New-ADComputer -Name Comp2 -SamAccountName Comp2Sam -Path $subOU.DistinguishedName -PassThru -OtherAttributes @{
+            comment = 'comment 1'
+            'msDS-AllowedToDelegateTo' = 'dns 2'
+        }
+
+        Add-ADGroupMember -Identity $group1 -Members $comp1, $comp2
+        Add-ADGroupMember -Identity $group2 -Members $comp1
+
+        $compMembers = @{
+            Property = @(
+                'DistinguishedName'
+                'MemberOf'
+                @{N='RawMemberOf'; E={
+                    ,@($_.memberOf | ForEach-Object {
+                        $b = (New-Object -TypeName System.Text.UTF8Encoding).GetBytes($_)
+                        [System.Convert]::ToBase64String($b)
+                    })
+                }}
+                'PwdLastSet'
+                @{N='SID'; E={$_.SID.Value}}
+                @{N='RawSID'; E={
+                    $b = New-Object -TypeName byte[] -ArgumentList $_.SID.BinaryLength
+                    $_.SID.GetBinaryForm($b, 0)
+                    [System.Convert]::ToBase64String($b)
+                }}
+            )
+        }
+
+        [PSCustomObject]@{
+            OUId = $ou.ObjectGuid
+            OUPath = $ou.DistinguishedName
+            Comp1 = $comp1 | Get-ADComputer -Properties * | Select-Object @compMembers
+            Comp2 = $comp2 | Get-ADComputer -Properties * | Select-Object @compMembers
+        }
+    register: test_data
+
+  - import_tasks: invoke.yml
+    vars:
+      scenario: Search with search_base and scope
+      inventory:
+        plugin: microsoft.ad.ldap
+        server: '{{ ldap_server }}'
+        username: '{{ ldap_user }}'
+        password: '{{ ldap_pass }}'
+        search_base: '{{ test_data.output[0]["OUPath"] }}'
+        search_scope: one_level
+
+  - name: assert search with seach base and scope
+    assert:
+      that:
+      - inventory_out._meta.hostvars | length == 1
+      - (inventory_out._meta.hostvars.keys() | list) == ["Comp1"]
+      - (inventory_out._meta.hostvars.Comp1.keys() | list) == ['ansible_host', 'microsoft_ad_distinguished_name']
+      - inventory_out._meta.hostvars.Comp1.ansible_host == "CustomName"
+      - inventory_out._meta.hostvars.Comp1.microsoft_ad_distinguished_name == test_data.output[0].Comp1.DistinguishedName
+      - inventory_out.ungrouped.hosts == ["Comp1"]
+
+  - import_tasks: invoke.yml
+    vars:
+      scenario: Search with filter
+      inventory:
+        plugin: microsoft.ad.ldap
+        server: '{{ ldap_server }}'
+        username: '{{ ldap_user }}'
+        password: '{{ ldap_pass }}'
+        filter: (sAMAccountName=Comp2Sam$)
+
+  - name: assert search with seach base and scope
+    assert:
+      that:
+      - inventory_out._meta.hostvars | length == 1
+      - (inventory_out._meta.hostvars.keys() | list) == ["Comp2"]
+      - (inventory_out._meta.hostvars.Comp2.keys() | list) == ['microsoft_ad_distinguished_name']
+      - inventory_out._meta.hostvars.Comp2.microsoft_ad_distinguished_name == test_data.output[0].Comp2.DistinguishedName
+      - inventory_out.ungrouped.hosts == ["Comp2"]
+
+  - import_tasks: invoke.yml
+    vars:
+      scenario: Set inventory_hostname from attributes
+      inventory:
+        plugin: microsoft.ad.ldap
+        server: '{{ ldap_server }}'
+        username: '{{ ldap_user }}'
+        password: '{{ ldap_pass }}'
+        search_base: '{{ test_data.output[0]["OUPath"] }}'
+        attributes:
+          sAMAccountName:
+          inventory_hostname: sAMAccountName[:-1]
+          ansible_host: inventory_hostname
+
+  - name: assert set inventory_hostname from attributes
+    assert:
+      that:
+      - inventory_out._meta.hostvars | length == 2
+      - (inventory_out._meta.hostvars.keys() | list | sort) == ["Comp1", "Comp2Sam"]
+
+      - (inventory_out._meta.hostvars.Comp1.keys() | list | sort) == ['ansible_host', 'microsoft_ad_distinguished_name', 'sAMAccountName']
+      - "inventory_out._meta.hostvars.Comp1.ansible_host == {'__ansible_unsafe': 'Comp1'}"
+      - inventory_out._meta.hostvars.Comp1.microsoft_ad_distinguished_name == test_data.output[0].Comp1.DistinguishedName
+      - "inventory_out._meta.hostvars.Comp1.sAMAccountName == {'__ansible_unsafe': 'Comp1$'}"
+
+      - (inventory_out._meta.hostvars.Comp2Sam.keys() | list | sort) == ['ansible_host', 'microsoft_ad_distinguished_name', 'sAMAccountName']
+      - "inventory_out._meta.hostvars.Comp2Sam.ansible_host == {'__ansible_unsafe': 'Comp2Sam'}"
+      - inventory_out._meta.hostvars.Comp2Sam.microsoft_ad_distinguished_name == test_data.output[0].Comp2.DistinguishedName
+      - "inventory_out._meta.hostvars.Comp2Sam.sAMAccountName == {'__ansible_unsafe': 'Comp2Sam$'}"
+
+      - "inventory_out.ungrouped.hosts == [{'__ansible_unsafe': 'Comp2Sam'}, {'__ansible_unsafe': 'Comp1'}]"
+
+  - import_tasks: invoke.yml
+    vars:
+      scenario: Set inventory_hostname from compose
+      inventory:
+        plugin: microsoft.ad.ldap
+        server: '{{ ldap_server }}'
+        username: '{{ ldap_user }}'
+        password: '{{ ldap_pass }}'
+        search_base: '{{ test_data.output[0]["OUPath"] }}'
+        attributes:
+          sAMAccountName:
+        compose:
+          inventory_hostname: sAMAccountName[:-1]
+          ansible_host: inventory_hostname
+
+  - name: assert set inventory_hostname from compose
+    assert:
+      that:
+      - inventory_out._meta.hostvars | length == 2
+      - (inventory_out._meta.hostvars.keys() | list | sort) == ["Comp1", "Comp2Sam"]
+
+      - (inventory_out._meta.hostvars.Comp1.keys() | list | sort) == ['ansible_host', 'microsoft_ad_distinguished_name', 'sAMAccountName']
+      - "inventory_out._meta.hostvars.Comp1.ansible_host == {'__ansible_unsafe': 'Comp1'}"
+      - inventory_out._meta.hostvars.Comp1.microsoft_ad_distinguished_name == test_data.output[0].Comp1.DistinguishedName
+      - "inventory_out._meta.hostvars.Comp1.sAMAccountName == {'__ansible_unsafe': 'Comp1$'}"
+
+      - (inventory_out._meta.hostvars.Comp2Sam.keys() | list | sort) == ['ansible_host', 'microsoft_ad_distinguished_name', 'sAMAccountName']
+      - "inventory_out._meta.hostvars.Comp2Sam.ansible_host == {'__ansible_unsafe': 'Comp2Sam'}"
+      - inventory_out._meta.hostvars.Comp2Sam.microsoft_ad_distinguished_name == test_data.output[0].Comp2.DistinguishedName
+      - "inventory_out._meta.hostvars.Comp2Sam.sAMAccountName == {'__ansible_unsafe': 'Comp2Sam$'}"
+
+      - "inventory_out.ungrouped.hosts == [{'__ansible_unsafe': 'Comp2Sam'}, {'__ansible_unsafe': 'Comp1'}]"
+
+  - import_tasks: invoke.yml
+    vars:
+      scenario: Search with composable options
+      inventory:
+        plugin: microsoft.ad.ldap
+        server: '{{ ldap_server }}'
+        username: '{{ ldap_user }}'
+        password: '{{ ldap_pass }}'
+        search_base: '{{ test_data.output[0]["OUPath"] }}'
+        attributes:
+          sAMAccountName:
+          objectSid:
+            nothing_sid:
+            this_sid: this
+            raw_sid: raw
+            raw_sid_filter: raw | microsoft.ad.as_sid
+          PwdLastSet:
+          location:
+          msDS-SupportedEncryptionTypes:
+          msDS-AllowedToDelegateTo:
+            msDS-AllowedToDelegateTo:
+          memberOf:
+            previous_reference: PwdLastSet | microsoft.ad.as_datetime
+            nothing_member:
+            this_member: this
+            raw_member: raw
+            computer_membership: this | map("regex_search", '^CN=(?P<name>.+?)((?<!\\),)', '\g<name>') | flatten
+        compose:
+          host_var: computer_sid
+        groups:
+          testing: true
+          production: '"Group2" in computer_membership'
+        keyed_groups:
+        - key: location | default(omit)
+          prefix: site
+          default_value: unknown
+
+  - name: assert search with composable options
+    assert:
+      that:
+      - inventory_out._meta.hostvars | length == 2
+      - (inventory_out._meta.hostvars.keys() | list | sort) == ["Comp1", "Comp2"]
+
+      - (inventory_out._meta.hostvars.Comp1.keys() | list | sort) == ['ansible_host', 'computer_membership', 'location', 'microsoft_ad_distinguished_name', 'msDS-AllowedToDelegateTo', 'msDS_SupportedEncryptionTypes', 'nothing_member', 'nothing_sid', 'previous_reference', 'PwdLastSet', 'raw_member', 'raw_sid', 'raw_sid_filter', 'sAMAccountName', 'this_member', 'this_sid']
+      - inventory_out._meta.hostvars.Comp1['ansible_host'] == 'CustomName'
+      - "inventory_out._meta.hostvars.Comp1['computer_membership'] == [{'__ansible_unsafe': 'Group2'}, {'__ansible_unsafe': 'Group1'}]"
+      - "inventory_out._meta.hostvars.Comp1['location'] == {'__ansible_unsafe': 'my_location'}"
+      - inventory_out._meta.hostvars.Comp1['microsoft_ad_distinguished_name'] == test_data.output[0].Comp1.DistinguishedName
+      - "inventory_out._meta.hostvars.Comp1['msDS-AllowedToDelegateTo'] == [{'__ansible_unsafe': 'dns 1'}]"
+      - inventory_out._meta.hostvars.Comp1['msDS_SupportedEncryptionTypes'] == None
+      - "inventory_out._meta.hostvars.Comp1['nothing_member'] == [{'__ansible_unsafe': test_data.output[0].Comp1.MemberOf[0]}, {'__ansible_unsafe': test_data.output[0].Comp1.MemberOf[1]}]"
+      - "inventory_out._meta.hostvars.Comp1['nothing_sid'] == {'__ansible_unsafe': test_data.output[0].Comp1.SID}"
+      - inventory_out._meta.hostvars.Comp1['previous_reference'] == test_data.output[0].Comp1.PwdLastSet | microsoft.ad.as_datetime
+      - inventory_out._meta.hostvars.Comp1['PwdLastSet'] == test_data.output[0].Comp1.PwdLastSet
+      - "inventory_out._meta.hostvars.Comp1['raw_member'] == [{'__ansible_unsafe': test_data.output[0].Comp1.RawMemberOf[0]}, {'__ansible_unsafe': test_data.output[0].Comp1.RawMemberOf[1]}]"
+      - "inventory_out._meta.hostvars.Comp1['raw_sid'] == [{'__ansible_unsafe': test_data.output[0].Comp1.RawSID}]"
+      - "inventory_out._meta.hostvars.Comp1['raw_sid_filter'] == [{'__ansible_unsafe': test_data.output[0].Comp1.SID}]"
+      - "inventory_out._meta.hostvars.Comp1['sAMAccountName'] == {'__ansible_unsafe': 'Comp1$'}"
+      - "inventory_out._meta.hostvars.Comp1['this_member'] == [{'__ansible_unsafe': test_data.output[0].Comp1.MemberOf[0]}, {'__ansible_unsafe': test_data.output[0].Comp1.MemberOf[1]}]"
+      - "inventory_out._meta.hostvars.Comp1['this_sid'] == {'__ansible_unsafe': test_data.output[0].Comp1.SID}"
+
+      - (inventory_out._meta.hostvars.Comp2.keys() | list | sort) == ['computer_membership', 'location', 'microsoft_ad_distinguished_name', 'msDS-AllowedToDelegateTo', 'msDS_SupportedEncryptionTypes', 'nothing_member', 'nothing_sid', 'previous_reference', 'PwdLastSet', 'raw_member', 'raw_sid', 'raw_sid_filter', 'sAMAccountName', 'this_member', 'this_sid']
+      - "inventory_out._meta.hostvars.Comp2['computer_membership'] == [{'__ansible_unsafe': 'Group1'}]"
+      - inventory_out._meta.hostvars.Comp2['location'] == None
+      - inventory_out._meta.hostvars.Comp2['microsoft_ad_distinguished_name'] == test_data.output[0].Comp2.DistinguishedName
+      - "inventory_out._meta.hostvars.Comp2['msDS-AllowedToDelegateTo'] == [{'__ansible_unsafe': 'dns 2'}]"
+      - inventory_out._meta.hostvars.Comp2['msDS_SupportedEncryptionTypes'] == None
+      - "inventory_out._meta.hostvars.Comp2['nothing_member'] == [{'__ansible_unsafe': test_data.output[0].Comp2.MemberOf[0]}]"
+      - "inventory_out._meta.hostvars.Comp2['nothing_sid'] == {'__ansible_unsafe': test_data.output[0].Comp2.SID}"
+      - inventory_out._meta.hostvars.Comp2['previous_reference'] == test_data.output[0].Comp2.PwdLastSet | microsoft.ad.as_datetime
+      - inventory_out._meta.hostvars.Comp2['PwdLastSet'] == test_data.output[0].Comp2.PwdLastSet
+      - "inventory_out._meta.hostvars.Comp2['raw_member'] == [{'__ansible_unsafe': test_data.output[0].Comp2.RawMemberOf[0]}]"
+      - "inventory_out._meta.hostvars.Comp2['raw_sid'] == [{'__ansible_unsafe': test_data.output[0].Comp2.RawSID}]"
+      - "inventory_out._meta.hostvars.Comp2['raw_sid_filter'] == [{'__ansible_unsafe': test_data.output[0].Comp2.SID}]"
+      - "inventory_out._meta.hostvars.Comp2['sAMAccountName'] == {'__ansible_unsafe': 'Comp2Sam$'}"
+      - "inventory_out._meta.hostvars.Comp2['this_member'] == [{'__ansible_unsafe': test_data.output[0].Comp2.MemberOf[0]}]"
+      - "inventory_out._meta.hostvars.Comp2['this_sid'] == {'__ansible_unsafe': test_data.output[0].Comp2.SID}"
+
+      - inventory_out.production.hosts == ["Comp1"]
+      - inventory_out.site_my_location.hosts == ["Comp1"]
+      - inventory_out.site_unknown.hosts == ["Comp2"]
+      - inventory_out.testing.hosts | sort == ["Comp1", "Comp2"]
+
+  - name: create multiple computer objects
+    ansible.windows.win_powershell:
+      parameters:
+        Path: '{{ test_data.output[0].OUPath }}'
+      script: |
+        param($Path)
+
+        $ErrorActionPreference = 'Stop'
+
+        1..2010 | ForEach-Object {
+            New-ADComputer -Name "MultiComp$_" -Path $Path
+        }
+
+  - import_tasks: invoke.yml
+    vars:
+      scenario: Search with large number of computer accounts
+      inventory:
+        plugin: microsoft.ad.ldap
+        server: '{{ ldap_server }}'
+        username: '{{ ldap_user }}'
+        password: '{{ ldap_pass }}'
+        filter: (name=MultiComp*)
+
+  - name: assert search with large number of computer accounts
+    assert:
+      that:
+      - inventory_out._meta.hostvars | length == 2010
+
+  always:
+  - name: remove test OU
+    microsoft.ad.ou:
+      name: <My OU, !test'>
+      identity: '{{ test_data.output[0].OUId | default(omit) }}'
+      state: absent
