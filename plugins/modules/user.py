@@ -350,6 +350,37 @@ EXAMPLES = r"""
     spn:
       set:
       - MSSQLSvc/us99db-svr95:2433
+
+# The name option is the name of the AD object as seen in dsa.msc and not the
+# sAMAccountName. For example, this will change the sAMAccountName of the user
+# CN=existing_user,CN=Users,DC=domain,DC=com to 'new_sam_name'.
+# E.g. This will change
+- name: Change the user's sAMAccountName
+  microsoft.ad.user:
+    name: existing_user
+    sam_account_name: new_sam_name
+    state: present
+
+# This will rename the AD object that is specified by identity to 'new_name'.
+# The identity value can be the object's GUID, SecurityIdentifier, or
+# sAMAccountName. It is important to use the identity value when renaming or
+# moving a user object to ensure the object is moved/renamed rather than a new
+# one being created.
+- name: Rename user LDAP name
+  microsoft.ad.user:
+    name: new_name
+    identity: '{{ user_obj.object_guid }}'
+    state: present
+
+# Like changing the name example above, the identity option is needed to ensure
+# the existing user object specified is moved rather than a new one created at
+# the path specified.
+- name: Move user object to different OU
+  microsoft.ad.user:
+    name: user
+    path: OU=Admins,DC=domain,DC=com
+    identity: '{{ user_obj.sid }}'
+    state: present
 """
 
 RETURN = r"""
