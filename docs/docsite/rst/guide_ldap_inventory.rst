@@ -295,3 +295,158 @@ The ``this`` variable refers to the coerced LDAP attribute value while ``raw`` r
     - AQMAAAAAAAUVAAAA0gQAAFQEAAA=
     sid_raw_filtered: S-1-5-21-1234-1108
     microsoft_ad_distinguished_name: CN=MYHOST,CN=Computers,DC=domain,DC=com
+
+
+.. _ansible_collections.microsoft.ad.docsite.guide_ldap_inventory.laps:
+
+LAPS
+====
+
+Local Administrator Administrator Password Solution (LAPS) can be used to automatically change the password of the local administrator account on domain joined hosts. The LDAP connection plugin can be used to set the LAPS value as the connection password for the target host.
+
+There are three different attributes that can be used by LAPS to store the password information:
+
+* ``ms-Mcs-AdmPwd`` - The legacy LAPS attribute containing the password
+* ``msLAPS-Password`` - The Windows LAPS attribute containing the username and password
+* ``msLAPS-EncryptedPassword`` - The Windows LAPS attribute containing the encrypted username and password
+
+If using the legacy LAPS setup, the following can be used to set the username and password to the LAPS value:
+
+.. code-block:: yaml
+
+    plugin: microsoft.ad.ldap
+
+    attributes:
+      ms-Mcs-AdmPwd:
+        ansible_user: '"Administrator"'
+        ansible_password: this
+
+.. code-block:: yaml
+
+    # ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml
+
+    ansible_host: MYHOST.domain.com
+    ansible_password: aR$lmrqK1l622H
+    ansible_user: Administrator
+    microsoft_ad_distinguished_name: CN=MYHOST,CN=Computers,DC=domain,DC=com
+
+.. note::
+    Legacy LAPS does not store the username, the above example hardcodes the user name ``Administrator``.
+
+If using the Windows LAPS setup without encryption, the following can be used to set the username and password:
+
+.. code-block:: yaml
+
+    plugin: microsoft.ad.ldap
+
+    attributes:
+      msLAPS-Password:
+        ansible_user: (this | from_json).n
+        ansible_password: (this | from_json).p
+        raw_example: raw
+        this_example: this
+
+.. code-block:: yaml
+
+    # ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml
+
+    ansible_host: MYHOST.domain.com
+    ansible_password: AWznso@ZJ+J6p9
+    ansible_user: Administrator
+    microsoft_ad_distinguished_name: CN=MYHOST,CN=Computers,DC=domain,DC=com
+    raw_example:
+    - eyJuIjoiQWRtaW5pc3RyYXRvciIsInQiOiIxZDk4MmI0MzdiN2E1YzYiLCJwIjoiQVd6bnNvQFpKK0o2cDkifQ==
+    this_example:
+      n: Administrator
+      p: AWznso@ZJ+J6p9
+      t: 1d982b437b7a5c6
+
+Unlike Legacy LAPS, the attribute value is a json string that contains the keys:
+
+* ``n`` - The account name the password was encrypted for
+* ``p`` - The password for the account
+* ``t`` - The time the password was set encoded as a FILETIME in base16
+
+.. note::
+    While not necessary, it is recommended to use the ``from_json`` filter as shown in the example above when getting the value from ``this``. This ensure the code works if Jinja2 native types is enabled or not.
+
+Getting an encrypted Windows LAPS value requires the ``dpapi-ng`` Python library to be installed. See :ref:`the LDAP connection requirements <ansible_collections.microsoft.ad.docsite.guide_ldap_connection.requirements>` for more information on this optional package and how to debug whether it's installed or not.
+
+.. note::
+    Using Windows LAPS encrypted password is currently an experimental feature.
+
+Once the ``dpapi-ng`` package is installed, the LAPS password value can be decrypted as long as the connection user is authorized to decrypt the value. The following can be used to set the username and password:
+
+.. code-block:: yaml
+
+    plugin: microsoft.ad.ldap
+
+    attributes:
+      msLAPS-EncryptedPassword:
+        ansible_user: (this.value | from_json).n
+        ansible_password: (this.value | from_json).p
+        raw_example: raw
+        this_example: this
+
+.. code-block:: yaml
+
+    # ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml
+
+    ansible_host: MYHOST.domain.com
+    ansible_password: 6jr&}yK++{0Q}&
+    ansible_user: Administrator
+    microsoft_ad_distinguished_name: CN=MYHOST,CN=Computers,DC=domain,DC=com
+    raw_example:
+    - toLZAWR7rgfk...
+    this_example:
+      encrypted_value: MIIETgYJKoZI...
+      flags: 0
+      info: ''
+      update_timestamp: 133281382308674404
+      value: '{"n":"Administrator","t":"1d982b607ae7b64","p":"6jr&}yK++{0Q}&"}'
+
+The ``raw`` value contains the raw base64 encoded value as stored in AD. The ``this`` value contains a dictionary with the following keys:
+
+* ``encrypted_value``: The encrypted password blob as a base64 string
+* ``flags``: The flags set as a bitwise int value, currently these are undocumented by Microsoft
+* ``update_timestamp``: The FILETIME value of when the 
+* ``value``: The decrypted value containing the username and password as a JSON string
+* ``debug``: Debug information that indicates why it failed to decrypt the value
+
+The ``value`` key will only be present if the decryption process was successful. If it failed, the ``debug`` key will be present and contain the reason why it failed to be decrypted.
+
+If the ``dpapi-ng`` library is not installed this is what the output would look like:
+
+.. code-block:: yaml
+
+  # ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml
+
+  ansible_host: MYHOST.domain.com
+  microsoft_ad_distinguished_name: CN=MYHOST,CN=Computers,DC=domain,DC=com
+  raw_example:
+  - toLZAWR7rgfk...
+  this_example:
+    debug: Cannot decrypt value as the Python library dpapi-ng is not installed
+    encrypted_value: MIIETgYJKoZI...
+    flags: 0
+    update_timestamp: 133281382308674404
+
+The ``value`` key is no longer present and ``debug`` contains the message that ``dpapi-ng`` is not installed.
+
+If ``dpapi-ng`` library was installed but the connection user is not authorized to decrypt the value this is what the output would look like:
+
+.. code-block:: yaml
+
+  # ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml
+
+  ansible_host: MYHOST.domain.com
+  microsoft_ad_distinguished_name: CN=MYHOST,CN=Computers,DC=domain,DC=com
+  raw_example:
+  - toLZAWR7rgfk...
+  this_example:
+    debug: Failed to decrypt value due to error - ValueError GetKey failed 0x80070005
+    encrypted_value: MIIETgYJKoZI...
+    flags: 0
+    update_timestamp: 133281382308674404
+
+A simple way to test that the connection user is able to decrypt the password is to run ``Get-LapsADPassword -Identity MYHOST`` on a Windows host as that user.

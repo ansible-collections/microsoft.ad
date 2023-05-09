@@ -53,6 +53,7 @@ class ActionModule(ActionBase):
                 "kerberos": kerb_info,
                 "packages": {
                     "dnspython": self._import_lib("dns.resolver", package_name="dnspython"),
+                    "dpapi_ng": self._import_lib("dpapi_ng", package_name="dpapi-ng"),
                     "krb5": self._import_lib("krb5"),
                     "pyspnego": self._import_lib("spnego", package_name="pyspnego"),
                     "sansldap": self._import_lib("sansldap"),

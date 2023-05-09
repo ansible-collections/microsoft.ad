@@ -2,4 +2,5 @@ setuptools > 0.6 # pytest-xdist installed via requirements does not work with ve
 unittest2 ; python_version < '2.7'
 importlib ; python_version < '2.7'
 cryptography
+dpapi-ng
 sansldap
