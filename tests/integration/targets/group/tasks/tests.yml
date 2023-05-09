@@ -59,6 +59,7 @@
   group:
     name: MyGroup
     state: present
+    scope: global
   register: create_group_again
 
 - name: assert create group - idempotent
