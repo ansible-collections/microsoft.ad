@@ -15,6 +15,7 @@ $setParams = @{
                 type = 'str'
             }
             Attribute = 'GroupCategory'
+            CaseInsensitive = $true
         }
         [PSCustomObject]@{
             Name = 'homepage'
@@ -173,6 +174,7 @@ $setParams = @{
                 type = 'str'
             }
             Attribute = 'GroupScope'
+            CaseInsensitive = $true
         }
     )
     ModuleNoun = 'ADGroup'
