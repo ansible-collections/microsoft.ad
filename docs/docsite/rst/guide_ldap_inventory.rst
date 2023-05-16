@@ -302,7 +302,7 @@ The ``this`` variable refers to the coerced LDAP attribute value while ``raw`` r
 LAPS
 ====
 
-Local Administrator Administrator Password Solution (LAPS) can be used to automatically change the password of the local administrator account on domain joined hosts. The LDAP connection plugin can be used to set the LAPS value as the connection password for the target host.
+Local Administrator Administrator Password Solution (LAPS) can be used to automatically change the password of the local administrator account on domain joined hosts. The LDAP connection plugin can retrieve the LAPS-managed value and assign it as the connection password for the target host.
 
 There are three different attributes that can be used by LAPS to store the password information:
 
@@ -310,7 +310,7 @@ There are three different attributes that can be used by LAPS to store the passw
 * ``msLAPS-Password`` - The Windows LAPS attribute containing the username and password
 * ``msLAPS-EncryptedPassword`` - The Windows LAPS attribute containing the encrypted username and password
 
-If using the legacy LAPS setup, the following can be used to set the username and password to the LAPS value:
+If using the legacy LAPS setup, the following will retrieve, decrypt, and assign the connection username and password to the LAPS-managed value:
 
 .. code-block:: yaml
 
@@ -333,7 +333,7 @@ If using the legacy LAPS setup, the following can be used to set the username an
 .. note::
     Legacy LAPS does not store the username, the above example hardcodes the user name ``Administrator``.
 
-If using the Windows LAPS setup without encryption, the following can be used to set the username and password:
+If using Windows LAPS without encryption, the following will assign the connection username and password to the LAPS-managed values:
 
 .. code-block:: yaml
 
@@ -368,14 +368,14 @@ Unlike Legacy LAPS, the attribute value is a json string that contains the keys:
 * ``t`` - The time the password was set encoded as a FILETIME in base16
 
 .. note::
-    While not necessary, it is recommended to use the ``from_json`` filter as shown in the example above when getting the value from ``this``. This ensure the code works if Jinja2 native types is enabled or not.
+    It is recommended to use the ``from_json`` filter (as shown in the example above) on the ``this`` value to ensure consistent behavior in the presence or absence of Jinja2 native type support.
 
 Getting an encrypted Windows LAPS value requires the ``dpapi-ng`` Python library to be installed. See :ref:`the LDAP connection requirements <ansible_collections.microsoft.ad.docsite.guide_ldap_connection.requirements>` for more information on this optional package and how to debug whether it's installed or not.
 
 .. note::
     Using Windows LAPS encrypted password is currently an experimental feature.
 
-Once the ``dpapi-ng`` package is installed, the LAPS password value can be decrypted as long as the connection user is authorized to decrypt the value. The following can be used to set the username and password:
+With the ``dpapi-ng`` package installed, an authorized LDAP user can decrypt and assign the LAPS-managed username and password to the target host connection as follows:
 
 .. code-block:: yaml
 
