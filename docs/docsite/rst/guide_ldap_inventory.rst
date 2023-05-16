@@ -310,7 +310,7 @@ There are three different attributes that can be used by LAPS to store the passw
 * ``msLAPS-Password`` - The Windows LAPS attribute containing the username and password
 * ``msLAPS-EncryptedPassword`` - The Windows LAPS attribute containing the encrypted username and password
 
-If using the legacy LAPS setup, the following will retrieve, decrypt, and assign the connection username and password to the LAPS-managed value:
+If using the legacy LAPS setup, the following will retrieve and assign the connection username and password to the LAPS-managed value:
 
 .. code-block:: yaml
 
