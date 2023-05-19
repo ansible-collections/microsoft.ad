@@ -279,7 +279,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-offlin
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
-<li><p>For more information on Offline Domain Join see <a class="reference external" href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/dd392267%28v%3Dws.10%29">the step-by-step guide</a>.</p></li>
+<li><p>For more information on Offline Domain Join see <a class="reference external" href="https://docs.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2008-R2-and-2008/dd392267%2528v=ws.10%2529">the step-by-step guide</a>.</p></li>
 <li><p>There is no way to specify specific credentials to communicate with the domain controller when creating the blob. Use <code class="docutils literal notranslate"><span class="pre">become</span></code> with net credentials if the current user cannot authenticate itself and bypass the double hop problem.</p></li>
 <li><p>The data returned by this module is very sensitive. If not using <em>blob_path</em> then <code class="docutils literal notranslate"><span class="pre">no_log=True</span></code> should be used on the task to avoid the data being leaked.</p></li>
 <li><p>This module will always report a change unless <em>blob_path</em> is specified. If the path is specified then then the existence of that path will act as the idempotency check.</p></li>
