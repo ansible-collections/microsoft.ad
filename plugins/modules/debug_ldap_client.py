@@ -182,6 +182,13 @@ packages:
       returned: always
       type: str
       sample: '2.3.0'
+    dpapi_ng:
+      description:
+      - The installed version of C(dpapi-ng) or the import error if not
+        installed.
+      returned: always
+      type: str
+      sample: '0.1.0'
     krb5:
       description:
       - The installed version of C(krb5) or the import error if not

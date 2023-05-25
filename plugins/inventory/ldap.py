@@ -68,6 +68,9 @@ options:
 notes:
 - See R(LDAP inventory,ansible_collections.microsoft.ad.docsite.guide_ldap_inventory)
   for more details on how to use this inventory plugin.
+- See R(LAPS,ansible_collections.microsoft.ad.docsite.guide_ldap_inventory.laps)
+  for more details on how this plugin can retrieve the LAPS password
+  information.
 - This plugin is a tech preview and the module options are subject to change
   based on feedback received.
 extends_documentation_fragment:
@@ -157,6 +160,14 @@ attributes:
     ansible_user: (this | from_json).n
     ansible_password: (this | from_json).p
 
+  # msLAPS-EncryptedPassword is used if encryption has been configured.
+  # If the Python dpapi-ng library is installed the `this`` value will
+  # contain the entry `value` which is the decrypted value. The ``info``
+  # entry will contain the reason why the value could not be decrypted.
+  msLAPS-EncryptedPassword:
+    ansible_user: (this.value | from_json).n
+    ansible_password: (this.value | from_json).p
+
   # ms-Mcs-AdmPwd is used for Legacy LAPS and stores just the password.
   # The username needs to be hardcoded as a string value for this template.
   ms-Mcs-AdmPwd:
@@ -207,6 +218,7 @@ try:
 
     from ..plugin_utils._ldap import create_ldap_connection
     from ..plugin_utils._ldap.schema import LDAPSchema
+    from ..plugin_utils._ldap.laps import LAPSDecryptor
 
     HAS_LDAP = True
     LDAP_IMP_ERR = None
@@ -279,7 +291,9 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
         if inventory_hostname:
             custom_attributes["inventory_hostname"] = {"inventory_hostname": inventory_hostname}
 
-        with create_ldap_connection(**self.get_options()) as client:
+        connection_options = self.get_options()
+        laps_decryptor = LAPSDecryptor(**connection_options)
+        with create_ldap_connection(**connection_options) as client:
             schema = LDAPSchema.load_schema(client)
 
             for dn, info in client.search(
@@ -303,25 +317,12 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
                     raw_values = insensitive_info.get(name.lower(), [])
                     values = schema.cast_object(name, raw_values)
 
-                    if name.lower() == 'mslaps-encryptedpassword' and raw_values:
-                        import struct
-                        update_timestamp_upper = struct.unpack("<I", raw_values[0][:4])[0]
-                        update_timestamp_lower = struct.unpack("<I", raw_values[0][4:8])[0]
-                        update_timestamp = (update_timestamp_upper << 32) | update_timestamp_lower
-
-                        enc_buffer_size = struct.unpack("<I", raw_values[0][8:12])[0]
-                        flags = struct.unpack("<I", raw_values[0][12:16])[0]
-                        enc_buffer = raw_values[0][16:16 + enc_buffer_size]
-
-                        host_vars['pwd_info'] = {
-                            'update_timestamp': update_timestamp,
-                            'enc_buffer_size': enc_buffer_size,
-                            'flags': flags,
-                            'enc_buffer': base64.b64encode(enc_buffer).decode(),
-                        }
-
                     host_vars["raw"] = wrap_var([base64.b64encode(r).decode() for r in raw_values])
-                    host_vars["this"] = wrap_var(values)
+
+                    if name.lower() == 'mslaps-encryptedpassword' and raw_values:
+                        host_vars["this"] = laps_decryptor.decrypt(raw_values[0])
+                    else:
+                        host_vars["this"] = wrap_var(values)
 
                     for n, v in var_info.items():
                         try:

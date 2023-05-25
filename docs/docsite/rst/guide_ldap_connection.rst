@@ -38,6 +38,8 @@ There are also optional dependencies to provide extra features
 +-------------------------+-----------------------------+
 | Server Lookups          | dnspython                   |
 +-------------------------+-----------------------------+
+| LAPS Decryption         | dpapi-ng                    |
++-------------------------+-----------------------------+
 
 To install all the optional features run:
 
@@ -45,6 +47,7 @@ To install all the optional features run:
 
     $ python3 -m pip install --user \
         dnspython \
+        dpapi-ng \
         'pyspnego[kerberos] >= 0.8.0'
 
 The Kerberos authentication components require the Kerberos system libraries to be present. For RPM based systems, these are:
