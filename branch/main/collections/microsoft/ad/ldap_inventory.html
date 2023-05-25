@@ -215,6 +215,10 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;kerberos&quot;</span></code></p></li>
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;ntlm&quot;</span></code></p></li>
 </ul>
+<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<ul class="simple">
+<li><p>Environment variable: <span class="target" id="index-0"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_AUTH_PROTOCOL"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_AUTH_PROTOCOL</span></code></a></p></li>
+</ul>
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
@@ -223,6 +227,10 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 </div></td>
 <td><div class="ansible-option-cell"><p>Can be the path to a CA certificate PEM or DER file, directory of PEM certificates, or the CA certificate PEM string that is used for certificate validation.</p>
 <p>If omitted, the default CA store used for validation is dependent on the current Python settings.</p>
+<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<ul class="simple">
+<li><p>Environment variable: <span class="target" id="index-1"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_CA_CERT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_CA_CERT</span></code></a></p></li>
+</ul>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
@@ -241,6 +249,10 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;ignore&quot;</span></code></p></li>
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;ignore_hostname&quot;</span></code></p></li>
 </ul>
+<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<ul class="simple">
+<li><p>Environment variable: <span class="target" id="index-2"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_CERT_VALIDATION"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_CERT_VALIDATION</span></code></a></p></li>
+</ul>
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
@@ -252,6 +264,10 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p>If using a path to a certificate file, the file can be a PEM encoded certificate, a PEM encoded certificate and key bundle, a DER encoded certificate, or a PFX/PKCS12 encoded certificate and key bundle.</p>
 <p>Use <em>certificate_key</em> if the certificate specified does not contain the key.</p>
 <p>Use <em>certificate_password</em> if the key is encrypted with a password.</p>
+<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<ul class="simple">
+<li><p>Environment variable: <span class="target" id="index-3"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_CERTIFICATE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_CERTIFICATE</span></code></a></p></li>
+</ul>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
@@ -261,6 +277,10 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <td><div class="ansible-option-cell"><p>The certificate key that is used for certificate authentication.</p>
 <p>The value can either be a path to a file containing the key in the PEM or DER encoded form, or it can be the string of a PEM encoded key.</p>
 <p>Use <em>certificate_password</em> if the key is encrypted with a password.</p>
+<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<ul class="simple">
+<li><p>Environment variable: <span class="target" id="index-4"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_CERTIFICATE_KEY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_CERTIFICATE_KEY</span></code></a></p></li>
+</ul>
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
@@ -268,6 +288,10 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <a class="ansibleOptionLink" href="#parameter-certificate_password" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The password used to decrypt the certificate key specified by <em>certificate</em> or <em>certificate_key</em>.</p>
+<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<ul class="simple">
+<li><p>Environment variable: <span class="target" id="index-5"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_CERTIFICATE_PASSWORD"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_CERTIFICATE_PASSWORD</span></code></a></p></li>
+</ul>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
@@ -284,6 +308,10 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 </div></td>
 <td><div class="ansible-option-cell"><p>The timeout in seconds to wait until the connection is established before failing.</p>
 <p class="ansible-option-line"><span class="ansible-option-default-bold">Default:</span> <code class="ansible-option-default docutils literal notranslate"><span class="pre">5</span></code></p>
+<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<ul class="simple">
+<li><p>Environment variable: <span class="target" id="index-6"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_CONNECTION_TIMEOUT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_CONNECTION_TIMEOUT</span></code></a></p></li>
+</ul>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
@@ -298,6 +326,10 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <ul class="simple">
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">false</span></code></p></li>
 <li><p><code class="ansible-option-default-bold docutils literal notranslate"><span class="pre">true</span></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
+</ul>
+<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<ul class="simple">
+<li><p>Environment variable: <span class="target" id="index-7"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_ENCRYPT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_ENCRYPT</span></code></a></p></li>
 </ul>
 </div></td>
 </tr>
@@ -403,6 +435,10 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <td><div class="ansible-option-cell"><p>The password to authenticate with.</p>
 <p>If <em>auth_protocol</em> is <code class="docutils literal notranslate"><span class="pre">simple</span></code> and no password is specified, the bind will be performed as an unauthenticated bind.</p>
 <p>If <em>auth_protocol</em> is <code class="docutils literal notranslate"><span class="pre">negotiate</span></code>, <code class="docutils literal notranslate"><span class="pre">kerberos</span></code>, or <code class="docutils literal notranslate"><span class="pre">ntlm</span></code> and no password is specified, it will attempt to use the local cached credential specified by <em>username</em> if available.</p>
+<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<ul class="simple">
+<li><p>Environment variable: <span class="target" id="index-8"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_PASSWORD"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_PASSWORD</span></code></a></p></li>
+</ul>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
@@ -412,6 +448,10 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <td><div class="ansible-option-cell"><p>The LDAP port to use for the connection.</p>
 <p>Port 389 is used for LDAP and port 686 is used for LDAPS.</p>
 <p>Defaults to port <code class="docutils literal notranslate"><span class="pre">636</span></code> if <code class="docutils literal notranslate"><span class="pre">tls_mode=ldaps</span></code> otherwise <code class="docutils literal notranslate"><span class="pre">389</span></code>.</p>
+<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<ul class="simple">
+<li><p>Environment variable: <span class="target" id="index-9"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_PORT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_PORT</span></code></a></p></li>
+</ul>
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
@@ -446,6 +486,10 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <td><div class="ansible-option-cell"><p>The domain controller/server to connect to.</p>
 <p>If not specified the server will be derived from the current krb5.conf <code class="docutils literal notranslate"><span class="pre">default_realm</span></code> setting and with an SRV DNS lookup.</p>
 <p>See <a class="reference internal" href="docsite/guide_ldap_connection.html#ansible-collections-microsoft-ad-docsite-guide-ldap-connection-server-lookup"><span class="std std-ref">Server lookup</span></a> for more information.</p>
+<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<ul class="simple">
+<li><p>Environment variable: <span class="target" id="index-10"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_SERVER"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_SERVER</span></code></a></p></li>
+</ul>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
@@ -475,6 +519,10 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;ldaps&quot;</span></code></p></li>
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;start_tls&quot;</span></code></p></li>
 </ul>
+<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<ul class="simple">
+<li><p>Environment variable: <span class="target" id="index-11"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_TLS_MODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_TLS_MODE</span></code></a></p></li>
+</ul>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
@@ -496,7 +544,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 </pre></div>
 </div>
 </li>
-<li><p>Environment variable: <span class="target" id="index-0"></span><a class="reference internal" href="../../environment_variables.html#envvar-ANSIBLE_INVENTORY_USE_EXTRA_VARS"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">ANSIBLE_INVENTORY_USE_EXTRA_VARS</span></code></a></p></li>
+<li><p>Environment variable: <span class="target" id="index-12"></span><a class="reference internal" href="../../environment_variables.html#envvar-ANSIBLE_INVENTORY_USE_EXTRA_VARS"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">ANSIBLE_INVENTORY_USE_EXTRA_VARS</span></code></a></p></li>
 </ul>
 </div></td>
 </tr>
@@ -507,6 +555,10 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <td><div class="ansible-option-cell"><p>The username to authenticate with.</p>
 <p>If <em>auth_protocol</em> is <code class="docutils literal notranslate"><span class="pre">simple</span></code> and no username is specified, anonymous authentication is used.</p>
 <p>If <em>auth_protocol</em> is <code class="docutils literal notranslate"><span class="pre">negotiate</span></code>, <code class="docutils literal notranslate"><span class="pre">kerberos</span></code>, or <code class="docutils literal notranslate"><span class="pre">ntlm</span></code> and no username is specified, it will attempt to use the local cached credential if available, for example one retrieved by <code class="docutils literal notranslate"><span class="pre">kinit</span></code>.</p>
+<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<ul class="simple">
+<li><p>Environment variable: <span class="target" id="index-13"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_USERNAME"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_USERNAME</span></code></a></p></li>
+</ul>
 </div></td>
 </tr>
 </tbody>
