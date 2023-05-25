@@ -38,6 +38,8 @@ options:
     - kerberos
     - ntlm
     type: str
+    env:
+    - name: MICROSOFT_AD_LDAP_AUTH_PROTOCOL
   ca_cert:
     description:
     - Can be the path to a CA certificate PEM or DER file, directory of PEM
@@ -46,6 +48,8 @@ options:
     - If omitted, the default CA store used for validation is dependent on
       the current Python settings.
     type: str
+    env:
+    - name: MICROSOFT_AD_LDAP_CA_CERT
   cert_validation:
     description:
     - The certificate validation behaviour when using a TLS connection.
@@ -62,6 +66,8 @@ options:
     - ignore_hostname
     default: always
     type: str
+    env:
+    - name: MICROSOFT_AD_LDAP_CERT_VALIDATION
   certificate:
     description:
     - The certificate or certificate with key bundle that is used for
@@ -75,6 +81,8 @@ options:
       key.
     - Use I(certificate_password) if the key is encrypted with a password.
     type: str
+    env:
+    - name: MICROSOFT_AD_LDAP_CERTIFICATE
   certificate_key:
     description:
     - The certificate key that is used for certificate authentication.
@@ -82,17 +90,23 @@ options:
       DER encoded form, or it can be the string of a PEM encoded key.
     - Use I(certificate_password) if the key is encrypted with a password.
     type: str
+    env:
+    - name: MICROSOFT_AD_LDAP_CERTIFICATE_KEY
   certificate_password:
     description:
     - The password used to decrypt the certificate key specified by
       I(certificate) or I(certificate_key).
     type: str
+    env:
+    - name: MICROSOFT_AD_LDAP_CERTIFICATE_PASSWORD
   connection_timeout:
     description:
     - The timeout in seconds to wait until the connection is established before
       failing.
     default: 5
     type: int
+    env:
+    - name: MICROSOFT_AD_LDAP_CONNECTION_TIMEOUT
   encrypt:
     description:
     - Whether encryption is required for the connection.
@@ -105,6 +119,8 @@ options:
       plaintext and should be avoided.
     default: true
     type: bool
+    env:
+    - name: MICROSOFT_AD_LDAP_ENCRYPT
   password:
     description:
     - The password to authenticate with.
@@ -113,12 +129,17 @@ options:
     - If I(auth_protocol) is C(negotiate), C(kerberos), or C(ntlm) and no
       password is specified, it will attempt to use the local cached credential
       specified by I(username) if available.
+    type: str
+    env:
+    - name: MICROSOFT_AD_LDAP_PASSWORD
   port:
     description:
     - The LDAP port to use for the connection.
     - Port 389 is used for LDAP and port 686 is used for LDAPS.
     - Defaults to port C(636) if C(tls_mode=ldaps) otherwise C(389).
     type: int
+    env:
+    - name: MICROSOFT_AD_LDAP_PORT
   server:
     description:
     - The domain controller/server to connect to.
@@ -127,6 +148,8 @@ options:
     - See R(Server lookup,ansible_collections.microsoft.ad.docsite.guide_ldap_connection.server_lookup)
       for more information.
     type: str
+    env:
+    - name: MICROSOFT_AD_LDAP_SERVER
   tls_mode:
     description:
     - The TLS operation to use.
@@ -140,6 +163,8 @@ options:
     - ldaps
     - start_tls
     type: str
+    env:
+    - name: MICROSOFT_AD_LDAP_TLS_MODE
   username:
     description:
     - The username to authenticate with.
@@ -149,6 +174,8 @@ options:
       username is specified, it will attempt to use the local cached credential
       if available, for example one retrieved by C(kinit).
     type: str
+    env:
+    - name: MICROSOFT_AD_LDAP_USERNAME
 notes:
 - See R(LDAP connection help,ansible_collections.microsoft.ad.docsite.guide_ldap_connection)
   for more information about LDAP connections.
