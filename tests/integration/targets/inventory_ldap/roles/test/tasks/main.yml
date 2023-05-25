@@ -81,6 +81,20 @@
 
 - import_tasks: invoke.yml
   vars:
+    scenario: LDAP through environment variables
+    inventory:
+      plugin: microsoft.ad.ldap
+  environment:
+    MICROSOFT_AD_LDAP_SERVER: '{{ ldap_server }}'
+    MICROSOFT_AD_LDAP_USERNAME: '{{ ldap_user }}'
+    MICROSOFT_AD_LDAP_PASSWORD: '{{ ldap_pass }}'
+
+- name: assert LDAP inventory through environment variables
+  assert:
+    that: *default-assertion
+
+- import_tasks: invoke.yml
+  vars:
     scenario: LDAPS
     inventory:
       plugin: microsoft.ad.ldap
@@ -92,6 +106,23 @@
       password: '{{ ldap_pass }}'
 
 - name: assert LDAPS inventory
+  assert:
+    that: *default-assertion
+
+- import_tasks: invoke.yml
+  vars:
+    scenario: LDAPS through environment variables
+    inventory:
+      plugin: microsoft.ad.ldap
+  environment:
+    MICROSOFT_AD_LDAP_SERVER: '{{ ldap_server }}'
+    MICROSOFT_AD_LDAP_TLS_MODE: ldaps
+    MICROSOFT_AD_LDAP_CA_CERT: '{{ ldap_ca_cert }}'
+    MICROSOFT_AD_LDAP_CERT_VALIDATION: ignore_hostname
+    MICROSOFT_AD_LDAP_USERNAME: '{{ ldap_user }}'
+    MICROSOFT_AD_LDAP_PASSWORD: '{{ ldap_pass }}'
+
+- name: assert LDAPS inventory through environment variables
   assert:
     that: *default-assertion
 

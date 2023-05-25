@@ -1,0 +1,2 @@
+minor_changes:
+- microsoft.ad.ldap - Allow setting LDAP connection and authentication options through environment variables - https://github.com/ansible-collections/microsoft.ad/issues/34
