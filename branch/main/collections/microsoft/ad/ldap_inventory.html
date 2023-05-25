@@ -518,6 +518,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p class="admonition-title">Note</p>
 <ul class="simple">
 <li><p>See <a class="reference internal" href="docsite/guide_ldap_inventory.html#ansible-collections-microsoft-ad-docsite-guide-ldap-inventory"><span class="std std-ref">LDAP inventory</span></a> for more details on how to use this inventory plugin.</p></li>
+<li><p>See <a class="reference internal" href="docsite/guide_ldap_inventory.html#ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-laps"><span class="std std-ref">LAPS</span></a> for more details on how this plugin can retrieve the LAPS password information.</p></li>
 <li><p>This plugin is a tech preview and the module options are subject to change based on feedback received.</p></li>
 <li><p>See <a class="reference internal" href="docsite/guide_ldap_connection.html#ansible-collections-microsoft-ad-docsite-guide-ldap-connection"><span class="std std-ref">LDAP connection help</span></a> for more information about LDAP connections.</p></li>
 </ul>
@@ -605,6 +606,14 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <span class="w">  </span><span class="nt">msLAPS-Password</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">ansible_user</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(this | from_json).n</span>
 <span class="w">    </span><span class="nt">ansible_password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(this | from_json).p</span>
+
+<span class="w">  </span><span class="c1"># msLAPS-EncryptedPassword is used if encryption has been configured.</span>
+<span class="w">  </span><span class="c1"># If the Python dpapi-ng library is installed the `this`` value will</span>
+<span class="w">  </span><span class="c1"># contain the entry `value` which is the decrypted value. The ``info``</span>
+<span class="w">  </span><span class="c1"># entry will contain the reason why the value could not be decrypted.</span>
+<span class="w">  </span><span class="nt">msLAPS-EncryptedPassword</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ansible_user</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(this.value | from_json).n</span>
+<span class="w">    </span><span class="nt">ansible_password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(this.value | from_json).p</span>
 
 <span class="w">  </span><span class="c1"># ms-Mcs-AdmPwd is used for Legacy LAPS and stores just the password.</span>
 <span class="w">  </span><span class="c1"># The username needs to be hardcoded as a string value for this template.</span>
