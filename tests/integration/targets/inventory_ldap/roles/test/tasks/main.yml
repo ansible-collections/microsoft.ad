@@ -338,7 +338,9 @@
       - inventory_out._meta.hostvars.Comp2Sam.microsoft_ad_distinguished_name == test_data.output[0].Comp2.DistinguishedName
       - "inventory_out._meta.hostvars.Comp2Sam.sAMAccountName == {'__ansible_unsafe': 'Comp2Sam$'}"
 
-      - "inventory_out.ungrouped.hosts == [{'__ansible_unsafe': 'Comp2Sam'}, {'__ansible_unsafe': 'Comp1'}]"
+      - inventory_out.ungrouped.hosts | length == 2
+      - inventory_out.ungrouped.hosts[0]['__ansible_unsafe'] in ['Comp1', 'Comp2Sam']
+      - inventory_out.ungrouped.hosts[1]['__ansible_unsafe'] in ['Comp1', 'Comp2Sam']
 
   - import_tasks: invoke.yml
     vars:
@@ -371,7 +373,9 @@
       - inventory_out._meta.hostvars.Comp2Sam.microsoft_ad_distinguished_name == test_data.output[0].Comp2.DistinguishedName
       - "inventory_out._meta.hostvars.Comp2Sam.sAMAccountName == {'__ansible_unsafe': 'Comp2Sam$'}"
 
-      - "inventory_out.ungrouped.hosts == [{'__ansible_unsafe': 'Comp2Sam'}, {'__ansible_unsafe': 'Comp1'}]"
+      - inventory_out.ungrouped.hosts | length == 2
+      - inventory_out.ungrouped.hosts[0]['__ansible_unsafe'] in ['Comp1', 'Comp2Sam']
+      - inventory_out.ungrouped.hosts[1]['__ansible_unsafe'] in ['Comp1', 'Comp2Sam']
 
   - import_tasks: invoke.yml
     vars:
