@@ -425,7 +425,7 @@ Function Compare-AnsibleADIdempotentList {
     )
 
     # It's easier to compare with strings.
-    $existingString = [string[]]@(if ($Existing) { $Existing | ForEach-Object ToString })
+    $existingString = [string[]]@(if ($null -ne $Existing) { $Existing | ForEach-Object ToString })
     $comparer = if ($CaseInsensitive) {
         [System.StringComparer]::OrdinalIgnoreCase
     }

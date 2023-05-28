@@ -421,6 +421,30 @@
       - group_custom_actual.objects[0].sAMAccountName == "GroupSAM"
       - group_custom_actual.objects[0].wWWHomePage == "www.ansible.com"
 
+  - name: create group with custom options - idempotent
+    group:
+      name: MyGroup
+      state: present
+      path: '{{ ou_info.distinguished_name }}'
+      display_name: My Display Name
+      description: My Description
+      scope: domainlocal
+      category: distribution
+      homepage: www.ansible.com
+      managed_by: CN=Domain Admins,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      members:
+        add:
+        - my_user_1
+        - '{{ test_users.results[1].object_guid }}'
+        - '{{ test_users.results[2].sid }}'
+      sam_account_name: GroupSAM
+    register: group_custom_again
+
+  - name: assert create group with custom options - idempotent
+    assert:
+      that:
+      - group_custom_again is not changed
+
   - name: edit group
     group:
       name: MyGroup
