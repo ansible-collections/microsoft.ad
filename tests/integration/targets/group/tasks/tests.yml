@@ -431,12 +431,11 @@
       scope: domainlocal
       category: distribution
       homepage: www.ansible.com
-      managed_by: Domain Admins
+      managed_by: CN=Domain Admins,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
       members:
         add:
         - my_user_1
         - '{{ test_users.results[1].object_guid }}'
-        set:
         - '{{ test_users.results[2].sid }}'
       sam_account_name: GroupSAM
     register: group_custom_again
