@@ -1,3 +1,0 @@
-bugfixes:
-- >-
-  group - Fix idempotency check when ``scope: domainlocal`` is set - https://github.com/ansible-collections/microsoft.ad/issues/31

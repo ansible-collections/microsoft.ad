@@ -1,3 +1,0 @@
-minor_changes:
-- microsoft.ad.ldap - Add support for decrypting LAPS encrypted password
-- microsoft.ad.debug_ldap_client - Add ``dpapi_ng`` to list of packages checked

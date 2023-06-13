@@ -1,4 +1,0 @@
-deprecated_features:
-- >-
-  Deprecating support for Server 2012 and Server 2012 R2. These OS versions are reaching End of Life status from
-  Microsoft and support for using them in Ansible are nearing its end.
