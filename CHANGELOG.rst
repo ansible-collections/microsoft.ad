@@ -5,6 +5,32 @@ Ansible Microsoft Active Directory Release Notes
 .. contents:: Topics
 
 
+v1.2.0
+======
+
+Release Summary
+---------------
+
+Release summary for v1.2.0
+
+Minor Changes
+-------------
+
+- microsoft.ad.debug_ldap_client - Add ``dpapi_ng`` to list of packages checked
+- microsoft.ad.ldap - Add support for decrypting LAPS encrypted password
+- microsoft.ad.ldap - Allow setting LDAP connection and authentication options through environment variables - https://github.com/ansible-collections/microsoft.ad/issues/34
+
+Deprecated Features
+-------------------
+
+- Deprecating support for Server 2012 and Server 2012 R2. These OS versions are reaching End of Life status from Microsoft and support for using them in Ansible are nearing its end.
+
+Bugfixes
+--------
+
+- group - Fix idempotency check when ``scope: domainlocal`` is set - https://github.com/ansible-collections/microsoft.ad/issues/31
+- microsoft.ad.group - ensure the ``scope`` and ``category`` values are checked as case insensitive to avoid changes when not needed - https://github.com/ansible-collections/microsoft.ad/issues/31
+
 v1.1.0
 ======
 
