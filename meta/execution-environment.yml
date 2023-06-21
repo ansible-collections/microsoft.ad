@@ -3,3 +3,4 @@ version: 1
 
 dependencies:
   python: requirements.txt
+  system: bindep.txt
