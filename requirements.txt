@@ -9,6 +9,9 @@ cryptography >= 3.1
 # For LDAP SRV lookups. 2.0.0 is when the new API used was introduced.
 dnspython >= 2.0.0
 
+# For LDAP LAPS decryption support
+dpapi-ng
+
 # For krb5 default_realm lookups
 krb5
 

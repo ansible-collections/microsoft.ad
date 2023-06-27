@@ -1,0 +1,2 @@
+bugfixes:
+- Added the missing dependency ``dpapi-ng`` to Ansible Execution Environments requirements file for LAPS decryption support
