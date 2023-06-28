@@ -392,6 +392,7 @@
     password_never_expires: true
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     postal_code: 4000
+    protect_from_deletion: false
     sam_account_name: MyUserSam
     spn:
       set:
@@ -441,6 +442,7 @@
     password_never_expires: true
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     postal_code: 4000
+    protect_from_deletion: false
     sam_account_name: MyUserSam
     spn:
       set:
@@ -476,6 +478,7 @@
     - objectSid
     - postalcode
     - primaryGroupID
+    - ProtectedFromAccidentalDeletion
     - pwdLastSet
     - sAMAccountName
     - servicePrincipalName
@@ -522,6 +525,7 @@
     - create_user_actual.objects[0].memberOf == 'CN=Domain Admins,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
     - create_user_actual.objects[0].postalcode == '4000'
     - create_user_actual.objects[0].primaryGroupID == 513  # Domain Users
+    - create_user_actual.objects[0].ProtectedFromAccidentalDeletion == false
     - create_user_actual.objects[0].pwdLastSet > 0
     - create_user_actual.objects[0].sAMAccountName == 'MyUserSam'
     - create_user_actual.objects[0].servicePrincipalName == 'HTTP/MyUser'
@@ -555,6 +559,7 @@
     password_never_expires: true
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     postal_code: 4000
+    protect_from_deletion: false
     sam_account_name: MyUserSam
     spn:
       set:
@@ -629,6 +634,7 @@
     - objectSid
     - postalcode
     - primaryGroupID
+    - ProtectedFromAccidentalDeletion
     - pwdLastSet
     - sAMAccountName
     - servicePrincipalName
@@ -659,6 +665,7 @@
     - update_user_check_actual.objects[0].memberOf == 'CN=Domain Admins,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
     - update_user_check_actual.objects[0].postalcode == '4000'
     - update_user_check_actual.objects[0].primaryGroupID == 513  # Domain Users
+    - update_user_check_actual.objects[0].ProtectedFromAccidentalDeletion == false
     - update_user_check_actual.objects[0].pwdLastSet > 0
     - update_user_check_actual.objects[0].sAMAccountName == 'MyUserSam'
     - update_user_check_actual.objects[0].servicePrincipalName == 'HTTP/MyUser'
