@@ -1,0 +1,2 @@
+bugfixes:
+- Fix up ``protect_from_deletion`` when creating new AD objects - https://github.com/ansible-collections/microsoft.ad/issues/47

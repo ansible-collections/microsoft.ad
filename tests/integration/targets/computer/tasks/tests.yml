@@ -122,6 +122,7 @@
     trusted_for_delegation: true
     upn: MyComputer@{{ domain_realm }}
     path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    protect_from_deletion: true
   register: custom_comp
 
 - set_fact:
@@ -137,6 +138,7 @@
     - msDS-AllowedToActOnBehalfOfOtherIdentity
     - msDS-SupportedEncryptionTypes
     - objectSid
+    - ProtectedFromAccidentalDeletion
     - sAMAccountName
     - servicePrincipalName
     - userAccountControl
@@ -174,6 +176,7 @@
     - custom_comp_actual.objects[0]['msDS-SupportedEncryptionTypes_AnsibleFlags'] == ["AES128_CTS_HMAC_SHA1_96", "AES256_CTS_HMAC_SHA1_96"]
     - custom_comp_actual.objects[0].sAMAccountName == 'SamMyComputer$'
     - custom_comp_actual.objects[0].ObjectClass == 'computer'
+    - custom_comp_actual.objects[0].ProtectedFromAccidentalDeletion == true
     - custom_comp_actual.objects[0].servicePrincipalName == 'HTTP/MyComputer'
     - custom_comp_actual.objects[0].userPrincipalName == 'MyComputer@' ~ domain_realm
     - '"ADS_UF_ACCOUNTDISABLE" in custom_comp_actual.objects[0].userAccountControl_AnsibleFlags'
@@ -197,6 +200,7 @@
     sam_account_name: MyComputer2$
     trusted_for_delegation: false
     upn: mycomputer@{{ domain_realm }}
+    protect_from_deletion: false
   register: change_comp
 
 - name: get result of change computer with custom options
@@ -207,6 +211,7 @@
     - location
     - msDS-AllowedToActOnBehalfOfOtherIdentity
     - msDS-SupportedEncryptionTypes
+    - ProtectedFromAccidentalDeletion
     - sAMAccountName
     - userAccountControl
     - userPrincipalName
@@ -235,6 +240,7 @@
     - change_comp_actual.objects[0].location == 'comp location'
     - change_comp_actual.objects[0]['msDS-SupportedEncryptionTypes'] == 20
     - change_comp_actual.objects[0]['msDS-SupportedEncryptionTypes_AnsibleFlags'] == ["RC4_HMAC", "AES256_CTS_HMAC_SHA1_96"]
+    - change_comp_actual.objects[0].ProtectedFromAccidentalDeletion == false
     - change_comp_actual.objects[0].sAMAccountName == 'MyComputer2$'
     - change_comp_actual.objects[0].userPrincipalName == 'mycomputer@' ~ domain_realm
     - '"ADS_UF_ACCOUNTDISABLE" not in change_comp_actual.objects[0].userAccountControl_AnsibleFlags'

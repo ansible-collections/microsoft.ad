@@ -959,6 +959,19 @@ Function Invoke-AnsibleADObject {
                 }
             }
 
+            # Only New-ADObject has the -ProtectedFromAccidentialDeletion while
+            # other cmdlets do not. Check for this and manually run with
+            # Set-ADObject later if protection is desired.
+            # https://github.com/ansible-collections/microsoft.ad/issues/47
+            $protectFromDeletion = $false
+            if (
+                $newParams.ContainsKey('ProtectedFromAccidentalDeletion') -and
+                -not $newCommand.Parameters.ContainsKey('ProtectedFromAccidentalDeletion')
+            ) {
+                $protectFromDeletion = $newParams.ProtectedFromAccidentalDeletion
+                $newParams.Remove('ProtectedFromAccidentalDeletion')
+            }
+
             try {
                 $adObject = & $newCommand @newParams @adParams
             }
@@ -976,6 +989,10 @@ Function Invoke-AnsibleADObject {
             else {
                 $objectDN = $adObject.DistinguishedName
                 $objectGuid = $adObject.ObjectGUID
+
+                if ($protectFromDeletion) {
+                    $adObject | Set-ADObject @adParams -ProtectedFromAccidentalDeletion $true
+                }
             }
         }
         else {
@@ -1086,6 +1103,15 @@ Function Invoke-AnsibleADObject {
                 $module.Result.changed = $true
             }
 
+            $protectFromDeletion = $null
+            if (
+                $setParams.ContainsKey('ProtectedFromAccidentalDeletion') -and
+                -not $setCommand.Parameters.ContainsKey('ProtectedFromAccidentalDeletion')
+            ) {
+                $protectFromDeletion = $setParams.ProtectedFromAccidentalDeletion
+                $setParams.Remove('ProtectedFromAccidentalDeletion')
+            }
+
             if ($setParams.Count) {
                 try {
                     $finalADObject = & $setCommand @commonParams @setParams @adParams
@@ -1095,6 +1121,11 @@ Function Invoke-AnsibleADObject {
                     # like the diff output is returned
                     $module.FailJson("Set-$ModuleNoun failed: $_", $_)
                 }
+                $module.Result.changed = $true
+            }
+
+            if ($null -ne $protectFromDeletion) {
+                $finalADObject = Set-ADObject -ProtectedFromAccidentalDeletion $protectFromDeletion @commonParams @adParams
                 $module.Result.changed = $true
             }
 
