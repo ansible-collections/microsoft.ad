@@ -883,7 +883,7 @@ Function Invoke-AnsibleADObject {
 
             # Remove-ADObject -Recursive fails with access is denied, use this
             # instead to remove the child objects manually
-            Get-ADObject -Filter * -Properties ProtectedFromAccidentalDeletion -Searchbase $adObject.DistinguishedName |
+            Get-ADObject -Filter * -Properties ProtectedFromAccidentalDeletion -Searchbase $adObject.DistinguishedName @adParams |
                 Sort-Object -Property { $_.DistinguishedName.Length } -Descending |
                 ForEach-Object -Process {
                     if ($_.ProtectedFromAccidentalDeletion) {
@@ -1077,7 +1077,7 @@ Function Invoke-AnsibleADObject {
                 $objectName = $module.Params.name
                 $module.Diff.after.name = $objectName
 
-                $finalADObject = Rename-ADObject @commonParams -NewName $objectName
+                $finalADObject = Rename-ADObject @commonParams @adParams -NewName $objectName
                 $module.Result.changed = $true
             }
 
@@ -1092,7 +1092,7 @@ Function Invoke-AnsibleADObject {
                 }
 
                 try {
-                    $finalADObject = Move-ADObject @commonParams -TargetPath $objectPath
+                    $finalADObject = Move-ADObject @commonParams @adParams -TargetPath $objectPath
                 }
                 finally {
                     if ($addProtection) {
