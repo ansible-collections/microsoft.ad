@@ -136,7 +136,7 @@
 <h1>microsoft.ad.ldap inventory – Inventory plugin for Active Directory<a class="headerlink" href="#microsoft-ad-ldap-inventory-inventory-plugin-for-active-directory" title="Permalink to this heading"></a></h1>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This inventory plugin is part of the <a class="reference external" href="https://galaxy.ansible.com/microsoft/ad">microsoft.ad collection</a> (version 1.2.0).</p>
+<p>This inventory plugin is part of the <a class="reference external" href="https://galaxy.ansible.com/microsoft/ad">microsoft.ad collection</a> (version 1.3.0).</p>
 <p>To install it, use: <code class="code docutils literal notranslate"><span class="pre">ansible-galaxy</span> <span class="pre">collection</span> <span class="pre">install</span> <span class="pre">microsoft.ad</span></code>.
 You need further requirements to be able to use this inventory plugin,
 see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-inventory-requirements"><span class="std std-ref">Requirements</span></a> for details.</p>
@@ -338,10 +338,24 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <a class="ansibleOptionLink" href="#parameter-filter" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The LDAP filter string used to query the computer objects.</p>
-<p>This will be combined with the filter “(objectClass=computer)”.</p>
+<p>By default, this will be combined with the filter “(objectClass=computer)”. Use <em>filter_without_computer</em> to override this behavior and have <em>filter</em> be the only filter used.</p>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-filter_without_computer"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-filter-without-computer"><strong>filter_without_computer</strong></p>
+<a class="ansibleOptionLink" href="#parameter-filter_without_computer" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
+<p><span class="ansible-option-versionadded">added in microsoft.ad 1.3.0</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Will not combine the <em>filter</em> value with the filter “(objectClass=computer)”.</p>
+<p>In most cases this should be <code class="docutils literal notranslate"><span class="pre">false</span></code> but can be set to <code class="docutils literal notranslate"><span class="pre">true</span></code> to have the <em>filter</em> value specified be the only filter used.</p>
+<p class="ansible-option-line"><span class="ansible-option-choices">Choices:</span></p>
+<ul class="simple">
+<li><p><code class="ansible-option-default-bold docutils literal notranslate"><span class="pre">false</span></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
+<li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">true</span></code></p></li>
+</ul>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-groups"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-groups"><strong>groups</strong></p>
 <a class="ansibleOptionLink" href="#parameter-groups" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">dictionary</span></p>
 </div></td>
@@ -349,7 +363,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p class="ansible-option-line"><span class="ansible-option-default-bold">Default:</span> <code class="ansible-option-default docutils literal notranslate"><span class="pre">{}</span></code></p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-keyed_groups"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-keyed-groups"><strong>keyed_groups</strong></p>
 <a class="ansibleOptionLink" href="#parameter-keyed_groups" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=dictionary</span></p>
 </div></td>
@@ -357,7 +371,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p class="ansible-option-line"><span class="ansible-option-default-bold">Default:</span> <code class="ansible-option-default docutils literal notranslate"><span class="pre">[]</span></code></p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-keyed_groups/default_value"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-keyed-groups-default-value"><strong>default_value</strong></p>
 <a class="ansibleOptionLink" href="#parameter-keyed_groups/default_value" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 <p><span class="ansible-option-versionadded">added in ansible-core 2.12</span></p>
@@ -366,21 +380,21 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p>This option is mutually exclusive with <code class="docutils literal notranslate"><span class="pre">trailing_separator</span></code>.</p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-keyed_groups/key"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-keyed-groups-key"><strong>key</strong></p>
 <a class="ansibleOptionLink" href="#parameter-keyed_groups/key" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The key from input dictionary used to generate groups</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-keyed_groups/parent_group"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-keyed-groups-parent-group"><strong>parent_group</strong></p>
 <a class="ansibleOptionLink" href="#parameter-keyed_groups/parent_group" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>parent group for keyed group</p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-keyed_groups/prefix"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-keyed-groups-prefix"><strong>prefix</strong></p>
 <a class="ansibleOptionLink" href="#parameter-keyed_groups/prefix" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -388,7 +402,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p class="ansible-option-line"><span class="ansible-option-default-bold">Default:</span> <code class="ansible-option-default docutils literal notranslate"><span class="pre">&quot;&quot;</span></code></p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-keyed_groups/separator"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-keyed-groups-separator"><strong>separator</strong></p>
 <a class="ansibleOptionLink" href="#parameter-keyed_groups/separator" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -396,7 +410,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p class="ansible-option-line"><span class="ansible-option-default-bold">Default:</span> <code class="ansible-option-default docutils literal notranslate"><span class="pre">&quot;_&quot;</span></code></p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-keyed_groups/trailing_separator"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-keyed-groups-trailing-separator"><strong>trailing_separator</strong></p>
 <a class="ansibleOptionLink" href="#parameter-keyed_groups/trailing_separator" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
 <p><span class="ansible-option-versionadded">added in ansible-core 2.12</span></p>
@@ -410,7 +424,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 </ul>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-leading_separator"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-leading-separator"><strong>leading_separator</strong></p>
 <a class="ansibleOptionLink" href="#parameter-leading_separator" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
 <p><span class="ansible-option-versionadded">added in ansible-core 2.11</span></p>
@@ -428,7 +442,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 </ul>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-password"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-password"><strong>password</strong></p>
 <a class="ansibleOptionLink" href="#parameter-password" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -441,7 +455,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 </ul>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-port"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-port"><strong>port</strong></p>
 <a class="ansibleOptionLink" href="#parameter-port" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">integer</span></p>
 </div></td>
@@ -454,7 +468,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 </ul>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-search_base"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-search-base"><strong>search_base</strong></p>
 <a class="ansibleOptionLink" href="#parameter-search_base" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -463,7 +477,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p>If searching a larger Active Directory database, it is recommended to narrow the search base to speed up the queries.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-search_scope"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-search-scope"><strong>search_scope</strong></p>
 <a class="ansibleOptionLink" href="#parameter-search_scope" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -479,7 +493,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 </ul>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-server"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-server"><strong>server</strong></p>
 <a class="ansibleOptionLink" href="#parameter-server" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -492,7 +506,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 </ul>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-strict"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-strict"><strong>strict</strong></p>
 <a class="ansibleOptionLink" href="#parameter-strict" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
 </div></td>
@@ -505,7 +519,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 </ul>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-tls_mode"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-tls-mode"><strong>tls_mode</strong></p>
 <a class="ansibleOptionLink" href="#parameter-tls_mode" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -525,7 +539,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 </ul>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-use_extra_vars"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-use-extra-vars"><strong>use_extra_vars</strong></p>
 <a class="ansibleOptionLink" href="#parameter-use_extra_vars" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
 <p><span class="ansible-option-versionadded">added in ansible-core 2.11</span></p>
@@ -548,7 +562,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 </ul>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-username"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-username"><strong>username</strong></p>
 <a class="ansibleOptionLink" href="#parameter-username" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
