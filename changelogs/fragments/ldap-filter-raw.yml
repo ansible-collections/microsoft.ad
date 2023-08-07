@@ -1,0 +1,4 @@
+minor_changes:
+- >-
+  microsoft.ad.ldap - Added the option ``filter_without_computer`` to not add the AND clause ``objectClass=computer``
+  to the final filter used - https://github.com/ansible-collections/microsoft.ad/issues/55
