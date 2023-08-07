@@ -285,8 +285,6 @@
     that:
     - not move_with_path_sentinel_again is changed
 
-# CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
-
 - name: update password from blank - skip for on_create
   user:
     name: MyUser
@@ -377,6 +375,29 @@
     that:
     - always_update_password is changed
     - always_update_password_actual.objects[0].pwdLastSet > change_pass_actual.objects[0].pwdLastSet
+
+- name: expire account for subsequent password check
+  user:
+    name: MyUser
+    attributes:
+      set:
+        accountExpires:
+          type: date_time
+          value: '2000-01-01T00:00:00.0000000Z'
+
+# There's no way to validate a password on an expired account, this will
+# result in a change even if the password is the same
+- name: update password for expired account
+  user:
+    name: MyUser
+    password: Password123!
+    update_password: when_changed
+  register: update_password_on_expired_account
+
+- name: assert update password for expired account
+  assert:
+    that:
+    - update_password_on_expired_account is changed
 
 - name: remove user - check
   user:
@@ -509,6 +530,9 @@
     attributes:
       set:
         comment: My comment
+        accountExpires:
+          type: date_time
+          value: '3023-07-31T00:00:00.0000000Z'
   register: create_user_check
   check_mode: true
 
@@ -559,6 +583,9 @@
     attributes:
       set:
         comment: My comment
+        accountExpires:
+          type: date_time
+          value: '3023-07-31T00:00:00.0000000Z'
   register: create_user
 
 - set_fact:
@@ -569,6 +596,7 @@
   object_info:
     identity: '{{ object_identity }}'
     properties:
+    - accountExpires
     - c
     - comment
     - company
@@ -619,6 +647,7 @@
     - create_user_actual.objects[0].Description == 'User Description'
     - create_user_actual.objects[0].DisplayName == 'User Name'
     - create_user_actual.objects[0].DistinguishedName == 'CN=MyUser,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_user_actual.objects[0].accountExpires == 448921440000000000
     - create_user_actual.objects[0].c == 'au'
     - create_user_actual.objects[0].comment == 'My comment'
     - create_user_actual.objects[0].company == 'Red Hat'
@@ -677,6 +706,9 @@
     attributes:
       set:
         comment: My comment
+        accountExpires:
+          type: date_time
+          value: '3023-07-31T00:00:00.0000000Z'
   register: create_user_again
 
 - name: assert create user with extra info - idempotent
@@ -718,6 +750,9 @@
     attributes:
       set:
         comment: My Comment
+        accountExpires:
+          type: date_time
+          value: '3023-07-31T00:00:00.0000001Z'
   register: update_user_check
   check_mode: true
 
@@ -725,6 +760,7 @@
   object_info:
     identity: '{{ object_identity }}'
     properties:
+    - accountExpires
     - c
     - comment
     - company
@@ -759,6 +795,7 @@
     - update_user_check_actual.objects[0].Description == 'User Description'
     - update_user_check_actual.objects[0].DisplayName == 'User Name'
     - update_user_check_actual.objects[0].DistinguishedName == 'CN=MyUser,' ~ setup_domain_info.output[0].defaultNamingContext
+    - update_user_check_actual.objects[0].accountExpires == 448921440000000000
     - update_user_check_actual.objects[0].c == 'au'
     - update_user_check_actual.objects[0].comment == 'My comment'
     - update_user_check_actual.objects[0].company == 'Red Hat'
@@ -814,12 +851,16 @@
     attributes:
       set:
         comment: My Comment
+        accountExpires:
+          type: date_time
+          value: '3023-07-31T00:00:00.0000001Z'
   register: update_user
 
 - name: get result of update user settings
   object_info:
     identity: '{{ object_identity }}'
     properties:
+    - accountExpires
     - c
     - comment
     - company
@@ -868,6 +909,7 @@
     - update_user_actual.objects[0].Description == 'User description'
     - update_user_actual.objects[0].DisplayName == 'User name'
     - update_user_actual.objects[0].DistinguishedName == 'CN=MyUser,' ~ setup_domain_info.output[0].defaultNamingContext
+    - update_user_actual.objects[0].accountExpires == 448921440000000001
     - update_user_actual.objects[0].c == 'us'
     - update_user_actual.objects[0].comment == 'My Comment'
     - update_user_actual.objects[0].company == 'Ansible'

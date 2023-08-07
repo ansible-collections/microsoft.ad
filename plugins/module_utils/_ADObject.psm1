@@ -75,7 +75,7 @@ Function Compare-AnsibleADAttribute {
             [System.Convert]::ToBase64String($_)
         }
         elseif ($_ -is [System.DateTime]) {
-            $_.ToUniversalTime().ToString('o')
+            $_.ToUniversalTime().ToFileTimeUtc()
         }
         elseif ($_ -is [System.DirectoryServices.ActiveDirectorySecurity]) {
             $_.GetSecurityDescriptorSddlForm([System.Security.AccessControl.AccessControlSections]::All)

@@ -1,0 +1,2 @@
+bugfixes:
+- Fix up date_time attribute comparisons to be idempotent - https://github.com/ansible-collections/microsoft.ad/issues/57

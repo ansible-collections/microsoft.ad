@@ -221,7 +221,8 @@ options:
     - C(always) will always update passwords.
     - C(on_create) will only set the password for newly created users.
     - C(when_changed) will only set the password when changed.
-    - Using C(when_changed) will not work if the account is not enabled.
+    - Using C(when_changed) will not work if the account is not enabled or is
+      expired.
     choices:
     - always
     - on_create

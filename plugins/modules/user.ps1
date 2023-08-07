@@ -39,6 +39,7 @@ Function Test-Credential {
         $failed_codes = @(
             0x0000052E, # ERROR_LOGON_FAILURE
             0x00000532, # ERROR_PASSWORD_EXPIRED
+            0x00000701, # ERROR_ACCOUNT_EXPIRED
             0x00000773, # ERROR_PASSWORD_MUST_CHANGE
             0x00000533  # ERROR_ACCOUNT_DISABLED
         )
@@ -278,7 +279,7 @@ $setParams = @{
                         $SetParams.ServicePrincipalNames.Remove = $res.ToRemove
                     }
                 }
-                $module.Diff.after.kerberos_encryption_types = @($res.Value | Sort-Object)
+                $module.Diff.after.spn = @($res.Value | Sort-Object)
             }
         }
 
