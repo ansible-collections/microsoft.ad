@@ -40,8 +40,19 @@ options:
   filter:
     description:
     - The LDAP filter string used to query the computer objects.
-    - This will be combined with the filter "(objectClass=computer)".
+    - By default, this will be combined with the filter
+      "(objectClass=computer)". Use I(filter_without_computer) to override
+      this behavior and have I(filter) be the only filter used.
     type: str
+  filter_without_computer:
+    description:
+    - Will not combine the I(filter) value with the filter
+      "(objectClass=computer)".
+    - In most cases this should be C(false) but can be set to C(true) to have
+      the I(filter) value specified be the only filter used.
+    type: bool
+    default: false
+    version_added: '1.3.0'
   search_base:
     description:
     - The LDAP search base to find the computer objects in.
@@ -259,6 +270,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
         groups = self.get_option("groups")
         keyed_groups = self.get_option("keyed_groups")
         ldap_filter = self.get_option("filter")
+        ldap_filter_without_computer = self.get_option("filter_without_computer")
         search_base = self.get_option("search_base")
         search_scope = self.get_option("search_scope")
         strict = self.get_option("strict")
@@ -272,12 +284,14 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
         computer_filter = sansldap.FilterEquality("objectClass", b"computer")
         final_filter: sansldap.LDAPFilter
         if ldap_filter:
-            final_filter = sansldap.FilterAnd(
-                filters=[
-                    computer_filter,
-                    sansldap.LDAPFilter.from_string(ldap_filter),
-                ]
-            )
+            ldap_filter_obj = sansldap.LDAPFilter.from_string(ldap_filter)
+
+            if ldap_filter_without_computer:
+                final_filter = ldap_filter_obj
+            else:
+                final_filter = sansldap.FilterAnd(
+                    filters=[computer_filter, ldap_filter_obj]
+                )
         else:
             final_filter = computer_filter
 
