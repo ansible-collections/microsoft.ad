@@ -1,0 +1,4 @@
+bugfixes:
+- >-
+  Ensure renaming and moving an object will be done with the ``domain_server`` and ``domain_username`` credentials
+  specified - https://github.com/ansible-collections/microsoft.ad/issues/54
