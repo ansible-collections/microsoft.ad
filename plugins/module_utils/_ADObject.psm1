@@ -685,6 +685,8 @@ Function Invoke-AnsibleADObject {
         $PostAction
     )
 
+    $defaultPathSentinel = 'microsoft.ad.default_path'
+
     $spec = @{
         options = @{
             attributes = @{
@@ -828,7 +830,7 @@ Function Invoke-AnsibleADObject {
     }
     else {
         $ouPath = $defaultObjectPath
-        if ($module.Params.path) {
+        if ($module.Params.path -and $module.Params.path -ne $defaultPathSentinel) {
             $ouPath = $module.Params.path
         }
         "$namePrefix=$($Module.Params.name -replace ',', '\,'),$ouPath"
@@ -911,7 +913,7 @@ Function Invoke-AnsibleADObject {
             }
 
             $objectPath = $null
-            if ($module.Params.path) {
+            if ($module.Params.path -and $module.Params.path -ne $defaultPathSentinel) {
                 $objectPath = $path
                 $newParams.Path = $module.Params.path
             }
@@ -1081,8 +1083,12 @@ Function Invoke-AnsibleADObject {
                 $module.Result.changed = $true
             }
 
-            if ($module.Params.path -and $module.Params.path -ne $objectPath) {
-                $objectPath = $module.Params.path
+            $desiredPath = $module.Params.path
+            if ($desiredPath -eq $defaultPathSentinel) {
+                $desiredPath = $defaultObjectPath
+            }
+            if ($desiredPath -and $desiredPath -ne $objectPath) {
+                $objectPath = $desiredPath
                 $module.Diff.after.path = $objectPath
 
                 $addProtection = $false

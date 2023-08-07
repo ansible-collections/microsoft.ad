@@ -441,6 +441,59 @@
     - move_ou_actual.objects[0].DistinguishedName == 'OU=TestOU 2,' ~ sub_ous.results[0].distinguished_name
     - move_ou_actual.objects[0].ProtectedFromAccidentalDeletion == true
 
+- name: do not move object in non default path without path - check
+  object:
+    name: TestOU 2
+    identity: '{{ sub_ous.results[1].object_guid }}'
+    type: organizationalUnit
+    attributes:
+      set:
+        description: Test comment
+  register: dont_move_no_path_check
+  check_mode: true
+
+- name: get result of do not move object in non default path without path - check
+  object_info:
+    identity: '{{ sub_ous.results[1].object_guid }}'
+    properties:
+    - description
+  register: dont_move_no_path_check_actual
+
+- name: assert do not move object in non default path without path - check
+  assert:
+    that:
+    - dont_move_no_path_check is changed
+    - dont_move_no_path_check.distinguished_name == 'OU=TestOU 2,' ~ sub_ous.results[0].distinguished_name
+    - dont_move_no_path_check_actual.objects[0].Name == 'TestOU 2'
+    - dont_move_no_path_check_actual.objects[0].DistinguishedName == 'OU=TestOU 2,' ~ sub_ous.results[0].distinguished_name
+    - dont_move_no_path_check_actual.objects[0].Description == None
+
+- name: do not move object in non default path without path
+  object:
+    name: TestOU 2
+    identity: '{{ sub_ous.results[1].object_guid }}'
+    type: organizationalUnit
+    attributes:
+      set:
+        description: Test comment
+  register: dont_move_no_path
+
+- name: get result of do not move object in non default path without path
+  object_info:
+    identity: '{{ sub_ous.results[1].object_guid }}'
+    properties:
+    - description
+  register: dont_move_no_path_actual
+
+- name: assert do not move object in non default path without path - check
+  assert:
+    that:
+    - dont_move_no_path is changed
+    - dont_move_no_path.distinguished_name == 'OU=TestOU 2,' ~ sub_ous.results[0].distinguished_name
+    - dont_move_no_path_actual.objects[0].Name == 'TestOU 2'
+    - dont_move_no_path_actual.objects[0].DistinguishedName == 'OU=TestOU 2,' ~ sub_ous.results[0].distinguished_name
+    - dont_move_no_path_actual.objects[0].Description == 'Test comment'
+
 - name: remove object that is protected from deletion - check
   object:
     name: My, Container
@@ -1444,3 +1497,57 @@
   assert:
     that:
     - not unset_normal_again is changed
+
+- name: move object back into the default path - check
+  object:
+    name: My, Container
+    identity: '{{ object_identity }}'
+    type: container
+    path: microsoft.ad.default_path
+  register: move_into_default_check
+  check_mode: true
+
+- name: get result of move object back into the default path - check
+  object_info:
+    identity: '{{ object_identity }}'
+  register: move_into_default_check_actual
+
+- name: assert move object back into the default path - check
+  assert:
+    that:
+    - move_into_default_check is changed
+    - move_into_default_check.distinguished_name == 'CN=My\, Container,' ~ setup_domain_info.output[0].defaultNamingContext
+    - move_into_default_check_actual.objects[0].DistinguishedName == 'CN=My\, Container,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+
+- name: move object back into the default path
+  object:
+    name: My, Container
+    identity: '{{ object_identity }}'
+    type: container
+    path: microsoft.ad.default_path
+  register: move_into_default
+
+- name: get result of move object back into the default path
+  object_info:
+    identity: '{{ object_identity }}'
+  register: move_into_default_actual
+
+- name: assert move object back into the default path
+  assert:
+    that:
+    - move_into_default is changed
+    - move_into_default.distinguished_name == 'CN=My\, Container,' ~ setup_domain_info.output[0].defaultNamingContext
+    - move_into_default_actual.objects[0].DistinguishedName == 'CN=My\, Container,' ~ setup_domain_info.output[0].defaultNamingContext
+
+- name: move object back into the default path - idempotent
+  object:
+    name: My, Container
+    identity: '{{ object_identity }}'
+    type: container
+    path: microsoft.ad.default_path
+  register: move_into_default_again
+
+- name: assert move object back into the default path - idempotent
+  assert:
+    that:
+    - not move_into_default_again is changed
