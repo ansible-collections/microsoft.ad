@@ -353,8 +353,10 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-group-
 <a class="ansibleOptionLink" href="#parameter-path" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The path of the OU or the container where the new object should exist in.</p>
-<p>If no path is specified, the default is the <code class="docutils literal notranslate"><span class="pre">defaultNamingContext</span></code> of domain for most objects.</p>
+<p>If creating a new object, the new object will be created at the path specified. If no path is specified then the <code class="docutils literal notranslate"><span class="pre">defaultNamingContext</span></code> of the domain will be used as the path for most object types.</p>
+<p>If managing an existing object found by <em>identity</em>, the path of the found object will be moved to the one specified by this option. If no path is specified, the object will not be moved.</p>
 <p>The modules <a class="reference internal" href="computer_module.html#ansible-collections-microsoft-ad-computer-module"><span class="std std-ref">microsoft.ad.computer</span></a>, <a class="reference internal" href="user_module.html#ansible-collections-microsoft-ad-user-module"><span class="std std-ref">microsoft.ad.user</span></a>, and <a class="reference internal" href="#ansible-collections-microsoft-ad-group-module"><span class="std std-ref">microsoft.ad.group</span></a> have their own default path that is configured on the Active Directory domain controller.</p>
+<p>This can be set to <code class="docutils literal notranslate"><span class="pre">microsoft.ad.default_path</span></code> which will equal the default value used when creating a new object.</p>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
