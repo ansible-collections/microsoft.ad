@@ -177,11 +177,115 @@
     that:
     - not move_user_again is changed
 
+- name: update user not in default path by identity - check
+  user:
+    name: MyUser2
+    identity: '{{ object_sid }}'
+    firstname: first name
+  register: dont_move_no_path_check
+  check_mode: true
+
+- name: get result of update user not in default path by identity - check
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - givenName
+  register: dont_move_no_path_check_actual
+  check_mode: true
+
+- name: assert update user not in default path by identity - check
+  assert:
+    that:
+    - dont_move_no_path_check is changed
+    - dont_move_no_path_check.distinguished_name == 'CN=MyUser2,' ~ setup_domain_info.output[0].defaultNamingContext
+    - dont_move_no_path_check_actual.objects[0].DistinguishedName == 'CN=MyUser2,' ~ setup_domain_info.output[0].defaultNamingContext
+    - dont_move_no_path_check_actual.objects[0].Name == 'MyUser2'
+    - dont_move_no_path_check_actual.objects[0].givenName == None
+
+- name: update user not in default path by identity
+  user:
+    name: MyUser2
+    identity: '{{ object_sid }}'
+    firstname: first name
+  register: dont_move_no_path
+
+- name: get result of update user not in default path by identity
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - givenName
+  register: dont_move_no_path_actual
+  check_mode: true
+
+- name: assert update user not in default path by identity - check
+  assert:
+    that:
+    - dont_move_no_path is changed
+    - dont_move_no_path.distinguished_name == 'CN=MyUser2,' ~ setup_domain_info.output[0].defaultNamingContext
+    - dont_move_no_path_actual.objects[0].DistinguishedName == 'CN=MyUser2,' ~ setup_domain_info.output[0].defaultNamingContext
+    - dont_move_no_path_actual.objects[0].Name == 'MyUser2'
+    - dont_move_no_path_actual.objects[0].givenName == 'first name'
+
+- name: move user back - check
+  user:
+    name: MyUser
+    identity: MyUser
+    path: microsoft.ad.default_path
+  register: move_with_path_sentinel_check
+  check_mode: true
+
+- name: get result of move user back - check
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - sAMAccountName
+  register: move_with_path_sentinel_check_actual
+
+- name: assert move user back - check
+  assert:
+    that:
+    - move_with_path_sentinel_check is changed
+    - move_with_path_sentinel_check.distinguished_name == 'CN=MyUser,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - move_with_path_sentinel_check_actual.objects[0].DistinguishedName == 'CN=MyUser2,' ~ setup_domain_info.output[0].defaultNamingContext
+    - move_with_path_sentinel_check_actual.objects[0].Name == 'MyUser2'
+    - move_with_path_sentinel_check_actual.objects[0].sAMAccountName == 'MyUser'
+
 - name: move user back
   user:
     name: MyUser
-    identity: MyUser  # By sAMAccountName
-    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    identity: MyUser
+    path: microsoft.ad.default_path
+  register: move_with_path_sentinel
+
+- name: get result of move user back
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - sAMAccountName
+  register: move_with_path_sentinel_actual
+
+- name: assert move user back
+  assert:
+    that:
+    - move_with_path_sentinel is changed
+    - move_with_path_sentinel.distinguished_name == 'CN=MyUser,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - move_with_path_sentinel_actual.objects[0].DistinguishedName == 'CN=MyUser,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - move_with_path_sentinel_actual.objects[0].Name == 'MyUser'
+    - move_with_path_sentinel_actual.objects[0].sAMAccountName == 'MyUser'
+
+- name: move user back - idempotent
+  user:
+    name: MyUser
+    identity: MyUser
+    path: microsoft.ad.default_path
+  register: move_with_path_sentinel_again
+
+- name: assert move user back - idempotent
+  assert:
+    that:
+    - not move_with_path_sentinel_again is changed
+
+# CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
 
 - name: update password from blank - skip for on_create
   user:

@@ -119,11 +119,17 @@ options:
   path:
     description:
     - The path of the OU or the container where the new object should exist in.
-    - If no path is specified, the default is the C(defaultNamingContext) of
-      domain for most objects.
+    - If creating a new object, the new object will be created at the path
+      specified. If no path is specified then the C(defaultNamingContext) of
+      the domain will be used as the path for most object types.
+    - If managing an existing object found by I(identity), the path of the
+      found object will be moved to the one specified by this option. If no
+      path is specified, the object will not be moved.
     - The modules M(microsoft.ad.computer), M(microsoft.ad.user), and
       M(microsoft.ad.group) have their own default path that is
       configured on the Active Directory domain controller.
+    - This can be set to C(microsoft.ad.default_path) which will equal the
+      default value used when creating a new object.
     type: str
   protect_from_deletion:
     description:
