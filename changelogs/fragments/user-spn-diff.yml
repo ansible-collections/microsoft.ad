@@ -1,0 +1,2 @@
+bugfixes:
+- microsoft.ad.user - Ensure the ``spn`` diff after key is ``spn`` and not ``kerberos_encryption_types``
