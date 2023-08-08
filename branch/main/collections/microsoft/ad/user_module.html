@@ -609,7 +609,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <td><div class="ansible-option-cell"><p><code class="docutils literal notranslate"><span class="pre">always</span></code> will always update passwords.</p>
 <p><code class="docutils literal notranslate"><span class="pre">on_create</span></code> will only set the password for newly created users.</p>
 <p><code class="docutils literal notranslate"><span class="pre">when_changed</span></code> will only set the password when changed.</p>
-<p>Using <code class="docutils literal notranslate"><span class="pre">when_changed</span></code> will not work if the account is not enabled.</p>
+<p>Using <code class="docutils literal notranslate"><span class="pre">when_changed</span></code> will not work if the account is not enabled or is expired.</p>
 <p class="ansible-option-line"><span class="ansible-option-choices">Choices:</span></p>
 <ul class="simple">
 <li><p><code class="ansible-option-default-bold docutils literal notranslate"><span class="pre">&quot;always&quot;</span></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
