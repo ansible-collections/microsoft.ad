@@ -1,4 +1,0 @@
-minor_changes:
-- >-
-  AD objects will no longer be moved to the default AD path for their type if no ``path`` was specified. Use the value
-  ``microsoft.ad.default_path`` to explicitly set the path to the default path if that behaviour is desired.
