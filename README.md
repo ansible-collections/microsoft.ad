@@ -84,7 +84,7 @@ The current process for publishing new versions of the Microsoft AD Collection i
 * Update the `CHANGELOG`:
   * Make sure you have [`antsibull-changelog`](https://pypi.org/project/antsibull-changelog/) installed `pip install antsibull-changelog`.
   * Make sure there are fragments for all known changes in `changelogs/fragments`.
-  * Add a new `release_summary` fragment: `echo "Release summary for v..." > changelogs/fragments/release-summary.yml`
+  * Add a new `release_summary` fragment: `echo "release_summary: Release summary for v..." > changelogs/fragments/release-summary.yml`
   * Run `antsibull-changelog release`.
 * Commit the changes and wait for CI to be green
 * Create a release with the tag that matches the version number
