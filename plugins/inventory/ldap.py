@@ -8,7 +8,7 @@ short_description: Inventory plugin for Active Directory
 version_added: 1.1.0
 description:
 - Inventory plugin for Active Directory or other LDAP sources.
-- Uses a YAML configuration file that ends with C(microsoft.ad.{yml|yaml}).
+- Uses a YAML configuration file that ends with C(microsoft.ad.ldap.{yml|yaml}).
 - Each host that is added will set the C(inventory_hostname) to the C(name) of
   the LDAP computer object and C(ansible_host) to the value of the
   C(dNSHostName) LDAP attribute if set. If the C(dNSHostName) attribute is not
