@@ -14,11 +14,11 @@
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="search" title="Search" href="../../../../search.html" />
     <link rel="next" title="LDAP Inventory guide" href="guide_ldap_inventory.html" />
@@ -131,7 +131,7 @@
            <div itemprop="articleBody">
              
   <section id="ldap-connection-guide">
-<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-connection"></span><h1>LDAP Connection guide<a class="headerlink" href="#ldap-connection-guide" title="Permalink to this heading"></a></h1>
+<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-connection"></span><h1>LDAP Connection guide<a class="headerlink" href="#ldap-connection-guide" title="Link to this heading"></a></h1>
 <p>This guide covers information about communicating with an LDAP server, like Microsoft Active Directory, from the Ansible host. Unlike Windows hosts, there are no builtin mechanisms to communicate and authenticate with an LDAP server, so the plugins that run on the Ansible host require some extra configuration to get working.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -146,7 +146,7 @@
 </ul>
 </nav>
 <section id="requirements">
-<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-connection-requirements"></span><h2><a class="toc-backref" href="#id1" role="doc-backlink">Requirements</a><a class="headerlink" href="#requirements" title="Permalink to this heading"></a></h2>
+<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-connection-requirements"></span><h2><a class="toc-backref" href="#id1" role="doc-backlink">Requirements</a><a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
 <p>The LDAP connection code requires the <a class="reference external" href="https://pypi.org/project/sansldap/">sansldap</a> and <a class="reference external" href="https://pypi.org/project/pyspnego/">pyspnego</a> libraries. They can be installed using <code class="docutils literal notranslate"><span class="pre">pip</span></code> with:</p>
 <div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span><span class="s1">&#39;pyspnego &gt;= 0.8.0&#39;</span>
@@ -200,7 +200,7 @@
 </div>
 </section>
 <section id="connection-options">
-<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-connection-connection-options"></span><h2><a class="toc-backref" href="#id2" role="doc-backlink">Connection options</a><a class="headerlink" href="#connection-options" title="Permalink to this heading"></a></h2>
+<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-connection-connection-options"></span><h2><a class="toc-backref" href="#id2" role="doc-backlink">Connection options</a><a class="headerlink" href="#connection-options" title="Link to this heading"></a></h2>
 <p>Connecting to a Microsoft Active Directory or LDAP server requires information like the domain controller hostname, port, whether to use LDAPS or StartTLS, and authentication information. Some of this information can be retrieved based on the Ansible host environment but can also be manually specified through the plugin options. These options include:</p>
 <table class="docutils align-default">
 <thead>
@@ -238,7 +238,7 @@
 </table>
 <p>The server lookup details are described below. The port defaults to <code class="docutils literal notranslate"><span class="pre">389</span></code> unless <code class="docutils literal notranslate"><span class="pre">tls_mode:</span> <span class="pre">ldaps</span></code> is specified. The TLS mode defaults to <code class="docutils literal notranslate"><span class="pre">ldaps</span></code> if the port is explicitly set to <code class="docutils literal notranslate"><span class="pre">686</span></code> otherwise it defaults to <code class="docutils literal notranslate"><span class="pre">389</span></code>. The authentication protocol defaults to <code class="docutils literal notranslate"><span class="pre">negotiate</span></code> while attempting to use the implicit credential if it’s available.</p>
 <section id="server-lookup">
-<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-connection-server-lookup"></span><h3>Server lookup<a class="headerlink" href="#server-lookup" title="Permalink to this heading"></a></h3>
+<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-connection-server-lookup"></span><h3>Server lookup<a class="headerlink" href="#server-lookup" title="Link to this heading"></a></h3>
 <p>If no server option was explicitly set, the plugin will attempt to lookup the LDAP server based on the current environment configuration. This is only possible if:</p>
 <ul class="simple">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">dnspython</span></code> Python package is installed</p></li>
@@ -259,7 +259,7 @@
 </section>
 </section>
 <section id="authentication">
-<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-connection-authentication"></span><h2><a class="toc-backref" href="#id3" role="doc-backlink">Authentication</a><a class="headerlink" href="#authentication" title="Permalink to this heading"></a></h2>
+<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-connection-authentication"></span><h2><a class="toc-backref" href="#id3" role="doc-backlink">Authentication</a><a class="headerlink" href="#authentication" title="Link to this heading"></a></h2>
 <p>A critical component of LDAP connections is how the user authenticates itself to the server. The following authentication mechanisms are supported:</p>
 <table class="docutils align-default">
 <thead>
@@ -295,7 +295,7 @@
 <p>Any protocol that does not support encryption must either be used with LDAPS, StartTLS, or they must explicitly disable the encryption checks with the <code class="docutils literal notranslate"><span class="pre">encrypt:</span> <span class="pre">false</span></code> option. Disabling encryption is not recommended as it will send the credentials without any protection and any of the data exchanged can be seen by anyone. It also requires the target server to allow unencrypted connections as they can reject such connections.</p>
 <p>Implicit credential support documents whether the authentication protocol can authenticate without an explicit <code class="docutils literal notranslate"><span class="pre">username</span></code> and <code class="docutils literal notranslate"><span class="pre">password</span></code> specified. Currently only <code class="docutils literal notranslate"><span class="pre">simple</span></code> and <code class="docutils literal notranslate"><span class="pre">negotiate/kerberos</span></code> supports implicit credentials. See each protocol section for more details.</p>
 <section id="simple">
-<h3>Simple<a class="headerlink" href="#simple" title="Permalink to this heading"></a></h3>
+<h3>Simple<a class="headerlink" href="#simple" title="Link to this heading"></a></h3>
 <p>Simple authentication is the most basic authentication protocol supported. It works by sending the username and password in plaintext to the server, similar to HTTP Basic authentication. Microsoft AD requires the username to be the <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> or <code class="docutils literal notranslate"><span class="pre">userPrincipalName</span></code> of the account but other LDAP implementations require the LDAP <code class="docutils literal notranslate"><span class="pre">distinguishedName</span></code>. While it is possible to do an anonymous bind when no username or password is specified, it is likely the server will reject any search operations unless it is authenticated with an actual users credentials. Simple authentication is not allowed over a connection that is not protected by TLS. It is possible to allow simple authentication over such connections by disabling the encryption check but this is not recommended.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -303,7 +303,7 @@
 </div>
 </section>
 <section id="certificate">
-<h3>Certificate<a class="headerlink" href="#certificate" title="Permalink to this heading"></a></h3>
+<h3>Certificate<a class="headerlink" href="#certificate" title="Link to this heading"></a></h3>
 <p>Certificate authentication uses TLS client authentication as part of the TLS handshake to authenticate the user to the host. As it is part of the TLS handshake, it can only be used over an LDAPS connection or with StartTLS. It uses a certificate and certificate key of the user to authenticate as. There are three options that can be used to specify a client certificate and key to use for authentication:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">certificate</span></code> - The certificate, and optionally bundled key</p></li>
@@ -317,11 +317,11 @@
 </div>
 </section>
 <section id="negotiate">
-<h3>Negotiate<a class="headerlink" href="#negotiate" title="Permalink to this heading"></a></h3>
+<h3>Negotiate<a class="headerlink" href="#negotiate" title="Link to this heading"></a></h3>
 <p>Negotiate authentication is the default authentication protocol used by LDAP connections. It is a combination of both <code class="docutils literal notranslate"><span class="pre">kerberos</span></code> and <code class="docutils literal notranslate"><span class="pre">ntlm</span></code> with the client negotiating which one to use. It will favor <code class="docutils literal notranslate"><span class="pre">kerberos</span></code> if it is available and fallback to <code class="docutils literal notranslate"><span class="pre">ntlm</span></code> if not. The <code class="docutils literal notranslate"><span class="pre">pyspnego</span></code> Python package provides <code class="docutils literal notranslate"><span class="pre">negotiate</span></code> with just <code class="docutils literal notranslate"><span class="pre">ntlm</span></code> support, <code class="docutils literal notranslate"><span class="pre">kerberos</span></code> support is provided by the <code class="docutils literal notranslate"><span class="pre">pyspnego[kerberos]</span></code> extras option. See <a class="reference internal" href="#ansible-collections-microsoft-ad-docsite-guide-ldap-connection-requirements"><span class="std std-ref">requirements</span></a> for more information on how to install this requirement.</p>
 </section>
 <section id="kerberos">
-<h3>Kerberos<a class="headerlink" href="#kerberos" title="Permalink to this heading"></a></h3>
+<h3>Kerberos<a class="headerlink" href="#kerberos" title="Link to this heading"></a></h3>
 <p>Kerberos authentication is a modern authentication protocol supported by Microsoft AD servers and is the preferred protocol for authentication. It is only available if the <code class="docutils literal notranslate"><span class="pre">pyspnego[kerberos]</span></code> extras package is installed and the host has been configured properly. Typically this configuration is done through the <a class="reference external" href="https://web.mit.edu/kerberos/krb5-latest/doc/admin/conf_files/krb5_conf.html">/etc/krb5.conf</a> file on the system. This guide will not go into configuring the host’s Kerberos settings as it is environment specific.</p>
 <p>A good way to ensure the host has been configured to use Kerberos correctly is to ensure the following commands work:</p>
 <div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import krb5&quot;</span>
@@ -337,7 +337,7 @@
 <p>Using the <code class="docutils literal notranslate"><span class="pre">kinit</span></code> command it is possible to set up a credential cache for Ansible to use for authentication. By having a credential retrieved using <code class="docutils literal notranslate"><span class="pre">kinit</span></code>, it is possible to authenticate with the LDAP server without any explicit username and password set in Ansible. It is still possible to use Kerberos with explicit credentials.</p>
 </section>
 <section id="ntlm">
-<h3>NTLM<a class="headerlink" href="#ntlm" title="Permalink to this heading"></a></h3>
+<h3>NTLM<a class="headerlink" href="#ntlm" title="Link to this heading"></a></h3>
 <p>NTLM authentication is a simple authentication protocol that can be used by itself or as part of the <code class="docutils literal notranslate"><span class="pre">negotiate</span></code> fallback if <code class="docutils literal notranslate"><span class="pre">kerberos</span></code> is unavailable. Unlike <code class="docutils literal notranslate"><span class="pre">kerberos</span></code> support, it does not normally support implicit credentials so typically needs an explicit username and password specified to be used. It requires no extra host configuration and should work once <code class="docutils literal notranslate"><span class="pre">pyspnego</span></code> has been installed.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -346,7 +346,7 @@
 </section>
 </section>
 <section id="certificate-validation">
-<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-connection-cert-validation"></span><h2><a class="toc-backref" href="#id4" role="doc-backlink">Certificate validation</a><a class="headerlink" href="#certificate-validation" title="Permalink to this heading"></a></h2>
+<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-connection-cert-validation"></span><h2><a class="toc-backref" href="#id4" role="doc-backlink">Certificate validation</a><a class="headerlink" href="#certificate-validation" title="Link to this heading"></a></h2>
 <p>Using LDAPS or LDAP over StartTLS will perform a TLS handshake which by default has the client attempting to validate the certificate presented by the server. If the certificate chain cannot be trusted, or the hostname does not match the one being requested the connection will fail with an error indicating why. The default trust store location is dependent on the Python configuration and what SSL library it has been linked to. Typically it would be the OS’ default trust store but when in doubt the following Python code can be used to verify the LDAPS certificate. Make sure to change <code class="docutils literal notranslate"><span class="pre">hostname</span></code> to the hostname of the LDAP server that should be tested.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">socket</span>
 <span class="kn">import</span> <span class="nn">ssl</span>

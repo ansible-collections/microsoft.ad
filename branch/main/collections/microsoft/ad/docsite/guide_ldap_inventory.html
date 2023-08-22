@@ -14,11 +14,11 @@
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="search" title="Search" href="../../../../search.html" />
     <link rel="next" title="Setting list option values guide" href="guide_list_values.html" />
@@ -131,7 +131,7 @@
            <div itemprop="articleBody">
              
   <section id="ldap-inventory-guide">
-<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-inventory"></span><h1>LDAP Inventory guide<a class="headerlink" href="#ldap-inventory-guide" title="Permalink to this heading"></a></h1>
+<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-inventory"></span><h1>LDAP Inventory guide<a class="headerlink" href="#ldap-inventory-guide" title="Link to this heading"></a></h1>
 <p>This guide covers information about the LDAP inventory plugin included in this collection. This inventory plugin can be used to build an inventory from an LDAP server source, like Microsoft Active Directory.</p>
 <nav class="contents local" id="contents">
 <ul class="simple">
@@ -143,7 +143,7 @@
 </ul>
 </nav>
 <section id="connection-info">
-<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-connection-info"></span><h2><a class="toc-backref" href="#id1" role="doc-backlink">Connection info</a><a class="headerlink" href="#connection-info" title="Permalink to this heading"></a></h2>
+<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-connection-info"></span><h2><a class="toc-backref" href="#id1" role="doc-backlink">Connection info</a><a class="headerlink" href="#connection-info" title="Link to this heading"></a></h2>
 <p>Details on how to configure an LDAP connection can be found under <a class="reference internal" href="guide_ldap_connection.html#ansible-collections-microsoft-ad-docsite-guide-ldap-connection"><span class="std std-ref">the LDAP connection guide</span></a>. Each of the connection options described by the plugin documentation are specified in the inventory yml configuration file like the below.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">plugin</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">microsoft.ad.ldap</span>
 
@@ -156,7 +156,7 @@
 </div>
 </section>
 <section id="attributes">
-<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-attributes"></span><h2><a class="toc-backref" href="#id2" role="doc-backlink">Attributes</a><a class="headerlink" href="#attributes" title="Permalink to this heading"></a></h2>
+<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-attributes"></span><h2><a class="toc-backref" href="#id2" role="doc-backlink">Attributes</a><a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
 <p>The LDAP inventory plugin can be used to set custom facts for each host it retrieves based on the computer object’s LDAP attributes. Retrieving custom attributes is done through the <code class="docutils literal notranslate"><span class="pre">attributes</span></code> option in the inventory plugin definition. The value is set to one of the three following types:</p>
 <ul class="simple">
 <li><p>Empty string or null</p></li>
@@ -169,7 +169,7 @@
 </div>
 <p>It is also possible to use the <code class="docutils literal notranslate"><span class="pre">compose</span></code> inventory option to use the builtin compose templating provided by inventory plugins but the LDAP attributes must first be requested through the <code class="docutils literal notranslate"><span class="pre">attributes</span></code> option and referenced in the <code class="docutils literal notranslate"><span class="pre">compose</span></code> template through the host fact the <code class="docutils literal notranslate"><span class="pre">attributes</span></code> set it on.</p>
 <section id="empty-string-or-null">
-<h3>Empty string or null<a class="headerlink" href="#empty-string-or-null" title="Permalink to this heading"></a></h3>
+<h3>Empty string or null<a class="headerlink" href="#empty-string-or-null" title="Link to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">attributes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">comment</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">objectSid</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
@@ -188,7 +188,7 @@
 </div>
 </section>
 <section id="template-string">
-<h3>Template string<a class="headerlink" href="#template-string" title="Permalink to this heading"></a></h3>
+<h3>Template string<a class="headerlink" href="#template-string" title="Link to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">attributes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">comment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">this</span>
 <span class="w">  </span><span class="nt">objectSid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raw | microsoft.ad.as_sid</span>
@@ -208,7 +208,7 @@
 </div>
 </section>
 <section id="dictionary">
-<h3>Dictionary<a class="headerlink" href="#dictionary" title="Permalink to this heading"></a></h3>
+<h3>Dictionary<a class="headerlink" href="#dictionary" title="Link to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">attributes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">comment</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># Jinja2 native types will automatically convert this to a dict as</span>
@@ -247,7 +247,7 @@
 </section>
 </section>
 <section id="inventory-hostname">
-<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-inventory-hostname"></span><h2><a class="toc-backref" href="#id3" role="doc-backlink">Inventory hostname</a><a class="headerlink" href="#inventory-hostname" title="Permalink to this heading"></a></h2>
+<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-inventory-hostname"></span><h2><a class="toc-backref" href="#id3" role="doc-backlink">Inventory hostname</a><a class="headerlink" href="#inventory-hostname" title="Link to this heading"></a></h2>
 <p>By default the <code class="docutils literal notranslate"><span class="pre">inventory_hostname</span></code> for a found host will be based on the <code class="docutils literal notranslate"><span class="pre">name</span></code> LDAP attribute value. If the <code class="docutils literal notranslate"><span class="pre">dNSHostName</span></code> attribute is set for the computer account found, it will be set as the <code class="docutils literal notranslate"><span class="pre">ansible_host</span></code> fact. To define a custom <code class="docutils literal notranslate"><span class="pre">inventory_hostname</span></code> or <code class="docutils literal notranslate"><span class="pre">ansible_host</span></code> either set it in the <code class="docutils literal notranslate"><span class="pre">attributes</span></code> or <code class="docutils literal notranslate"><span class="pre">compose</span></code> plugin option under that key. For example this will set the <code class="docutils literal notranslate"><span class="pre">inventory_hostname</span></code> to the value of <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> without the ending <code class="docutils literal notranslate"><span class="pre">$</span></code> rather than the computer account LDAP <code class="docutils literal notranslate"><span class="pre">name</span></code> attribute.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">attributes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">sAMAccountName</span><span class="p">:</span>
@@ -277,7 +277,7 @@
 </div>
 </section>
 <section id="value-types-and-templating">
-<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-value-types"></span><h2><a class="toc-backref" href="#id4" role="doc-backlink">Value types and templating</a><a class="headerlink" href="#value-types-and-templating" title="Permalink to this heading"></a></h2>
+<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-value-types"></span><h2><a class="toc-backref" href="#id4" role="doc-backlink">Value types and templating</a><a class="headerlink" href="#value-types-and-templating" title="Link to this heading"></a></h2>
 <p>Each LDAP attribute value is stored as a list of bytes but the schema supplied in the LDAP database can describe how those raw list of bytes are represented as a proper type, like a string, integer, boolean, etc. Currently only these four types are used when coercing LDAP attribute values</p>
 <ul class="simple">
 <li><p>Booleans</p></li>
@@ -387,7 +387,7 @@
 </div>
 </section>
 <section id="laps">
-<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-laps"></span><h2><a class="toc-backref" href="#id5" role="doc-backlink">LAPS</a><a class="headerlink" href="#laps" title="Permalink to this heading"></a></h2>
+<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-laps"></span><h2><a class="toc-backref" href="#id5" role="doc-backlink">LAPS</a><a class="headerlink" href="#laps" title="Link to this heading"></a></h2>
 <p>Local Administrator Administrator Password Solution (LAPS) can be used to automatically change the password of the local administrator account on domain joined hosts. The LDAP connection plugin can retrieve the LAPS-managed value and assign it as the connection password for the target host.</p>
 <p>There are three different attributes that can be used by LAPS to store the password information:</p>
 <ul class="simple">

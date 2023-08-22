@@ -14,11 +14,11 @@
     <script src="../../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../../_static/jquery.js"></script>
-        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-        <script src="../../../../_static/doctools.js"></script>
-        <script src="../../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="search" title="Search" href="../../../../search.html" />
     <link rel="next" title="microsoft.ad.computer module – Manage Active Directory computer objects" href="../computer_module.html" />
@@ -131,7 +131,7 @@
            <div itemprop="articleBody">
              
   <section id="migration-guide">
-<span id="ansible-collections-microsoft-ad-docsite-guide-migration"></span><h1>Migration guide<a class="headerlink" href="#migration-guide" title="Permalink to this heading"></a></h1>
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration"></span><h1>Migration guide<a class="headerlink" href="#migration-guide" title="Link to this heading"></a></h1>
 <p>Some of the modules in this collection have come from the <a class="reference external" href="https://galaxy.ansible.com/ansible/windows">ansible.windows collection</a> or the <a class="reference external" href="https://galaxy.ansible.com/community/windows">community.windows collection</a>. This document will go through some of the changes made to help ease the transition from the older modules to the ones in this collection.</p>
 <nav class="contents local" id="contents">
 <ul class="simple">
@@ -139,7 +139,7 @@
 </ul>
 </nav>
 <section id="migrated-modules">
-<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules"></span><h2><a class="toc-backref" href="#id1" role="doc-backlink">Migrated Modules</a><a class="headerlink" href="#migrated-modules" title="Permalink to this heading"></a></h2>
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules"></span><h2><a class="toc-backref" href="#id1" role="doc-backlink">Migrated Modules</a><a class="headerlink" href="#migrated-modules" title="Link to this heading"></a></h2>
 <p>The following modules have been migrated in some shape or form into this collection</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ansible.windows.win_domain</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">microsoft.ad.domain</span></code> - <a class="reference internal" href="#ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain"><span class="std std-ref">details</span></a></p></li>
@@ -154,12 +154,12 @@
 </ul>
 <p>While these modules are mostly drop in place compatible there are some breaking changes that need to be considered. See each module entry for more information.</p>
 <section id="module-win-domain">
-<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain</span></code><a class="headerlink" href="#module-win-domain" title="Permalink to this heading"></a></h3>
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain</span></code><a class="headerlink" href="#module-win-domain" title="Link to this heading"></a></h3>
 <p>Migrated to <a class="reference internal" href="../domain_module.html#ansible-collections-microsoft-ad-domain-module"><span class="std std-ref">microsoft.ad.domain</span></a>.</p>
 <p>There are no known breaking changes and should work as a drop in replacement. The <code class="docutils literal notranslate"><span class="pre">reboot</span></code> option has been added to have the module handle any reboots that are needed instead of a separate <code class="docutils literal notranslate"><span class="pre">ansible.windows.win_reboot</span></code> task. Due to the operations involved with promoting a domain controller, it is highly recommended to use this option.</p>
 </section>
 <section id="module-win-domain-controller">
-<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-controller"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_controller</span></code><a class="headerlink" href="#module-win-domain-controller" title="Permalink to this heading"></a></h3>
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-controller"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_controller</span></code><a class="headerlink" href="#module-win-domain-controller" title="Link to this heading"></a></h3>
 <p>Migrated to <a class="reference internal" href="../domain_controller_module.html#ansible-collections-microsoft-ad-domain-controller-module"><span class="std std-ref">microsoft.ad.domain_controller</span></a>.</p>
 <p>The following options have been removed:</p>
 <ul class="simple">
@@ -168,7 +168,7 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">reboot</span></code> option has been added to have the module handle any reboots instead of a separate <code class="docutils literal notranslate"><span class="pre">ansible.windows.win_reboot</span></code> task. Due to the operations involved with promoting a domain controller, it is highly recommended to use this option.</p>
 </section>
 <section id="module-win-domain-membership">
-<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-membership"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_membership</span></code><a class="headerlink" href="#module-win-domain-membership" title="Permalink to this heading"></a></h3>
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-membership"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_membership</span></code><a class="headerlink" href="#module-win-domain-membership" title="Link to this heading"></a></h3>
 <p>Migrated to <a class="reference internal" href="../membership_module.html#ansible-collections-microsoft-ad-membership-module"><span class="std std-ref">microsoft.ad.membership</span></a>.</p>
 <p>The following options have been removed:</p>
 <ul class="simple">
@@ -177,7 +177,7 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">reboot</span></code> option has been added to have the module handle any reboots instead of a separate <code class="docutils literal notranslate"><span class="pre">ansible.windows.win_reboot</span></code> task.</p>
 </section>
 <section id="module-win-domain-computer">
-<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-computer"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_computer</span></code><a class="headerlink" href="#module-win-domain-computer" title="Permalink to this heading"></a></h3>
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-computer"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_computer</span></code><a class="headerlink" href="#module-win-domain-computer" title="Link to this heading"></a></h3>
 <p>Migrated to <a class="reference internal" href="../computer_module.html#ansible-collections-microsoft-ad-computer-module"><span class="std std-ref">microsoft.ad.computer</span></a>.</p>
 <p>The option <code class="docutils literal notranslate"><span class="pre">dns_host_name</span></code> is not required when <code class="docutils literal notranslate"><span class="pre">state:</span> <span class="pre">present</span></code>, the computer object is created without the <code class="docutils literal notranslate"><span class="pre">dnsHostName</span></code> LDAP attribute set if it is not defined.</p>
 <p>The default for <code class="docutils literal notranslate"><span class="pre">enabled</span></code> is nothing, the group will still be enabled when created but it will use the existing status if the option is omitted.</p>
@@ -203,7 +203,7 @@
 </div>
 </section>
 <section id="module-win-domain-group">
-<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-group"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_group</span></code><a class="headerlink" href="#module-win-domain-group" title="Permalink to this heading"></a></h3>
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-group"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_group</span></code><a class="headerlink" href="#module-win-domain-group" title="Link to this heading"></a></h3>
 <p>Migrated to <a class="reference internal" href="../group_module.html#ansible-collections-microsoft-ad-group-module"><span class="std std-ref">microsoft.ad.group</span></a>.</p>
 <p>The following options have changed:</p>
 <ul class="simple">
@@ -221,17 +221,17 @@
 <p>All other return values have been removed, use <code class="docutils literal notranslate"><span class="pre">microsoft.ad.object_info</span></code> to get extra values if needed.</p>
 </section>
 <section id="module-win-domain-group-membership">
-<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-group-membership"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_group_membership</span></code><a class="headerlink" href="#module-win-domain-group-membership" title="Permalink to this heading"></a></h3>
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-group-membership"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_group_membership</span></code><a class="headerlink" href="#module-win-domain-group-membership" title="Link to this heading"></a></h3>
 <p>Migrated to <a class="reference internal" href="../group_module.html#ansible-collections-microsoft-ad-group-module"><span class="std std-ref">microsoft.ad.group</span></a>.</p>
 <p>The functionality of this module has been merged with <code class="docutils literal notranslate"><span class="pre">microsoft.ad.group</span></code>. Use the <code class="docutils literal notranslate"><span class="pre">members</span></code> option to <code class="docutils literal notranslate"><span class="pre">add</span></code>, <code class="docutils literal notranslate"><span class="pre">remove</span></code>, or <code class="docutils literal notranslate"><span class="pre">set</span></code> to add, remove, or set group members respectively.</p>
 </section>
 <section id="module-win-domain-object-info">
-<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-object-info"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_object_info</span></code><a class="headerlink" href="#module-win-domain-object-info" title="Permalink to this heading"></a></h3>
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-object-info"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_object_info</span></code><a class="headerlink" href="#module-win-domain-object-info" title="Link to this heading"></a></h3>
 <p>Migrated to <a class="reference internal" href="../object_info_module.html#ansible-collections-microsoft-ad-object-info-module"><span class="std std-ref">microsoft.ad.object_info</span></a>.</p>
 <p>There are no known breaking changes and should work as a drop in replacement.</p>
 </section>
 <section id="module-win-domain-ou">
-<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-ou"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_ou</span></code><a class="headerlink" href="#module-win-domain-ou" title="Permalink to this heading"></a></h3>
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-ou"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_ou</span></code><a class="headerlink" href="#module-win-domain-ou" title="Link to this heading"></a></h3>
 <p>Migrated to <a class="reference internal" href="../ou_module.html#ansible-collections-microsoft-ad-ou-module"><span class="std std-ref">microsoft.ad.ou</span></a>.</p>
 <p>The following options have changed:</p>
 <ul class="simple">
@@ -248,7 +248,7 @@
 <p>All other return values have been removed, use <code class="docutils literal notranslate"><span class="pre">microsoft.ad.object_info</span></code> to get extra values if needed.</p>
 </section>
 <section id="module-win-domain-user">
-<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-user"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_user</span></code><a class="headerlink" href="#module-win-domain-user" title="Permalink to this heading"></a></h3>
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-user"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_user</span></code><a class="headerlink" href="#module-win-domain-user" title="Link to this heading"></a></h3>
 <p>Migrated to <a class="reference internal" href="../user_module.html#ansible-collections-microsoft-ad-user-module"><span class="std std-ref">microsoft.ad.user</span></a>.</p>
 <p>The following options have changed:</p>
 <ul class="simple">
