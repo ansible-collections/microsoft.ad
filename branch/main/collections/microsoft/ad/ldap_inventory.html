@@ -2,6 +2,7 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<meta content="2.4.0" name="antsibull-docs" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>microsoft.ad.ldap inventory – Inventory plugin for Active Directory &mdash; Ansible collections  documentation</title>
@@ -137,6 +138,8 @@
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This inventory plugin is part of the <a class="reference external" href="https://galaxy.ansible.com/microsoft/ad">microsoft.ad collection</a> (version 1.3.0).</p>
+<p>It is not included in <code class="docutils literal notranslate"><span class="pre">ansible-core</span></code>.
+To check whether it is installed, run <code class="code docutils literal notranslate"><span class="pre">ansible-galaxy</span> <span class="pre">collection</span> <span class="pre">list</span></code>.</p>
 <p>To install it, use: <code class="code docutils literal notranslate"><span class="pre">ansible-galaxy</span> <span class="pre">collection</span> <span class="pre">install</span> <span class="pre">microsoft.ad</span></code>.
 You need further requirements to be able to use this inventory plugin,
 see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-inventory-requirements"><span class="std std-ref">Requirements</span></a> for details.</p>
@@ -174,7 +177,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 </section>
 <section id="parameters">
 <h2><a class="toc-backref" href="#id3" role="doc-backlink">Parameters</a><a class="headerlink" href="#parameters" title="Link to this heading"></a></h2>
-<table class="ansible-option-table docutils align-default" style="width: 100%">
+<table class="longtable ansible-option-table docutils align-default" style="width: 100%">
 <thead>
 <tr class="row-odd"><th class="head"><p>Parameter</p></th>
 <th class="head"><p>Comments</p></th>
@@ -190,7 +193,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p>Each key of the inner dictionary value is the host variable name to set and the value is the template to use to derive the value. If no value is explicitly set then it will use the coerced value as returned from the LDAP attribute.</p>
 <p>Attributes that are denoted as single value in the LDAP schema are returned as that single value, multi valued attributes are returned as a list of values.</p>
 <p>See <a class="reference internal" href="docsite/guide_ldap_inventory.html#ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-attributes"><span class="std std-ref">LDAP inventory attributes</span></a> for more information.</p>
-<p class="ansible-option-line"><span class="ansible-option-default-bold">Default:</span> <code class="ansible-option-default docutils literal notranslate"><span class="pre">{}</span></code></p>
+<p class="ansible-option-line"><strong class="ansible-option-default-bold">Default:</strong> <code class="ansible-option-default docutils literal notranslate"><span class="pre">{}</span></code></p>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
@@ -207,7 +210,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p><code class="docutils literal notranslate"><span class="pre">negotiate</span></code>, <code class="docutils literal notranslate"><span class="pre">kerberos</span></code>, and <code class="docutils literal notranslate"><span class="pre">ntlm</span></code> support encryption over LDAP.</p>
 <p>Kerberos support requires the <code class="docutils literal notranslate"><span class="pre">pyspnego[kerberos]</span></code> extras to be installed.</p>
 <p>See <a class="reference internal" href="docsite/guide_ldap_connection.html#ansible-collections-microsoft-ad-docsite-guide-ldap-connection-authentication"><span class="std std-ref">LDAP authentication</span></a> for more information.</p>
-<p class="ansible-option-line"><span class="ansible-option-choices">Choices:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
 <ul class="simple">
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;simple&quot;</span></code></p></li>
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;certificate&quot;</span></code></p></li>
@@ -215,7 +218,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;kerberos&quot;</span></code></p></li>
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;ntlm&quot;</span></code></p></li>
 </ul>
-<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-0"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_AUTH_PROTOCOL"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_AUTH_PROTOCOL</span></code></a></p></li>
 </ul>
@@ -227,7 +230,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 </div></td>
 <td><div class="ansible-option-cell"><p>Can be the path to a CA certificate PEM or DER file, directory of PEM certificates, or the CA certificate PEM string that is used for certificate validation.</p>
 <p>If omitted, the default CA store used for validation is dependent on the current Python settings.</p>
-<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-1"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_CA_CERT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_CA_CERT</span></code></a></p></li>
 </ul>
@@ -243,13 +246,13 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p><code class="docutils literal notranslate"><span class="pre">ignore</span></code> will ignore any certificate errors.</p>
 <p><code class="docutils literal notranslate"><span class="pre">ignore_hostname</span></code> will validate the CA trust chain but will ignore any hostname checks performed by TLS.</p>
 <p>See <a class="reference internal" href="docsite/guide_ldap_connection.html#ansible-collections-microsoft-ad-docsite-guide-ldap-connection-cert-validation"><span class="std std-ref">Certificate validation</span></a> for more information.</p>
-<p class="ansible-option-line"><span class="ansible-option-choices">Choices:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
 <ul class="simple">
-<li><p><code class="ansible-option-default-bold docutils literal notranslate"><span class="pre">&quot;always&quot;</span></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
+<li><p><code class="ansible-option-default-bold docutils literal notranslate"><strong><span class="pre">&quot;always&quot;</span></strong></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;ignore&quot;</span></code></p></li>
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;ignore_hostname&quot;</span></code></p></li>
 </ul>
-<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-2"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_CERT_VALIDATION"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_CERT_VALIDATION</span></code></a></p></li>
 </ul>
@@ -264,7 +267,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p>If using a path to a certificate file, the file can be a PEM encoded certificate, a PEM encoded certificate and key bundle, a DER encoded certificate, or a PFX/PKCS12 encoded certificate and key bundle.</p>
 <p>Use <em>certificate_key</em> if the certificate specified does not contain the key.</p>
 <p>Use <em>certificate_password</em> if the key is encrypted with a password.</p>
-<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-3"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_CERTIFICATE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_CERTIFICATE</span></code></a></p></li>
 </ul>
@@ -277,7 +280,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <td><div class="ansible-option-cell"><p>The certificate key that is used for certificate authentication.</p>
 <p>The value can either be a path to a file containing the key in the PEM or DER encoded form, or it can be the string of a PEM encoded key.</p>
 <p>Use <em>certificate_password</em> if the key is encrypted with a password.</p>
-<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-4"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_CERTIFICATE_KEY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_CERTIFICATE_KEY</span></code></a></p></li>
 </ul>
@@ -288,7 +291,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <a class="ansibleOptionLink" href="#parameter-certificate_password" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The password used to decrypt the certificate key specified by <em>certificate</em> or <em>certificate_key</em>.</p>
-<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-5"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_CERTIFICATE_PASSWORD"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_CERTIFICATE_PASSWORD</span></code></a></p></li>
 </ul>
@@ -299,7 +302,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <a class="ansibleOptionLink" href="#parameter-compose" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">dictionary</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>Create vars from jinja2 expressions.</p>
-<p class="ansible-option-line"><span class="ansible-option-default-bold">Default:</span> <code class="ansible-option-default docutils literal notranslate"><span class="pre">{}</span></code></p>
+<p class="ansible-option-line"><strong class="ansible-option-default-bold">Default:</strong> <code class="ansible-option-default docutils literal notranslate"><span class="pre">{}</span></code></p>
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
@@ -307,8 +310,8 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <a class="ansibleOptionLink" href="#parameter-connection_timeout" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">integer</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The timeout in seconds to wait until the connection is established before failing.</p>
-<p class="ansible-option-line"><span class="ansible-option-default-bold">Default:</span> <code class="ansible-option-default docutils literal notranslate"><span class="pre">5</span></code></p>
-<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-default-bold">Default:</strong> <code class="ansible-option-default docutils literal notranslate"><span class="pre">5</span></code></p>
+<p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-6"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_CONNECTION_TIMEOUT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_CONNECTION_TIMEOUT</span></code></a></p></li>
 </ul>
@@ -322,12 +325,12 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p>Encryption can either be performed using the authentication protocol or through TLS.</p>
 <p>The <em>auth_protocol</em> <code class="docutils literal notranslate"><span class="pre">negotiate</span></code>, <code class="docutils literal notranslate"><span class="pre">kerberos</span></code>, and <code class="docutils literal notranslate"><span class="pre">ntlm</span></code> all support encryption over LDAP whereas <code class="docutils literal notranslate"><span class="pre">simple</span></code> does not.</p>
 <p>If using <code class="docutils literal notranslate"><span class="pre">auth_protocol=simple</span></code> over LDAP without TLS then this must be set to <code class="docutils literal notranslate"><span class="pre">False</span></code>. As no encryption is used, all traffic will be in plaintext and should be avoided.</p>
-<p class="ansible-option-line"><span class="ansible-option-choices">Choices:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
 <ul class="simple">
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">false</span></code></p></li>
-<li><p><code class="ansible-option-default-bold docutils literal notranslate"><span class="pre">true</span></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
+<li><p><code class="ansible-option-default-bold docutils literal notranslate"><strong><span class="pre">true</span></strong></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
 </ul>
-<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-7"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_ENCRYPT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_ENCRYPT</span></code></a></p></li>
 </ul>
@@ -344,13 +347,13 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-filter_without_computer"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-filter-without-computer"><strong>filter_without_computer</strong></p>
 <a class="ansibleOptionLink" href="#parameter-filter_without_computer" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
-<p><span class="ansible-option-versionadded">added in microsoft.ad 1.3.0</span></p>
+<p><em class="ansible-option-versionadded">added in microsoft.ad 1.3.0</em></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>Will not combine the <em>filter</em> value with the filter “(objectClass=computer)”.</p>
 <p>In most cases this should be <code class="docutils literal notranslate"><span class="pre">false</span></code> but can be set to <code class="docutils literal notranslate"><span class="pre">true</span></code> to have the <em>filter</em> value specified be the only filter used.</p>
-<p class="ansible-option-line"><span class="ansible-option-choices">Choices:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
 <ul class="simple">
-<li><p><code class="ansible-option-default-bold docutils literal notranslate"><span class="pre">false</span></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
+<li><p><code class="ansible-option-default-bold docutils literal notranslate"><strong><span class="pre">false</span></strong></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">true</span></code></p></li>
 </ul>
 </div></td>
@@ -360,7 +363,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <a class="ansibleOptionLink" href="#parameter-groups" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">dictionary</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>Add hosts to group based on Jinja2 conditionals.</p>
-<p class="ansible-option-line"><span class="ansible-option-default-bold">Default:</span> <code class="ansible-option-default docutils literal notranslate"><span class="pre">{}</span></code></p>
+<p class="ansible-option-line"><strong class="ansible-option-default-bold">Default:</strong> <code class="ansible-option-default docutils literal notranslate"><span class="pre">{}</span></code></p>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
@@ -368,13 +371,13 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <a class="ansibleOptionLink" href="#parameter-keyed_groups" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=dictionary</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>Add hosts to group based on the values of a variable.</p>
-<p class="ansible-option-line"><span class="ansible-option-default-bold">Default:</span> <code class="ansible-option-default docutils literal notranslate"><span class="pre">[]</span></code></p>
+<p class="ansible-option-line"><strong class="ansible-option-default-bold">Default:</strong> <code class="ansible-option-default docutils literal notranslate"><span class="pre">[]</span></code></p>
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-keyed_groups/default_value"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-keyed-groups-default-value"><strong>default_value</strong></p>
 <a class="ansibleOptionLink" href="#parameter-keyed_groups/default_value" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
-<p><span class="ansible-option-versionadded">added in ansible-core 2.12</span></p>
+<p><em class="ansible-option-versionadded">added in ansible-core 2.12</em></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The default value when the host variable’s value is an empty string.</p>
 <p>This option is mutually exclusive with <code class="docutils literal notranslate"><span class="pre">trailing_separator</span></code>.</p>
@@ -399,7 +402,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <a class="ansibleOptionLink" href="#parameter-keyed_groups/prefix" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>A keyed group name will start with this prefix</p>
-<p class="ansible-option-line"><span class="ansible-option-default-bold">Default:</span> <code class="ansible-option-default docutils literal notranslate"><span class="pre">&quot;&quot;</span></code></p>
+<p class="ansible-option-line"><strong class="ansible-option-default-bold">Default:</strong> <code class="ansible-option-default docutils literal notranslate"><span class="pre">&quot;&quot;</span></code></p>
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
@@ -407,27 +410,27 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <a class="ansibleOptionLink" href="#parameter-keyed_groups/separator" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>separator used to build the keyed group name</p>
-<p class="ansible-option-line"><span class="ansible-option-default-bold">Default:</span> <code class="ansible-option-default docutils literal notranslate"><span class="pre">&quot;_&quot;</span></code></p>
+<p class="ansible-option-line"><strong class="ansible-option-default-bold">Default:</strong> <code class="ansible-option-default docutils literal notranslate"><span class="pre">&quot;_&quot;</span></code></p>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-keyed_groups/trailing_separator"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-keyed-groups-trailing-separator"><strong>trailing_separator</strong></p>
 <a class="ansibleOptionLink" href="#parameter-keyed_groups/trailing_separator" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
-<p><span class="ansible-option-versionadded">added in ansible-core 2.12</span></p>
+<p><em class="ansible-option-versionadded">added in ansible-core 2.12</em></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>Set this option to <em>False</em> to omit the <code class="docutils literal notranslate"><span class="pre">separator</span></code> after the host variable when the value is an empty string.</p>
 <p>This option is mutually exclusive with <code class="docutils literal notranslate"><span class="pre">default_value</span></code>.</p>
-<p class="ansible-option-line"><span class="ansible-option-choices">Choices:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
 <ul class="simple">
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">false</span></code></p></li>
-<li><p><code class="ansible-option-default-bold docutils literal notranslate"><span class="pre">true</span></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
+<li><p><code class="ansible-option-default-bold docutils literal notranslate"><strong><span class="pre">true</span></strong></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
 </ul>
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-leading_separator"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-leading-separator"><strong>leading_separator</strong></p>
 <a class="ansibleOptionLink" href="#parameter-leading_separator" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
-<p><span class="ansible-option-versionadded">added in ansible-core 2.11</span></p>
+<p><em class="ansible-option-versionadded">added in ansible-core 2.11</em></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>Use in conjunction with keyed_groups.</p>
 <p>By default, a keyed group that does not have a prefix or a separator provided will have a name that starts with an underscore.</p>
@@ -435,10 +438,10 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p>Set this option to False to omit the leading underscore (or other separator) if no prefix is given.</p>
 <p>If the group name is derived from a mapping the separator is still used to concatenate the items.</p>
 <p>To not use a separator in the group name at all, set the separator for the keyed group to an empty string instead.</p>
-<p class="ansible-option-line"><span class="ansible-option-choices">Choices:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
 <ul class="simple">
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">false</span></code></p></li>
-<li><p><code class="ansible-option-default-bold docutils literal notranslate"><span class="pre">true</span></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
+<li><p><code class="ansible-option-default-bold docutils literal notranslate"><strong><span class="pre">true</span></strong></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
 </ul>
 </div></td>
 </tr>
@@ -449,7 +452,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <td><div class="ansible-option-cell"><p>The password to authenticate with.</p>
 <p>If <em>auth_protocol</em> is <code class="docutils literal notranslate"><span class="pre">simple</span></code> and no password is specified, the bind will be performed as an unauthenticated bind.</p>
 <p>If <em>auth_protocol</em> is <code class="docutils literal notranslate"><span class="pre">negotiate</span></code>, <code class="docutils literal notranslate"><span class="pre">kerberos</span></code>, or <code class="docutils literal notranslate"><span class="pre">ntlm</span></code> and no password is specified, it will attempt to use the local cached credential specified by <em>username</em> if available.</p>
-<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-8"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_PASSWORD"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_PASSWORD</span></code></a></p></li>
 </ul>
@@ -462,7 +465,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <td><div class="ansible-option-cell"><p>The LDAP port to use for the connection.</p>
 <p>Port 389 is used for LDAP and port 686 is used for LDAPS.</p>
 <p>Defaults to port <code class="docutils literal notranslate"><span class="pre">636</span></code> if <code class="docutils literal notranslate"><span class="pre">tls_mode=ldaps</span></code> otherwise <code class="docutils literal notranslate"><span class="pre">389</span></code>.</p>
-<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-9"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_PORT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_PORT</span></code></a></p></li>
 </ul>
@@ -485,11 +488,11 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p><code class="docutils literal notranslate"><span class="pre">base</span></code> will search only the current path or object specified by <em>search_base</em>. This is typically not useful for inventory plugins.</p>
 <p><code class="docutils literal notranslate"><span class="pre">one_level</span></code> will search only the immediate child objects in <em>search_base</em>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">subtree</span></code> will search the immediate child objects and any nested objects in <em>search_base</em>.</p>
-<p class="ansible-option-line"><span class="ansible-option-choices">Choices:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
 <ul class="simple">
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;base&quot;</span></code></p></li>
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;one_level&quot;</span></code></p></li>
-<li><p><code class="ansible-option-default-bold docutils literal notranslate"><span class="pre">&quot;subtree&quot;</span></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
+<li><p><code class="ansible-option-default-bold docutils literal notranslate"><strong><span class="pre">&quot;subtree&quot;</span></strong></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
 </ul>
 </div></td>
 </tr>
@@ -500,7 +503,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <td><div class="ansible-option-cell"><p>The domain controller/server to connect to.</p>
 <p>If not specified the server will be derived from the current krb5.conf <code class="docutils literal notranslate"><span class="pre">default_realm</span></code> setting and with an SRV DNS lookup.</p>
 <p>See <a class="reference internal" href="docsite/guide_ldap_connection.html#ansible-collections-microsoft-ad-docsite-guide-ldap-connection-server-lookup"><span class="std std-ref">Server lookup</span></a> for more information.</p>
-<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-10"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_SERVER"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_SERVER</span></code></a></p></li>
 </ul>
@@ -512,9 +515,9 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 </div></td>
 <td><div class="ansible-option-cell"><p>If <code class="docutils literal notranslate"><span class="pre">yes</span></code> make invalid entries a fatal error, otherwise skip and continue.</p>
 <p>Since it is possible to use facts in the expressions they might not always be available and we ignore those errors by default.</p>
-<p class="ansible-option-line"><span class="ansible-option-choices">Choices:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
 <ul class="simple">
-<li><p><code class="ansible-option-default-bold docutils literal notranslate"><span class="pre">false</span></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
+<li><p><code class="ansible-option-default-bold docutils literal notranslate"><strong><span class="pre">false</span></strong></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">true</span></code></p></li>
 </ul>
 </div></td>
@@ -528,12 +531,12 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p><code class="docutils literal notranslate"><span class="pre">ldaps</span></code> will connect over LDAPS (port 636).</p>
 <p><code class="docutils literal notranslate"><span class="pre">start_tls</span></code> will connect over LDAP (port 389) and perform the StartTLS operation before the authentication bind.</p>
 <p>It is recommended to use <code class="docutils literal notranslate"><span class="pre">ldaps</span></code> over <code class="docutils literal notranslate"><span class="pre">start_tls</span></code> if TLS is going to be used.</p>
-<p class="ansible-option-line"><span class="ansible-option-choices">Choices:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
 <ul class="simple">
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;ldaps&quot;</span></code></p></li>
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;start_tls&quot;</span></code></p></li>
 </ul>
-<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-11"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_TLS_MODE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_TLS_MODE</span></code></a></p></li>
 </ul>
@@ -542,15 +545,15 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-use_extra_vars"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-ldap-inventory-parameter-use-extra-vars"><strong>use_extra_vars</strong></p>
 <a class="ansibleOptionLink" href="#parameter-use_extra_vars" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
-<p><span class="ansible-option-versionadded">added in ansible-core 2.11</span></p>
+<p><em class="ansible-option-versionadded">added in ansible-core 2.11</em></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>Merge extra vars into the available variables for composition (highest precedence).</p>
-<p class="ansible-option-line"><span class="ansible-option-choices">Choices:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
 <ul class="simple">
-<li><p><code class="ansible-option-default-bold docutils literal notranslate"><span class="pre">false</span></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
+<li><p><code class="ansible-option-default-bold docutils literal notranslate"><strong><span class="pre">false</span></strong></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">true</span></code></p></li>
 </ul>
-<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul>
 <li><p>INI entry:</p>
 <div class="highlight-YAML+Jinja notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">[</span><span class="nv">inventory_plugins</span><span class="p p-Indicator">]</span>
@@ -569,7 +572,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <td><div class="ansible-option-cell"><p>The username to authenticate with.</p>
 <p>If <em>auth_protocol</em> is <code class="docutils literal notranslate"><span class="pre">simple</span></code> and no username is specified, anonymous authentication is used.</p>
 <p>If <em>auth_protocol</em> is <code class="docutils literal notranslate"><span class="pre">negotiate</span></code>, <code class="docutils literal notranslate"><span class="pre">kerberos</span></code>, or <code class="docutils literal notranslate"><span class="pre">ntlm</span></code> and no username is specified, it will attempt to use the local cached credential if available, for example one retrieved by <code class="docutils literal notranslate"><span class="pre">kinit</span></code>.</p>
-<p class="ansible-option-line"><span class="ansible-option-configuration">Configuration:</span></p>
+<p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-13"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_USERNAME"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_USERNAME</span></code></a></p></li>
 </ul>
@@ -728,12 +731,13 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 </section>
 <section id="collection-links">
 <h3>Collection links<a class="headerlink" href="#collection-links" title="Link to this heading"></a></h3>
-<p class="ansible-links">
-  <a href="https://github.com/ansible-collections/microsoft.ad/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc" aria-role="button" target="_blank" rel="noopener external">Issue Tracker</a>
-  <a href="https://github.com/ansible-collections/microsoft.ad" aria-role="button" target="_blank" rel="noopener external">Repository (Sources)</a>
-  <a href="https://github.com/ansible-collections/microsoft.ad/issues/new/choose" aria-role="button" target="_blank" rel="noopener external">Report an issue</a>
-  <a href="./#communication-for-microsoft-ad" aria-role="button" target="_blank">Communication</a>
-</p></section>
+<ul class="ansible-links">
+<li><span><a aria-role="button" class="ansible-link reference external" href="https://github.com/ansible-collections/microsoft.ad/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc" rel="noopener external" target="_blank">Issue Tracker</a></span></li>
+<li><span><a aria-role="button" class="ansible-link reference external" href="https://github.com/ansible-collections/microsoft.ad" rel="noopener external" target="_blank">Repository (Sources)</a></span></li>
+<li><span><a aria-role="button" class="ansible-link reference external" href="https://github.com/ansible-collections/microsoft.ad/issues/new/choose" rel="noopener external" target="_blank">Report an issue</a></span></li>
+<li><span><a class="reference internal" href="index.html#communication-for-microsoft-ad"><span class="std std-ref">Communication</span></a></span></li>
+</ul>
+</section>
 </section>
 </section>
 
