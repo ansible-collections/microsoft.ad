@@ -111,7 +111,7 @@ options:
     - The C(name) of the AD object to manage.
     - If I(identity) is specified, and the name of the object it found does not
       match this value, the object will be renamed.
-    - This must be set when I(state=present) or if I(identity) is not set.
+    - This if I(identity) must be set to find the object to manage.
     - This is not always going to be the same as the C(sAMAccountName) for user
       objects. It is strictly the C(name) of the object in the path specified.
       Use I(identity) to select an object to manage by C(sAMAccountName).
