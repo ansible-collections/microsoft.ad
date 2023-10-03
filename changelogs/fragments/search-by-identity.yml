@@ -1,0 +1,4 @@
+minor_changes:
+- Make ``name`` an optional parameter for the AD modules. Either ``name`` or ``identity`` needs to be set with their
+  respective behaviours. If creating a new AD user and only ``identity`` is set, that will be the value used for the
+  name of the object.

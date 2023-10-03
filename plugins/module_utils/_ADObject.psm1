@@ -740,7 +740,7 @@ Function Invoke-AnsibleADObject {
     }
 
     $stateRequiredIf = @{
-        present = @('name')
+        present = @()
         absent = @()
     }
 
@@ -905,9 +905,15 @@ Function Invoke-AnsibleADObject {
         $objectGuid = $null
 
         if (-not $adObject) {
+            $adName = if ($module.Params.name) {
+                $module.Params.name
+            }
+            else {
+                $module.Params.identity
+            }
             $newParams = @{
                 Confirm = $false
-                Name = $module.Params.name
+                Name = $adName
                 WhatIf = $module.CheckMode
                 PassThru = $true
             }
@@ -926,7 +932,7 @@ Function Invoke-AnsibleADObject {
 
             $module.Diff.after = @{
                 attributes = $diffAttributes.after
-                name = $module.Params.name
+                name = $adName
                 path = $objectPath
             }
 
@@ -985,7 +991,7 @@ Function Invoke-AnsibleADObject {
             $module.Result.changed = $true
 
             if ($module.CheckMode) {
-                $objectDN = "$namePrefix=$($module.Params.name -replace ',', '\,'),$objectPath"
+                $objectDN = "$namePrefix=$($adName -replace ',', '\,'),$objectPath"
                 $objectGuid = [Guid]::Empty  # Dummy value for check mode
             }
             else {
@@ -1075,8 +1081,9 @@ Function Invoke-AnsibleADObject {
             }
 
             $finalADObject = $null
-            if ($module.Params.name -cne $objectName) {
-                $objectName = $module.Params.name
+            $desiredName = $module.Params.name
+            if ($desiredName -and $desiredName -cne $objectName) {
+                $objectName = $desiredName
                 $module.Diff.after.name = $objectName
 
                 $finalADObject = Rename-ADObject @commonParams @adParams -NewName $objectName

@@ -226,6 +226,18 @@
     - dont_move_no_path_actual.objects[0].Name == 'MyUser2'
     - dont_move_no_path_actual.objects[0].givenName == 'first name'
 
+- name: update user without name
+  user:
+    identity: MyUser
+    firstname: first name
+  register: check_by_identity
+
+- name: assert update user without name
+  assert:
+    that:
+    - not check_by_identity is changed
+    - check_by_identity.distinguished_name == 'CN=MyUser2,' ~ setup_domain_info.output[0].defaultNamingContext
+
 - name: move user back - check
   user:
     name: MyUser
@@ -716,6 +728,27 @@
     that:
     - not create_user_again is changed
 
+- name: update user by identity
+  user:
+    identity: MyUserSam
+    postal_code: 4001
+  register: update_by_identity
+
+- name: get result of update user by identity
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - postalcode
+  register: update_by_identity_actual
+
+- name: assert create user with extra info
+  assert:
+    that:
+    - update_by_identity is changed
+    - update_by_identity_actual.objects | length == 1
+    - update_by_identity_actual.objects[0].DistinguishedName == 'CN=MyUser,' ~ setup_domain_info.output[0].defaultNamingContext
+    - update_by_identity_actual.objects[0].postalcode == '4001'
+
 - name: update user settings - check
   user:
     name: MyUser
@@ -804,7 +837,7 @@
     - update_user_check_actual.objects[0].mail == 'user@EMAIL.COM'
     # Domain Users is the primaryGroupID entry
     - update_user_check_actual.objects[0].memberOf == 'CN=Domain Admins,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
-    - update_user_check_actual.objects[0].postalcode == '4000'
+    - update_user_check_actual.objects[0].postalcode == '4001'
     - update_user_check_actual.objects[0].primaryGroupID == 513  # Domain Users
     - update_user_check_actual.objects[0].ProtectedFromAccidentalDeletion == false
     - update_user_check_actual.objects[0].pwdLastSet > 0
@@ -1216,3 +1249,54 @@
     that:
     - spn_add is changed
     - spn_add_actual.objects[0].servicePrincipalName == ['HTTP/fake', 'HTTP/host.domain:8080', 'HTTP/host']
+
+- name: remove user for next test
+  user:
+    identity: '{{ object_identity }}'
+    state: absent
+
+- name: create user by identity - check
+  user:
+    identity: UserId
+    password: Password123
+    state: present
+  register: create_user_by_id_check
+  check_mode: true
+
+- name: get result of create user by identity - check
+  object_info:
+    ldap_filter: (sAMAccountName=MyUser)
+  register: create_user_by_id_actual_check
+
+- name: assert create user by identity - check
+  assert:
+    that:
+    - create_user_by_id_check is changed
+    - create_user_by_id_check.distinguished_name == 'CN=UserId,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_user_by_id_actual_check.objects == []
+
+- name: create user by identity
+  user:
+    identity: UserId
+    password: Password123
+    state: present
+  register: create_user_by_id
+
+- set_fact:
+    object_identity: '{{ create_user_by_id.object_guid }}'
+
+- name: get result for create user by identity
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - sAMAccountName
+  register: create_user_by_id_actual
+
+- name: assert create user by identity
+  assert:
+    that:
+    - create_user_by_id is changed
+    - create_user_by_id.distinguished_name == 'CN=UserId,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_user_by_id_actual.objects[0].DistinguishedName == create_user_by_id.distinguished_name
+    - create_user_by_id_actual.objects[0].Name == 'UserId'
+    - create_user_by_id_actual.objects[0].sAMAccountName == 'UserId'
