@@ -419,7 +419,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 </div></td>
 <td><div class="ansible-option-cell"><p>The <code class="docutils literal notranslate"><span class="pre">name</span></code> of the AD object to manage.</p>
 <p>If <em>identity</em> is specified, and the name of the object it found does not match this value, the object will be renamed.</p>
-<p>This must be set when <em>state=present</em> or if <em>identity</em> is not set.</p>
+<p>This if <em>identity</em> must be set to find the object to manage.</p>
 <p>This is not always going to be the same as the <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> for user objects. It is strictly the <code class="docutils literal notranslate"><span class="pre">name</span></code> of the object in the path specified. Use <em>identity</em> to select an object to manage by <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code>.</p>
 </div></td>
 </tr>
