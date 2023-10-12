@@ -12,9 +12,10 @@ $spec = @{
         object = @{ type = "str"; required = $true; aliases = "path" }
         principal = @{ type = "str"; required = $true; aliases = "user" }
         rights = @{ type = "str"; required = $true }
-        rights_attr = @{ type = "str" }
+        object_type = @{ type = "str"; aliases = "rights_attr" }
         type = @{ type = "str"; required = $true; choices = "allow", "deny" }
         inherit = @{ type = "str"; default = "None" }
+        inherited_object_type = @{ type = "str" }
         state = @{ type = "str"; default = "present"; choices = "absent", "present" }
     }
 }
@@ -34,8 +35,9 @@ $principal = $module.Params.principal
 $state = $module.Params.state
 $type = $module.Params.type
 $rights = $module.Params.rights
-$rights_attr = $module.Params.rights_attr
+$object_type = $module.Params.object_type
 $inherit = $module.Params.inherit
+$inherited_object_type = $module.Params.inherited_object_type
 
 $user_sid = Convert-ToSID -account_name $principal
 
@@ -44,8 +46,8 @@ Get-ADObject -SearchBase ((Get-ADRootDSE).SchemaNamingContext) -LDAPFilter "(sch
     ForEach-Object { $guidmap[$_.lDAPDisplayName] = [System.GUID]$_.schemaIDGUID }
 
 if ($rights_attr) {
-    if ($guidmap.Contains($rights_attr)) {
-        $objGUID = $guidmap[$rights_attr]
+    if ($guidmap.Contains($object_type)) {
+        $objGUID = $guidmap[$object_type]
     }
     Else {
         $module.FailJson("LDAP attribute $rights_attr does not exist")
@@ -53,6 +55,18 @@ if ($rights_attr) {
 }
 Else {
     $objGUID = [guid]::empty
+}
+
+if ($inherited_object_type) {
+    if ($guidmap.Contains($inherited_object_type)) {
+        $inheritGUID = $guidmap[$inherited_object_type]
+    }
+    Else {
+        $module.FailJson("LDAP attribute $inherited_object_type does not exist")
+    }
+}
+Else {
+    $inheritGUID = [guid]::empty
 }
 
 Try {
@@ -67,7 +81,7 @@ Try {
     }
 
     $objUser = New-Object System.Security.Principal.SecurityIdentifier($user_sid)
-    $objACE = New-Object System.DirectoryServices.ActiveDirectoryAccessRule($objUser, $objRights, $objType, $objGUID, $InheritanceFlag, [guid]::empty)
+    $objACE = New-Object System.DirectoryServices.ActiveDirectoryAccessRule($objUser, $objRights, $objType, $objGUID, $InheritanceFlag, $inheritGUID)
     $objACL = Get-ACL -Path "AD:\$($object)"
 
     $match = $false
