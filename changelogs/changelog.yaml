@@ -96,3 +96,20 @@ releases:
     - user-account-expired-password.yml
     - user-spn-diff.yml
     release_date: '2023-08-11'
+  1.4.0:
+    changes:
+      minor_changes:
+      - Make ``name`` an optional parameter for the AD modules. Either ``name`` or
+        ``identity`` needs to be set with their respective behaviours. If creating
+        a new AD user and only ``identity`` is set, that will be the value used for
+        the name of the object.
+      - Set minimum supported Ansible version to 2.14 to align with the versions still
+        supported by Ansible.
+      - object_info - Add ActiveDirectory module import
+      release_summary: Prepare for v1.4.0 release
+    fragments:
+    - 73-import-activedirectory-module.yml
+    - ansible_support.yml
+    - release_summary.yml
+    - search-by-identity.yml
+    release_date: '2023-11-16'
