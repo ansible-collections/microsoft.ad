@@ -5,6 +5,21 @@ Ansible Microsoft Active Directory Release Notes
 .. contents:: Topics
 
 
+v1.4.0
+======
+
+Release Summary
+---------------
+
+Prepare for v1.4.0 release
+
+Minor Changes
+-------------
+
+- Make ``name`` an optional parameter for the AD modules. Either ``name`` or ``identity`` needs to be set with their respective behaviours. If creating a new AD user and only ``identity`` is set, that will be the value used for the name of the object.
+- Set minimum supported Ansible version to 2.14 to align with the versions still supported by Ansible.
+- object_info - Add ActiveDirectory module import
+
 v1.3.0
 ======
 
