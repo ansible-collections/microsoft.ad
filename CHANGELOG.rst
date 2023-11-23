@@ -5,6 +5,19 @@ Ansible Microsoft Active Directory Release Notes
 .. contents:: Topics
 
 
+v1.4.1
+======
+
+Release Summary
+---------------
+
+Release summary for v1.4.1
+
+Bugfixes
+--------
+
+- debug_ldap_client - handle failures when attempting to get the krb5 context and default CCache rather than fail with a traceback
+
 v1.4.0
 ======
 

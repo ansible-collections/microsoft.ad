@@ -1,2 +1,0 @@
-bugfixes:
-- debug_ldap_client - handle failures when attempting to get the krb5 context and default CCache rather than fail with a traceback
