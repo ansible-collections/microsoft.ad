@@ -113,3 +113,13 @@ releases:
     - release_summary.yml
     - search-by-identity.yml
     release_date: '2023-11-16'
+  1.4.1:
+    changes:
+      bugfixes:
+      - debug_ldap_client - handle failures when attempting to get the krb5 context
+        and default CCache rather than fail with a traceback
+      release_summary: Release summary for v1.4.1
+    fragments:
+    - debug_ldap_client-failure.yml
+    - release_summary.yml
+    release_date: '2023-11-23'
