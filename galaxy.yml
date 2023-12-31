@@ -1,6 +1,6 @@
 namespace: microsoft
 name: ad
-version: 1.4.0
+version: 1.4.1
 readme: README.md
 authors:
 - Jordan Borean @jborean93

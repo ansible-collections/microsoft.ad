@@ -52,7 +52,9 @@ class ActionModule(ActionBase):
                 "dns": dns_info,
                 "kerberos": kerb_info,
                 "packages": {
-                    "dnspython": self._import_lib("dns.resolver", package_name="dnspython"),
+                    "dnspython": self._import_lib(
+                        "dns.resolver", package_name="dnspython"
+                    ),
                     "dpapi_ng": self._import_lib("dpapi_ng", package_name="dpapi-ng"),
                     "krb5": self._import_lib("krb5"),
                     "pyspnego": self._import_lib("spnego", package_name="pyspnego"),
@@ -77,8 +79,6 @@ class ActionModule(ActionBase):
             ctx = krb5.init_context()
         except Exception:
             res["exception"] = traceback.format_exc()
-
-        if not ctx:
             return res
 
         try:
@@ -106,8 +106,6 @@ class ActionModule(ActionBase):
             default_cc = krb5.cc_default(ctx)
         except Exception:
             res["exception"] = traceback.format_exc()
-
-        if not default_cc:
             return res
 
         try:
@@ -154,7 +152,9 @@ class ActionModule(ActionBase):
                     }
                 )
 
-            highest_record = next(iter(sorted(records, key=lambda k: (k["priority"], -k["weight"]))), None)
+            highest_record = next(
+                iter(sorted(records, key=lambda k: (k["priority"], -k["weight"]))), None
+            )
             if highest_record:
                 res["default_server"] = highest_record["target"].rstrip(".")
                 res["default_port"] = highest_record["port"]
