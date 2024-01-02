@@ -25,7 +25,7 @@
     <script src="../../../_static/js/theme.js"></script>
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="Index of all Filter Plugins" href="../../index_filter.html" />
-    <link rel="prev" title="microsoft.ad.as_sid filter – Converts an LDAP value to a Security Identifier string" href="as_sid_filter.html" /><!-- extra head elements for Ansible beyond RTD Sphinx Theme -->
+    <link rel="prev" title="microsoft.ad.parse_dn filter – Parses an LDAP DistinguishedName string into an object." href="parse_dn_filter.html" /><!-- extra head elements for Ansible beyond RTD Sphinx Theme -->
 
 
 
@@ -137,7 +137,7 @@
 <h1>microsoft.ad.ldap inventory – Inventory plugin for Active Directory<a class="headerlink" href="#microsoft-ad-ldap-inventory-inventory-plugin-for-active-directory" title="Link to this heading"></a></h1>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This inventory plugin is part of the <a class="reference external" href="https://galaxy.ansible.com/ui/repo/published/microsoft/ad/">microsoft.ad collection</a> (version 1.4.1).</p>
+<p>This inventory plugin is part of the <a class="reference external" href="https://galaxy.ansible.com/ui/repo/published/microsoft/ad/">microsoft.ad collection</a> (version 1.5.0).</p>
 <p>It is not included in <code class="docutils literal notranslate"><span class="pre">ansible-core</span></code>.
 To check whether it is installed, run <code class="code docutils literal notranslate"><span class="pre">ansible-galaxy</span> <span class="pre">collection</span> <span class="pre">list</span></code>.</p>
 <p>To install it, use: <code class="code docutils literal notranslate"><span class="pre">ansible-galaxy</span> <span class="pre">collection</span> <span class="pre">install</span> <span class="pre">microsoft.ad</span></code>.
@@ -659,7 +659,10 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <span class="w">  </span><span class="nt">comment</span><span class="p">:</span>
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">host_comment</span>
 <span class="w">  </span><span class="nt">memberOf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">computer_membership</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">this | map(&quot;regex_search&quot;, &#39;^CN=(?P&lt;name&gt;.+?)((?&lt;!\\),)&#39;, &#39;\g&lt;name&gt;&#39;) | flatten</span>
+<span class="w">    </span><span class="c1"># Gets the value (1) of the first RDN (0) of each memberOf instance (this).</span>
+<span class="w">    </span><span class="c1"># For example &#39;CN=Domain Admins,CN=Users,DC=domain,DC=test&#39;</span>
+<span class="w">    </span><span class="c1"># will be returned as just &#39;Domain Admins&#39;</span>
+<span class="w">    </span><span class="nt">computer_membership</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">this | microsoft.ad.parse_dn | map(attribute=&quot;0.1&quot;)</span>
 <span class="w">  </span><span class="nt">location</span><span class="p">:</span>
 
 
@@ -747,7 +750,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
           
 
 <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="as_sid_filter.html" class="btn btn-neutral float-left" title="microsoft.ad.as_sid filter – Converts an LDAP value to a Security Identifier string" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="parse_dn_filter.html" class="btn btn-neutral float-left" title="microsoft.ad.parse_dn filter – Parses an LDAP DistinguishedName string into an object." accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="../../index_filter.html" class="btn btn-neutral float-right" title="Index of all Filter Plugins" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
