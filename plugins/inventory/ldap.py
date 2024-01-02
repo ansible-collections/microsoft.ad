@@ -154,7 +154,10 @@ attributes:
   comment:
     host_comment
   memberOf:
-    computer_membership: this | map("regex_search", '^CN=(?P<name>.+?)((?<!\\),)', '\g<name>') | flatten
+    # Gets the value (1) of the first RDN (0) of each memberOf instance (this).
+    # For example 'CN=Domain Admins,CN=Users,DC=domain,DC=test'
+    # will be returned as just 'Domain Admins'
+    computer_membership: this | microsoft.ad.parse_dn | map(attribute="0.1")
   location:
 
 
@@ -296,14 +299,18 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
             final_filter = computer_filter
 
         custom_attributes = self._get_custom_attributes()
-        attributes = {"name", "dnshostname"}.union([a.lower() for a in custom_attributes.keys()])
+        attributes = {"name", "dnshostname"}.union(
+            [a.lower() for a in custom_attributes.keys()]
+        )
 
         # If inventory_hostname was defined in compose, set it in the custom
         # attributes so we can set the hostname before processing the rest of
         # compose entries.
         inventory_hostname = compose.pop("inventory_hostname", None)
         if inventory_hostname:
-            custom_attributes["inventory_hostname"] = {"inventory_hostname": inventory_hostname}
+            custom_attributes["inventory_hostname"] = {
+                "inventory_hostname": inventory_hostname
+            }
 
         connection_options = self.get_options()
         laps_decryptor = LAPSDecryptor(**connection_options)
@@ -331,9 +338,11 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
                     raw_values = insensitive_info.get(name.lower(), [])
                     values = schema.cast_object(name, raw_values)
 
-                    host_vars["raw"] = wrap_var([base64.b64encode(r).decode() for r in raw_values])
+                    host_vars["raw"] = wrap_var(
+                        [base64.b64encode(r).decode() for r in raw_values]
+                    )
 
-                    if name.lower() == 'mslaps-encryptedpassword' and raw_values:
+                    if name.lower() == "mslaps-encryptedpassword" and raw_values:
                         host_vars["this"] = laps_decryptor.decrypt(raw_values[0])
                     else:
                         host_vars["this"] = wrap_var(values)
@@ -343,7 +352,9 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
                             composite = self._compose(v, host_vars)
                         except Exception as e:
                             if strict:
-                                raise AnsibleError(f"Could not set {n} for host {host_name}: {e}") from e
+                                raise AnsibleError(
+                                    f"Could not set {n} for host {host_name}: {e}"
+                                ) from e
                             continue
 
                         host_vars[n] = composite
@@ -358,9 +369,15 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
                         continue
                     inventory.set_variable(actual_host_name, n, v)
 
-                self._set_composite_vars(compose, host_vars, actual_host_name, strict=strict)
-                self._add_host_to_composed_groups(groups, host_vars, actual_host_name, strict=strict)
-                self._add_host_to_keyed_groups(keyed_groups, host_vars, actual_host_name, strict=strict)
+                self._set_composite_vars(
+                    compose, host_vars, actual_host_name, strict=strict
+                )
+                self._add_host_to_composed_groups(
+                    groups, host_vars, actual_host_name, strict=strict
+                )
+                self._add_host_to_keyed_groups(
+                    keyed_groups, host_vars, actual_host_name, strict=strict
+                )
 
     def _get_custom_attributes(self) -> t.Dict[str, t.Dict[str, str]]:
         custom_attributes = self.get_option("attributes")
@@ -372,7 +389,9 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
             elif isinstance(info, str):
                 info = {name.replace("-", "_"): info}
             elif not isinstance(info, dict):
-                raise AnsibleError(f"Attribute {name} value was {type(info).__name__} but was expecting a dictionary")
+                raise AnsibleError(
+                    f"Attribute {name} value was {type(info).__name__} but was expecting a dictionary"
+                )
 
             for var_name in list(info.keys()):
                 var_template = info[var_name]

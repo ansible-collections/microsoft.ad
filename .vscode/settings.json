@@ -27,4 +27,7 @@
     "[powershell]": {
         "editor.formatOnSave": true,
     },
+    "[python]": {
+        "editor.formatOnSave": false
+    }
 }

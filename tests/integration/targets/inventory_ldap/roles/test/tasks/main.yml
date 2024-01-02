@@ -434,7 +434,7 @@
             nothing_member:
             this_member: this
             raw_member: raw
-            computer_membership: this | map("regex_search", '^CN=(?P<name>.+?)((?<!\\),)', '\g<name>') | flatten
+            computer_membership: this | microsoft.ad.parse_dn | map(attribute="0.1")
         compose:
           host_var: computer_sid
         groups:
