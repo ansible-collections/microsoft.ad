@@ -3,20 +3,20 @@ name: ad
 version: 1.5.0
 readme: README.md
 authors:
-- Jordan Borean @jborean93
-- Matt Davis @nitzmahone
+  - Jordan Borean @jborean93
+  - Matt Davis @nitzmahone
 description: |
   Ansible collection for Active Directory management
 license_file: COPYING
 tags:
-- active_directory
-- windows
+  - active_directory
+  - windows
 dependencies: {}
 repository: https://github.com/ansible-collections/microsoft.ad
 documentation: https://docs.ansible.com/ansible/devel/collections/microsoft/ad
 homepage: https://github.com/ansible-collections/microsoft.ad
 issues: https://github.com/ansible-collections/microsoft.ad/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc
 build_ignore:
-- .vscode
-- tests/integration/inventory*
-- changelogs/.plugin-cache.yaml
+  - .vscode
+  - tests/integration/inventory*
+  - changelogs/.plugin-cache.yaml

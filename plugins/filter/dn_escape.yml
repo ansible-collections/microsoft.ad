@@ -4,25 +4,25 @@
 DOCUMENTATION:
   name: dn_escape
   author:
-  - Jordan Borean (@jborean93)
+    - Jordan Borean (@jborean93)
   short_description: Escape an LDAP DistinguishedName value string.
   version_added: 1.5.0
   seealso:
-  - ref: microsoft.ad.parse_dn <ansible_collections.microsoft.ad.parse_dn_filter>
-    description: microsoft.ad.parse_dn filter
-  - ref: microsoft.ad.ldap <ansible_collections.microsoft.ad.ldap_inventory>
-    description: microsoft.ad.ldap inventory
+    - ref: microsoft.ad.parse_dn <ansible_collections.microsoft.ad.parse_dn_filter>
+      description: microsoft.ad.parse_dn filter
+    - ref: microsoft.ad.ldap <ansible_collections.microsoft.ad.ldap_inventory>
+      description: microsoft.ad.ldap inventory
   description:
-  - Escapes a string value for use in an LDAP DistinguishedName.
-  - This can be used to escape special characters when building a
-    DistinguishedName value.
+    - Escapes a string value for use in an LDAP DistinguishedName.
+    - This can be used to escape special characters when building a
+      DistinguishedName value.
   positional: _input
   options:
     _input:
       description:
-      - The string value to escape.
-      - This should be just the RDN value not including the attribute type
-        that prefixes the value, for example C(MyValue) and not C(CN=MyValue).
+        - The string value to escape.
+        - This should be just the RDN value not including the attribute type
+          that prefixes the value, for example C(MyValue) and not C(CN=MyValue).
       type: str
       required: true
 
@@ -42,5 +42,5 @@ EXAMPLES: |
 RETURN:
   _value:
     description:
-    - The escaped RDN attribute value.
+      - The escaped RDN attribute value.
     type: string
