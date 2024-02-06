@@ -4,28 +4,28 @@
 DOCUMENTATION:
   name: as_guid
   author:
-  - Jordan Borean (@jborean93)
+    - Jordan Borean (@jborean93)
   short_description: Converts an LDAP value to a GUID string
   version_added: 1.1.0
   seealso:
-  - ref: microsoft.ad.as_datetime <ansible_collections.microsoft.ad.as_datetime_filter>
-    description: microsoft.ad.as_datetime filter
-  - ref: microsoft.ad.as_sid <ansible_collections.microsoft.ad.as_sid_filter>
-    description: microsoft.ad.as_sid filter
-  - ref: microsoft.ad.ldap <ansible_collections.microsoft.ad.ldap_inventory>
-    description: microsoft.ad.ldap inventory
+    - ref: microsoft.ad.as_datetime <ansible_collections.microsoft.ad.as_datetime_filter>
+      description: microsoft.ad.as_datetime filter
+    - ref: microsoft.ad.as_sid <ansible_collections.microsoft.ad.as_sid_filter>
+      description: microsoft.ad.as_sid filter
+    - ref: microsoft.ad.ldap <ansible_collections.microsoft.ad.ldap_inventory>
+      description: microsoft.ad.ldap inventory
   description:
-  - Converts an LDAP string or raw value to a guid string.
-  - Should be used with the C(microsoft.ad.ldap) plugin to convert
-    attribute values to a guid string.
+    - Converts an LDAP string or raw value to a guid string.
+    - Should be used with the C(microsoft.ad.ldap) plugin to convert
+      attribute values to a guid string.
   positional: _input
   options:
     _input:
       description:
-      - The LDAP attribute bytes or string value representing a GUID
-        stored in LDAP.
-      - If using a string as input, it must be a base64 string representing
-        the GUIDs bytes.
+        - The LDAP attribute bytes or string value representing a GUID
+          stored in LDAP.
+        - If using a string as input, it must be a base64 string representing
+          the GUIDs bytes.
       type: raw
       required: true
 
@@ -38,5 +38,5 @@ EXAMPLES: |
 RETURN:
   _value:
     description:
-    - The guid string value(s).
+      - The guid string value(s).
     type: string

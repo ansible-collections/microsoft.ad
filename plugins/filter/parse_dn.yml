@@ -4,36 +4,36 @@
 DOCUMENTATION:
   name: parse_dn
   author:
-  - Jordan Borean (@jborean93)
+    - Jordan Borean (@jborean93)
   short_description: Parses an LDAP DistinguishedName string into an object.
   version_added: 1.5.0
   seealso:
-  - ref: microsoft.ad.dn_escape <ansible_collections.microsoft.ad.dn_escape_filter>
-    description: microsoft.ad.dn_escape filter
-  - ref: microsoft.ad.ldap <ansible_collections.microsoft.ad.ldap_inventory>
-    description: microsoft.ad.ldap inventory
+    - ref: microsoft.ad.dn_escape <ansible_collections.microsoft.ad.dn_escape_filter>
+      description: microsoft.ad.dn_escape filter
+    - ref: microsoft.ad.ldap <ansible_collections.microsoft.ad.ldap_inventory>
+      description: microsoft.ad.ldap inventory
   description:
-  - Parses the provided LDAP DistinguishedName (C(DN)) string value into a
-    structured object.
-  - The rules for parsing as defined in
-    L(RFC 4514,https://www.ietf.org/rfc/rfc4514.txt).
-  - Each DN contains Relative DistinguishedNames (C(RDN)) separated by C(,) and
-    each RDN can contain multiple attribute type values also known as an
-    C(AVA). While Microsoft Active Directory DNs can only contain 1 AVA in an
-    RDN this parser supports multiple AVAs.
-  - The returned object for each DN will be provided as a list of lists where
-    the outer list is each RDN component separated by C(,) and the inner list
-    is each AVA separated by C(=) and C(+). Each RDN entry is guaranteed to
-    have 2 string values for the AVA type and value but can contain more if the
-    RDN contains multiple AVAs separated by C(+).
-  - The parsed RDN attribute values will be unescaped to represent the actual
-    value rather than the raw string in the DN.
-  - A DN that is invalid will raise a filter error.
+    - Parses the provided LDAP DistinguishedName (C(DN)) string value into a
+      structured object.
+    - The rules for parsing as defined in
+      L(RFC 4514,https://www.ietf.org/rfc/rfc4514.txt).
+    - Each DN contains Relative DistinguishedNames (C(RDN)) separated by C(,) and
+      each RDN can contain multiple attribute type values also known as an
+      C(AVA). While Microsoft Active Directory DNs can only contain 1 AVA in an
+      RDN this parser supports multiple AVAs.
+    - The returned object for each DN will be provided as a list of lists where
+      the outer list is each RDN component separated by C(,) and the inner list
+      is each AVA separated by C(=) and C(+). Each RDN entry is guaranteed to
+      have 2 string values for the AVA type and value but can contain more if the
+      RDN contains multiple AVAs separated by C(+).
+    - The parsed RDN attribute values will be unescaped to represent the actual
+      value rather than the raw string in the DN.
+    - A DN that is invalid will raise a filter error.
   positional: _input
   options:
     _input:
       description:
-      - The LDAP DistinguishedName string to parse.
+        - The LDAP DistinguishedName string to parse.
       type: str
       required: true
 
@@ -67,16 +67,13 @@ EXAMPLES: |
 RETURN:
   _value:
     description:
-    - The parsed LDAP DN values.
+      - The parsed LDAP DN values.
     type: list
     elements: list
     sample:
-    -
-      - CN
-      - Foo
-    -
-      - DC
-      - domain
-    -
-      - DC
-      - com
+      - - CN
+        - Foo
+      - - DC
+        - domain
+      - - DC
+        - com
