@@ -26,6 +26,23 @@
       Get-ADComputer -Filter { Name -ne 'DC' } -Properties DistinguishedName, Name, Enabled |
           Select-Object -Property DistinguishedName, Name, Enabled
 
+- name: join domain invalid OU
+  membership:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    domain_ou_path: CN=Invalid,{{ domain_dn_base }}
+    state: domain
+    reboot: true
+  ignore_errors: true
+  register: join_domain_invalid_ou
+
+- name: assert join domain invalid OU
+  assert:
+    that:
+    - join_domain_invalid_ou is failed
+    - join_domain_invalid_ou.msg.endswith('Check domain_ou_path is pointing to a valid OU in the target domain.')
+
 - name: join domain - check mode
   membership:
     dns_domain_name: '{{ domain_realm }}'

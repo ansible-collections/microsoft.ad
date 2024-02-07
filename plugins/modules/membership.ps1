@@ -207,7 +207,27 @@ if ($state -eq 'domain') {
                 $joinParams.OUPath = $domainOUPath
             }
 
-            Add-Computer @joinParams
+            try {
+                Add-Computer @joinParams
+            }
+            catch {
+                $failMsg = [string]$_
+
+                # The error if the domain_ou_path does not exist is a bit
+                # vague, we try to catch that specific error type and provide
+                # a more helpful hint to what is wrong. As the exception does
+                # not have an error code to check, we compare the Win32 error
+                # code message with a localized variant for
+                # ERROR_FILE_NOT_FOUND. .NET Framework does not end with .
+                # whereas .NET 5+ does so we use regex to match both patterns.
+                # https://github.com/ansible-collections/microsoft.ad/issues/88
+                $fileNotFound = [System.ComponentModel.Win32Exception]::new(2).Message
+                if ($_.Exception.Message -match ".*$([Regex]::Escape($fileNotFound))\.?`$") {
+                    $failMsg += " Check domain_ou_path is pointing to a valid OU in the target domain."
+                }
+
+                $module.FailJson($failMsg, $_)
+            }
 
             $module.Result.changed = $true
             $module.Result.reboot_required = $true
