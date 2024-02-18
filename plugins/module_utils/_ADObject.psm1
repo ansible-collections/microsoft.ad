@@ -559,9 +559,6 @@ Function Get-AnsibleADObject {
     elseif ($Identity -match '^.*\@.*\..*$') {
         $getParams.LDAPFilter = "(userPrincipalName=$($Matches[0]))"
     }
-    elseif ($Identity -match '^(?:[^:*?""<>|\/\\]+\\)?(?<username>[^;:""<>|?,=\*\+\\\(\)]{1,20})$') {
-        $getParams.LDAPFilter = "(sAMAccountName=$($Matches.username))"
-    }
     else {
         try {
             $sid = New-Object -TypeName System.Security.Principal.SecurityIdentifier -ArgumentList $Identity
@@ -574,8 +571,13 @@ Function Get-AnsibleADObject {
             $getParams.LDAPFilter = "(objectSid=$value)"
         }
         catch [System.ArgumentException] {
-            # Finally fallback to DistinguishedName.
-            $getParams.Identity = $Identity
+            if ($Identity -match '^(?:[^:*?""<>|\/\\]+\\)?(?<username>[^;:""<>|?,=\*\+\\\(\)]+)$') {
+                $getParams.LDAPFilter = "(sAMAccountName=$($Matches.username))"
+            }
+            else {
+                # Finally fallback to DistinguishedName.
+                $getParams.Identity = $Identity
+            }
         }
     }
 
