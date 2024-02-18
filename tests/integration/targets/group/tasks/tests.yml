@@ -88,6 +88,14 @@
     - 3
     - 4
 
+  - name: create test group with long name
+    group:
+      name: MyGroup2-ReallyLongGroupNameHere
+      state: present
+      scope: global
+      path: '{{ ou_info.distinguished_name }}'
+    register: test_group
+
   - name: fail to find members to add to a group
     group:
       name: MyGroup
@@ -109,6 +117,7 @@
         add:
         - my_user_1
         - '{{ test_users.results[2].sid }}'
+        - MyGroup2-ReallyLongGroupNameHere
     register: add_member_check
     check_mode: true
 
@@ -133,6 +142,7 @@
         add:
         - my_user_1
         - '{{ test_users.results[2].sid }}'
+        - MyGroup2-ReallyLongGroupNameHere
     register: add_member
 
   - name: get result of add members to a group
@@ -146,9 +156,10 @@
     assert:
       that:
       - add_member is changed
-      - add_member_actual.objects[0].member | length == 2
+      - add_member_actual.objects[0].member | length == 3
       - test_users.results[0].distinguished_name in add_member_actual.objects[0].member
       - test_users.results[2].distinguished_name in add_member_actual.objects[0].member
+      - test_group.distinguished_name in add_member_actual.objects[0].member
 
   - name: add members to a group - idempotent
     group:
@@ -158,6 +169,7 @@
         add:
         - user_1@{{ domain_realm }}
         - '{{ test_users.results[2].object_guid }}'
+        - MyGroup2-ReallyLongGroupNameHere
     register: add_member_again
 
   - name: assert add members to a group - idempotent
@@ -186,7 +198,8 @@
     assert:
       that:
       - remove_member is changed
-      - remove_member_actual.objects[0].member == test_users.results[2].distinguished_name
+      - test_users.results[2].distinguished_name in remove_member_actual.objects[0].member
+      - test_group.distinguished_name in remove_member_actual.objects[0].member
 
   - name: remove member from a group - idempotent
     group:
@@ -226,9 +239,10 @@
     assert:
       that:
       - add_remove_member is changed
-      - add_remove_member_actual.objects[0].member | length == 2
+      - add_remove_member_actual.objects[0].member | length == 3
       - test_users.results[0].distinguished_name in add_remove_member_actual.objects[0].member
       - test_users.results[1].distinguished_name in add_remove_member_actual.objects[0].member
+      - test_group.distinguished_name in add_remove_member_actual.objects[0].member
 
   - name: set members
     group:
