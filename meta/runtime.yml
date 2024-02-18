@@ -1,1 +1,9 @@
 requires_ansible: '>=2.14'
+action_groups:
+  domain:
+    - computer
+    - group
+    - object_info
+    - object
+    - ou
+    - user

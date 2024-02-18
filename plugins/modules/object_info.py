@@ -16,12 +16,16 @@ options:
   domain_password:
     description:
     - The password for I(domain_username).
+    - This can be set under the R(play's module defaults,module_defaults_groups)
+      under the C(group/microsoft.ad.domain) group.
     type: str
   domain_server:
     description:
     - Specified the Active Directory Domain Services instance to connect to.
     - Can be in the form of an FQDN or NetBIOS name.
     - If not specified then the value is based on the default domain of the computer running PowerShell.
+    - This can be set under the R(play's module defaults,module_defaults_groups)
+      under the C(group/microsoft.ad.domain) group.
     type: str
   domain_username:
     description:
@@ -29,6 +33,8 @@ options:
     - If this is not set then the user that is used for authentication will be the connection user.
     - Ansible will be unable to use the connection user unless auth is Kerberos with credential delegation or CredSSP,
       or become is used on the task.
+    - This can be set under the R(play's module defaults,module_defaults_groups)
+      under the C(group/microsoft.ad.domain) group.
     type: str
   filter:
     description:
