@@ -289,6 +289,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-offlin
 <li><p>The data returned by this module is very sensitive. If not using <em>blob_path</em> then <code class="docutils literal notranslate"><span class="pre">no_log=True</span></code> should be used on the task to avoid the data being leaked.</p></li>
 <li><p>This module will always report a change unless <em>blob_path</em> is specified. If the path is specified then then the existence of that path will act as the idempotency check.</p></li>
 <li><p>Generating a new blob will reset the password of the computer object, take care that this isn’t called under a computer account that has already been joined.</p></li>
+<li><p>This module must be run on a Windows target host with the <code class="docutils literal notranslate"><span class="pre">ActiveDirectory</span></code> module installed.</p></li>
 </ul>
 </div>
 </section>

@@ -297,9 +297,9 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-group-
 <a class="ansibleOptionLink" href="#parameter-identity" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The identity of the AD object used to find the AD object to manage.</p>
-<p>Must be specified if <em>name</em> is not set, when trying to rename the object with a new <em>name</em>, or when trying to move the object into a different <em>path</em>.</p>
+<p>This must be specified if; <em>name</em> is not set, when trying to rename the object with a new <em>name</em>, or when trying to move the object into a different <em>path</em>.</p>
 <p>The identity can be in the form of a GUID representing the <code class="docutils literal notranslate"><span class="pre">objectGUID</span></code> value, the <code class="docutils literal notranslate"><span class="pre">userPrincipalName</span></code>, <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code>, <code class="docutils literal notranslate"><span class="pre">objectSid</span></code>, or <code class="docutils literal notranslate"><span class="pre">distinguishedName</span></code>.</p>
-<p>If omitted, the AD object to managed is selected by the <code class="docutils literal notranslate"><span class="pre">distinguishedName</span></code> using the format <code class="docutils literal notranslate"><span class="pre">CN={{</span> <span class="pre">name</span> <span class="pre">}},{{</span> <span class="pre">path</span> <span class="pre">}}</span></code>. If <em>path</em> is not defined, the <code class="docutils literal notranslate"><span class="pre">defaultNamingContext</span></code> is used instead.</p>
+<p>If omitted, the AD object to manage is selected by the <code class="docutils literal notranslate"><span class="pre">distinguishedName</span></code> using the format <code class="docutils literal notranslate"><span class="pre">CN={{</span> <span class="pre">name</span> <span class="pre">}},{{</span> <span class="pre">path</span> <span class="pre">}}</span></code>. If <em>path</em> is not defined, the <code class="docutils literal notranslate"><span class="pre">defaultNamingContext</span></code> is used instead.</p>
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
@@ -348,10 +348,9 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-group-
 <div class="ansibleOptionAnchor" id="parameter-name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-group-module-parameter-name"><strong>name</strong></p>
 <a class="ansibleOptionLink" href="#parameter-name" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
-<td><div class="ansible-option-cell"><p>The <code class="docutils literal notranslate"><span class="pre">name</span></code> of the AD object to manage.</p>
-<p>If <em>identity</em> is specified, and the name of the object it found does not match this value, the object will be renamed.</p>
-<p>This if <em>identity</em> must be set to find the object to manage.</p>
-<p>This is not always going to be the same as the <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> for user objects. It is strictly the <code class="docutils literal notranslate"><span class="pre">name</span></code> of the object in the path specified. Use <em>identity</em> to select an object to manage by <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code>.</p>
+<td><div class="ansible-option-cell"><p>The <code class="docutils literal notranslate"><span class="pre">name</span></code> of the AD object to manage, this is not the <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> of the object but the LDAP <code class="docutils literal notranslate"><span class="pre">cn</span></code> or <code class="docutils literal notranslate"><span class="pre">name</span></code> entry of the object in the path specified. Use <em>identity</em> to select an object to manage by its <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code>.</p>
+<p>If <em>identity</em> is specified, and the name of the object found by that identity does not match this value, the object will be renamed.</p>
+<p>This must be specified if <em>identity</em> is not set.</p>
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
@@ -362,7 +361,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-group-
 <p>If creating a new object, the new object will be created at the path specified. If no path is specified then the <code class="docutils literal notranslate"><span class="pre">defaultNamingContext</span></code> of the domain will be used as the path for most object types.</p>
 <p>If managing an existing object found by <em>identity</em>, the path of the found object will be moved to the one specified by this option. If no path is specified, the object will not be moved.</p>
 <p>The modules <a class="reference internal" href="computer_module.html#ansible-collections-microsoft-ad-computer-module"><span class="std std-ref">microsoft.ad.computer</span></a>, <a class="reference internal" href="user_module.html#ansible-collections-microsoft-ad-user-module"><span class="std std-ref">microsoft.ad.user</span></a>, and <a class="reference internal" href="#ansible-collections-microsoft-ad-group-module"><span class="std std-ref">microsoft.ad.group</span></a> have their own default path that is configured on the Active Directory domain controller.</p>
-<p>This can be set to <code class="docutils literal notranslate"><span class="pre">microsoft.ad.default_path</span></code> which will equal the default value used when creating a new object.</p>
+<p>This can be set to the literal value <code class="docutils literal notranslate"><span class="pre">microsoft.ad.default_path</span></code> which will equal the default value used when creating a new object.</p>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
@@ -464,6 +463,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-group-
 <p class="admonition-title">Note</p>
 <ul class="simple">
 <li><p>See <a class="reference internal" href="docsite/guide_migration.html#ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-group"><span class="std std-ref">win_group migration</span></a> for help on migrating from <a class="reference external" href="https://docs.ansible.com/ansible/devel/collections/community/windows/win_domain_group_module.html#ansible-collections-community-windows-win-domain-group-module" title="(in Ansible vdevel)"><span class="xref std std-ref">community.windows.win_domain_group</span></a> to this module.</p></li>
+<li><p>This module must be run on a Windows target host with the <code class="docutils literal notranslate"><span class="pre">ActiveDirectory</span></code> module installed.</p></li>
 <li><p>Some LDAP attributes can have only a single value set while others can have multiple. Some attributes are also read only and cannot be changed. It is recommended to look at the schema metadata for an attribute where <code class="docutils literal notranslate"><span class="pre">System-Only</span></code> are read only values and <code class="docutils literal notranslate"><span class="pre">Is-Single-Value</span></code> are attributes with only 1 value.</p></li>
 <li><p>Attempting to set multiple values to a <code class="docutils literal notranslate"><span class="pre">Is-Single-Value</span></code> attribute results in undefined behaviour.</p></li>
 <li><p>If running on a server that is not a Domain Controller, credential delegation through CredSSP or Kerberos with delegation must be used or the <em>domain_username</em>, <em>domain_password</em> must be set.</p></li>
@@ -498,12 +498,12 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-group-
 <h2><a class="toc-backref" href="#id7" role="doc-backlink">Examples</a><a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
 <div class="highlight-yaml+jinja notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ensure a group exists</span>
 <span class="w">  </span><span class="nt">microsoft.ad.group</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Cow</span>
+<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Cow</span>
 <span class="w">    </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Remove a group</span>
 <span class="w">  </span><span class="nt">microsoft.ad.group</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Cow</span>
+<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Cow</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">absent</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create a group in a custom path</span>
