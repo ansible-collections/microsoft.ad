@@ -184,6 +184,8 @@ notes:
 - See R(win_domain_computer migration,ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_computer)
   for help on migrating from M(community.windows.win_domain_computer) to this
   module.
+- This module must be run on a Windows target host with the C(ActiveDirectory)
+  module installed.
 extends_documentation_fragment:
 - microsoft.ad.ad_object
 - ansible.builtin.action_common_attributes
@@ -223,12 +225,12 @@ EXAMPLES = r"""
 
 - name: Remove linux computer from Active Directory using a windows machine
   microsoft.ad.computer:
-    name: one_linux_server
+    identity: one_linux_server
     state: absent
 
 - name: Add SPNs to computer
   microsoft.ad.computer:
-    name: TheComputer
+    identity: TheComputer
     spn:
       add:
       - HOST/TheComputer
@@ -237,7 +239,7 @@ EXAMPLES = r"""
 
 - name: Remove SPNs on the computer
   microsoft.ad.computer:
-    name: TheComputer
+    identity: TheComputer
     spn:
       remove:
       - HOST/TheComputer
@@ -246,7 +248,7 @@ EXAMPLES = r"""
 
 - name: Set the principals the computer trusts for delegation from
   microsoft.ad.computer:
-    name: TheComputer
+    identity: TheComputer
     delegates:
       set:
       - CN=FileShare,OU=Computers,DC=domain,DC=test

@@ -90,6 +90,8 @@ notes:
 - See R(win_group migration,ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_group)
   for help on migrating from M(community.windows.win_domain_group) to this
   module.
+- This module must be run on a Windows target host with the C(ActiveDirectory)
+  module installed.
 extends_documentation_fragment:
 - microsoft.ad.ad_object
 - ansible.builtin.action_common_attributes
@@ -118,12 +120,12 @@ author:
 EXAMPLES = r"""
 - name: Ensure a group exists
   microsoft.ad.group:
-    name: Cow
+    identity: Cow
     scope: global
 
 - name: Remove a group
   microsoft.ad.group:
-    name: Cow
+    identity: Cow
     state: absent
 
 - name: Create a group in a custom path

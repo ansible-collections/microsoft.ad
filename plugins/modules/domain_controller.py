@@ -92,6 +92,7 @@ notes:
 - It is highly recommended to set I(reboot=true) to have Ansible manage the host reboot phase as the actions done by
   this module puts the host in a state where it may not be possible for Ansible to reconnect in a subsequent task
   without a reboot.
+- This module must be run on a Windows target host.
 extends_documentation_fragment:
 - ansible.builtin.action_common_attributes
 - ansible.builtin.action_common_attributes.flow

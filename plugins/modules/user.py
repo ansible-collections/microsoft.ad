@@ -104,6 +104,10 @@ options:
     - To clear all group memberships, use I(set) with an empty list.
     - Note that users cannot be removed from their principal group (for
       example, "Domain Users"). Attempting to do so will display a warning.
+    - Each subkey is set to a list of groups objects to add, remove or
+      set as the membership of this AD user respectively. A group can be in
+      the form of a C(distinguishedName), C(objectGUID), C(objectSid), or
+      C(sAMAccountName).
     - See R(Setting list option values,ansible_collections.microsoft.ad.docsite.guide_list_values)
       for more information on how to add/remove/set list options.
     type: dict
@@ -245,6 +249,8 @@ options:
 notes:
 - See R(win_domain_user migration,ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_user)
   for help on migrating from M(community.windows.win_domain_user) to this module.
+- This module must be run on a Windows target host with the C(ActiveDirectory)
+  module installed.
 extends_documentation_fragment:
 - microsoft.ad.ad_object
 - ansible.builtin.action_common_attributes
@@ -273,7 +279,7 @@ author:
 EXAMPLES = r"""
 - name: Ensure user bob is present with address information
   microsoft.ad.user:
-    name: bob
+    identity: bob
     firstname: Bob
     surname: Smith
     company: BobCo
@@ -293,7 +299,7 @@ EXAMPLES = r"""
 
 - name: Ensure user bob is created and use custom credentials to create the user
   microsoft.ad.user:
-    name: bob
+    identity: bob
     firstname: Bob
     surname: Smith
     password: B0bP4ssw0rd
@@ -304,7 +310,7 @@ EXAMPLES = r"""
 
 - name: Ensure user bob is present in OU ou=test,dc=domain,dc=local
   microsoft.ad.user:
-    name: bob
+    identity: bob
     password: B0bP4ssw0rd
     state: present
     path: ou=test,dc=domain,dc=local
@@ -315,12 +321,12 @@ EXAMPLES = r"""
 
 - name: Ensure user bob is absent
   microsoft.ad.user:
-    name: bob
+    identity: bob
     state: absent
 
 - name: Ensure user has only these spn's defined
   microsoft.ad.user:
-    name: liz.kenyon
+    identity: liz.kenyon
     spn:
       set:
       - MSSQLSvc/us99db-svr95:1433
@@ -328,14 +334,14 @@ EXAMPLES = r"""
 
 - name: Ensure user has spn added
   microsoft.ad.user:
-    name: liz.kenyon
+    identity: liz.kenyon
     spn:
       add:
       - MSSQLSvc/us99db-svr95:2433
 
 - name: Ensure user is created with delegates and spn's defined
   microsoft.ad.user:
-    name: shmemmmy
+    identity: shmemmmy
     password: The3rubberducki33!
     state: present
     groups:
