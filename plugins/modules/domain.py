@@ -78,6 +78,8 @@ options:
       Sysvol file will be created.
     - If not set then the default path is C(%SYSTEMROOT%\SYSVOL).
     type: path
+notes:
+- This module must be run on a Windows target host.
 extends_documentation_fragment:
 - ansible.builtin.action_common_attributes
 - ansible.builtin.action_common_attributes.flow

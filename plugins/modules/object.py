@@ -24,6 +24,8 @@ notes:
   Directory. It will not validate all the correct defaults are set for each
   type when it is created. If a type specific module is available to manage
   that AD object type it is recommend to use that.
+- This module must be run on a Windows target host with the C(ActiveDirectory)
+  module installed.
 extends_documentation_fragment:
 - microsoft.ad.ad_object
 - ansible.builtin.action_common_attributes

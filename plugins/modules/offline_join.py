@@ -85,6 +85,8 @@ notes:
 - Generating a new blob will reset the password of the computer object, take
   care that this isn't called under a computer account that has already been
   joined.
+- This module must be run on a Windows target host with the C(ActiveDirectory)
+  module installed.
 seealso:
 - module: microsoft.ad.domain
 - module: microsoft.ad.membership
