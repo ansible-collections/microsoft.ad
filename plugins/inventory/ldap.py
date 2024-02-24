@@ -311,8 +311,14 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
             custom_attributes["inventory_hostname"] = {
                 "inventory_hostname": inventory_hostname
             }
-
         connection_options = self.get_options()
+        template_fields = ['username', 'password', 'server', 'tls_mode', 'auth_protocol', 'ca_cert', 'cert_validation', 'certificate', 'certificate_key', 'certificate_key', 'encrypt']
+        for t in template_fields:
+            if t in connection_options.keys():
+                if self.templar.is_template(connection_options[t]):
+                    self.display.vvv("detemplating option %s" % t)
+                    connection_options[t] = self.templar.template(variable=connection_options[t], disable_lookups=False)
+
         laps_decryptor = LAPSDecryptor(**connection_options)
         with create_ldap_connection(**connection_options) as client:
             schema = LDAPSchema.load_schema(client)
