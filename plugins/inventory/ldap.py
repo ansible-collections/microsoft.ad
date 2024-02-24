@@ -312,7 +312,8 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
                 "inventory_hostname": inventory_hostname
             }
         connection_options = self.get_options()
-        template_fields = ['username', 'password', 'server', 'tls_mode', 'auth_protocol', 'ca_cert', 'cert_validation', 'certificate', 'certificate_key', 'certificate_key', 'encrypt']
+        template_fields = ['username', 'password', 'server', 'tls_mode', 'auth_protocol', 'ca_cert',
+                           'cert_validation', 'certificate', 'certificate_key', 'certificate_key', 'encrypt']
         for t in template_fields:
             if t in connection_options.keys():
                 if self.templar.is_template(connection_options[t]):
