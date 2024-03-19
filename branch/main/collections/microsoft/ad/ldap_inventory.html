@@ -210,6 +210,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p><code class="docutils literal notranslate"><span class="pre">negotiate</span></code>, <code class="docutils literal notranslate"><span class="pre">kerberos</span></code>, and <code class="docutils literal notranslate"><span class="pre">ntlm</span></code> support encryption over LDAP.</p>
 <p>Kerberos support requires the <code class="docutils literal notranslate"><span class="pre">pyspnego[kerberos]</span></code> extras to be installed.</p>
 <p>See <a class="reference internal" href="docsite/guide_ldap_connection.html#ansible-collections-microsoft-ad-docsite-guide-ldap-connection-authentication"><span class="std std-ref">LDAP authentication</span></a> for more information.</p>
+<p>This option can be set using a Jinja2 template value.</p>
 <p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
 <ul class="simple">
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;simple&quot;</span></code></p></li>
@@ -230,6 +231,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 </div></td>
 <td><div class="ansible-option-cell"><p>Can be the path to a CA certificate PEM or DER file, directory of PEM certificates, or the CA certificate PEM string that is used for certificate validation.</p>
 <p>If omitted, the default CA store used for validation is dependent on the current Python settings.</p>
+<p>This option can be set using a Jinja2 template value.</p>
 <p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-1"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_CA_CERT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_CA_CERT</span></code></a></p></li>
@@ -246,6 +248,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p><code class="docutils literal notranslate"><span class="pre">ignore</span></code> will ignore any certificate errors.</p>
 <p><code class="docutils literal notranslate"><span class="pre">ignore_hostname</span></code> will validate the CA trust chain but will ignore any hostname checks performed by TLS.</p>
 <p>See <a class="reference internal" href="docsite/guide_ldap_connection.html#ansible-collections-microsoft-ad-docsite-guide-ldap-connection-cert-validation"><span class="std std-ref">Certificate validation</span></a> for more information.</p>
+<p>This option can be set using a Jinja2 template value.</p>
 <p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
 <ul class="simple">
 <li><p><code class="ansible-option-default-bold docutils literal notranslate"><strong><span class="pre">&quot;always&quot;</span></strong></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
@@ -267,6 +270,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p>If using a path to a certificate file, the file can be a PEM encoded certificate, a PEM encoded certificate and key bundle, a DER encoded certificate, or a PFX/PKCS12 encoded certificate and key bundle.</p>
 <p>Use <em>certificate_key</em> if the certificate specified does not contain the key.</p>
 <p>Use <em>certificate_password</em> if the key is encrypted with a password.</p>
+<p>This option can be set using a Jinja2 template value.</p>
 <p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-3"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_CERTIFICATE"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_CERTIFICATE</span></code></a></p></li>
@@ -280,6 +284,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <td><div class="ansible-option-cell"><p>The certificate key that is used for certificate authentication.</p>
 <p>The value can either be a path to a file containing the key in the PEM or DER encoded form, or it can be the string of a PEM encoded key.</p>
 <p>Use <em>certificate_password</em> if the key is encrypted with a password.</p>
+<p>This option can be set using a Jinja2 template value.</p>
 <p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-4"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_CERTIFICATE_KEY"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_CERTIFICATE_KEY</span></code></a></p></li>
@@ -291,6 +296,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <a class="ansibleOptionLink" href="#parameter-certificate_password" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The password used to decrypt the certificate key specified by <em>certificate</em> or <em>certificate_key</em>.</p>
+<p>This option can be set using a Jinja2 template value.</p>
 <p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-5"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_CERTIFICATE_PASSWORD"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_CERTIFICATE_PASSWORD</span></code></a></p></li>
@@ -310,6 +316,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <a class="ansibleOptionLink" href="#parameter-connection_timeout" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">integer</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The timeout in seconds to wait until the connection is established before failing.</p>
+<p>This option can be set using a Jinja2 template value.</p>
 <p class="ansible-option-line"><strong class="ansible-option-default-bold">Default:</strong> <code class="ansible-option-default docutils literal notranslate"><span class="pre">5</span></code></p>
 <p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
@@ -325,6 +332,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p>Encryption can either be performed using the authentication protocol or through TLS.</p>
 <p>The <em>auth_protocol</em> <code class="docutils literal notranslate"><span class="pre">negotiate</span></code>, <code class="docutils literal notranslate"><span class="pre">kerberos</span></code>, and <code class="docutils literal notranslate"><span class="pre">ntlm</span></code> all support encryption over LDAP whereas <code class="docutils literal notranslate"><span class="pre">simple</span></code> does not.</p>
 <p>If using <code class="docutils literal notranslate"><span class="pre">auth_protocol=simple</span></code> over LDAP without TLS then this must be set to <code class="docutils literal notranslate"><span class="pre">False</span></code>. As no encryption is used, all traffic will be in plaintext and should be avoided.</p>
+<p>This option can be set using a Jinja2 template value.</p>
 <p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
 <ul class="simple">
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">false</span></code></p></li>
@@ -452,6 +460,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <td><div class="ansible-option-cell"><p>The password to authenticate with.</p>
 <p>If <em>auth_protocol</em> is <code class="docutils literal notranslate"><span class="pre">simple</span></code> and no password is specified, the bind will be performed as an unauthenticated bind.</p>
 <p>If <em>auth_protocol</em> is <code class="docutils literal notranslate"><span class="pre">negotiate</span></code>, <code class="docutils literal notranslate"><span class="pre">kerberos</span></code>, or <code class="docutils literal notranslate"><span class="pre">ntlm</span></code> and no password is specified, it will attempt to use the local cached credential specified by <em>username</em> if available.</p>
+<p>This option can be set using a Jinja2 template value.</p>
 <p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-8"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_PASSWORD"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_PASSWORD</span></code></a></p></li>
@@ -465,6 +474,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <td><div class="ansible-option-cell"><p>The LDAP port to use for the connection.</p>
 <p>Port 389 is used for LDAP and port 686 is used for LDAPS.</p>
 <p>Defaults to port <code class="docutils literal notranslate"><span class="pre">636</span></code> if <code class="docutils literal notranslate"><span class="pre">tls_mode=ldaps</span></code> otherwise <code class="docutils literal notranslate"><span class="pre">389</span></code>.</p>
+<p>This option can be set using a Jinja2 template value.</p>
 <p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-9"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_PORT"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_PORT</span></code></a></p></li>
@@ -503,6 +513,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <td><div class="ansible-option-cell"><p>The domain controller/server to connect to.</p>
 <p>If not specified the server will be derived from the current krb5.conf <code class="docutils literal notranslate"><span class="pre">default_realm</span></code> setting and with an SRV DNS lookup.</p>
 <p>See <a class="reference internal" href="docsite/guide_ldap_connection.html#ansible-collections-microsoft-ad-docsite-guide-ldap-connection-server-lookup"><span class="std std-ref">Server lookup</span></a> for more information.</p>
+<p>This option can be set using a Jinja2 template value.</p>
 <p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-10"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_SERVER"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_SERVER</span></code></a></p></li>
@@ -531,6 +542,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <p><code class="docutils literal notranslate"><span class="pre">ldaps</span></code> will connect over LDAPS (port 636).</p>
 <p><code class="docutils literal notranslate"><span class="pre">start_tls</span></code> will connect over LDAP (port 389) and perform the StartTLS operation before the authentication bind.</p>
 <p>It is recommended to use <code class="docutils literal notranslate"><span class="pre">ldaps</span></code> over <code class="docutils literal notranslate"><span class="pre">start_tls</span></code> if TLS is going to be used.</p>
+<p>This option can be set using a Jinja2 template value.</p>
 <p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
 <ul class="simple">
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;ldaps&quot;</span></code></p></li>
@@ -572,6 +584,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <td><div class="ansible-option-cell"><p>The username to authenticate with.</p>
 <p>If <em>auth_protocol</em> is <code class="docutils literal notranslate"><span class="pre">simple</span></code> and no username is specified, anonymous authentication is used.</p>
 <p>If <em>auth_protocol</em> is <code class="docutils literal notranslate"><span class="pre">negotiate</span></code>, <code class="docutils literal notranslate"><span class="pre">kerberos</span></code>, or <code class="docutils literal notranslate"><span class="pre">ntlm</span></code> and no username is specified, it will attempt to use the local cached credential if available, for example one retrieved by <code class="docutils literal notranslate"><span class="pre">kinit</span></code>.</p>
+<p>This option can be set using a Jinja2 template value.</p>
 <p class="ansible-option-line"><strong class="ansible-option-configuration">Configuration:</strong></p>
 <ul class="simple">
 <li><p>Environment variable: <span class="target" id="index-13"></span><a class="reference internal" href="../../environment_variables.html#envvar-MICROSOFT_AD_LDAP_USERNAME"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">MICROSOFT_AD_LDAP_USERNAME</span></code></a></p></li>
@@ -589,6 +602,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <li><p>See <a class="reference internal" href="docsite/guide_ldap_inventory.html#ansible-collections-microsoft-ad-docsite-guide-ldap-inventory"><span class="std std-ref">LDAP inventory</span></a> for more details on how to use this inventory plugin.</p></li>
 <li><p>See <a class="reference internal" href="docsite/guide_ldap_inventory.html#ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-laps"><span class="std std-ref">LAPS</span></a> for more details on how this plugin can retrieve the LAPS password information.</p></li>
 <li><p>This plugin is a tech preview and the module options are subject to change based on feedback received.</p></li>
+<li><p>Unless specified otherwise in the option description, the value specified in the config file is used as is. Only the LDAP connection options allow using a Jinja2 template.</p></li>
 <li><p>See <a class="reference internal" href="docsite/guide_ldap_connection.html#ansible-collections-microsoft-ad-docsite-guide-ldap-connection"><span class="std std-ref">LDAP connection help</span></a> for more information about LDAP connections.</p></li>
 </ul>
 </div>
@@ -630,6 +644,11 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <span class="nt">tls_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ldaps</span>
 <span class="nt">ca_cert</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/home/user/certs/ldap.pem</span>
 
+<span class="c1"># The username and password can be retrieved using a template with a lookup.</span>
+<span class="c1"># Other connection options can also be set this way, the option description</span>
+<span class="c1"># tells you whether it can be set to a template.</span>
+<span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;</span><span class="cp">{{</span> <span class="nv">lookup</span><span class="o">(</span><span class="s2">&quot;ansible.builtin.env&quot;</span><span class="o">,</span> <span class="s2">&quot;LDAP_USERNAME&quot;</span><span class="o">)</span> <span class="cp">}}</span><span class="s">&#39;</span>
+<span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;</span><span class="cp">{{</span> <span class="nv">lookup</span><span class="o">(</span><span class="s2">&quot;ansible.builtin.env&quot;</span><span class="o">,</span> <span class="s2">&quot;LDAP_PASSWORD&quot;</span><span class="o">)</span> <span class="cp">}}</span><span class="s">&#39;</span>
 
 <span class="c1">##############################################</span>
 <span class="c1">#               Search Options               #</span>
