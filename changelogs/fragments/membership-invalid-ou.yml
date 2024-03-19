@@ -1,4 +1,0 @@
-bugfixes:
-  - >-
-    microsoft.ad.membership - Add helpful hint when the failure was due to a missing/invalid ``domain_ou_path``
-    - https://github.com/ansible-collections/microsoft.ad/issues/88
