@@ -31,6 +31,7 @@ options:
       installed.
     - See R(LDAP authentication,ansible_collections.microsoft.ad.docsite.guide_ldap_connection.authentication)
       for more information.
+    - This option can be set using a Jinja2 template value.
     choices:
     - simple
     - certificate
@@ -47,6 +48,7 @@ options:
       certificate validation.
     - If omitted, the default CA store used for validation is dependent on
       the current Python settings.
+    - This option can be set using a Jinja2 template value.
     type: str
     env:
     - name: MICROSOFT_AD_LDAP_CA_CERT
@@ -60,6 +62,7 @@ options:
       hostname checks performed by TLS.
     - See R(Certificate validation,ansible_collections.microsoft.ad.docsite.guide_ldap_connection.cert_validation)
       for more information.
+    - This option can be set using a Jinja2 template value.
     choices:
     - always
     - ignore
@@ -80,6 +83,7 @@ options:
     - Use I(certificate_key) if the certificate specified does not contain the
       key.
     - Use I(certificate_password) if the key is encrypted with a password.
+    - This option can be set using a Jinja2 template value.
     type: str
     env:
     - name: MICROSOFT_AD_LDAP_CERTIFICATE
@@ -89,6 +93,7 @@ options:
     - The value can either be a path to a file containing the key in the PEM or
       DER encoded form, or it can be the string of a PEM encoded key.
     - Use I(certificate_password) if the key is encrypted with a password.
+    - This option can be set using a Jinja2 template value.
     type: str
     env:
     - name: MICROSOFT_AD_LDAP_CERTIFICATE_KEY
@@ -96,6 +101,7 @@ options:
     description:
     - The password used to decrypt the certificate key specified by
       I(certificate) or I(certificate_key).
+    - This option can be set using a Jinja2 template value.
     type: str
     env:
     - name: MICROSOFT_AD_LDAP_CERTIFICATE_PASSWORD
@@ -103,6 +109,7 @@ options:
     description:
     - The timeout in seconds to wait until the connection is established before
       failing.
+    - This option can be set using a Jinja2 template value.
     default: 5
     type: int
     env:
@@ -117,6 +124,7 @@ options:
     - If using C(auth_protocol=simple) over LDAP without TLS then this must be
       set to C(False). As no encryption is used, all traffic will be in
       plaintext and should be avoided.
+    - This option can be set using a Jinja2 template value.
     default: true
     type: bool
     env:
@@ -129,6 +137,7 @@ options:
     - If I(auth_protocol) is C(negotiate), C(kerberos), or C(ntlm) and no
       password is specified, it will attempt to use the local cached credential
       specified by I(username) if available.
+    - This option can be set using a Jinja2 template value.
     type: str
     env:
     - name: MICROSOFT_AD_LDAP_PASSWORD
@@ -137,6 +146,7 @@ options:
     - The LDAP port to use for the connection.
     - Port 389 is used for LDAP and port 686 is used for LDAPS.
     - Defaults to port C(636) if C(tls_mode=ldaps) otherwise C(389).
+    - This option can be set using a Jinja2 template value.
     type: int
     env:
     - name: MICROSOFT_AD_LDAP_PORT
@@ -147,6 +157,7 @@ options:
       C(default_realm) setting and with an SRV DNS lookup.
     - See R(Server lookup,ansible_collections.microsoft.ad.docsite.guide_ldap_connection.server_lookup)
       for more information.
+    - This option can be set using a Jinja2 template value.
     type: str
     env:
     - name: MICROSOFT_AD_LDAP_SERVER
@@ -159,6 +170,7 @@ options:
       operation before the authentication bind.
     - It is recommended to use C(ldaps) over C(start_tls) if TLS is going to be
       used.
+    - This option can be set using a Jinja2 template value.
     choices:
     - ldaps
     - start_tls
@@ -173,6 +185,7 @@ options:
     - If I(auth_protocol) is C(negotiate), C(kerberos), or C(ntlm) and no
       username is specified, it will attempt to use the local cached credential
       if available, for example one retrieved by C(kinit).
+    - This option can be set using a Jinja2 template value.
     type: str
     env:
     - name: MICROSOFT_AD_LDAP_USERNAME

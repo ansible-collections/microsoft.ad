@@ -84,6 +84,9 @@ notes:
   information.
 - This plugin is a tech preview and the module options are subject to change
   based on feedback received.
+- Unless specified otherwise in the option description, the value specified in
+  the config file is used as is. Only the LDAP connection options allow using
+  a Jinja2 template.
 extends_documentation_fragment:
 - constructed
 - microsoft.ad.ldap_connection
@@ -125,6 +128,11 @@ auth_protocol: kerberos
 tls_mode: ldaps
 ca_cert: /home/user/certs/ldap.pem
 
+# The username and password can be retrieved using a template with a lookup.
+# Other connection options can also be set this way, the option description
+# tells you whether it can be set to a template.
+username: '{{ lookup("ansible.builtin.env", "LDAP_USERNAME") }}'
+password: '{{ lookup("ansible.builtin.env", "LDAP_PASSWORD") }}'
 
 ##############################################
 #               Search Options               #
@@ -312,13 +320,30 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
                 "inventory_hostname": inventory_hostname
             }
         connection_options = self.get_options()
-        template_fields = ['username', 'password', 'server', 'tls_mode', 'auth_protocol', 'ca_cert',
-                           'cert_validation', 'certificate', 'certificate_key', 'certificate_key', 'encrypt']
-        for t in template_fields:
-            if t in connection_options.keys():
-                if self.templar.is_template(connection_options[t]):
-                    self.display.vvv("detemplating option %s" % t)
-                    connection_options[t] = self.templar.template(variable=connection_options[t], disable_lookups=False)
+
+        # These options are in ../doc_fragments/ldap_connection.py
+        template_fields = {
+            'auth_protocol',
+            'ca_cert',
+            'cert_validation',
+            'certificate',
+            'certificate_key',
+            'certificate_password',
+            'connection_timeout',
+            'encrypt',
+            'password',
+            'port',
+            'server',
+            'tls_mode',
+            'username',
+        }
+        for option_name, option_value in connection_options.items():
+            if option_name in template_fields and self.templar.is_template(option_value):
+                self.display.vvv(f"Templating option {option_name}")
+                connection_options[option_name] = self.templar.template(
+                    variable=option_value,
+                    disable_lookups=False,
+                )
 
         laps_decryptor = LAPSDecryptor(**connection_options)
         with create_ldap_connection(**connection_options) as client:
