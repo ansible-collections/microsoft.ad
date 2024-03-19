@@ -4,6 +4,34 @@ Ansible Microsoft Active Directory Release Notes
 
 .. contents:: Topics
 
+v1.5.0
+======
+
+Release Summary
+---------------
+
+Release summary for v1.5.0
+
+Minor Changes
+-------------
+
+- Added ``group/microsoft.ad.domain`` module defaults group for the ``computer``, ``group``, ``object_info``, ``object``, ``ou``, and ``user`` module. Users can use this defaults group to set common connection options for these modules such as the ``domain_server``, ``domain_username``, and ``domain_password`` options.
+- Added support for Jinja2 templating in ldap inventory.
+
+Bugfixes
+--------
+
+- microsoft.ad.group - Support membership lookup of groups that are longer than 20 characters long
+- microsoft.ad.membership - Add helpful hint when the failure was due to a missing/invalid ``domain_ou_path`` - https://github.com/ansible-collections/microsoft.ad/issues/88
+
+New Plugins
+-----------
+
+Filter
+~~~~~~
+
+- dn_escape - Escape an LDAP DistinguishedName value string.
+- parse_dn - Parses an LDAP DistinguishedName string into an object.
 
 v1.4.1
 ======
@@ -91,7 +119,6 @@ Release Summary
 
 This release includes the new ``microsoft.ad.ldap`` inventory plugin which can be used to generate an Ansible
 inventory from an LDAP/AD source.
-
 
 Bugfixes
 --------

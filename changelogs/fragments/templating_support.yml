@@ -1,3 +1,0 @@
-minor_changes:
-  - >-
-    Added support for Jinja2 templating in ldap inventory.

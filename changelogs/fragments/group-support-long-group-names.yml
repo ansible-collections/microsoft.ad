@@ -1,2 +1,0 @@
-bugfixes:
-  - microsoft.ad.group - Support membership lookup of groups that are longer than 20 characters long

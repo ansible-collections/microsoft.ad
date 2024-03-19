@@ -123,3 +123,33 @@ releases:
     - debug_ldap_client-failure.yml
     - release_summary.yml
     release_date: '2023-11-23'
+  1.5.0:
+    changes:
+      bugfixes:
+      - microsoft.ad.group - Support membership lookup of groups that are longer than
+        20 characters long
+      - microsoft.ad.membership - Add helpful hint when the failure was due to a missing/invalid
+        ``domain_ou_path`` - https://github.com/ansible-collections/microsoft.ad/issues/88
+      minor_changes:
+      - Added ``group/microsoft.ad.domain`` module defaults group for the ``computer``,
+        ``group``, ``object_info``, ``object``, ``ou``, and ``user`` module. Users
+        can use this defaults group to set common connection options for these modules
+        such as the ``domain_server``, ``domain_username``, and ``domain_password``
+        options.
+      - Added support for Jinja2 templating in ldap inventory.
+      release_summary: Release summary for v1.5.0
+    fragments:
+    - default_options.yml
+    - group-support-long-group-names.yml
+    - membership-invalid-ou.yml
+    - release-summary.yml
+    - templating_support.yml
+    plugins:
+      filter:
+      - description: Escape an LDAP DistinguishedName value string.
+        name: dn_escape
+        namespace: null
+      - description: Parses an LDAP DistinguishedName string into an object.
+        name: parse_dn
+        namespace: null
+    release_date: '2024-03-20'

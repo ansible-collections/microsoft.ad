@@ -1,5 +1,0 @@
-minor_changes:
-  - >-
-    Added ``group/microsoft.ad.domain`` module defaults group for the ``computer``, ``group``, ``object_info``,
-    ``object``, ``ou``, and ``user`` module. Users can use this defaults group to set common connection options
-    for these modules such as the ``domain_server``, ``domain_username``, and ``domain_password`` options.
