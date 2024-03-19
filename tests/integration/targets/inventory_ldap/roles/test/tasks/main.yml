@@ -95,6 +95,23 @@
 
 - import_tasks: invoke.yml
   vars:
+    scenario: LDAP through lookup templates
+    inventory:
+      plugin: microsoft.ad.ldap
+      server: !unsafe '{{ lookup("ansible.builtin.env", "LDAP_SERVER") }}'
+      username: !unsafe '{{ lookup("ansible.builtin.env", "LDAP_USERNAME") }}'
+      password: !unsafe '{{ lookup("ansible.builtin.env", "LDAP_PASSWORD") }}'
+  environment:
+    LDAP_SERVER: '{{ ldap_server }}'
+    LDAP_USERNAME: '{{ ldap_user }}'
+    LDAP_PASSWORD: '{{ ldap_pass }}'
+
+- name: assert LDAP through lookup templates
+  assert:
+    that: *default-assertion
+
+- import_tasks: invoke.yml
+  vars:
     scenario: LDAPS
     inventory:
       plugin: microsoft.ad.ldap
