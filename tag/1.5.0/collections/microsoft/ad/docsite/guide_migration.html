@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Migration guide &mdash; Ansible collections  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=5707b69d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/ansible.css?v=c5b67dd2" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/antsibull-minimal.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/rtd-ethical-ads.css?v=289b023e" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/images/Ansible-Mark-RGB_Black.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="microsoft.ad.computer module – Manage Active Directory computer objects" href="../computer_module.html" />
+    <link rel="prev" title="Setting list option values guide" href="guide_list_values.html" /><!-- extra head elements for Ansible beyond RTD Sphinx Theme -->
+
+
+
+
+</head>
+
+<body class="wy-body-for-nav"><!-- extra body elements for Ansible beyond RTD Sphinx Theme -->
+
+<div class="DocSite-globalNav ansibleNav">
+  <ul>
+    <li><a href="https://www.ansible.com/blog" target="_blank">Blog</a></li>
+    <li><a href="https://forum.ansible.com/" target="_blank">Ansible community forum</a></li>
+    <li><a href="https://docs.ansible.com/" target="_blank">Documentation</a></li>
+  </ul>
+</div>
+
+<a class="DocSite-nav" href="/" style="padding-bottom: 30px;">
+
+  <img class="DocSiteNav-logo"
+    src="../../../../_static/images/Ansible-Mark-RGB_White.png"
+    alt="Ansible Logo">
+  <div class="DocSiteNav-title">Ansible Collections Documentation</div>
+</a>
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Ansible collections
+          </a><!--- Based on https://github.com/rtfd/sphinx_rtd_theme/pull/438/files -->
+
+<div class="version">
+  
+    
+  
+</div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <label class="sr-only" for="q">Search docs:</label>
+    <input type="text" class="st-default-search-input" id="q" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+  
+              <p class="caption" role="heading"><span class="caption-text">Collections:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">Collection Index</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html">Collections in the Microsoft Namespace</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html">Microsoft.Ad</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../index.html#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#communication">Communication</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html#scenario-guides">Scenario Guides</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#plugin-index">Plugin Index</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugin indexes:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index_filter.html">Index of all Filter Plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../index_inventory.html">Index of all Inventory Plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../index_module.html">Index of all Modules</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference indexes:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../environment_variables.html">Index of all Collection Environment Variables</a></li>
+</ul>
+<!-- extra nav elements for Ansible beyond RTD Sphinx Theme -->
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Ansible collections</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Collection Index</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Collections in the Microsoft Namespace</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Microsoft.Ad</a></li>
+      <li class="breadcrumb-item active">Migration guide</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+  
+           <div itemprop="articleBody">
+             
+  <section id="migration-guide">
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration"></span><h1>Migration guide<a class="headerlink" href="#migration-guide" title="Link to this heading"></a></h1>
+<p>Some of the modules in this collection have come from the <a class="reference external" href="https://galaxy.ansible.com/ansible/windows">ansible.windows collection</a> or the <a class="reference external" href="https://galaxy.ansible.com/community/windows">community.windows collection</a>. This document will go through some of the changes made to help ease the transition from the older modules to the ones in this collection.</p>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#migrated-modules" id="id1">Migrated Modules</a></p></li>
+</ul>
+</nav>
+<section id="migrated-modules">
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules"></span><h2><a class="toc-backref" href="#id1" role="doc-backlink">Migrated Modules</a><a class="headerlink" href="#migrated-modules" title="Link to this heading"></a></h2>
+<p>The following modules have been migrated in some shape or form into this collection</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ansible.windows.win_domain</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">microsoft.ad.domain</span></code> - <a class="reference internal" href="#ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain"><span class="std std-ref">details</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ansible.windows.win_domain_controller</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">microsoft.ad.domain_controller</span></code> - <a class="reference internal" href="#ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-controller"><span class="std std-ref">details</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ansible.windows.win_domain_membership</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">microsoft.ad.membership</span></code> - <a class="reference internal" href="#ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-membership"><span class="std std-ref">details</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">community.windows.win_domain_computer</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">microsoft.ad.computer</span></code> - <a class="reference internal" href="#ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-computer"><span class="std std-ref">details</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">community.windows.win_domain_group</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">microsoft.ad.group</span></code> - <a class="reference internal" href="#ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-group"><span class="std std-ref">details</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">community.windows.win_domain_group_membership</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">microsoft.ad.group</span></code> - <a class="reference internal" href="#ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-group-membership"><span class="std std-ref">details</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">community.windows.win_domain_object_info</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">microsoft.ad.object_info</span></code> - <a class="reference internal" href="#ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-object-info"><span class="std std-ref">details</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">community.windows.win_domain_ou</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">microsoft.ad.ou</span></code> - <a class="reference internal" href="#ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-ou"><span class="std std-ref">details</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">community.windows.win_domain_user</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">microsoft.ad.user</span></code> - <a class="reference internal" href="#ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-user"><span class="std std-ref">details</span></a></p></li>
+</ul>
+<p>While these modules are mostly drop in place compatible there are some breaking changes that need to be considered. See each module entry for more information.</p>
+<section id="module-win-domain">
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain</span></code><a class="headerlink" href="#module-win-domain" title="Link to this heading"></a></h3>
+<p>Migrated to <a class="reference internal" href="../domain_module.html#ansible-collections-microsoft-ad-domain-module"><span class="std std-ref">microsoft.ad.domain</span></a>.</p>
+<p>There are no known breaking changes and should work as a drop in replacement. The <code class="docutils literal notranslate"><span class="pre">reboot</span></code> option has been added to have the module handle any reboots that are needed instead of a separate <code class="docutils literal notranslate"><span class="pre">ansible.windows.win_reboot</span></code> task. Due to the operations involved with promoting a domain controller, it is highly recommended to use this option.</p>
+</section>
+<section id="module-win-domain-controller">
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-controller"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_controller</span></code><a class="headerlink" href="#module-win-domain-controller" title="Link to this heading"></a></h3>
+<p>Migrated to <a class="reference internal" href="../domain_controller_module.html#ansible-collections-microsoft-ad-domain-controller-module"><span class="std std-ref">microsoft.ad.domain_controller</span></a>.</p>
+<p>The following options have been removed:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">log_path</span></code> - Creating a debug log of module actions is not supported</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">reboot</span></code> option has been added to have the module handle any reboots instead of a separate <code class="docutils literal notranslate"><span class="pre">ansible.windows.win_reboot</span></code> task. Due to the operations involved with promoting a domain controller, it is highly recommended to use this option.</p>
+</section>
+<section id="module-win-domain-membership">
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-membership"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_membership</span></code><a class="headerlink" href="#module-win-domain-membership" title="Link to this heading"></a></h3>
+<p>Migrated to <a class="reference internal" href="../membership_module.html#ansible-collections-microsoft-ad-membership-module"><span class="std std-ref">microsoft.ad.membership</span></a>.</p>
+<p>The following options have been removed:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">log_path</span></code> - Creating a debug log of module actions is not supported</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">reboot</span></code> option has been added to have the module handle any reboots instead of a separate <code class="docutils literal notranslate"><span class="pre">ansible.windows.win_reboot</span></code> task.</p>
+</section>
+<section id="module-win-domain-computer">
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-computer"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_computer</span></code><a class="headerlink" href="#module-win-domain-computer" title="Link to this heading"></a></h3>
+<p>Migrated to <a class="reference internal" href="../computer_module.html#ansible-collections-microsoft-ad-computer-module"><span class="std std-ref">microsoft.ad.computer</span></a>.</p>
+<p>The option <code class="docutils literal notranslate"><span class="pre">dns_host_name</span></code> is not required when <code class="docutils literal notranslate"><span class="pre">state:</span> <span class="pre">present</span></code>, the computer object is created without the <code class="docutils literal notranslate"><span class="pre">dnsHostName</span></code> LDAP attribute set if it is not defined.</p>
+<p>The default for <code class="docutils literal notranslate"><span class="pre">enabled</span></code> is nothing, the group will still be enabled when created but it will use the existing status if the option is omitted.</p>
+<p>The option <code class="docutils literal notranslate"><span class="pre">ou</span></code> is now named <code class="docutils literal notranslate"><span class="pre">path</span></code> to match the standard set by other modules.</p>
+<p>The options <code class="docutils literal notranslate"><span class="pre">offline_domain_join</span></code> and <code class="docutils literal notranslate"><span class="pre">odj_blob_path</span></code> has been removed. Use the new module <code class="docutils literal notranslate"><span class="pre">microsoft.ad.offline_join</span></code> to generate the offline join blob. For example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">create computer object</span>
+<span class="w">  </span><span class="nt">microsoft.ad.computer</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyComputer</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+<span class="w">  </span><span class="nt">register</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">computer_obj</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">create offline blob</span>
+<span class="w">  </span><span class="nt">microsoft.ad.offline_join</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{</span><span class="nv"> </span><span class="s">computer_obj.object_guid</span><span class="nv"> </span><span class="s">}}&#39;</span>
+<span class="w">  </span><span class="nt">when</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">computer_obj is changed</span>
+<span class="w">  </span><span class="nt">register</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">offline_blob</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">display offline blob</span>
+<span class="w">  </span><span class="nt">debug</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">var</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">offline_blob.blob</span>
+<span class="w">  </span><span class="nt">when</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">computer_obj is changed</span>
+</pre></div>
+</div>
+</section>
+<section id="module-win-domain-group">
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-group"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_group</span></code><a class="headerlink" href="#module-win-domain-group" title="Link to this heading"></a></h3>
+<p>Migrated to <a class="reference internal" href="../group_module.html#ansible-collections-microsoft-ad-group-module"><span class="std std-ref">microsoft.ad.group</span></a>.</p>
+<p>The following options have changed:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">attributes</span></code> - changed format as outlined in <a class="reference internal" href="guide_attributes.html#ansible-collections-microsoft-ad-docsite-guide-attributes"><span class="std std-ref">Attributes guid</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ignore_protection</span></code> - Has been removed and <code class="docutils literal notranslate"><span class="pre">state:</span> <span class="pre">absent</span></code> will also remove objects regardless of the protection status</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">organizational_unit</span></code> and <code class="docutils literal notranslate"><span class="pre">ou</span></code> - Have been removed, use <code class="docutils literal notranslate"><span class="pre">path</span></code> instead</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">protect</span></code> - Has been renamed to <code class="docutils literal notranslate"><span class="pre">protect_from_deletion</span></code> and is now not needed to be unset for <code class="docutils literal notranslate"><span class="pre">state:</span> <span class="pre">absent</span></code> to remove the group</p></li>
+</ul>
+<p>The return values for <code class="docutils literal notranslate"><span class="pre">win_domain_group</span></code> have also been simplified to only return:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">distinguished_name</span></code> - The Distinguished Name (<code class="docutils literal notranslate"><span class="pre">DN</span></code>) of the managed OU</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">object_guid</span></code> - The Object GUID of the managed OU</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sid</span></code> - The Security Identifier of the managed user</p></li>
+</ul>
+<p>All other return values have been removed, use <code class="docutils literal notranslate"><span class="pre">microsoft.ad.object_info</span></code> to get extra values if needed.</p>
+</section>
+<section id="module-win-domain-group-membership">
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-group-membership"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_group_membership</span></code><a class="headerlink" href="#module-win-domain-group-membership" title="Link to this heading"></a></h3>
+<p>Migrated to <a class="reference internal" href="../group_module.html#ansible-collections-microsoft-ad-group-module"><span class="std std-ref">microsoft.ad.group</span></a>.</p>
+<p>The functionality of this module has been merged with <code class="docutils literal notranslate"><span class="pre">microsoft.ad.group</span></code>. Use the <code class="docutils literal notranslate"><span class="pre">members</span></code> option to <code class="docutils literal notranslate"><span class="pre">add</span></code>, <code class="docutils literal notranslate"><span class="pre">remove</span></code>, or <code class="docutils literal notranslate"><span class="pre">set</span></code> to add, remove, or set group members respectively.</p>
+</section>
+<section id="module-win-domain-object-info">
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-object-info"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_object_info</span></code><a class="headerlink" href="#module-win-domain-object-info" title="Link to this heading"></a></h3>
+<p>Migrated to <a class="reference internal" href="../object_info_module.html#ansible-collections-microsoft-ad-object-info-module"><span class="std std-ref">microsoft.ad.object_info</span></a>.</p>
+<p>There are no known breaking changes and should work as a drop in replacement.</p>
+</section>
+<section id="module-win-domain-ou">
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-ou"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_ou</span></code><a class="headerlink" href="#module-win-domain-ou" title="Link to this heading"></a></h3>
+<p>Migrated to <a class="reference internal" href="../ou_module.html#ansible-collections-microsoft-ad-ou-module"><span class="std std-ref">microsoft.ad.ou</span></a>.</p>
+<p>The following options have changed:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">protected</span></code> - Has been renamed to <code class="docutils literal notranslate"><span class="pre">protect_from_deletion</span></code> and is now not needed to be unset for <code class="docutils literal notranslate"><span class="pre">state:</span> <span class="pre">absent</span></code> to remove the OU</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">recursive</span></code> - Has been removed and <code class="docutils literal notranslate"><span class="pre">state:</span> <span class="pre">absent</span></code> will also remove objects recursively</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">filter</span></code> - Has been removed, the <code class="docutils literal notranslate"><span class="pre">name</span></code> object refers to the OU name and <code class="docutils literal notranslate"><span class="pre">identity</span></code> can be used to select the OU by <code class="docutils literal notranslate"><span class="pre">DistinguishedName</span></code> or <code class="docutils literal notranslate"><span class="pre">ObjectGUID</span></code> if a rename or move is needed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">properties</span></code> - Has been removed, use the new <code class="docutils literal notranslate"><span class="pre">attributes</span></code> option</p></li>
+</ul>
+<p>The return values for <code class="docutils literal notranslate"><span class="pre">win_domain_ou</span></code> have also been simplified to only return:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">distinguished_name</span></code> - The Distinguished Name (<code class="docutils literal notranslate"><span class="pre">DN</span></code>) of the managed OU</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">object_guid</span></code> - The Object GUID of the managed OU</p></li>
+</ul>
+<p>All other return values have been removed, use <code class="docutils literal notranslate"><span class="pre">microsoft.ad.object_info</span></code> to get extra values if needed.</p>
+</section>
+<section id="module-win-domain-user">
+<span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-user"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_user</span></code><a class="headerlink" href="#module-win-domain-user" title="Link to this heading"></a></h3>
+<p>Migrated to <a class="reference internal" href="../user_module.html#ansible-collections-microsoft-ad-user-module"><span class="std std-ref">microsoft.ad.user</span></a>.</p>
+<p>The following options have changed:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">attributes</span></code> - changed format as outlined in <a class="reference internal" href="guide_attributes.html#ansible-collections-microsoft-ad-docsite-guide-attributes"><span class="std std-ref">Attributes guid</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">delegates</span></code> - changed format as outlined in <a class="reference internal" href="guide_list_values.html#ansible-collections-microsoft-ad-docsite-guide-list-values"><span class="std std-ref">Setting list values</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">groups</span></code> - changed format as outlined in <a class="reference internal" href="guide_list_values.html#ansible-collections-microsoft-ad-docsite-guide-list-values"><span class="std std-ref">Setting list values</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">groups_action</span></code> - has been removed in favour of the new <code class="docutils literal notranslate"><span class="pre">groups</span></code> format</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">groups_missing_behaviour</span></code> - has been moved into the <code class="docutils literal notranslate"><span class="pre">group</span></code> dictionary value as <code class="docutils literal notranslate"><span class="pre">missing_behaviour</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">spn</span></code>- changed format as outlined in <a class="reference internal" href="guide_list_values.html#ansible-collections-microsoft-ad-docsite-guide-list-values"><span class="std std-ref">Setting list values</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">spn_action</span></code> - has been removed in favour of the new <code class="docutils literal notranslate"><span class="pre">spn</span></code> format</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state</span></code> - No query option - use <code class="docutils literal notranslate"><span class="pre">microsoft.ad.object_info</span></code> instead</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">enabled</span></code> - Does not default to <code class="docutils literal notranslate"><span class="pre">true</span></code>. Creating a new user without a password will use <code class="docutils literal notranslate"><span class="pre">enabled=false</span></code> but setting a password will use <code class="docutils literal notranslate"><span class="pre">enabled=true</span></code></p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">groups_action</span></code> and <code class="docutils literal notranslate"><span class="pre">spn_action</span></code> <code class="docutils literal notranslate"><span class="pre">set</span></code> value was renamed to align with common practice. The <code class="docutils literal notranslate"><span class="pre">state=query</span></code> functionality has been removed to simplify the module and favour <code class="docutils literal notranslate"><span class="pre">microsoft.ad.object_info</span></code> which is designed to return information about AD objects. The <code class="docutils literal notranslate"><span class="pre">enabled</span></code> default was removed to allow setting other attributes on an existing AD object without always having to specify <code class="docutils literal notranslate"><span class="pre">enabled</span></code>.</p>
+<p>The return values for <code class="docutils literal notranslate"><span class="pre">win_domain_user</span></code> have also been simplified to only return:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">distinguished_name</span></code> - The Distinguished Name (<code class="docutils literal notranslate"><span class="pre">DN</span></code>) of the managed user</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">object_guid</span></code> - The Object GUID of the managed user</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sid</span></code> - The Security Identifier of the managed user</p></li>
+</ul>
+<p>All other return values have been removed, use <code class="docutils literal notranslate"><span class="pre">microsoft.ad.object_info</span></code> to get extra values if needed.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          
+
+<footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="guide_list_values.html" class="btn btn-neutral float-left" title="Setting list option values guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../computer_module.html" class="btn btn-neutral float-right" title="microsoft.ad.computer module – Manage Active Directory computer objects" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Ansible contributors.</p>
+  </div>
+
+  
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script><!-- extra footer elements for Ansible beyond RTD Sphinx Theme -->
+
+</body>
+</html>

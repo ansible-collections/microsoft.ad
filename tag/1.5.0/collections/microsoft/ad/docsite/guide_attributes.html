@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Attributes guide &mdash; Ansible collections  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=5707b69d" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/ansible.css?v=c5b67dd2" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/antsibull-minimal.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/rtd-ethical-ads.css?v=289b023e" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/images/Ansible-Mark-RGB_Black.png"/>
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../../_static/documentation_options.js?v=7f41d439"></script>
+        <script src="../../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="LDAP Connection guide" href="guide_ldap_connection.html" />
+    <link rel="prev" title="Microsoft.Ad" href="../index.html" /><!-- extra head elements for Ansible beyond RTD Sphinx Theme -->
+
+
+
+
+</head>
+
+<body class="wy-body-for-nav"><!-- extra body elements for Ansible beyond RTD Sphinx Theme -->
+
+<div class="DocSite-globalNav ansibleNav">
+  <ul>
+    <li><a href="https://www.ansible.com/blog" target="_blank">Blog</a></li>
+    <li><a href="https://forum.ansible.com/" target="_blank">Ansible community forum</a></li>
+    <li><a href="https://docs.ansible.com/" target="_blank">Documentation</a></li>
+  </ul>
+</div>
+
+<a class="DocSite-nav" href="/" style="padding-bottom: 30px;">
+
+  <img class="DocSiteNav-logo"
+    src="../../../../_static/images/Ansible-Mark-RGB_White.png"
+    alt="Ansible Logo">
+  <div class="DocSiteNav-title">Ansible Collections Documentation</div>
+</a>
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Ansible collections
+          </a><!--- Based on https://github.com/rtfd/sphinx_rtd_theme/pull/438/files -->
+
+<div class="version">
+  
+    
+  
+</div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <label class="sr-only" for="q">Search docs:</label>
+    <input type="text" class="st-default-search-input" id="q" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+  
+              <p class="caption" role="heading"><span class="caption-text">Collections:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">Collection Index</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html">Collections in the Microsoft Namespace</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html">Microsoft.Ad</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../index.html#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#communication">Communication</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html#scenario-guides">Scenario Guides</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#plugin-index">Plugin Index</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugin indexes:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index_filter.html">Index of all Filter Plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../index_inventory.html">Index of all Inventory Plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../index_module.html">Index of all Modules</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference indexes:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../environment_variables.html">Index of all Collection Environment Variables</a></li>
+</ul>
+<!-- extra nav elements for Ansible beyond RTD Sphinx Theme -->
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Ansible collections</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Collection Index</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Collections in the Microsoft Namespace</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Microsoft.Ad</a></li>
+      <li class="breadcrumb-item active">Attributes guide</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+  
+           <div itemprop="articleBody">
+             
+  <section id="attributes-guide">
+<span id="ansible-collections-microsoft-ad-docsite-guide-attributes"></span><h1>Attributes guide<a class="headerlink" href="#attributes-guide" title="Link to this heading"></a></h1>
+<p>A common use case for modules in this collection is to manage various Active Directory objects, such as users, groups, computers, and more. Some of these options are exposed as direct module options but other attributes might need to be set through the <code class="docutils literal notranslate"><span class="pre">attributes</span></code> option common to most modules in this collection.</p>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#ldap-attributes" id="id1">LDAP Attributes</a></p></li>
+<li><p><a class="reference internal" href="#setting-attributes" id="id2">Setting Attributes</a></p></li>
+<li><p><a class="reference internal" href="#attribute-types" id="id3">Attribute Types</a></p></li>
+</ul>
+</nav>
+<section id="ldap-attributes">
+<span id="ansible-collections-microsoft-ad-docsite-guide-attributes-ldap-attributes"></span><h2><a class="toc-backref" href="#id1" role="doc-backlink">LDAP Attributes</a><a class="headerlink" href="#ldap-attributes" title="Link to this heading"></a></h2>
+<p>One core component of Microsoft’s Active Directory (<code class="docutils literal notranslate"><span class="pre">AD</span></code>) is a Lightweight Directory Access Protocol (<code class="docutils literal notranslate"><span class="pre">LDAP</span></code>) database. This database contains all the information relevant to an AD environment such as users, computers, organizational units, and more. Each object contains a dynamic set of attributes to describe the object and conform to a schema. For example users contain attributes like <code class="docutils literal notranslate"><span class="pre">firstName</span></code>, <code class="docutils literal notranslate"><span class="pre">country</span></code>, <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> to describe the object itself. Microsoft document all the builtin attributes in AD in their <a class="reference external" href="https://learn.microsoft.com/en-us/windows/win32/adschema/attributes-all">AD Attribute Schema</a>. For example the <a class="reference external" href="https://learn.microsoft.com/en-us/windows/win32/adschema/a-samaccountname">SAM-Account-Name attribute</a> contains the metadata around this attribute. It includes fields like:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Ldap-Display-Name</span></code> - The LDAP display name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Syntax</span></code> - The underlying value type that the attribute stores</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">System-Only</span></code> - Whether the attribute is set by the system, effectively making it read only</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Is-Single-Value</span></code> - Whether the attribute value is a single value or an array/list of values</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">Ldap-Display-Name</span></code> is the attribute name/key that is referenced by the Ansible module. For example to manage the <code class="docutils literal notranslate"><span class="pre">SAM-Account-Name</span></code> attribute, it would be referenced by the key <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code>. Each attribute has at least 1 value associated with it, but some attributes can have multiple values. For example <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> is a <code class="docutils literal notranslate"><span class="pre">Is-Single-Value</span></code> attribute so only has one value but <code class="docutils literal notranslate"><span class="pre">userCert</span></code> can contain multiple values. The <code class="docutils literal notranslate"><span class="pre">Active</span> <span class="pre">Directory</span> <span class="pre">Users</span> <span class="pre">and</span> <span class="pre">Computers</span></code> snap-in (or <code class="docutils literal notranslate"><span class="pre">dsa.msc</span></code>) can be used to view these LDAP attributes in the advanced mode. This is useful for seeing existing values as well as what attributes can be set on an object.</p>
+<p>The LDAP schema in AD can also be extended to add custom attributes for an organization. These custom attributes are also supported in the modules in this collection. To get the LDAP schema information for attributes, the following can be run in PowerShell:</p>
+<div class="highlight-PowerShell notranslate"><div class="highlight"><pre><span></span><span class="k">Function</span> <span class="nb">Get-AttributeMetadata</span> <span class="p">{</span>
+    <span class="p">[</span><span class="k">CmdletBinding</span><span class="p">()]</span>
+    <span class="k">param</span> <span class="p">([</span><span class="k">Parameter</span><span class="p">(</span><span class="k">ValueFromPipeline</span><span class="p">)]</span><span class="no">[string[]]</span><span class="nv">$Name</span><span class="p">)</span>
+
+    <span class="k">begin</span> <span class="p">{</span>
+        <span class="nv">$schema</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-ADRootDSE</span> <span class="n">-Properties</span> <span class="n">subschemaSubentry</span><span class="p">).</span><span class="n">subschemaSubentry</span>
+        <span class="nv">$getParams</span> <span class="p">=</span> <span class="p">@{</span>
+            <span class="n">SearchBase</span> <span class="p">=</span> <span class="nv">$schema</span>
+            <span class="n">LDAPFilter</span> <span class="p">=</span> <span class="s1">&#39;(objectClass=*)&#39;</span>
+            <span class="n">Properties</span> <span class="p">=</span> <span class="s1">&#39;attributeTypes&#39;</span>
+        <span class="p">}</span>
+        <span class="nv">$attributes</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-ADObject</span> <span class="nv">@getParams</span><span class="p">).</span><span class="n">attributeTypes</span>
+        <span class="nv">$queried</span> <span class="p">=</span> <span class="nv">$false</span>
+    <span class="p">}</span>
+
+    <span class="k">process</span> <span class="p">{</span>
+        <span class="k">foreach</span> <span class="p">(</span><span class="nv">$n</span> <span class="k">in</span> <span class="nv">$Name</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$queried</span> <span class="p">=</span> <span class="nv">$true</span>
+            <span class="nv">$attributes</span> <span class="p">|</span> <span class="nb">Where-Object</span> <span class="p">{</span>
+                <span class="nv">$_</span> <span class="o">-like</span> <span class="s2">&quot;*Name &#39;$n&#39;*&quot;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="k">end</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">-not</span> <span class="nv">$queried</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nv">$attributes</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c"># Display all attributes</span>
+<span class="nb">Get-AttributeMetadata</span>
+
+<span class="c"># Get specific attributes</span>
+<span class="nb">Get-AttributeMetadata</span> <span class="n">-Name</span> <span class="n">sAMAccountName</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">objectGuid</span>
+</pre></div>
+</div>
+<p>The output is in the format:</p>
+<div class="highlight-YAML+Jinja notranslate"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">( $ATTRIBUTE_OID NAME &#39;$ATTRIBUTE_NAME&#39; SYNTAX &#39;$TYPE_OID&#39; [SINGLE-VALUE|NO-USER-MODIFICATION] )</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">$TYPE_OID</span></code> specifies the value type that can be used for this attribute. search the OID online for more information. The <code class="docutils literal notranslate"><span class="pre">SINGLE-VALUE</span></code> specifies if the attribute can only store 1 value. The <code class="docutils literal notranslate"><span class="pre">NO-USER-MODIFICATION</span></code> specifies if the attribute is read only and cannot be set.</p>
+<p>The last example outputs:</p>
+<div class="highlight-YAML+Jinja notranslate"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">( 1.2.840.113556.1.4.221 NAME &#39;sAMAccountName&#39; SYNTAX &#39;1.3.6.1.4.1.1466.115.121.1.15&#39; SINGLE-VALUE )</span>
+<span class="l l-Scalar l-Scalar-Plain">( 2.5.4.10 NAME &#39;o&#39; SYNTAX &#39;1.3.6.1.4.1.1466.115.121.1.15&#39; )</span>
+<span class="l l-Scalar l-Scalar-Plain">( 1.2.840.113556.1.4.2 NAME &#39;objectGUID&#39; SYNTAX &#39;1.3.6.1.4.1.1466.115.121.1.40&#39; SINGLE-VALUE NO-USER-MODIFICATION )</span>
+</pre></div>
+</div>
+<p>This shows the <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> is a string that can only have 1 value. The <code class="docutils literal notranslate"><span class="pre">o</span></code> attribute is also a string but can store multiple values. The <code class="docutils literal notranslate"><span class="pre">objectGUID</span></code> is a byte array value that can only have 1 value and is also read only.</p>
+</section>
+<section id="setting-attributes">
+<span id="ansible-collections-microsoft-ad-docsite-guide-attributes-setting-attributes"></span><h2><a class="toc-backref" href="#id2" role="doc-backlink">Setting Attributes</a><a class="headerlink" href="#setting-attributes" title="Link to this heading"></a></h2>
+<p>Each module that manages an Active Directory object will have an <code class="docutils literal notranslate"><span class="pre">attributes</span></code> option which is used to configure LDAP attributes directly. The dictionary accepts three keys:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">add</span></code> - Adds the attribute values if not present</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">remove</span></code> - Removes the attribute values if present</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set</span></code> - Replaces the existing attribute values with the ones specified.</p></li>
+</ul>
+<p>Each of these keys contain a dictionary value where the keys are the LDAP attribute names by <code class="docutils literal notranslate"><span class="pre">ldapDisplayName</span></code> and their values to set. As an LDAP attribute can contain multiple values, the values specified can either be a single value or a list of values, for example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyUser</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+<span class="w">    </span><span class="nt">attributes</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">set</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">comment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">My Comment</span>
+<span class="w">        </span><span class="nt">extensionName</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Extension Value 1</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Extension Value 2</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Extension Value 3</span>
+</pre></div>
+</div>
+<p>The above example will set the <code class="docutils literal notranslate"><span class="pre">comment</span></code> LDAP attribute of the <code class="docutils literal notranslate"><span class="pre">MyUser</span></code> object to the value specified. It will also ensure the <code class="docutils literal notranslate"><span class="pre">extensionName</span></code> attribute is set to those three values, removing any other value if present.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">add</span></code> key can be used to ensure the LDAP attribute values specified are added to the Attribute value list. The opposite is true for attributes under the <code class="docutils literal notranslate"><span class="pre">remove</span></code> key. Any attributes there will have the values specified removed if they are present on the attribute in question. For example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyUser</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+<span class="w">    </span><span class="nt">attributes</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">add</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">extensionName</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Extension Value 1</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Extension Value 3</span>
+<span class="w">      </span><span class="nt">remove</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">extensionName</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Extension Value 2</span>
+</pre></div>
+</div>
+<p>The above example will ensure the <code class="docutils literal notranslate"><span class="pre">extensionName</span></code> has the values <code class="docutils literal notranslate"><span class="pre">Extension</span> <span class="pre">Value</span> <span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">Extension</span> <span class="pre">Value</span> <span class="pre">3</span></code> and remove <code class="docutils literal notranslate"><span class="pre">Extension</span> <span class="pre">Value</span> <span class="pre">2</span></code> if it is set. Because <code class="docutils literal notranslate"><span class="pre">set</span></code> was not used, any existing values will not be touched unless they are in the <code class="docutils literal notranslate"><span class="pre">remove</span></code> entry.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Only use LDAP attributes that can contain multiple values with <code class="docutils literal notranslate"><span class="pre">add</span></code> or <code class="docutils literal notranslate"><span class="pre">remove</span></code>. Using a <code class="docutils literal notranslate"><span class="pre">Is-Single-Value</span></code> attribute will result in undefined behaviour.</p>
+</div>
+<p>To clear an attribute value, define the attribute under <code class="docutils literal notranslate"><span class="pre">set</span></code> and set the value to either null (<code class="docutils literal notranslate"><span class="pre">~</span></code>) or an empty list. For example</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyUser</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+<span class="w">    </span><span class="nt">attributes</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">set</span><span class="p">:</span>
+<span class="w">        </span><span class="c1"># Null can either be represented by no value</span>
+<span class="w">        </span><span class="c1"># or with tilde (~)</span>
+<span class="w">        </span><span class="nt">comment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">~</span>
+<span class="w">        </span><span class="nt">company</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">extensionName</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+</pre></div>
+</div>
+<p>This task will ensure the <code class="docutils literal notranslate"><span class="pre">comment</span></code>, <code class="docutils literal notranslate"><span class="pre">company</span></code>, and <code class="docutils literal notranslate"><span class="pre">extensionName</span></code> attributes are cleared of any value.</p>
+</section>
+<section id="attribute-types">
+<span id="ansible-collections-microsoft-ad-docsite-guide-attributes-attribute-types"></span><h2><a class="toc-backref" href="#id3" role="doc-backlink">Attribute Types</a><a class="headerlink" href="#attribute-types" title="Link to this heading"></a></h2>
+<p>There are a few different value types that can be stored in an attribute.
+The common types are:</p>
+<ul class="simple">
+<li><p>Strings</p></li>
+<li><p>Integers</p></li>
+<li><p>Booleans</p></li>
+<li><p>Byte Arrays</p></li>
+<li><p>Dates</p></li>
+<li><p>Security Descriptors</p></li>
+</ul>
+<p>Setting a string, integer, or boolean value through an Ansible task is simply done through the YAML syntax, for example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">string</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">This is a string</span>
+<span class="nt">integer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="nt">boolean</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Strings are compared in a case sensitive operation, that is <code class="docutils literal notranslate"><span class="pre">&quot;String&quot;</span> <span class="pre">!=</span> <span class="pre">&quot;string&quot;</span></code>.</p>
+</div>
+<p>These simple types can also be represented by a dictionary with the keys <code class="docutils literal notranslate"><span class="pre">type</span></code> and <code class="docutils literal notranslate"><span class="pre">value</span></code>. The type key can be set to one of the following:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">bool</span></code> - Value is casted to a boolean</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bytes</span></code> - Value is decoded as a base64 string</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">date_time</span></code> - Value is decoded as an ISO 8601 datetime string</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">int</span></code> - Value is decoded as an integer</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">security_descriptor</span></code> - Value is decoded as a SDDL string</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">string</span></code> - Value is casted to a string</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">raw</span></code> - Value is used as is - this is the default type used</p></li>
+</ul>
+<p>This looks like the following:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyUser</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+<span class="w">    </span><span class="nt">attributes</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">set</span><span class="p">:</span>
+<span class="w">        </span><span class="c1"># comment: A raw value that is a string</span>
+<span class="w">        </span><span class="nt">comment</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raw</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A string</span>
+
+<span class="w">        </span><span class="c1"># userAccountControl: 1234</span>
+<span class="w">        </span><span class="nt">userAccountControl</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">int</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1234</span>
+
+<span class="w">        </span><span class="c1"># extensionName: [&#39;Value 1&#39;, &#39;Value 2&#39;]</span>
+<span class="w">        </span><span class="nt">extensionName</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raw</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Value 1</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raw</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Value 2</span>
+</pre></div>
+</div>
+<p>The complex dictionary value with the <code class="docutils literal notranslate"><span class="pre">type</span></code> and <code class="docutils literal notranslate"><span class="pre">value</span></code> structure is only really needed for the more complex types listed below. If omitted the value is treated as <code class="docutils literal notranslate"><span class="pre">type:</span> <span class="pre">raw</span></code>.</p>
+<section id="byte-arrays">
+<h3>Byte Arrays<a class="headerlink" href="#byte-arrays" title="Link to this heading"></a></h3>
+<p>As raw bytes cannot be expressed in YAML, to set an attribute with a byte array value the following format is used:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyUser</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+<span class="w">    </span><span class="nt">attributes</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">set</span><span class="p">:</span>
+<span class="w">        </span><span class="c1"># Attribute with single value</span>
+<span class="w">        </span><span class="nt">dsaSignature</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bytes</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">YmluYXJ5</span>
+<span class="w">        </span><span class="c1"># Attribute with multiple values</span>
+<span class="w">        </span><span class="nt">userCertificate</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bytes</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Zm9vYmFy</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bytes</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">YmFyZm9v</span>
+</pre></div>
+</div>
+<p>The value specified here is the bytes encoded as a base64 string.</p>
+<p>The <a class="reference external" href="https://docs.ansible.com/ansible/devel/collections/ansible/builtin/b64encode_filter.html#ansible-collections-ansible-builtin-b64encode-filter" title="(in Ansible vdevel)"><span class="xref std std-ref">ansible.builtin.b64encode filter</span></a> can be used to encode strings on the fly, and the <a class="reference external" href="https://docs.ansible.com/ansible/devel/collections/ansible/builtin/file_lookup.html#ansible-collections-ansible-builtin-file-lookup" title="(in Ansible vdevel)"><span class="xref std std-ref">ansible.builtin.file lookup</span></a> could be used to read data from a file.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">vars</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">sig_data</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">lookup(&#39;ansible.builtin.file&#39;,</span><span class="nv"> </span><span class="s">&#39;/path/to/my/sig&#39;)</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyUser</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+<span class="w">    </span><span class="nt">attributes</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">set</span><span class="p">:</span>
+<span class="w">        </span><span class="c1"># Attribute with single value</span>
+<span class="w">        </span><span class="nt">dsaSignature</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bytes</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">sig_data</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">ansible.builtin.b64encode</span><span class="nv"> </span><span class="s">}}&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="dates">
+<h3>Dates<a class="headerlink" href="#dates" title="Link to this heading"></a></h3>
+<p>Attributes with datetime values are technically integer values but represent a point in time. For ease of use, these entries can be represented as an ISO 8601 extended format datetime and will be internally represented by the integer value. To specify an attribute value in the datetime format, use the same dictionary value structure as above but set the <code class="docutils literal notranslate"><span class="pre">type</span></code> to <code class="docutils literal notranslate"><span class="pre">date_time</span></code>. For example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyUser</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+<span class="w">    </span><span class="nt">attributes</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">set</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">dateAttributeSingleValue</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">date_time</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2019-09-07T15:50:00+00:00&#39;</span>
+<span class="w">        </span><span class="nt">dateAttributeMultipleValue</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">date_time</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2019-09-07T15:50:00Z&#39;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">date_time</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2019-09-07T11:50:00-04:00&#39;</span>
+</pre></div>
+</div>
+<p>Internally the datetime is converted to the UTC time and converted to the number of 100 nanosecond increments since 1601-01-01. This PowerShell snippet shows what is happening internally to get the integer value:</p>
+<div class="highlight-PowerShell notranslate"><div class="highlight"><pre><span></span><span class="nv">$dt</span> <span class="p">=</span> <span class="s1">&#39;2019-09-07T15:50:00Z&#39;</span>
+<span class="nv">$dtVal</span> <span class="p">=</span> <span class="no">[DateTimeOffset]</span><span class="p">::</span><span class="n">ParseExact</span><span class="p">(</span>
+    <span class="nv">$dt</span><span class="p">,</span>
+    <span class="no">[string[]]</span><span class="p">@(</span><span class="s2">&quot;yyyy-MM-dd&#39;T&#39;HH:mm:ss.FFFFFFFK&quot;</span><span class="p">),</span>
+    <span class="no">[System.Globalization.CultureInfo]</span><span class="p">::</span><span class="n">InvariantCulture</span><span class="p">,</span>
+    <span class="no">[System.Globalization.DateTimeStyles]</span><span class="p">::</span><span class="n">AssumeUniversal</span><span class="p">)</span>
+<span class="nv">$dtVal</span><span class="p">.</span><span class="n">UtcDateTime</span><span class="p">.</span><span class="n">ToFileTimeUtc</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If no timezone is specified, it is assumed to be in UTC.</p>
+</div>
+</section>
+<section id="security-descriptors">
+<h3>Security Descriptors<a class="headerlink" href="#security-descriptors" title="Link to this heading"></a></h3>
+<p>A security descriptor is stored as a byte array in the attribute but the <code class="docutils literal notranslate"><span class="pre">security_descriptor</span></code> type can be used to more conveniently represent this value in a playbook. The value specified is the <a class="reference external" href="https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language">Security Descriptor Definition Language</a> (<code class="docutils literal notranslate"><span class="pre">SDDL</span></code>). This string is internally converted to the byte array needed to set the SDDL. An example of setting an attribute of this type is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyUser</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+<span class="w">    </span><span class="nt">attributes</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">set</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">nTSecurityDescriptor</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security_descriptor</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">O:DAG:DAD:PAI(A;CI;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)</span>
+</pre></div>
+</div>
+<p>SDDL strings can be quite complex so building them manually is ill-advised. It is recommended to build a test object in the <code class="docutils literal notranslate"><span class="pre">Active</span> <span class="pre">Directory</span> <span class="pre">Users</span> <span class="pre">and</span> <span class="pre">Computers</span></code> snap-in (or <code class="docutils literal notranslate"><span class="pre">dsa.msc</span></code>) and set the security as needed in the <code class="docutils literal notranslate"><span class="pre">Security</span></code> tab. From there the SDDL string can be retrieved by doing the following:</p>
+<div class="highlight-PowerShell notranslate"><div class="highlight"><pre><span></span><span class="nv">$dn</span> <span class="p">=</span> <span class="s1">&#39;CN=ObjectName,DC=domain,DC=test&#39;</span>
+<span class="nv">$obj</span> <span class="p">=</span> <span class="nb">Get-ADObject</span> <span class="n">-Identity</span> <span class="nv">$dn</span> <span class="n">-Properties</span> <span class="n">nTSecurityDescriptor</span>
+<span class="nv">$obj</span><span class="p">.</span><span class="n">nTSecurityDescriptor</span><span class="p">.</span><span class="n">GetSecurityDescriptorSddlForm</span><span class="p">(</span><span class="s1">&#39;All&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          
+
+<footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="Microsoft.Ad" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="guide_ldap_connection.html" class="btn btn-neutral float-right" title="LDAP Connection guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Ansible contributors.</p>
+  </div>
+
+  
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script><!-- extra footer elements for Ansible beyond RTD Sphinx Theme -->
+
+</body>
+</html>
