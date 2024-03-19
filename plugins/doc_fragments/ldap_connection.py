@@ -197,4 +197,5 @@ requirements:
 - pyspnego >= 0.8.0
 - pyspnego[kerberos] - For Kerberos and server lookup support
 - sansldap
+- dpapi-ng - For LAPS decryption support
 """
