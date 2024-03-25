@@ -66,6 +66,9 @@ $setParams = @{
                 type = 'bool'
             }
             Attribute = 'LockedOut'
+            # We cannot lock a user and creating a user that is unlocked
+            # requires no action.
+            New = {}
             Set = {
                 param($Module, $ADParams, $SetParams, $ADObject)
 

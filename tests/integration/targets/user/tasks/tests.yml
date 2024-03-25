@@ -510,6 +510,7 @@
   user:
     name: MyUser
     state: present
+    account_locked: False
     city: Brisbane
     company: Red Hat
     country: au
@@ -563,6 +564,7 @@
   user:
     name: MyUser
     state: present
+    account_locked: False
     city: Brisbane
     company: Red Hat
     country: au
@@ -685,6 +687,7 @@
   user:
     name: MyUser
     state: present
+    account_locked: False
     city: Brisbane
     company: Red Hat
     country: au
