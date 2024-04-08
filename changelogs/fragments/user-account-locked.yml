@@ -1,0 +1,4 @@
+bugfixes:
+  - >-
+    microsoft.ad.user - Fix issue when creating a new user account with ``account_locked: false`` -
+    https://github.com/ansible-collections/microsoft.ad/issues/108
