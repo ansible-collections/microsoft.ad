@@ -143,7 +143,7 @@ Function Get-CurrentState {
     }
 
     [PSCustomObject]@{
-        HostName = $env:COMPUTERNAME
+        HostName = [System.Net.Dns]::GetHostName()
         PartOfDomain = $cs.PartOfDomain
         DnsDomainName = $domainName
         WorkgroupName = $cs.Workgroup
