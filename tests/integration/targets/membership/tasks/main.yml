@@ -1,7 +1,7 @@
 - set_fact:
     get_result_script: |
       $Ansible.Changed = $false
-      $cs = Get-CimInstance -ClassName Win32_ComputerSystem -Property Domain, PartOfDomain, Workgroup
+      $cs = Get-CimInstance -ClassName Win32_ComputerSystem -Property DNSHostName, Domain, PartOfDomain, Workgroup
       $domainName = if ($cs.PartOfDomain) {
           try {
               [System.DirectoryServices.ActiveDirectory.Domain]::GetComputerDomain().Name
@@ -15,7 +15,8 @@
       }
 
       [PSCustomObject]@{
-          HostName = $env:COMPUTERNAME
+          HostName = $cs.DNSHostName
+          NetbiosName = $env:COMPUTERNAME
           PartOfDomain = $cs.PartOfDomain
           DnsDomainName = $domainName
           WorkgroupName = $cs.Workgroup
@@ -23,8 +24,13 @@
 
     get_ad_result_script: |
       $Ansible.Changed = $false
-      Get-ADComputer -Filter { Name -ne 'DC' } -Properties DistinguishedName, Name, Enabled |
-          Select-Object -Property DistinguishedName, Name, Enabled
+      Get-ADComputer -Filter { Name -ne 'DC' } -Properties DistinguishedName, DNSHostName, Name, Enabled |
+          Select-Object -Property @(
+              'DistinguishedName'
+              @{ N = 'DNSHostName'; E = { $_.DNSHostName.Substring(0, $_.DNSHostName.IndexOf('.')) } }
+              'Name'
+              'Enabled'
+          )
 
 - name: join domain invalid OU
   membership:
@@ -65,6 +71,7 @@
     - join_domain_check.reboot_required == False
     - join_domain_check_actual.output[0]["DnsDomainName"] == None
     - join_domain_check_actual.output[0]["HostName"] == "TEST"
+    - join_domain_check_actual.output[0]["NetbiosName"] == "TEST"
     - join_domain_check_actual.output[0]["PartOfDomain"] == False
     - join_domain_check_actual.output[0]["WorkgroupName"] == "WORKGROUP"
 
@@ -95,9 +102,11 @@
     - join_domain.reboot_required == False
     - join_domain_actual.output[0]["DnsDomainName"] == domain_realm
     - join_domain_actual.output[0]["HostName"] == "TEST"
+    - join_domain_actual.output[0]["NetbiosName"] == "TEST"
     - join_domain_actual.output[0]["PartOfDomain"] == True
     - join_domain_actual.output[0]["WorkgroupName"] == None
     - join_domain_ad_actual.output | length == 1
+    - join_domain_ad_actual.output[0]["DNSHostName"] == "TEST"
     - join_domain_ad_actual.output[0]["Name"] == "TEST"
     - join_domain_ad_actual.output[0]["Enabled"] == True
 
@@ -132,7 +141,7 @@
     dns_domain_name: '{{ domain_realm }}'
     domain_admin_user: '{{ domain_user_upn }}'
     domain_admin_password: '{{ domain_password }}'
-    hostname: OTHER
+    hostname: TEST1-long-HOSTNAME1
     state: domain
     reboot: true
   register: rename_host_domain_check
@@ -156,9 +165,11 @@
     - rename_host_domain_check.reboot_required == False
     - rename_host_domain_check_actual.output[0]["DnsDomainName"] == domain_realm
     - rename_host_domain_check_actual.output[0]["HostName"] == "TEST"
+    - rename_host_domain_check_actual.output[0]["NetbiosName"] == "TEST"
     - rename_host_domain_check_actual.output[0]["PartOfDomain"] == True
     - rename_host_domain_check_actual.output[0]["WorkgroupName"] == None
     - rename_host_domain_check_ad_actual.output | length == 1
+    - rename_host_domain_check_ad_actual.output[0]["DNSHostName"] == "TEST"
     - rename_host_domain_check_ad_actual.output[0]["Name"] == "TEST"
     - rename_host_domain_check_ad_actual.output[0]["Enabled"] == True
 
@@ -167,7 +178,7 @@
     dns_domain_name: '{{ domain_realm }}'
     domain_admin_user: '{{ domain_user_upn }}'
     domain_admin_password: '{{ domain_password }}'
-    hostname: OTHER
+    hostname: TEST1-long-HOSTNAME1
     state: domain
     reboot: true
   register: rename_host_domain
@@ -183,18 +194,108 @@
   delegate_to: DC
   register: rename_host_domain_ad_actual
 
-- name: assert join domain
+- name: assert rename hostname of domain joined host
   assert:
     that:
     - rename_host_domain is changed
     - rename_host_domain.reboot_required == False
     - rename_host_domain_actual.output[0]["DnsDomainName"] == domain_realm
-    - rename_host_domain_actual.output[0]["HostName"] == "OTHER"
+    - rename_host_domain_actual.output[0]["HostName"] == "TEST1-long-HOSTNAME1"
+    - rename_host_domain_actual.output[0]["NetbiosName"] == "TEST1-LONG-HOST"
     - rename_host_domain_actual.output[0]["PartOfDomain"] == True
     - rename_host_domain_actual.output[0]["WorkgroupName"] == None
     - rename_host_domain_ad_actual.output | length == 1
-    - rename_host_domain_ad_actual.output[0]["Name"] == "OTHER"
+    - rename_host_domain_ad_actual.output[0]["DNSHostName"] == "TEST1-long-HOSTNAME1"
+    - rename_host_domain_ad_actual.output[0]["Name"] == "TEST1-LONG-HOST"
     - rename_host_domain_ad_actual.output[0]["Enabled"] == True
+
+- name: rename hostname of domain joined host - idempotent
+  membership:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    hostname: TEST1-long-HOSTNAME1
+    state: domain
+    reboot: true
+  register: rename_host_domain_again
+
+- name: assert rename hostname of domain joined host - idempotent
+  assert:
+    that:
+    - not rename_host_domain_again is changed
+
+- name: rename hostname of domain joined host netbios portion - check mode
+  membership:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    hostname: TEST2-long-HOSTNAME1
+    state: domain
+    reboot: true
+  register: rename_host_domain_netbios_check
+  check_mode: True
+
+- name: get result of rename hostname of domain joined host netbios portion - check mode
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: rename_host_domain_netbios_check_actual
+
+- name: get ad result of rename hostname of domain joined host netbios portion - check mode
+  ansible.windows.win_powershell:
+    script: '{{ get_ad_result_script }}'
+  delegate_to: DC
+  register: rename_host_domain_netbios_check_ad_actual
+
+- name: assert rename hostname of domain joined host netbios portion - check mode
+  assert:
+    that:
+    - rename_host_domain_netbios_check is changed
+    - rename_host_domain_netbios_check.reboot_required == False
+    - rename_host_domain_netbios_check_actual.output[0]["DnsDomainName"] == domain_realm
+    - rename_host_domain_netbios_check_actual.output[0]["HostName"] == "TEST1-long-HOSTNAME1"
+    - rename_host_domain_netbios_check_actual.output[0]["NetbiosName"] == "TEST1-LONG-HOST"
+    - rename_host_domain_netbios_check_actual.output[0]["PartOfDomain"] == True
+    - rename_host_domain_netbios_check_actual.output[0]["WorkgroupName"] == None
+    - rename_host_domain_netbios_check_ad_actual.output | length == 1
+    - rename_host_domain_netbios_check_ad_actual.output[0]["DNSHostName"] == "TEST1-long-HOSTNAME1"
+    - rename_host_domain_netbios_check_ad_actual.output[0]["Name"] == "TEST1-LONG-HOST"
+    - rename_host_domain_netbios_check_ad_actual.output[0]["Enabled"] == True
+
+- name: rename hostname of domain joined host netbios portion
+  membership:
+    dns_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    hostname: TEST2-long-HOSTNAME1
+    state: domain
+    reboot: true
+  register: rename_host_domain_netbios
+
+- name: get result of rename hostname of domain joined host netbios portion
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: rename_host_domain_netbios_actual
+
+- name: get ad result of rename hostname of domain joined host netbios portion
+  ansible.windows.win_powershell:
+    script: '{{ get_ad_result_script }}'
+  delegate_to: DC
+  register: rename_host_domain_netbios_ad_actual
+
+- name: assert rename hostname of domain joined host
+  assert:
+    that:
+    - rename_host_domain_netbios is changed
+    - rename_host_domain_netbios.reboot_required == False
+    - rename_host_domain_netbios_actual.output[0]["DnsDomainName"] == domain_realm
+    - rename_host_domain_netbios_actual.output[0]["HostName"] == "TEST2-long-HOSTNAME1"
+    - rename_host_domain_netbios_actual.output[0]["NetbiosName"] == "TEST2-LONG-HOST"
+    - rename_host_domain_netbios_actual.output[0]["PartOfDomain"] == True
+    - rename_host_domain_netbios_actual.output[0]["WorkgroupName"] == None
+    - rename_host_domain_netbios_ad_actual.output | length == 1
+    - rename_host_domain_netbios_ad_actual.output[0]["DNSHostName"] == "TEST2-long-HOSTNAME1"
+    - rename_host_domain_netbios_ad_actual.output[0]["Name"] == "TEST2-LONG-HOST"
+    - rename_host_domain_netbios_ad_actual.output[0]["Enabled"] == True
 
 - name: change domain to workgroup - check mode
   membership:
@@ -222,11 +323,13 @@
     - to_workgroup_check is changed
     - to_workgroup_check.reboot_required == True
     - to_workgroup_check_actual.output[0]["DnsDomainName"] == domain_realm
-    - to_workgroup_check_actual.output[0]["HostName"] == "OTHER"
+    - to_workgroup_check_actual.output[0]["HostName"] == "TEST2-long-HOSTNAME1"
+    - to_workgroup_check_actual.output[0]["NetbiosName"] == "TEST2-LONG-HOST"
     - to_workgroup_check_actual.output[0]["PartOfDomain"] == True
     - to_workgroup_check_actual.output[0]["WorkgroupName"] == None
     - to_workgroup_check_ad_actual.output | length == 1
-    - to_workgroup_check_ad_actual.output[0]["Name"] == "OTHER"
+    - to_workgroup_check_ad_actual.output[0]["DNSHostName"] == "TEST2-long-HOSTNAME1"
+    - to_workgroup_check_ad_actual.output[0]["Name"] == "TEST2-LONG-HOST"
     - to_workgroup_check_ad_actual.output[0]["Enabled"] == True
 
 - name: change domain to workgroup
@@ -238,7 +341,7 @@
   register: to_workgroup
 
 - set_fact:
-    local_user: OTHER\{{ ansible_user }}
+    local_user: TEST2-LONG-HOST\{{ ansible_user }}
 
 - ansible.windows.win_reboot:
   when: to_workgroup.reboot_required
@@ -266,16 +369,18 @@
     - to_workgroup is changed
     - to_workgroup.reboot_required == True
     - to_workgroup_actual.output[0]["DnsDomainName"] == None
-    - to_workgroup_actual.output[0]["HostName"] == "OTHER"
+    - to_workgroup_actual.output[0]["HostName"] == "TEST2-long-HOSTNAME1"
+    - to_workgroup_actual.output[0]["NetbiosName"] == "TEST2-LONG-HOST"
     - to_workgroup_actual.output[0]["PartOfDomain"] == False
     - to_workgroup_actual.output[0]["WorkgroupName"] == "TEST"
     - to_workgroup_ad_actual.output | length == 1
-    - to_workgroup_ad_actual.output[0]["Name"] == "OTHER"
+    - to_workgroup_ad_actual.output[0]["DNSHostName"] == "TEST2-long-HOSTNAME1"
+    - to_workgroup_ad_actual.output[0]["Name"] == "TEST2-LONG-HOST"
     - to_workgroup_ad_actual.output[0]["Enabled"] == False
 
 - name: remove orphaned AD account for later tests
   microsoft.ad.computer:
-    name: OTHER
+    name: TEST2-LONG-HOST
     state: absent
   delegate_to: DC
 
@@ -315,7 +420,8 @@
     - change_workgroup_check is changed
     - change_workgroup_check.reboot_required == False
     - change_workgroup_check_actual.output[0]["DnsDomainName"] == None
-    - change_workgroup_check_actual.output[0]["HostName"] == "OTHER"
+    - change_workgroup_check_actual.output[0]["HostName"] == "TEST2-long-HOSTNAME1"
+    - change_workgroup_check_actual.output[0]["NetbiosName"] == "TEST2-LONG-HOST"
     - change_workgroup_check_actual.output[0]["PartOfDomain"] == False
     - change_workgroup_check_actual.output[0]["WorkgroupName"] == "TEST"
 
@@ -339,7 +445,8 @@
     - change_workgroup is changed
     - change_workgroup.reboot_required == False
     - change_workgroup_actual.output[0]["DnsDomainName"] == None
-    - change_workgroup_actual.output[0]["HostName"] == "OTHER"
+    - change_workgroup_actual.output[0]["HostName"] == "TEST2-long-HOSTNAME1"
+    - change_workgroup_actual.output[0]["NetbiosName"] == "TEST2-LONG-HOST"
     - change_workgroup_actual.output[0]["PartOfDomain"] == False
     - change_workgroup_actual.output[0]["WorkgroupName"] == "TEST2"
 
@@ -350,7 +457,7 @@
     domain_admin_password: '{{ domain_password }}'
     state: workgroup
     reboot: true
-    hostname: FOO
+    hostname: TEST1-long-HOSTNAME2
   register: change_hostname_check
   check_mode: true
 
@@ -365,7 +472,8 @@
     - change_hostname_check is changed
     - change_hostname_check.reboot_required == False
     - change_hostname_check_actual.output[0]["DnsDomainName"] == None
-    - change_hostname_check_actual.output[0]["HostName"] == "OTHER"
+    - change_hostname_check_actual.output[0]["HostName"] == "TEST2-long-HOSTNAME1"
+    - change_hostname_check_actual.output[0]["NetbiosName"] == "TEST2-LONG-HOST"
     - change_hostname_check_actual.output[0]["PartOfDomain"] == False
     - change_hostname_check_actual.output[0]["WorkgroupName"] == "TEST2"
 
@@ -376,7 +484,7 @@
     domain_admin_password: '{{ domain_password }}'
     state: workgroup
     reboot: true
-    hostname: FOO
+    hostname: TEST1-long-HOSTNAME2
   register: change_hostname
 
 - name: get result of change just the hostname
@@ -384,15 +492,84 @@
     script: '{{ get_result_script }}'
   register: change_hostname_actual
 
-- name: assert change just the hostname - check mode
+- name: assert change just the hostname
   assert:
     that:
     - change_hostname is changed
     - change_hostname.reboot_required == False
     - change_hostname_actual.output[0]["DnsDomainName"] == None
-    - change_hostname_actual.output[0]["HostName"] == "FOO"
+    - change_hostname_actual.output[0]["HostName"] == "TEST1-long-HOSTNAME2"
+    - change_hostname_actual.output[0]["NetbiosName"] == "TEST1-LONG-HOST"
     - change_hostname_actual.output[0]["PartOfDomain"] == False
     - change_hostname_actual.output[0]["WorkgroupName"] == "TEST2"
+
+- name: change just the hostname - idempotent
+  membership:
+    workgroup_name: TEST2
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    state: workgroup
+    reboot: true
+    hostname: TEST1-long-HOSTNAME2
+  register: change_hostname_again
+
+- name: assert change just the hostname - idempotent
+  assert:
+    that:
+    - not change_hostname_again is changed
+
+- name: change just the hostname netbios portion - check mode
+  membership:
+    workgroup_name: TEST2
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    state: workgroup
+    reboot: true
+    hostname: TEST2-long-HOSTNAME2
+  register: change_hostname_netbios_check
+  check_mode: true
+
+- name: get result of change just the hostname netbios portion - check mode
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: change_hostname_netbios_check_actual
+
+- name: assert change just the hostname netbios portion - check mode
+  assert:
+    that:
+    - change_hostname_netbios_check is changed
+    - change_hostname_netbios_check.reboot_required == False
+    - change_hostname_netbios_check_actual.output[0]["DnsDomainName"] == None
+    - change_hostname_netbios_check_actual.output[0]["HostName"] == "TEST1-long-HOSTNAME2"
+    - change_hostname_netbios_check_actual.output[0]["NetbiosName"] == "TEST1-LONG-HOST"
+    - change_hostname_netbios_check_actual.output[0]["PartOfDomain"] == False
+    - change_hostname_netbios_check_actual.output[0]["WorkgroupName"] == "TEST2"
+
+- name: change just the hostname netbios portion
+  membership:
+    workgroup_name: TEST2
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    state: workgroup
+    reboot: true
+    hostname: TEST2-long-HOSTNAME2
+  register: change_hostname_netbios
+
+- name: get result of change just the hostname netbios portion
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: change_hostname_netbios_actual
+
+- name: assert change just the hostname
+  assert:
+    that:
+    - change_hostname_netbios is changed
+    - change_hostname_netbios.reboot_required == False
+    - change_hostname_netbios_actual.output[0]["DnsDomainName"] == None
+    - change_hostname_netbios_actual.output[0]["HostName"] == "TEST2-long-HOSTNAME2"
+    - change_hostname_netbios_actual.output[0]["NetbiosName"] == "TEST2-LONG-HOST"
+    - change_hostname_netbios_actual.output[0]["PartOfDomain"] == False
+    - change_hostname_netbios_actual.output[0]["WorkgroupName"] == "TEST2"
 
 - name: create custom OU
   ansible.windows.win_powershell:
@@ -407,7 +584,7 @@
     dns_domain_name: '{{ domain_realm }}'
     domain_admin_user: '{{ domain_user_upn }}'
     domain_admin_password: '{{ domain_password }}'
-    hostname: BAR
+    hostname: TEST1-long-HOSTNAME3
     domain_ou_path: '{{ custom_ou.output[0] }}'
     state: domain
   register: join_ou_check
@@ -424,7 +601,8 @@
     - join_ou_check is changed
     - join_ou_check.reboot_required == True
     - join_ou_check_actual.output[0]["DnsDomainName"] == None
-    - join_ou_check_actual.output[0]["HostName"] == "FOO"
+    - join_ou_check_actual.output[0]["HostName"] == "TEST2-long-HOSTNAME2"
+    - join_ou_check_actual.output[0]["NetbiosName"] == "TEST2-LONG-HOST"
     - join_ou_check_actual.output[0]["PartOfDomain"] == False
     - join_ou_check_actual.output[0]["WorkgroupName"] == "TEST2"
 
@@ -433,7 +611,7 @@
     dns_domain_name: '{{ domain_realm }}'
     domain_admin_user: '{{ domain_user_upn }}'
     domain_admin_password: '{{ domain_password }}'
-    hostname: BAR
+    hostname: TEST1-long-HOSTNAME3
     domain_ou_path: '{{ custom_ou.output[0] }}'
     state: domain
   register: join_ou
@@ -452,26 +630,28 @@
   register: join_ou_ad_actual
   delegate_to: DC
 
-- name: assert change just the hostname
+- name: assert join domain with hostname and OUT
   assert:
     that:
     - join_ou is changed
     - join_ou.reboot_required == True
     - join_ou_actual.output[0]["DnsDomainName"] == domain_realm
-    - join_ou_actual.output[0]["HostName"] == "BAR"
+    - join_ou_actual.output[0]["HostName"] == "TEST1-long-HOSTNAME3"
+    - join_ou_actual.output[0]["NetbiosName"] == "TEST1-LONG-HOST"
     - join_ou_actual.output[0]["PartOfDomain"] == True
     - join_ou_actual.output[0]["WorkgroupName"] == None
     - join_ou_ad_actual.output | length == 1
-    - join_ou_ad_actual.output[0]["Name"] == "BAR"
+    - join_ou_ad_actual.output[0]["DNSHostName"] == "TEST1-long-HOSTNAME3"
+    - join_ou_ad_actual.output[0]["Name"] == "TEST1-LONG-HOST"
     - join_ou_ad_actual.output[0]["Enabled"] == True
-    - join_ou_ad_actual.output[0]["DistinguishedName"] == "CN=BAR," ~ custom_ou.output[0]
+    - join_ou_ad_actual.output[0]["DistinguishedName"] == "CN=TEST1-LONG-HOST," ~ custom_ou.output[0]
 
 - name: change domain to workgroup with hostname change - check mode
   membership:
     workgroup_name: WORKGROUP
     domain_admin_user: '{{ domain_user_upn }}'
     domain_admin_password: '{{ domain_password }}'
-    hostname: FOO
+    hostname: TEST1-long-HOSTNAME4
     state: workgroup
   register: to_workgroup_hostname_check
   check_mode: true
@@ -493,11 +673,13 @@
     - to_workgroup_hostname_check is changed
     - to_workgroup_hostname_check.reboot_required == True
     - to_workgroup_hostname_check_actual.output[0]["DnsDomainName"] == domain_realm
-    - to_workgroup_hostname_check_actual.output[0]["HostName"] == "BAR"
+    - to_workgroup_hostname_check_actual.output[0]["HostName"] == "TEST1-long-HOSTNAME3"
+    - to_workgroup_hostname_check_actual.output[0]["NetbiosName"] == "TEST1-LONG-HOST"
     - to_workgroup_hostname_check_actual.output[0]["PartOfDomain"] == True
     - to_workgroup_hostname_check_actual.output[0]["WorkgroupName"] == None
     - to_workgroup_hostname_check_ad_actual.output | length == 1
-    - to_workgroup_hostname_check_ad_actual.output[0]["Name"] == "BAR"
+    - to_workgroup_hostname_check_ad_actual.output[0]["DNSHostName"] == "TEST1-long-HOSTNAME3"
+    - to_workgroup_hostname_check_ad_actual.output[0]["Name"] == "TEST1-LONG-HOST"
     - to_workgroup_hostname_check_ad_actual.output[0]["Enabled"] == True
 
 - name: change domain to workgroup with hostname change
@@ -505,7 +687,7 @@
     workgroup_name: WORKGROUP
     domain_admin_user: '{{ domain_user_upn }}'
     domain_admin_password: '{{ domain_password }}'
-    hostname: FOO
+    hostname: TEST1-long-HOSTNAME4
     state: workgroup
     reboot: true
   register: to_workgroup_hostname
@@ -527,12 +709,29 @@
     - to_workgroup_hostname is changed
     - to_workgroup_hostname.reboot_required == False
     - to_workgroup_hostname_actual.output[0]["DnsDomainName"] == None
-    - to_workgroup_hostname_actual.output[0]["HostName"] == "FOO"
+    - to_workgroup_hostname_actual.output[0]["HostName"] == "TEST1-long-HOSTNAME4"
+    - to_workgroup_hostname_actual.output[0]["NetbiosName"] == "TEST1-LONG-HOST"
     - to_workgroup_hostname_actual.output[0]["PartOfDomain"] == False
     - to_workgroup_hostname_actual.output[0]["WorkgroupName"] == "WORKGROUP"
     - to_workgroup_hostname_ad_actual.output | length == 1
-    - to_workgroup_hostname_ad_actual.output[0]["Name"] == "BAR"
+    - to_workgroup_hostname_ad_actual.output[0]["DNSHostName"] == "TEST1-long-HOSTNAME3"
+    - to_workgroup_hostname_ad_actual.output[0]["Name"] == "TEST1-LONG-HOST"
     - to_workgroup_hostname_ad_actual.output[0]["Enabled"] == False
+
+- name: change domain to workgroup with hostname change - idempotent
+  membership:
+    workgroup_name: WORKGROUP
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    hostname: TEST1-long-HOSTNAME4
+    state: workgroup
+    reboot: true
+  register: to_workgroup_hostname_again
+
+- name: assert change domain to workgroup with hostname change - idempotent
+  assert:
+    that:
+    - not to_workgroup_hostname_again is changed
 
 - name: remove orphaned AD account for later tests
   microsoft.ad.computer:
