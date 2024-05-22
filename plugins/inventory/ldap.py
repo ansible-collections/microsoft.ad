@@ -134,6 +134,7 @@ ca_cert: /home/user/certs/ldap.pem
 username: '{{ lookup("ansible.builtin.env", "LDAP_USERNAME") }}'
 password: '{{ lookup("ansible.builtin.env", "LDAP_PASSWORD") }}'
 
+
 ##############################################
 #               Search Options               #
 #                                            #
@@ -220,9 +221,9 @@ groups:
 # Adds the host to a group site_{{ location }} with the default group of
 # site_unknown if the location isn't defined
 keyed_groups:
-- key: location | default(omit)
-  prefix: site
-  default_value: unknown
+  - key: location | default(omit)
+    prefix: site
+    default_value: unknown
 """
 
 import base64

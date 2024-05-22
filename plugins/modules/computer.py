@@ -220,7 +220,7 @@ EXAMPLES = r"""
     dns_hostname: one_linux_server.my_org.local
     path: OU=servers,DC=my_org,DC=local
     description: Example of linux server
-    enabled: yes
+    enabled: true
     state: present
 
 - name: Remove linux computer from Active Directory using a windows machine
@@ -233,26 +233,26 @@ EXAMPLES = r"""
     identity: TheComputer
     spn:
       add:
-      - HOST/TheComputer
-      - HOST/TheComputer.domain.test
-      - HOST/TheComputer.domain.test:1234
+        - HOST/TheComputer
+        - HOST/TheComputer.domain.test
+        - HOST/TheComputer.domain.test:1234
 
 - name: Remove SPNs on the computer
   microsoft.ad.computer:
     identity: TheComputer
     spn:
       remove:
-      - HOST/TheComputer
-      - HOST/TheComputer.domain.test
-      - HOST/TheComputer.domain.test:1234
+        - HOST/TheComputer
+        - HOST/TheComputer.domain.test
+        - HOST/TheComputer.domain.test:1234
 
 - name: Set the principals the computer trusts for delegation from
   microsoft.ad.computer:
     identity: TheComputer
     delegates:
       set:
-      - CN=FileShare,OU=Computers,DC=domain,DC=test
-      - CN=DC,OU=Domain Controllers,DC=domain,DC=test
+        - CN=FileShare,OU=Computers,DC=domain,DC=test
+        - CN=DC,OU=Domain Controllers,DC=domain,DC=test
 """
 
 RETURN = r"""

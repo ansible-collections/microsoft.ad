@@ -150,7 +150,7 @@ EXAMPLES = r"""
     domain_admin_password: password123!
     safe_mode_password: password123!
     state: domain_controller
-    read_only: yes
+    read_only: true
     site_name: London
     reboot: true
 

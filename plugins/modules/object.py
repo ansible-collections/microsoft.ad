@@ -128,8 +128,8 @@ EXAMPLES = r"""
     attributes:
       add:
         extensionName:
-        - value 1
-        - value 2
+          - value 1
+          - value 2
     type: container
     state: present
 
@@ -139,8 +139,8 @@ EXAMPLES = r"""
     attributes:
       remove:
         extensionName:
-        - value 1
-        - value 3
+          - value 1
+          - value 3
     type: container
     state: present
 """

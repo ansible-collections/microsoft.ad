@@ -5,6 +5,8 @@ exclude_paths:
   - changelogs/changelog.yaml
   # Incorrect error around supported ansible versions in this file
   - meta/runtime.yml
+  # Examples contain duplicate keys due to how we document inventory plugins
+  - plugins/inventory/ldap.py
   - tests/integration/
   # We skip a rule that has to be skipped
   - tests/sanity/ignore-*.txt
