@@ -179,8 +179,8 @@ EXAMPLES = r"""
     scope: domainlocal
     members:
       add:
-      - Domain Admins
-      - Domain Users
+        - Domain Admins
+        - Domain Users
 
 - name: Remove members from the group, preserving existing membership
   microsoft.ad.group:
@@ -188,8 +188,8 @@ EXAMPLES = r"""
     scope: domainlocal
     members:
       remove:
-      - Domain Admins
-      - Domain Users
+        - Domain Admins
+        - Domain Users
 
 - name: Replace entire membership of group
   microsoft.ad.group:
@@ -197,8 +197,8 @@ EXAMPLES = r"""
     scope: domainlocal
     members:
       set:
-      - Domain Admins
-      - Domain Users
+        - Domain Admins
+        - Domain Users
 """
 
 RETURN = r"""

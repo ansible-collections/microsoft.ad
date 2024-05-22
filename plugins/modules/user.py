@@ -287,7 +287,7 @@ EXAMPLES = r"""
     state: present
     groups:
       set:
-      - Domain Admins
+        - Domain Admins
     street: 123 4th St.
     city: Sometown
     state_province: IN
@@ -316,8 +316,8 @@ EXAMPLES = r"""
     path: ou=test,dc=domain,dc=local
     groups:
       set:
-      - Domain Admins
-      - Domain Users
+        - Domain Admins
+        - Domain Users
 
 - name: Ensure user bob is absent
   microsoft.ad.user:
@@ -329,15 +329,15 @@ EXAMPLES = r"""
     identity: liz.kenyon
     spn:
       set:
-      - MSSQLSvc/us99db-svr95:1433
-      - MSSQLSvc/us99db-svr95.vmware.com:1433
+        - MSSQLSvc/us99db-svr95:1433
+        - MSSQLSvc/us99db-svr95.vmware.com:1433
 
 - name: Ensure user has spn added
   microsoft.ad.user:
     identity: liz.kenyon
     spn:
       add:
-      - MSSQLSvc/us99db-svr95:2433
+        - MSSQLSvc/us99db-svr95:2433
 
 - name: Ensure user is created with delegates and spn's defined
   microsoft.ad.user:
@@ -346,17 +346,17 @@ EXAMPLES = r"""
     state: present
     groups:
       set:
-      - Domain Admins
-      - Domain Users
-      - Enterprise Admins
+        - Domain Admins
+        - Domain Users
+        - Enterprise Admins
     delegates:
       set:
-      - CN=shenetworks,CN=Users,DC=ansible,DC=test
-      - CN=mk.ai,CN=Users,DC=ansible,DC=test
-      - CN=jessiedotjs,CN=Users,DC=ansible,DC=test
+        - CN=shenetworks,CN=Users,DC=ansible,DC=test
+        - CN=mk.ai,CN=Users,DC=ansible,DC=test
+        - CN=jessiedotjs,CN=Users,DC=ansible,DC=test
     spn:
       set:
-      - MSSQLSvc/us99db-svr95:2433
+        - MSSQLSvc/us99db-svr95:2433
 
 # The name option is the name of the AD object as seen in dsa.msc and not the
 # sAMAccountName. For example, this will change the sAMAccountName of the user
