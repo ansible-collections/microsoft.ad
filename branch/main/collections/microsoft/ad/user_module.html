@@ -736,7 +736,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
 <span class="w">    </span><span class="nt">groups</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">set</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Admins</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Admins</span>
 <span class="w">    </span><span class="nt">street</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">123 4th St.</span>
 <span class="w">    </span><span class="nt">city</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Sometown</span>
 <span class="w">    </span><span class="nt">state_province</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IN</span>
@@ -765,8 +765,8 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ou=test,dc=domain,dc=local</span>
 <span class="w">    </span><span class="nt">groups</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">set</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Admins</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Users</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Admins</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Users</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ensure user bob is absent</span>
 <span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
@@ -778,15 +778,15 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">liz.kenyon</span>
 <span class="w">    </span><span class="nt">spn</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">set</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MSSQLSvc/us99db-svr95:1433</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MSSQLSvc/us99db-svr95.vmware.com:1433</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MSSQLSvc/us99db-svr95:1433</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MSSQLSvc/us99db-svr95.vmware.com:1433</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ensure user has spn added</span>
 <span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">liz.kenyon</span>
 <span class="w">    </span><span class="nt">spn</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">add</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MSSQLSvc/us99db-svr95:2433</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MSSQLSvc/us99db-svr95:2433</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ensure user is created with delegates and spn&#39;s defined</span>
 <span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
@@ -795,17 +795,17 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
 <span class="w">    </span><span class="nt">groups</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">set</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Admins</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Users</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Enterprise Admins</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Admins</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Users</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Enterprise Admins</span>
 <span class="w">    </span><span class="nt">delegates</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">set</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=shenetworks,CN=Users,DC=ansible,DC=test</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=mk.ai,CN=Users,DC=ansible,DC=test</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=jessiedotjs,CN=Users,DC=ansible,DC=test</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=shenetworks,CN=Users,DC=ansible,DC=test</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=mk.ai,CN=Users,DC=ansible,DC=test</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=jessiedotjs,CN=Users,DC=ansible,DC=test</span>
 <span class="w">    </span><span class="nt">spn</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">set</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MSSQLSvc/us99db-svr95:2433</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MSSQLSvc/us99db-svr95:2433</span>
 
 <span class="c1"># The name option is the name of the AD object as seen in dsa.msc and not the</span>
 <span class="c1"># sAMAccountName. For example, this will change the sAMAccountName of the user</span>

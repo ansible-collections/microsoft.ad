@@ -651,6 +651,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;</span><span class="cp">{{</span> <span class="nv">lookup</span><span class="o">(</span><span class="s2">&quot;ansible.builtin.env&quot;</span><span class="o">,</span> <span class="s2">&quot;LDAP_USERNAME&quot;</span><span class="o">)</span> <span class="cp">}}</span><span class="s">&#39;</span>
 <span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;</span><span class="cp">{{</span> <span class="nv">lookup</span><span class="o">(</span><span class="s2">&quot;ansible.builtin.env&quot;</span><span class="o">,</span> <span class="s2">&quot;LDAP_PASSWORD&quot;</span><span class="o">)</span> <span class="cp">}}</span><span class="s">&#39;</span>
 
+
 <span class="c1">##############################################</span>
 <span class="c1">#               Search Options               #</span>
 <span class="c1">#                                            #</span>
@@ -737,9 +738,9 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <span class="c1"># Adds the host to a group site_</span><span class="cp">{{</span> <span class="nv">location</span> <span class="cp">}}</span><span class="c1"> with the default group of</span>
 <span class="c1"># site_unknown if the location isn&#39;t defined</span>
 <span class="nt">keyed_groups</span><span class="p">:</span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">location | default(omit)</span>
-<span class="w">  </span><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">site</span>
-<span class="w">  </span><span class="nt">default_value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unknown</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">location | default(omit)</span>
+<span class="w">    </span><span class="nt">prefix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">site</span>
+<span class="w">    </span><span class="nt">default_value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">unknown</span>
 </pre></div>
 </div>
 <section id="authors">
