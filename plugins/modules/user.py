@@ -40,14 +40,19 @@ options:
     description:
     - The principal objects that the current AD object can trust for
       delegation to either add, remove or set.
-    - The values for each sub option must be specified as a distinguished name
-      C(CN=shenetworks,CN=Users,DC=ansible,DC=test)
+    - Each subkey value is a list of values in the form of a
+      C(distinguishedName), C(objectGUID), C(objectSid), C(sAMAccountName),
+      or C(userPrincipalName) string or a dictionary with the I(name) and
+      optional I(server) key.
     - This is the value set on the C(msDS-AllowedToActOnBehalfOfOtherIdentity)
       LDAP attribute.
     - This is a highly sensitive attribute as it allows the principals
       specified to impersonate any account when authenticating with the AD
       computer object being managed.
     - To clear all principals, use I(set) with an empty list.
+    - See
+      R(DN Lookup Attributes,ansible_collections.microsoft.ad.docsite.guide_attributes.dn_lookup_attributes)
+      for more information on how DN lookups work.
     - See R(Setting list option values,ansible_collections.microsoft.ad.docsite.guide_list_values)
       for more information on how to add/remove/set list options.
     aliases:
@@ -56,29 +61,36 @@ options:
     suboptions:
       add:
         description:
-        - The AD objects by their C(DistinguishedName) to add as a principal
-          allowed to delegate.
+        - Adds the principals specified as principals allowed to delegate to.
         - Any existing principals not specified by I(add) will be untouched
           unless specified by I(remove) or not in I(set).
         type: list
-        elements: str
+        elements: raw
+      lookup_failure_action:
+        description:
+        - Control the action to take when the lookup fails to find the DN.
+        - C(fail) will cause the task to fail.
+        - C(ignore) will ignore the value and continue.
+        - C(warn) will ignore the value and display a warning.
+        choices: ['fail', 'ignore', 'warn']
+        default: fail
+        type: str
       remove:
         description:
-        - The AD objects by their C(DistinguishedName) to remove as a principal
-          allowed to delegate.
+        - Removes the principals specified as principals allowed to delegate to.
         - Any existing principals not specified by I(remove) will be untouched
           unless I(set) is defined.
         type: list
-        elements: str
+        elements: raw
       set:
         description:
-        - The AD objects by their C(DistinguishedName) to set as the only
+        - Sets the principals specified as principals allowed to delegate to.
           principals allowed to delegate.
         - This will remove any existing principals if not specified in this
           list.
         - Specify an empty list to remove all principals allowed to delegate.
         type: list
-        elements: str
+        elements: raw
   email:
     description:
     - Configures the user's email address.

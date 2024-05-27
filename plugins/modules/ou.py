@@ -26,9 +26,13 @@ options:
     description:
     - The user or group that manages the object.
     - The value can be in the form of a C(distinguishedName), C(objectGUID),
-      C(objectSid), or sAMAccountName).
+      C(objectSid), C(sAMAccountName), or C(userPrincipalName) string or a
+      dictionary with the I(name) and optional I(server) key.
     - This is the value set on the C(managedBy) LDAP attribute.
-    type: str
+    - See
+      R(DN Lookup Attributes,ansible_collections.microsoft.ad.docsite.guide_attributes.dn_lookup_attributes)
+      for more information on how DN lookups work.
+    type: raw
   postal_code:
     description:
     - Configures the user's postal code / zip code.
@@ -116,6 +120,13 @@ EXAMPLES = r"""
     attributes:
       set:
         comment: A comment for the OU
+
+- name: Set managedBy using an identity from another DC
+  microsoft.ad.ou:
+    name: MyOU
+    managed_by:
+      name: manager-user
+      server: OtherDC
 """
 
 RETURN = r"""

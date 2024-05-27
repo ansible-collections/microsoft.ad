@@ -22,6 +22,7 @@ $setParams = @{
             Name = 'managed_by'
             Option = @{ type = 'str' }
             Attribute = 'ManagedBy'
+            DNLookup = $true
         }
         [PSCustomObject]@{
             Name = 'postal_code'

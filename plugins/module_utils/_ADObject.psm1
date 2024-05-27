@@ -486,11 +486,166 @@ Function Compare-AnsibleADIdempotentList {
     }
 
     [PSCustomObject]@{
+        # $null is explicit here as the AD modules use it to unset a value
         Value = if ($value.Count) { $value.ToArray() } else { $null }
         # Also returned if the API doesn't support explicitly setting 1 value
         ToAdd = $toAdd.ToArray()
         ToRemove = $toRemove.ToArray()
         Changed = [bool]($toAdd.Count -or $toRemove.Count)
+    }
+}
+
+Function ConvertTo-AnsibleADDistinguishedName {
+    <#
+    .SYNOPSIS
+    Converts the input list into DistinguishedNames for later comparison.
+
+    .PARAMETER InputObject
+    The identity parameter, this can either be a string or a hashtable.
+    If a hashtable it should contain the name and optional server key to
+    identity the object to search and set a specific server to search on.
+
+    .PARAMETER Module
+    The AnsibleModule object associated with the current module execution.
+
+    .PARAMETER Context
+    The context behind this conversion to add to the error message if there
+    is one.
+
+    .PARAMETER Server
+    The default server to search. The Identity server key will override this
+    value is present.
+
+    .PARAMETER Credential
+    The credential to search with. This is ignored if the Identity server key
+    is present.
+
+    .PARAMETER FailureAction
+    The action to take if the lookup fails. Fail will cause the module to
+    exit with an error, ignore will ignore the error, and warn will emit a
+    warning on failure.
+    #>
+    [OutputType([string])]
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [object[]]
+        $InputObject,
+
+        [Parameter(Mandatory)]
+        [object]
+        $Module,
+
+        [Parameter(Mandatory)]
+        [string]
+        $Context,
+
+        [string]
+        $Server,
+
+        [PSCredential]
+        $Credential,
+
+        [ValidateSet('Fail', 'Ignore', 'Warn')]
+        [string]
+        $FailureAction = 'Fail'
+    )
+
+    begin {
+        $allowedKeys = [string[]]@('name', 'server')
+        $results = [System.Collections.Generic.List[string]]@()
+        $getErrors = [System.Collections.Generic.List[string]]@()
+        $invalidIdentities = [System.Collections.Generic.List[string]]@()
+    }
+
+    process {
+        foreach ($obj in $InputObject) {
+            $getParams = @{}
+            if ($Server) {
+                $getParams.Server = $Server
+            }
+            if ($Credential) {
+                $getParams.Credential = $Credential
+            }
+
+            if ($obj -is [System.Collections.IDictionary]) {
+                # When using a hashtable, the name and server key can be used
+                # to specify the identity and server to use. If no server is
+                # set then it defaults to the default server (if provided) and
+                # it's credentials.
+                $existingKeys = [string[]]$obj.Keys
+
+                if ('name' -notin $existingKeys) {
+                    $getErrors.Add("Identity entry does not contain the required name key")
+                    continue
+                }
+                $name = [string]$obj.name
+
+                [string[]]$extraKeys = [System.Linq.Enumerable]::Except($existingKeys, $allowedKeys)
+                if ($extraKeys) {
+                    $extraKeys = $extraKeys | Sort-Object
+                    $getErrors.Add("Identity entry for '$name' contains extra keys: '$($extraKeys -join "', '")'")
+                    continue
+                }
+                $getParams.Identity = $name
+
+                if ($obj.server) {
+                    # If a custom server is specified we use that and the
+                    # credential (if any) associated with that server.
+                    $getParams.Server = $obj.server
+
+                    if ($Module.ServerCredentials.ContainsKey($obj.server)) {
+                        $getParams.Credential = $Module.ServerCredentials[$obj.server]
+                    }
+                    elseif (-not $Module.DefaultCredentialSet) {
+                        $null = $getParams.Remove('Credential')
+                    }
+                }
+            }
+            else {
+                # Treat the value as just the identity as a string.
+                $getParams.Identity = [string]$obj
+            }
+
+            if (-not $getParams.Identity) {
+                continue
+            }
+
+            $adDN = Get-AnsibleADObject @getParams |
+                Select-Object -ExpandProperty DistinguishedName
+            if ($adDN) {
+                $results.Add($adDN)
+            }
+            else {
+                $invalidIdentities.Add($getParams.Identity)
+            }
+        }
+    }
+
+    end {
+        # This is a weird workaround as FailJson calls exit which means the
+        # caller won't capture the output causing junk data in the output. By
+        # only outputting the results if no errors occurred we can avoid that
+        # problem.
+        $errorPrefix = "Failed to find the AD object DNs for $Context"
+        if ($getErrors) {
+            $msg = "$errorPrefix. $($getErrors -join '. ')."
+            $Module.FailJson($msg)
+        }
+
+        if ($invalidIdentities) {
+            if ($FailureAction -ne 'Ignore') {
+                $identityString = "'$($invalidIdentities -join "', '")'"
+                if ($FailureAction -eq 'Fail') {
+                    $Module.FailJson("$errorPrefix. Invalid identities: $identityString")
+                }
+                else {
+                    $module.Warn("$errorPrefix. Ignoring invalid identities: $identityString")
+                }
+            }
+        }
+
+        $results
     }
 }
 
@@ -612,8 +767,16 @@ Function Invoke-AnsibleADObject {
         Attribute - The ldap attribute name to compare against
         CaseInsensitive - The values are case insensitive (defaults to $false)
         StateRequired - Set to 'present' or 'absent' if this needs to be defined for either state
+        DNLookup - Whether each value needs to be looked up to get the DN
+        IsRawAttribute - Whether the attribute is a raw LDAP attribute name and not a parameter name
         New - Called when the option is to be set on the New-AD* cmdlet splat
         Set - Called when the option is to be set on the Set-AD* cmdlet splat
+
+    The 'type' key in 'Option' should be a valid Ansible.Basic type or
+    'add_remove_set'. When 'add_remove_set' is used the option type becomes
+    dict with the options subentry for add/remove/set being the Option value
+    specified. This can be combined with DNLookup to set the value as raw that
+    can lookup the DN value from the string or dict specified.
 
     If Attribute is set then requested value will be compared with the
     attribute specified. The current attribute value is added to the before
@@ -631,6 +794,10 @@ Function Invoke-AnsibleADObject {
     parameters, a splat that is called with Set-AD*, and the current AD object.
     It is up to the scriptblock to set the required splat parameters or call
     whatever function is needed.
+
+    The DNLookup key is used to indicate that the add/remove/set values can
+    either be a string or a dictionary containing the name/server to specify
+    the name and server to lookup the object DN value.
 
     Both New and Set must set the $Module.Diff.after results accordingly and/or
     mark $Module.Result.changed if it is making a change outside of adjusting
@@ -709,6 +876,25 @@ Function Invoke-AnsibleADObject {
                     }
                 }
             }
+            domain_credentials = @{
+                default = @()
+                type = 'list'
+                elements = 'dict'
+                options = @{
+                    name = @{
+                        type = 'str'
+                    }
+                    username = @{
+                        required = $true
+                        type = 'str'
+                    }
+                    password = @{
+                        no_log = $true
+                        required = $true
+                        type = 'str'
+                    }
+                }
+            }
             domain_password = @{
                 no_log = $true
                 type = 'str'
@@ -775,7 +961,44 @@ Function Invoke-AnsibleADObject {
                 $stateRequiredIf[$propInfo.StateRequired] += $ansibleOption
             }
 
-            $spec.options[$ansibleOption] = $propInfo.Option
+            $option = $propInfo.Option
+            if ($option.type -eq 'add_remove_set') {
+                $option.type = 'dict'
+
+                $optionElement = $option.Clone()
+                $optionElement.type = 'list'
+
+                $option = @{
+                    type = 'dict'
+                    options = @{}
+                }
+
+                if ($propInfo.DNLookup) {
+                    $optionElement.elements = 'raw'
+                    $option.options.lookup_failure_action = @{
+                        choices = @('fail', 'ignore', 'warn')
+                        default = 'fail'
+                        type = 'str'
+                    }
+                }
+                elseif (-not $optionElement.ContainsKey('elements')) {
+                    $optionElement.elements = 'str'
+                }
+
+                if ($optionElement.ContainsKey('aliases')) {
+                    $option.aliases = $optionElement.aliases
+                    $null = $optionElement.Remove('aliases')
+                }
+
+                $option.options.add = $optionElement
+                $option.options.remove = $optionElement
+                $option.options.set = $optionElement
+            }
+            elseif ($propInfo.DNLookup) {
+                $option.type = 'raw'
+            }
+
+            $spec.options[$ansibleOption] = $option
 
             if ($propInfo.Attribute) {
                 $propInfo.Attribute
@@ -797,16 +1020,40 @@ Function Invoke-AnsibleADObject {
     $module.Result.distinguished_name = $null
     $module.Result.object_guid = $null
 
+    $serverCredentials = @{}
+    foreach ($domainCred in $module.Params.domain_credentials) {
+        $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @(
+            $domainCred.username,
+            (ConvertTo-SecureString -AsPlainText -Force -String $domainCred.password)
+        )
+
+        if ($domainCred.name) {
+            $serverCredentials[$domainCred.name] = $cred
+        }
+        elseif ($adParams.Credential) {
+            $module.FailJson("Cannot specify default domain_credentials with domain_username and domain_password")
+        }
+        else {
+            $adParams.Credential = $cred
+        }
+    }
+    $module | Add-Member -MemberType NoteProperty -Name ServerCredentials -Value $serverCredentials
+
     $adParams = @{}
     if ($module.Params.domain_server) {
         $adParams.Server = $module.Params.domain_server
     }
 
     if ($module.Params.domain_username) {
+        if ($adParams.Credential) {
+            $msg = "Cannot specify domain_username/domain_password and domain_credentials with an entry that has no name."
+            $module.FailJson($msg)
+        }
         $adParams.Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @(
             $module.Params.domain_username,
             (ConvertTo-SecureString -AsPlainText -Force -String $module.Params.domain_password)
         )
+        $module | Add-Member -MemberType NoteProperty -Name DefaultCredentialSet -Value $true
     }
 
     $defaultObjectPath = & $DefaultPath $module $adParams
@@ -953,11 +1200,45 @@ Function Invoke-AnsibleADObject {
                     $null = & $propInfo.New $module $adParams $newParams
                 }
                 elseif ($propInfo.Attribute) {
-                    if ($propValue -is [System.Collections.IDictionary]) {
-                        $propValue = @($propValue['add']; $propValue['set']) | Select-Object -Unique
+                    # If a dictionary (add/set/remove) and is not a DNLookup single value
+                    if ($propValue -is [System.Collections.IDictionary] -and $propInfo.Option.type -ne 'raw') {
+                        $propValue = if ($propInfo.DNLookup) {
+                            foreach ($actionKvp in $propValue.GetEnumerator()) {
+                                if ($null -eq $actionKvp.Value -or $actionKvp.Key -in @('lookup_failure_action', 'remove')) {
+                                    continue
+                                }
+
+                                $convertParams = @{
+                                    Module = $module
+                                    Context = "$($propInfo.Name).$($actionKvp.Key)"
+                                    FailureAction = $propValue.lookup_failure_action
+                                }
+                                $actionKvp.Value | ConvertTo-AnsibleADDistinguishedName @adParams @convertParams
+                            }
+                        }
+                        else {
+                            $propValue['add']
+                            $propValue['set']
+                        }
+
+                        $propValue = $propValue | Select-Object -Unique
+                    }
+                    elseif ($propInfo.DNLookup) {
+                        $propValue = $propValue | ConvertTo-AnsibleADDistinguishedName @adParams -Module $module -Context $propInfo.Name
                     }
 
-                    $newParams[$propInfo.Attribute] = $propValue
+                    if ($propInfo.IsRawAttribute) {
+                        if (-not $newParams.ContainsKey('OtherAttributes')) {
+                            $newParams.OtherAttributes = @{}
+                        }
+
+                        # The AD cmdlets don't like explicitly casted arrays, use
+                        # ForEach-Object to get back a vanilla object[] to set.
+                        $newParams.OtherAttributes[$propInfo.Attribute] = $propValue | ForEach-Object { "$_" }
+                    }
+                    else {
+                        $newParams[$propInfo.Attribute] = $propValue
+                    }
 
                     if ($propInfo.Option.no_log) {
                         $propValue = 'VALUE_SPECIFIED_IN_NO_LOG_PARAMETER'
@@ -1043,16 +1324,35 @@ Function Invoke-AnsibleADObject {
 
                     $compareParams = @{
                         Existing = $actualValue
-                        CaseInsensitive = $propInfo.CaseInsensitive
+                        CaseInsensitive = $propInfo.DNLookup -or $propInfo.CaseInsensitive
                     }
 
-                    if ($propValue -is [System.Collections.IDictionary]) {
-                        $compareParams.Add = $propValue['add']
-                        $compareParams.Remove = $propValue['remove']
-                        $compareParams.Set = $propValue['set']
+                    # If a dictionary (add/set/remove) and is not a DNLookup single value
+                    if ($propValue -is [System.Collections.IDictionary] -and $propInfo.Option.type -ne 'raw') {
+                        if ($propInfo.DNLookup) {
+                            foreach ($actionKvp in $propValue.GetEnumerator()) {
+                                if ($null -eq $actionKvp.Value -or $actionKvp.Key -eq 'lookup_failure_action') { continue }
+
+                                $convertParams = @{
+                                    Module = $module
+                                    Context = "$($propInfo.Name).$($actionKvp.Key)"
+                                    FailureAction = $propValue.lookup_failure_action
+                                }
+                                $dns = $actionKvp.Value | ConvertTo-AnsibleADDistinguishedName @adParams @convertParams
+                                $compareParams[$actionKvp.Key] = @($dns)
+                            }
+                        }
+                        else {
+                            $compareParams.Add = $propValue['add']
+                            $compareParams.Remove = $propValue['remove']
+                            $compareParams.Set = $propValue['set']
+                        }
                     }
                     elseif ([string]::IsNullOrWhiteSpace($propValue)) {
                         $compareParams.Set = @()
+                    }
+                    elseif ($propInfo.DNLookup) {
+                        $compareParams.Set = @($propValue | ConvertTo-AnsibleADDistinguishedName @adParams -Module $module -Context $propInfo.Name)
                     }
                     else {
                         $compareParams.Set = @($propValue)
@@ -1061,7 +1361,23 @@ Function Invoke-AnsibleADObject {
                     $res = Compare-AnsibleADIdempotentList @compareParams
                     $newValue = $res.Value
                     if ($res.Changed) {
-                        $setParams[$propInfo.Attribute] = $newValue
+                        if ($propInfo.IsRawAttribute) {
+                            if ($newValue) {
+                                if (-not $setParams.ContainsKey('Replace')) {
+                                    $setParams['Replace'] = @{}
+                                }
+                                $setParams['Replace'][$propInfo.Attribute] = $newValue
+                            }
+                            else {
+                                if (-not $setParams.ContainsKey('Clear')) {
+                                    $setParams['Clear'] = [System.Collections.Generic.List[string]]@()
+                                }
+                                $setParams['Clear'].Add($propInfo.Attribute)
+                            }
+                        }
+                        else {
+                            $setParams[$propInfo.Attribute] = $newValue
+                        }
                     }
 
                     $noLog = $propInfo.Option.no_log
@@ -1169,6 +1485,7 @@ Function Invoke-AnsibleADObject {
 $exportMembers = @{
     Function = @(
         "Compare-AnsibleADIdempotentList"
+        "ConvertTo-AnsibleADDistinguishedName"
         "Get-AnsibleADObject"
         "Invoke-AnsibleADObject"
     )

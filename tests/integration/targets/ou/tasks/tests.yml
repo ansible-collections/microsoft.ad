@@ -163,7 +163,8 @@
     country: US
     description: Custom description
     display_name: OU display Name
-    managed_by: Domain Users
+    managed_by:
+      name: Domain Users
     postal_code: 10001
     state_province: ''
     street: Main

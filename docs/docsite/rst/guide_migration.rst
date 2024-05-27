@@ -129,6 +129,30 @@ Migrated to :ref:`microsoft.ad.group <ansible_collections.microsoft.ad.group_mod
 
 The functionality of this module has been merged with ``microsoft.ad.group``. Use the ``members`` option to ``add``, ``remove``, or ``set`` to add, remove, or set group members respectively.
 
+One change is ``win_domain_group_membership`` could specify the server to lookup the member using the ``SERVER\member-name`` format. This member format is not supported in ``microsoft.ad.group`` but since v1.6.0 of this collection the same can be achieved by using a dictionary as the member value. For example:
+
+.. code-block:: yaml
+
+  - name: Add a domain user/group from another Domain in the multi-domain forest to a domain group
+    community.windows.win_domain_group_membership:
+      name: GroupinDomainAAA
+      domain_server: DomainAAA.cloud
+      members:
+        - DomainBBB.cloud\UserInDomainBBB
+      state: present
+
+  - name: Add a domain user/group from another Domain in the multi-domain forest to a domain group
+    microsoft.ad.group:
+      name: GroupinDomainAAA
+      domain_server: DomainAAA.cloud
+      members:
+        add:
+          - name: UserInDomainBBB
+            server: DomainBBB.cloud
+      state: present
+
+See :ref:`DN Lookup Attributes <ansible_collections.microsoft.ad.docsite.guide_attributes.dn_lookup_attributes>` for more information.
+
 .. _ansible_collections.microsoft.ad.docsite.guide_migration.migrated_modules.win_domain_object_info:
 
 Module ``win_domain_object_info``

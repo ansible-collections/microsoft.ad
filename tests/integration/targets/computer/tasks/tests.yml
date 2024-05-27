@@ -99,14 +99,41 @@
     that:
     - not remove_comp_again is changed
 
-- name: create computer with custom options
+- name: expect failure with invalid DN lookup entry - no name
   computer:
     name: MyComputer
     state: present
     delegates:
       set:
       - CN=krbtgt,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
-      - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      - server: fail
+  register: invalid_dn_lookup_no_name
+  failed_when: >-
+    invalid_dn_lookup_no_name.msg != "Failed to find the AD object DNs for delegates.set. Identity entry does not contain the required name key."
+
+- name: expect failure with invalid DN lookup entry - extra keys
+  computer:
+    name: MyComputer
+    state: present
+    delegates:
+      add:
+      - name: name
+        invalid2: bar
+        invalid1: foo
+  register: invalid_dn_lookup_extra_keys
+  failed_when: >-
+    invalid_dn_lookup_extra_keys.msg != "Failed to find the AD object DNs for delegates.add. Identity entry for 'name' contains extra keys: 'invalid1', 'invalid2'."
+
+- name: create computer with custom options
+  computer:
+    name: MyComputer
+    state: present
+    delegates:
+      lookup_failure_action: ignore
+      set:
+      - CN=krbtgt,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      - name: CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      - CN=Missing,{{ setup_domain_info.output[0].defaultNamingContext }}
     kerberos_encryption_types:
       set:
       - aes128
@@ -188,8 +215,11 @@
     name: MyComputer
     path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
     delegates:
+      lookup_failure_action: warn
       set:
-      - CN=KRBTGT,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      - name: CN=KRBTGT,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      - ''
+      - CN=Missing,{{ setup_domain_info.output[0].defaultNamingContext }}
     dns_hostname: other.domain.com
     kerberos_encryption_types:
       set:
@@ -236,6 +266,9 @@
   assert:
     that:
     - change_comp is changed
+    - change_comp.warnings | length == 1
+    - >-
+      change_comp.warnings[0] == "Failed to find the AD object DNs for delegates.set. Ignoring invalid identities: 'CN=Missing," ~ setup_domain_info.output[0].defaultNamingContext ~ "'"
     - change_comp_actual.objects[0].dnsHostName == 'other.domain.com'
     - change_comp_actual.objects[0].location == 'comp location'
     - change_comp_actual.objects[0]['msDS-SupportedEncryptionTypes'] == 20
@@ -247,6 +280,17 @@
     - '"ADS_UF_TRUSTED_FOR_DELEGATION" not in change_comp_actual.objects[0].userAccountControl_AnsibleFlags'
     - change_comp_delegates.output == ["krbtgt"]
 
+- name: fail with invalid delegate identity
+  computer:
+    name: MyComputer
+    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    delegates:
+      set:
+      - CN=Missing,{{ setup_domain_info.output[0].defaultNamingContext }}
+  register: invalid_delegate
+  failed_when: >-
+    invalid_delegate.msg != "Failed to find the AD object DNs for delegates.set. Invalid identities: 'CN=Missing," ~ setup_domain_info.output[0].defaultNamingContext ~ "'"
+
 - name: add and remove list options
   computer:
     name: MyComputer
@@ -254,9 +298,10 @@
     delegates:
       add:
       - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+      - ''
       remove:
+      - name: ''
       - CN=KRBTGT,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
-      - CN=Missing,{{ setup_domain_info.output[0].defaultNamingContext }}
     kerberos_encryption_types:
       add:
       - aes128
@@ -305,7 +350,6 @@
       - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
       remove:
       - CN=KRBTGT,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
-      - CN=Missing,{{ setup_domain_info.output[0].defaultNamingContext }}
     kerberos_encryption_types:
       add:
       - aes128

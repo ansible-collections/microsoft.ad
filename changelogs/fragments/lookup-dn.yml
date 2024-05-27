@@ -1,0 +1,19 @@
+minor_changes:
+  - >-
+    microsoft.ad AD modules - Added ``domain_credentials`` as a common module option that can be used to specify
+    credentials for specific AD servers.
+  - >-
+    microsoft.ad AD modules - Added ``lookup_failure_action`` on all modules that can specify a list of
+    distinguishedName values to control what should happen if the lookup fails.
+  - >-
+    microsoft.ad.computer - Added the ability to lookup a distinguishedName on a specific domain server for
+    ``delegates`` and ``managed_by``.
+  - >-
+    microsoft.ad.group - Added the ability to lookup a distinguishedName on a specific domain server for
+    ``managed_by`` and ``members``.
+  - >-
+    microsoft.ad.ou - Added the ability to lookup a distinguishedName on a specific domain server for
+    ``managed_by``.
+  - >-
+    microsoft.ad.user - Added the ability to lookup a distinguishedName on a specific domain server for
+    ``delegates``.
