@@ -63,6 +63,7 @@ DOCUMENTATION:
         - child
         - tree
       default: child
+      type: str
     install_dns:
       description:
         - Whether to install the DNS service when creating the domain
