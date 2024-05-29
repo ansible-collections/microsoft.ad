@@ -1,0 +1,98 @@
+- name: create child domain - check mode
+  domain_child:
+    dns_domain_name: '{{ child_domain_name }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    safe_mode_password: '{{ domain_password }}'
+    reboot: true
+  register: to_domain_check
+  check_mode: true
+
+- name: get result of promote to domain - check mode
+  ansible.windows.win_powershell:
+    script: '{{ get_role_script }}'
+  register: to_domain_check_actual
+
+- name: assert promote to domain - check mode
+  assert:
+    that:
+    - to_domain_check is changed
+    - to_domain_check_actual.output[0]["Domain"] == None
+    - to_domain_check_actual.output[0]["DomainRole"] == "StandaloneServer"
+
+- name: change hostname to have a pending change before promotion
+  ansible.windows.win_hostname:
+    name: '{{ new_hostname }}'
+
+- name: create child domain with pending reboot
+  domain_child:
+    dns_domain_name: '{{ child_domain_name }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    safe_mode_password: '{{ domain_password }}'
+    reboot: true
+  register: to_domain
+
+- name: get result of promote to domain with pending reboot
+  ansible.windows.win_powershell:
+    script: '{{ get_role_script }}'
+  register: to_domain_actual
+
+- name: assert promote to domain with pending reboot
+  assert:
+    that:
+    - to_domain is changed
+    - to_domain_actual.output[0]["Domain"] == child_domain_name
+    - to_domain_actual.output[0]["DomainRole"] == "PrimaryDC"
+    - to_domain_actual.output[0]["HostName"] == new_hostname | upper
+
+- name: create child domain - idempotent
+  domain_child:
+    dns_domain_name: '{{ child_domain_name }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    safe_mode_password: '{{ domain_password }}'
+    reboot: true
+  register: to_domain_again
+
+- name: assert create child domain - idempotent
+  assert:
+    that:
+    - not to_domain_again is changed
+
+- name: fail to change domain of host
+  domain_child:
+    dns_domain_name: bogus.local
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    safe_mode_password: '{{ domain_password }}'
+    reboot: true
+  register: change_domain_fail
+  failed_when:
+  - change_domain_fail.msg != "Host is already a domain controller in another domain " ~ child_domain_name
+
+- name: fail with parent_domain_name with domain_type mode
+  domain_child:
+    dns_domain_name: '{{ child_domain_name }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    safe_mode_password: '{{ domain_password }}'
+    parent_domain_name: other
+    reboot: true
+  register: invalid_parent
+  failed_when:
+  - invalid_parent.msg != "parent_domain_name must not be set when domain_type=child"
+
+- name: fail with invalid domain_mode
+  domain_child:
+    dns_domain_name: bogus.local
+    parent_domain_name: '{{ domain_realm }}'
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    safe_mode_password: '{{ domain_password }}'
+    domain_mode: Invalid
+    reboot: true
+  register: change_domain_invalid_mode
+  failed_when:
+  - >-
+    change_domain_invalid_mode.msg.startswith("The parameter 'domain_mode' does not accept 'Invalid', please use one of: ")

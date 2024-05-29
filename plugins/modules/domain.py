@@ -99,6 +99,7 @@ attributes:
   bypass_host_loop:
     support: none
 seealso:
+- module: microsoft.ad.domain_child
 - module: microsoft.ad.domain_controller
 - module: microsoft.ad.group
 - module: microsoft.ad.membership

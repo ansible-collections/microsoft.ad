@@ -1,0 +1,1 @@
+plugins/action/domain_child.py action-plugin-docs # ansible-test is ignoring sidecar docs
