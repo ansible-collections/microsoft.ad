@@ -1,0 +1,28 @@
+all:
+  children:
+    windows:
+      hosts:
+        PARENT:
+          ansible_host: 192.168.11.10
+          vagrant_box: jborean93/WindowsServer2022
+        CHILD:
+          ansible_host: 192.168.11.11
+          vagrant_box: jborean93/WindowsServer2022
+          new_hostname: foo
+          child_domain_name: child.ad.test
+        TREE:
+          ansible_host: 192.168.11.12
+          vagrant_box: jborean93/WindowsServer2022
+          new_hostname: bar
+          child_domain_name: tree.test
+      vars:
+        ansible_port: 5985
+        ansible_connection: psrp
+
+  vars:
+    ansible_user: vagrant
+    ansible_password: vagrant
+    domain_username: vagrant-domain
+    domain_user_upn: '{{ domain_username }}@{{ domain_realm | upper }}'
+    domain_password: VagrantPass1
+    domain_realm: ad.test

@@ -114,6 +114,7 @@ attributes:
 seealso:
 - module: microsoft.ad.computer
 - module: microsoft.ad.domain
+- module: microsoft.ad.domain_child
 - module: microsoft.ad.group
 - module: microsoft.ad.membership
 - module: microsoft.ad.user

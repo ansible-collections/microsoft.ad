@@ -1,0 +1,91 @@
+- name: create test folders
+  ansible.windows.win_file:
+    path: 'C:\ansible_testing\{{ item }}'
+    state: directory
+  loop:
+  - DB
+  - LogPath
+  - SysVol
+
+- name: create tree domain - check mode
+  domain_child:
+    dns_domain_name: '{{ child_domain_name }}'
+    parent_domain_name: '{{ domain_realm }}'
+    domain_type: tree
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    safe_mode_password: '{{ domain_password }}'
+    domain_mode: WinThreshold
+    database_path: C:\ansible_testing\DB
+    log_path: C:\ansible_testing\LogPath
+    sysvol_path: C:\ansible_testing\SysVol
+    reboot: true
+  register: to_tree_check
+  check_mode: true
+
+- name: get result of promote to tree domain - check mode
+  ansible.windows.win_powershell:
+    script: '{{ get_role_script }}'
+  register: to_tree_check_actual
+
+- name: assert promote to domain - check mode
+  assert:
+    that:
+    - to_tree_check is changed
+    - not to_tree_check.reboot_required
+    - to_tree_check_actual.output[0]["Domain"] == None
+    - to_tree_check_actual.output[0]["DomainRole"] == "StandaloneServer"
+
+- name: change hostname to have a pending change before promotion
+  ansible.windows.win_hostname:
+    name: '{{ new_hostname }}'
+
+- name: create tree domain with pending reboot
+  domain_child:
+    dns_domain_name: '{{ child_domain_name }}'
+    parent_domain_name: '{{ domain_realm }}'
+    domain_type: tree
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    safe_mode_password: '{{ domain_password }}'
+    domain_mode: WinThreshold
+    database_path: C:\ansible_testing\DB
+    log_path: C:\ansible_testing\LogPath
+    sysvol_path: C:\ansible_testing\SysVol
+    reboot: true
+  register: to_tree
+
+- name: get result of promote to domain with pending reboot
+  ansible.windows.win_powershell:
+    script: '{{ get_role_script }}'
+  register: to_tree_actual
+
+- name: assert promote to domain with pending reboot
+  assert:
+    that:
+    - to_tree is changed
+    - not to_tree.reboot_required
+    - to_tree_actual.output[0]["Domain"] == child_domain_name
+    - to_tree_actual.output[0]["DomainRole"] == "PrimaryDC"
+    - to_tree_actual.output[0]["HostName"] == new_hostname | upper
+
+- name: create tree domain - idempotent
+  domain_child:
+    dns_domain_name: '{{ child_domain_name }}'
+    parent_domain_name: '{{ domain_realm }}'
+    domain_type: tree
+    domain_admin_user: '{{ domain_user_upn }}'
+    domain_admin_password: '{{ domain_password }}'
+    safe_mode_password: '{{ domain_password }}'
+    domain_mode: WinThreshold
+    database_path: C:\ansible_testing\DB
+    log_path: C:\ansible_testing\LogPath
+    sysvol_path: C:\ansible_testing\SysVol
+    reboot: true
+  register: to_tree_again
+
+- name: assert create tree domain - idempotent
+  assert:
+    that:
+    - not to_tree_again is changed
+    - not to_tree_again.reboot_required
