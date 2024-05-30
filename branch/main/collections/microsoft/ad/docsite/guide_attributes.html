@@ -24,7 +24,7 @@
     <script src="../../../../_static/js/theme.js"></script>
     <link rel="search" title="Search" href="../../../../search.html" />
     <link rel="next" title="LDAP Connection guide" href="guide_ldap_connection.html" />
-    <link rel="prev" title="Microsoft.Ad" href="../index.html" /><!-- extra head elements for Ansible beyond RTD Sphinx Theme -->
+    <link rel="prev" title="AD Authentication in Modules" href="guide_ad_module_authentication.html" /><!-- extra head elements for Ansible beyond RTD Sphinx Theme -->
 
 
 
@@ -138,6 +138,7 @@
 <li><p><a class="reference internal" href="#ldap-attributes" id="id1">LDAP Attributes</a></p></li>
 <li><p><a class="reference internal" href="#setting-attributes" id="id2">Setting Attributes</a></p></li>
 <li><p><a class="reference internal" href="#attribute-types" id="id3">Attribute Types</a></p></li>
+<li><p><a class="reference internal" href="#dn-lookup-attributes" id="id4">DN Lookup Attributes</a></p></li>
 </ul>
 </nav>
 <section id="ldap-attributes">
@@ -405,6 +406,68 @@ The common types are:</p>
 </div>
 </section>
 </section>
+<section id="dn-lookup-attributes">
+<span id="ansible-collections-microsoft-ad-docsite-guide-attributes-dn-lookup-attributes"></span><h2><a class="toc-backref" href="#id4" role="doc-backlink">DN Lookup Attributes</a><a class="headerlink" href="#dn-lookup-attributes" title="Link to this heading"></a></h2>
+<p>Some attributes in Active Directory are stored as a Distinguished Name (<code class="docutils literal notranslate"><span class="pre">DN</span></code>) value that references another AD object. Some modules expose a way to lookup the DN using a more human friendly value, such as <code class="docutils literal notranslate"><span class="pre">managed_by</span></code>. These option values must either be a string or a dictionary with the key <code class="docutils literal notranslate"><span class="pre">name</span></code> and optional key <code class="docutils literal notranslate"><span class="pre">server</span></code>. The string value or the value of <code class="docutils literal notranslate"><span class="pre">name</span></code> is the identity to lookup while <code class="docutils literal notranslate"><span class="pre">server</span></code> is the domain server to lookup the identity on. The lookup identity value can be specified as a <code class="docutils literal notranslate"><span class="pre">distinguishedName</span></code>, <code class="docutils literal notranslate"><span class="pre">objectGUID</span></code>, <code class="docutils literal notranslate"><span class="pre">objectSid</span></code>, <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code>, or <code class="docutils literal notranslate"><span class="pre">userPrincipalName</span></code>. The below is an example of how to lookup a DN using the <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> using a string value or in the dictionary form:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Find managed_by using string value</span>
+<span class="w">  </span><span class="nt">microsoft.ad.group</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">My Group</span>
+<span class="w">    </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global</span>
+<span class="w">    </span><span class="nt">managed_by</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Admins</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Find managed_by using dictionary value with a server</span>
+<span class="w">  </span><span class="nt">microsoft.ad.group</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">My Group</span>
+<span class="w">    </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">global</span>
+<span class="w">    </span><span class="nt">managed_by</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Domain Admins</span>
+<span class="w">      </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OtherDC</span>
+</pre></div>
+</div>
+<p>There are also module options that can set a list of DN values for an attribute. The list values for these options are the same as the single value attributes where each DN lookup is set as a string or a dictionary with the <code class="docutils literal notranslate"><span class="pre">name</span></code> and optional <code class="docutils literal notranslate"><span class="pre">server</span></code> key.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Specify a list of DNs to set</span>
+<span class="w">  </span><span class="nt">microsoft.ad.computer</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TheComputer</span>
+<span class="w">    </span><span class="nt">delegates</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">set</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FileShare</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServerA</span>
+<span class="w">        </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OtherDC</span>
+</pre></div>
+</div>
+<p>For list attributes with the <code class="docutils literal notranslate"><span class="pre">add/remove/set</span></code> subkey options, the <code class="docutils literal notranslate"><span class="pre">lookup_failure_action</span></code> option can also be set to <code class="docutils literal notranslate"><span class="pre">fail</span></code> (default), <code class="docutils literal notranslate"><span class="pre">ignore</span></code>, or <code class="docutils literal notranslate"><span class="pre">warn</span></code>. The <code class="docutils literal notranslate"><span class="pre">fail</span></code> option will fail the task if any of the lookups fail, <code class="docutils literal notranslate"><span class="pre">ignore</span></code> will ignore any invalid lookups, and <code class="docutils literal notranslate"><span class="pre">warn</span></code> will emit a warning but still continue on a lookup failure.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Specify a list of DNs to set - ignoring lookup failures</span>
+<span class="w">  </span><span class="nt">microsoft.ad.computer</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TheComputer</span>
+<span class="w">    </span><span class="nt">delegates</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">lookup_failure_action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ignore</span>
+<span class="w">      </span><span class="nt">set</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FileShare</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MissingUser</span>
+</pre></div>
+</div>
+<p>When a <code class="docutils literal notranslate"><span class="pre">server</span></code> key is provided, the lookup will be done using the server value specified. It is possible to also provide explicit credentials just for that server using the <code class="docutils literal notranslate"><span class="pre">domain_credentials</span></code> option.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set member with lookup on different server</span>
+<span class="w">  </span><span class="nt">microsoft.ad.group</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyGroup</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+<span class="w">    </span><span class="nt">members</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">add</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GroupOnDefaultDC</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GroupOnDefaultDC2</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GroupOnOtherDC</span>
+<span class="w">        </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OtherDC</span>
+<span class="w">    </span><span class="nt">domain_credentials</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UserForDefaultDC</span>
+<span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PasswordForDefaultDC</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OtherDC</span>
+<span class="w">      </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UserForOtherDC</span>
+<span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PasswordForOtherDC</span>
+</pre></div>
+</div>
+<p>In the above, the <code class="docutils literal notranslate"><span class="pre">GroupOnOtherDC</span></code> will be done with <code class="docutils literal notranslate"><span class="pre">OtherDC</span></code> with the username <code class="docutils literal notranslate"><span class="pre">UserForOtherDC</span></code>.</p>
+<p>The documentation for the module option will identify if the option supports the lookup behaviour or whether a DN value must be explicitly provided.</p>
+</section>
 </section>
 
 
@@ -413,7 +476,7 @@ The common types are:</p>
           
 
 <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../index.html" class="btn btn-neutral float-left" title="Microsoft.Ad" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="guide_ad_module_authentication.html" class="btn btn-neutral float-left" title="AD Authentication in Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="guide_ldap_connection.html" class="btn btn-neutral float-right" title="LDAP Connection guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

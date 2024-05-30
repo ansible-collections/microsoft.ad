@@ -224,6 +224,27 @@
 <span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-group-membership"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_group_membership</span></code><a class="headerlink" href="#module-win-domain-group-membership" title="Link to this heading"></a></h3>
 <p>Migrated to <a class="reference internal" href="../group_module.html#ansible-collections-microsoft-ad-group-module"><span class="std std-ref">microsoft.ad.group</span></a>.</p>
 <p>The functionality of this module has been merged with <code class="docutils literal notranslate"><span class="pre">microsoft.ad.group</span></code>. Use the <code class="docutils literal notranslate"><span class="pre">members</span></code> option to <code class="docutils literal notranslate"><span class="pre">add</span></code>, <code class="docutils literal notranslate"><span class="pre">remove</span></code>, or <code class="docutils literal notranslate"><span class="pre">set</span></code> to add, remove, or set group members respectively.</p>
+<p>One change is <code class="docutils literal notranslate"><span class="pre">win_domain_group_membership</span></code> could specify the server to lookup the member using the <code class="docutils literal notranslate"><span class="pre">SERVER\member-name</span></code> format. This member format is not supported in <code class="docutils literal notranslate"><span class="pre">microsoft.ad.group</span></code> but since v1.6.0 of this collection the same can be achieved by using a dictionary as the member value. For example:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Add a domain user/group from another Domain in the multi-domain forest to a domain group</span>
+<span class="w">  </span><span class="nt">community.windows.win_domain_group_membership</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GroupinDomainAAA</span>
+<span class="w">    </span><span class="nt">domain_server</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DomainAAA.cloud</span>
+<span class="w">    </span><span class="nt">members</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DomainBBB.cloud\UserInDomainBBB</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Add a domain user/group from another Domain in the multi-domain forest to a domain group</span>
+<span class="w">  </span><span class="nt">microsoft.ad.group</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GroupinDomainAAA</span>
+<span class="w">    </span><span class="nt">domain_server</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DomainAAA.cloud</span>
+<span class="w">    </span><span class="nt">members</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">add</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UserInDomainBBB</span>
+<span class="w">          </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DomainBBB.cloud</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+</pre></div>
+</div>
+<p>See <a class="reference internal" href="guide_attributes.html#ansible-collections-microsoft-ad-docsite-guide-attributes-dn-lookup-attributes"><span class="std std-ref">DN Lookup Attributes</span></a> for more information.</p>
 </section>
 <section id="module-win-domain-object-info">
 <span id="ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-object-info"></span><h3>Module <code class="docutils literal notranslate"><span class="pre">win_domain_object_info</span></code><a class="headerlink" href="#module-win-domain-object-info" title="Link to this heading"></a></h3>
