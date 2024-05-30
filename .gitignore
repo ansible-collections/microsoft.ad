@@ -394,3 +394,4 @@ tests/integration/inventory*
 tests/integration/targets/domain_controller/.vagrant
 tests/integration/targets/membership/.vagrant
 tests/output/
+.vagrant/

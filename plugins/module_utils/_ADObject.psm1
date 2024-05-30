@@ -1020,6 +1020,7 @@ Function Invoke-AnsibleADObject {
     $module.Result.distinguished_name = $null
     $module.Result.object_guid = $null
 
+    $adParams = @{}
     $serverCredentials = @{}
     foreach ($domainCred in $module.Params.domain_credentials) {
         $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @(
@@ -1039,7 +1040,6 @@ Function Invoke-AnsibleADObject {
     }
     $module | Add-Member -MemberType NoteProperty -Name ServerCredentials -Value $serverCredentials
 
-    $adParams = @{}
     if ($module.Params.domain_server) {
         $adParams.Server = $module.Params.domain_server
     }
@@ -1169,8 +1169,7 @@ Function Invoke-AnsibleADObject {
 
             $objectPath = $null
             if ($module.Params.path -and $module.Params.path -ne $defaultPathSentinel) {
-                $objectPath = $path
-                $newParams.Path = $module.Params.path
+                $newParams.Path = $objectPath = $module.Params.path
             }
             else {
                 $objectPath = $defaultObjectPath
