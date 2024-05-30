@@ -7,7 +7,7 @@ LDAP Connection guide
 This guide covers information about communicating with an LDAP server, like Microsoft Active Directory, from the Ansible host. Unlike Windows hosts, there are no builtin mechanisms to communicate and authenticate with an LDAP server, so the plugins that run on the Ansible host require some extra configuration to get working.
 
 .. note::
-  This guide covers LDAP communication from the Ansible host. This does not apply to the modules that run on the remote Windows hosts.
+  This guide covers LDAP communication from the Ansible host. This does not apply to the modules that run on the remote Windows hosts. See :ref:`AD Authentication in Modules <ansible_collections.microsoft.ad.docsite.guide_ad_module_authentication>` for information on how modules authentication can be configured.
 
 .. contents::
   :local:

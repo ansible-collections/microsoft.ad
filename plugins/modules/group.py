@@ -32,19 +32,29 @@ options:
     description:
     - The user or group that manages the group.
     - The value can be in the form of a C(distinguishedName), C(objectGUID),
-      C(objectSid), or C(sAMAccountName).
+      C(objectSid), C(sAMAccountName), or C(userPrincipalName) string or a
+      dictionary with the I(name) and optional I(server) key.
     - This is the value set on the C(managedBy) LDAP attribute.
-    type: str
+    - See
+      R(DN Lookup Attributes,ansible_collections.microsoft.ad.docsite.guide_attributes.dn_lookup_attributes)
+      for more information on how DN lookups work.
+    type: raw
   members:
     description:
     - The members of the group to set.
     - The value is a dictionary that contains 3 keys, I(add), I(remove), and
       I(set).
-    - Each subkey is set to a list of AD principal objects to add, remove or
-      set as the members of this AD group respectively. A principal can be in
-      the form of a C(distinguishedName), C(objectGUID), C(objectSid), or
-      C(sAMAccountName).
-    - The module will fail if it cannot find any of the members referenced.
+    - Each subkey value is a list of values in the form of a
+      C(distinguishedName), C(objectGUID), C(objectSid), C(sAMAccountName),
+      or C(userPrincipalName) string or a dictionary with the I(name) and
+      optional I(server) key.
+    - The value for each subkey can either be specified as a string or a
+      dictionary with the I(name) and optional I(server) key. The I(name) is
+      the identity to lookup and I(server) is an optional key to override what
+      AD server to lookup the identity on.
+    - See
+      R(DN Lookup Attributes,ansible_collections.microsoft.ad.docsite.guide_attributes.dn_lookup_attributes)
+      for more information.
     type: dict
     suboptions:
       add:
@@ -52,13 +62,22 @@ options:
         - Adds the principals specified as members of the group, keeping the
           existing membership if they are not specified.
         type: list
-        elements: str
+        elements: raw
+      lookup_failure_action:
+        description:
+        - Control the action to take when the lookup fails to find the DN.
+        - C(fail) will cause the task to fail.
+        - C(ignore) will ignore the value and continue.
+        - C(warn) will ignore the value and display a warning.
+        choices: ['fail', 'ignore', 'warn']
+        default: fail
+        type: str
       remove:
         description:
         - Removes the principals specified as members of the group, keeping the
           existing membership if they are not specified.
         type: list
-        elements: str
+        elements: raw
       set:
         description:
         - Sets only the principals specified as members of the group.
@@ -66,7 +85,7 @@ options:
           if not specified in this list.
         - Set this to an empty list to remove all members from a group.
         type: list
-        elements: str
+        elements: raw
   sam_account_name:
     description:
     - The C(sAMAccountName) value to set for the group.
@@ -199,6 +218,12 @@ EXAMPLES = r"""
       set:
         - Domain Admins
         - Domain Users
+        - name: UserInOtherDomain
+          server: OtherDomain
+    domain_credentials:
+      - name: OtherDomain
+        username: OtherDomainUser
+        password: '{{ other_domain_password }}'
 """
 
 RETURN = r"""

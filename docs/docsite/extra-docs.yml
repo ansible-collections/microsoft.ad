@@ -6,6 +6,7 @@
 sections:
   - title: Scenario Guides
     toctree:
+      - guide_ad_module_authentication
       - guide_attributes
       - guide_ldap_connection
       - guide_ldap_inventory

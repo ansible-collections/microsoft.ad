@@ -12,15 +12,10 @@ $setParams = @{
             Name = 'delegates'
             Option = @{
                 aliases = 'principals_allowed_to_delegate'
-                type = 'dict'
-                options = @{
-                    add = @{ type = 'list'; elements = 'str' }
-                    remove = @{ type = 'list'; elements = 'str' }
-                    set = @{ type = 'list'; elements = 'str' }
-                }
+                type = 'add_remove_set'
             }
             Attribute = 'PrincipalsAllowedToDelegateToAccount'
-            CaseInsensitive = $true
+            DNLookup = $true
         }
         [PSCustomObject]@{
             Name = 'dns_hostname'
@@ -35,24 +30,8 @@ $setParams = @{
         [PSCustomObject]@{
             Name = 'kerberos_encryption_types'
             Option = @{
-                type = 'dict'
-                options = @{
-                    add = @{
-                        choices = 'aes128', 'aes256', 'des', 'rc4'
-                        type = 'list'
-                        elements = 'str'
-                    }
-                    remove = @{
-                        choices = 'aes128', 'aes256', 'des', 'rc4'
-                        type = 'list'
-                        elements = 'str'
-                    }
-                    set = @{
-                        choices = 'aes128', 'aes256', 'des', 'rc4'
-                        type = 'list'
-                        elements = 'str'
-                    }
-                }
+                type = 'add_remove_set'
+                choices = 'aes128', 'aes256', 'des', 'rc4'
             }
             Attribute = 'KerberosEncryptionType'
             CaseInsensitive = $true
@@ -107,8 +86,9 @@ $setParams = @{
         }
         [PSCustomObject]@{
             Name = 'managed_by'
-            Option = @{ type = 'str' }
+            Option = @{ type = 'raw' }
             Attribute = 'ManagedBy'
+            DNLookup = $true
         }
         [PSCustomObject]@{
             Name = 'sam_account_name'
@@ -119,45 +99,11 @@ $setParams = @{
             Name = 'spn'
             Option = @{
                 aliases = 'spns'
-                type = 'dict'
-                options = @{
-                    add = @{ type = 'list'; elements = 'str' }
-                    remove = @{ type = 'list'; elements = 'str' }
-                    set = @{ type = 'list'; elements = 'str' }
-                }
+                type = 'add_remove_set'
             }
-            Attribute = 'ServicePrincipalNames'
-            New = {
-                param($Module, $ADParams, $NewParams)
-
-                $spns = @(
-                    $Module.Params.spn.add
-                    $Module.Params.spn.set
-                ) | Select-Object -Unique
-
-                $NewParams.ServicePrincipalNames = $spns
-                $Module.Diff.after.spn = $spns
-            }
-            Set = {
-                param($Module, $ADParams, $SetParams, $ADObject)
-
-                $desired = $Module.Params.spn
-                $compareParams = @{
-                    Existing = $ADObject.ServicePrincipalNames
-                    CaseInsensitive = $true
-                }
-                $res = Compare-AnsibleADIdempotentList @compareParams @desired
-                if ($res.Changed) {
-                    $SetParams.ServicePrincipalNames = @{}
-                    if ($res.ToAdd) {
-                        $SetParams.ServicePrincipalNames.Add = $res.ToAdd
-                    }
-                    if ($res.ToRemove) {
-                        $SetParams.ServicePrincipalNames.Remove = $res.ToRemove
-                    }
-                }
-                $module.Diff.after.kerberos_encryption_types = @($res.Value | Sort-Object)
-            }
+            Attribute = 'servicePrincipalName'
+            CaseInsensitive = $true
+            IsRawAttribute = $true
         }
         [PSCustomObject]@{
             Name = 'trusted_for_delegation'

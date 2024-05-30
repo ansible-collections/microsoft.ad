@@ -310,3 +310,77 @@ SDDL strings can be quite complex so building them manually is ill-advised. It i
     $dn = 'CN=ObjectName,DC=domain,DC=test'
     $obj = Get-ADObject -Identity $dn -Properties nTSecurityDescriptor
     $obj.nTSecurityDescriptor.GetSecurityDescriptorSddlForm('All')
+
+.. _ansible_collections.microsoft.ad.docsite.guide_attributes.dn_lookup_attributes:
+
+DN Lookup Attributes
+====================
+
+Some attributes in Active Directory are stored as a Distinguished Name (``DN``) value that references another AD object. Some modules expose a way to lookup the DN using a more human friendly value, such as ``managed_by``. These option values must either be a string or a dictionary with the key ``name`` and optional key ``server``. The string value or the value of ``name`` is the identity to lookup while ``server`` is the domain server to lookup the identity on. The lookup identity value can be specified as a ``distinguishedName``, ``objectGUID``, ``objectSid``, ``sAMAccountName``, or ``userPrincipalName``. The below is an example of how to lookup a DN using the ``sAMAccountName`` using a string value or in the dictionary form:
+
+.. code-block:: yaml
+
+    - name: Find managed_by using string value
+      microsoft.ad.group:
+        name: My Group
+        scope: global
+        managed_by: Domain Admins
+
+    - name: Find managed_by using dictionary value with a server
+      microsoft.ad.group:
+        name: My Group
+        scope: global
+        managed_by:
+          name: Domain Admins
+          server: OtherDC
+
+There are also module options that can set a list of DN values for an attribute. The list values for these options are the same as the single value attributes where each DN lookup is set as a string or a dictionary with the ``name`` and optional ``server`` key.
+
+.. code-block:: yaml
+
+    - name: Specify a list of DNs to set
+      microsoft.ad.computer:
+        identity: TheComputer
+        delegates:
+          set:
+          - FileShare
+          - name: ServerA
+            server: OtherDC
+
+For list attributes with the ``add/remove/set`` subkey options, the ``lookup_failure_action`` option can also be set to ``fail`` (default), ``ignore``, or ``warn``. The ``fail`` option will fail the task if any of the lookups fail, ``ignore`` will ignore any invalid lookups, and ``warn`` will emit a warning but still continue on a lookup failure.
+
+.. code-block:: yaml
+
+    - name: Specify a list of DNs to set - ignoring lookup failures
+      microsoft.ad.computer:
+        identity: TheComputer
+        delegates:
+          lookup_failure_action: ignore
+          set:
+          - FileShare
+          - MissingUser
+
+When a ``server`` key is provided, the lookup will be done using the server value specified. It is possible to also provide explicit credentials just for that server using the ``domain_credentials`` option.
+
+.. code-block:: yaml
+
+    - name: Set member with lookup on different server
+      microsoft.ad.group:
+        name: MyGroup
+        state: present
+        members:
+          add:
+          - GroupOnDefaultDC
+          - name: GroupOnDefaultDC2
+          - name: GroupOnOtherDC
+            server: OtherDC
+        domain_credentials:
+        - username: UserForDefaultDC
+          password: PasswordForDefaultDC
+        - name: OtherDC
+          username: UserForOtherDC
+          password: PasswordForOtherDC
+
+In the above, the ``GroupOnOtherDC`` will be done with ``OtherDC`` with the username ``UserForOtherDC``.
+
+The documentation for the module option will identify if the option supports the lookup behaviour or whether a DN value must be explicitly provided.

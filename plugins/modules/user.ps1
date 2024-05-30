@@ -103,15 +103,10 @@ $setParams = @{
             Name = 'delegates'
             Option = @{
                 aliases = 'principals_allowed_to_delegate'
-                type = 'dict'
-                options = @{
-                    add = @{ type = 'list'; elements = 'str' }
-                    remove = @{ type = 'list'; elements = 'str' }
-                    set = @{ type = 'list'; elements = 'str' }
-                }
+                type = 'add_remove_set'
             }
             Attribute = 'PrincipalsAllowedToDelegateToAccount'
-            CaseInsensitive = $true
+            DNLookup = $true
         }
 
         [PSCustomObject]@{

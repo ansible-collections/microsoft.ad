@@ -107,7 +107,8 @@
         - my_user_2
         - another-user
     register: fail_invalid_members
-    failed_when: 'fail_invalid_members.msg != "Failed to find the following ad objects for group members: ''fake-user'', ''another-user''"'
+    failed_when: >-
+      fail_invalid_members.msg != "Failed to find the AD object DNs for members.add. Invalid identities: 'fake-user', 'another-user'"
 
   - name: add members to a group - check
     group:
@@ -141,7 +142,7 @@
       members:
         add:
         - my_user_1
-        - '{{ test_users.results[2].sid }}'
+        - name: '{{ test_users.results[2].sid }}'
         - MyGroup2-ReallyLongGroupNameHere
     register: add_member
 
@@ -376,7 +377,8 @@
         - my_user_2
         - another-user
     register: fail_invalid_members
-    failed_when: 'fail_invalid_members.msg != "Failed to find the following ad objects for group members: ''fake-user'', ''another-user''"'
+    failed_when: >-
+      fail_invalid_members.msg != "Failed to find the AD object DNs for members.add. Invalid identities: 'fake-user', 'another-user'"
 
   - name: create group with custom options
     group:
@@ -388,7 +390,8 @@
       scope: domainlocal
       category: distribution
       homepage: www.ansible.com
-      managed_by: Domain Admins
+      managed_by:
+        name: Domain Admins
       members:
         add:
         - my_user_1
