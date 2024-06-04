@@ -444,20 +444,25 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <td><div class="ansible-option-cell"><p>Specifies the group membership the user is added, removed, or set to.</p>
 <p>To clear all group memberships, use <em>set</em> with an empty list.</p>
 <p>Note that users cannot be removed from their principal group (for example, “Domain Users”). Attempting to do so will display a warning.</p>
+<p>Adding and removing a user from a group is done on the group AD object. If the group is an object in a different domain, then it may require explicit <em>server</em> and <em>domain_credentials</em> for it to work.</p>
 <p>Each subkey is set to a list of groups objects to add, remove or set as the membership of this AD user respectively. A group can be in the form of a <code class="docutils literal notranslate"><span class="pre">distinguishedName</span></code>, <code class="docutils literal notranslate"><span class="pre">objectGUID</span></code>, <code class="docutils literal notranslate"><span class="pre">objectSid</span></code>, or <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code>.</p>
+<p>Each subkey value is a list of group objects in the form of a <code class="docutils literal notranslate"><span class="pre">distinguishedName</span></code>, <code class="docutils literal notranslate"><span class="pre">objectGUID</span></code>, <code class="docutils literal notranslate"><span class="pre">objectSid</span></code>, <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code>, or <code class="docutils literal notranslate"><span class="pre">userPrincipalName</span></code> string or a dictionary with the <em>name</em> and optional <em>server</em> key.</p>
+<p>See <a class="reference internal" href="docsite/guide_attributes.html#ansible-collections-microsoft-ad-docsite-guide-attributes-dn-lookup-attributes"><span class="std std-ref">DN Lookup Attributes</span></a> for more information on how DN lookups work.</p>
 <p>See <a class="reference internal" href="docsite/guide_list_values.html#ansible-collections-microsoft-ad-docsite-guide-list-values"><span class="std std-ref">Setting list option values</span></a> for more information on how to add/remove/set list options.</p>
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-groups/add"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-groups-add"><strong>add</strong></p>
-<a class="ansibleOptionLink" href="#parameter-groups/add" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+<a class="ansibleOptionLink" href="#parameter-groups/add" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=any</span></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The groups to add the user to.</p>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-groups/missing_behaviour"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-groups-missing-behaviour"><strong>missing_behaviour</strong></p>
-<a class="ansibleOptionLink" href="#parameter-groups/missing_behaviour" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+<div class="ansibleOptionAnchor" id="parameter-groups/lookup_failure_action"></div>
+<div class="ansibleOptionAnchor" id="parameter-groups/missing_behaviour"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-groups-missing-behaviour"><span id="ansible-collections-microsoft-ad-user-module-parameter-groups-lookup-failure-action"></span><strong>lookup_failure_action</strong></p>
+<a class="ansibleOptionLink" href="#parameter-groups/lookup_failure_action" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-aliases">aliases: missing_behaviour</span></p>
+<p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>Controls what happens when a group specified by <code class="docutils literal notranslate"><span class="pre">groups</span></code> is an invalid group name.</p>
 <p><code class="docutils literal notranslate"><span class="pre">fail</span></code> is the default and will return an error any groups do not exist.</p>
@@ -473,14 +478,14 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 </tr>
 <tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-groups/remove"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-groups-remove"><strong>remove</strong></p>
-<a class="ansibleOptionLink" href="#parameter-groups/remove" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+<a class="ansibleOptionLink" href="#parameter-groups/remove" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=any</span></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The groups to remove the user from.</p>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-groups/set"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-user-module-parameter-groups-set"><strong>set</strong></p>
-<a class="ansibleOptionLink" href="#parameter-groups/set" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+<a class="ansibleOptionLink" href="#parameter-groups/set" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=any</span></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The only groups the user is a member of.</p>
 <p>This will clear out any existing groups if not in the specified list.</p>
