@@ -380,3 +380,217 @@
   assert:
     that:
     - not lookup_with_creds_again is changed
+
+- name: create user group with DN lookup and creds - check mode
+  microsoft.ad.user:
+    name: ChildUser1
+    path: '{{ child_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_credentials:
+    - name: '{{ domain_realm }}'
+      username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+    groups:
+      add:
+      - Group-CHILD
+      - name: Group-PARENT
+        server: '{{ domain_realm }}'
+  register: new_user_with_group_check
+  delegate_to: CHILD
+  check_mode: true
+
+- name: get result of create user group with DN lookup and creds - check mode
+  microsoft.ad.object_info:
+    identity: '{{ new_user_with_group_check.distinguished_name }}'
+    properties:
+    - memberOf
+  register: new_user_with_group_check_actual
+  delegate_to: CHILD
+
+- name: assert set value with DN lookup and creds
+  assert:
+    that:
+    - new_user_with_group_check is changed
+    - new_user_with_group_check.distinguished_name == "CN=ChildUser1," ~ child_ou
+    - new_user_with_group_check_actual.objects == []
+
+- name: create user group with DN lookup and creds
+  microsoft.ad.user:
+    name: ChildUser1
+    path: '{{ child_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_credentials:
+    - name: '{{ domain_realm }}'
+      username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+    groups:
+      add:
+      - Group-CHILD
+      - name: Group-PARENT
+        server: '{{ domain_realm }}'
+  register: new_user_with_group
+  delegate_to: CHILD
+
+- name: replicate group membership of parent group to child domain after adding group
+  ansible.windows.win_command: >-
+    repadmin.exe
+    /replsingleobj
+    {{ hostvars["CHILD"]["new_hostname"] }}.{{ hostvars["CHILD"]["child_domain_name"] }}
+    parent.{{ domain_realm }}
+    {{ parent_group }}
+  delegate_to: CHILD
+
+- name: get result of create user group with DN lookup and creds
+  microsoft.ad.object_info:
+    identity: '{{ new_user_with_group.distinguished_name }}'
+    properties:
+    - memberOf
+  register: new_user_with_group_actual
+  delegate_to: CHILD
+
+- name: assert create user group with DN lookup and creds
+  assert:
+    that:
+    - new_user_with_group is changed
+    - new_user_with_group.distinguished_name == "CN=ChildUser1," ~ child_ou
+    - new_user_with_group_actual.objects | count == 1
+    - new_user_with_group_actual.objects[0].DistinguishedName == new_user_with_group.distinguished_name
+    - >-
+      "CN=Group-CHILD," ~ child_ou in new_user_with_group_actual.objects[0].memberOf
+    - >-
+      "CN=Group-PARENT," ~ parent_ou in new_user_with_group_actual.objects[0].memberOf
+
+- name: create user group with DN lookup and creds - idempotent
+  microsoft.ad.user:
+    name: ChildUser1
+    path: '{{ child_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_credentials:
+    - name: '{{ domain_realm }}'
+      username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+    groups:
+      add:
+      - Group-CHILD
+      - name: Group-PARENT
+        server: '{{ domain_realm }}'
+  register: new_user_with_group_again
+  delegate_to: CHILD
+
+- name: assert create user group with DN lookup and creds - idempotent
+  assert:
+    that:
+    - not new_user_with_group_again is changed
+
+- name: remove user group with DN lookup and creds - check mode
+  microsoft.ad.user:
+    name: ChildUser1
+    path: '{{ child_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_credentials:
+    - name: '{{ domain_realm }}'
+      username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+    groups:
+      remove:
+      - Group-CHILD
+      - name: Group-PARENT
+        server: '{{ domain_realm }}'
+  register: remove_user_with_group_check
+  delegate_to: CHILD
+  check_mode: true
+
+- name: get result of remove user group with DN lookup and creds - check mode
+  microsoft.ad.object_info:
+    identity: '{{ remove_user_with_group_check.distinguished_name }}'
+    properties:
+    - memberOf
+  register: remove_user_with_group_check_actual
+  delegate_to: CHILD
+
+- name: assert remove user group with DN lookup and creds - check mode
+  assert:
+    that:
+    - remove_user_with_group_check is changed
+    - remove_user_with_group_check.distinguished_name == "CN=ChildUser1," ~ child_ou
+    - >-
+      "CN=Group-CHILD," ~ child_ou in remove_user_with_group_check_actual.objects[0].memberOf
+    - >-
+      "CN=Group-PARENT," ~ parent_ou in remove_user_with_group_check_actual.objects[0].memberOf
+
+- name: remove user group with DN lookup and creds
+  microsoft.ad.user:
+    name: ChildUser1
+    path: '{{ child_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_credentials:
+    - name: '{{ domain_realm }}'
+      username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+    groups:
+      remove:
+      - Group-CHILD
+      - name: Group-PARENT
+        server: '{{ domain_realm }}'
+  register: remove_user_with_group
+  delegate_to: CHILD
+
+- name: replicate group membership of parent group to child domain after removing group
+  ansible.windows.win_command: >-
+    repadmin.exe
+    /replsingleobj
+    {{ hostvars["CHILD"]["new_hostname"] }}.{{ hostvars["CHILD"]["child_domain_name"] }}
+    parent.{{ domain_realm }}
+    {{ parent_group }}
+  delegate_to: CHILD
+
+- name: get result of remove user group with DN lookup and creds
+  microsoft.ad.object_info:
+    identity: '{{ remove_user_with_group.distinguished_name }}'
+    properties:
+    - memberOf
+  register: remove_user_with_group_actual
+  delegate_to: CHILD
+
+- name: assert remove user group with DN lookup and creds
+  assert:
+    that:
+    - remove_user_with_group is changed
+    - remove_user_with_group.distinguished_name == "CN=ChildUser1," ~ child_ou
+    - remove_user_with_group_actual.objects | count == 1
+    - remove_user_with_group_actual.objects[0].DistinguishedName == new_user_with_group.distinguished_name
+    - remove_user_with_group_actual.objects[0].memberOf == None
+
+- name: remove user group with DN lookup and creds - idempotent
+  microsoft.ad.user:
+    name: ChildUser1
+    path: '{{ child_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_credentials:
+    - name: '{{ domain_realm }}'
+      username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+    groups:
+      remove:
+      - Group-CHILD
+      - name: Group-PARENT
+        server: '{{ domain_realm }}'
+  register: remove_user_with_group_again
+  delegate_to: CHILD
+
+- name: assert remove user group with DN lookup and creds - idempotent
+  assert:
+    that:
+    - not remove_user_with_group_again is changed

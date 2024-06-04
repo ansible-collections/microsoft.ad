@@ -132,10 +132,11 @@ $setParams = @{
             Option = @{
                 type = 'dict'
                 options = @{
-                    add = @{ type = 'list'; elements = 'str' }
-                    remove = @{ type = 'list'; elements = 'str' }
-                    set = @{ type = 'list'; elements = 'str' }
-                    missing_behaviour = @{
+                    add = @{ type = 'list'; elements = 'raw' }
+                    remove = @{ type = 'list'; elements = 'raw' }
+                    set = @{ type = 'list'; elements = 'raw' }
+                    lookup_failure_action = @{
+                        aliases = @('missing_behaviour')
                         choices = 'fail', 'ignore', 'warn'
                         default = 'fail'
                         type = 'str'
@@ -365,27 +366,19 @@ $setParams = @{
             return
         }
 
-        $groupMissingBehaviour = $Module.Params.groups.missing_behaviour
-        $lookupGroup = {
-            try {
-                (Get-ADGroup -Identity $args[0] @ADParams).DistinguishedName
-            }
-            catch {
-                if ($groupMissingBehaviour -eq "fail") {
-                    $module.FailJson("Failed to locate group $($args[0]): $($_.Exception.Message)", $_)
-                }
-                elseif ($groupMissingBehaviour -eq "warn") {
-                    $module.Warn("Failed to locate group $($args[0]) but continuing on: $($_.Exception.Message)")
-                }
-            }
-        }
-
         [string[]]$existingGroups = @(
             # In check mode the ADObject won't be given
             if ($ADObject) {
                 try {
-                    Get-ADPrincipalGroupMembership -Identity $ADObject.ObjectGUID @ADParams -ErrorAction Stop |
-                        Select-Object -ExpandProperty DistinguishedName
+                    # Get-ADPrincipalGroupMembership doesn't work well with
+                    # cross domain membership. It also gets the primary group
+                    # so this code reflects that using Get-ADUser instead.
+                    $userMembership = Get-ADUser -Identity $ADObject.ObjectGUID @ADParams -Properties @(
+                        'MemberOf',
+                        'PrimaryGroup'
+                    ) -ErrorAction Stop
+                    $userMembership.memberOf
+                    $userMembership.PrimaryGroup
                 }
                 catch {
                     $module.Warn("Failed to enumerate user groups but continuing on: $($_.Exception.Message)")
@@ -401,14 +394,42 @@ $setParams = @{
             CaseInsensitive = $true
             Existing = $existingGroups
         }
-        'add', 'remove', 'set' | ForEach-Object -Process {
-            if ($null -ne $Module.Params.groups[$_]) {
-                $compareParams[$_] = @(
-                    foreach ($group in $Module.Params.groups[$_]) {
-                        & $lookupGroup $group
-                    }
-                )
+        $dnServerParams = @{}
+        foreach ($actionKvp in $Module.Params.groups.GetEnumerator()) {
+            if ($null -eq $actionKvp.Value -or $actionKvp.Key -in @('lookup_failure_action', 'missing_behaviour')) {
+                continue
             }
+
+            $convertParams = @{
+                Module = $Module
+                Context = "groups.$($actionKvp.Key)"
+                FailureAction = $Module.Params.groups.lookup_failure_action
+            }
+            $dns = foreach ($lookupId in $actionKvp.Value) {
+                $dn = $lookupId | ConvertTo-AnsibleADDistinguishedName @ADParams @convertParams
+                if (-not $dn) {
+                    continue  # Warning was written
+                }
+
+                # As membership is done on the group server, we need to store
+                # correct server and credentials that was used for the lookup.
+                if ($lookupId -is [System.Collections.IDictionary] -and $lookupId.server) {
+                    $dnServerParams[$dn] = @{
+                        Server = $lookupId.server
+                    }
+
+                    if ($Module.ServerCredentials.ContainsKey($lookupId.server)) {
+                        $dnServerParams[$dn].Credential = $Module.ServerCredentials[$lookupId.server]
+                    }
+                }
+                else {
+                    $dnServerParams[$dn] = $ADParams
+                }
+
+                $dn
+            }
+
+            $compareParams[$actionKvp.Key] = @($dns)
         }
 
         $res = Compare-AnsibleADIdempotentList @compareParams
@@ -420,15 +441,32 @@ $setParams = @{
                 WhatIf = $Module.CheckMode
             }
             foreach ($member in $res.ToAdd) {
+                $lookupParams = if ($dnServerParams.ContainsKey($member)) {
+                    $dnServerParams[$member]
+                }
+                else {
+                    $ADParams
+                }
                 if ($ADObject) {
-                    Add-ADGroupMember -Identity $member -Members $ADObject.ObjectGUID @ADParams @commonParams
+                    Set-ADObject -Identity $member -Add @{
+                        member = $ADObject.DistinguishedName
+                    } @lookupParams @commonParams
+
                 }
                 $Module.Result.changed = $true
             }
             foreach ($member in $res.ToRemove) {
+                $lookupParams = if ($dnServerParams.ContainsKey($member)) {
+                    $dnServerParams[$member]
+                }
+                else {
+                    $ADParams
+                }
                 if ($ADObject) {
                     try {
-                        Remove-ADGroupMember -Identity $member -Members $ADObject.ObjectGUID @ADParams @commonParams
+                        Set-ADObject -Identity $member -Remove @{
+                            member = $ADObject.DistinguishedName
+                        } @lookupParams @commonParams
                     }
                     catch [Microsoft.ActiveDirectory.Management.ADException] {
                         if ($_.Exception.ErrorCode -eq 0x0000055E) {

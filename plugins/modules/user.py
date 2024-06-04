@@ -116,10 +116,20 @@ options:
     - To clear all group memberships, use I(set) with an empty list.
     - Note that users cannot be removed from their principal group (for
       example, "Domain Users"). Attempting to do so will display a warning.
+    - Adding and removing a user from a group is done on the group AD object.
+      If the group is an object in a different domain, then it may require
+      explicit I(server) and I(domain_credentials) for it to work.
     - Each subkey is set to a list of groups objects to add, remove or
       set as the membership of this AD user respectively. A group can be in
       the form of a C(distinguishedName), C(objectGUID), C(objectSid), or
       C(sAMAccountName).
+    - Each subkey value is a list of group objects in the form of a
+      C(distinguishedName), C(objectGUID), C(objectSid), C(sAMAccountName),
+      or C(userPrincipalName) string or a dictionary with the I(name) and
+      optional I(server) key.
+    - See
+      R(DN Lookup Attributes,ansible_collections.microsoft.ad.docsite.guide_attributes.dn_lookup_attributes)
+      for more information on how DN lookups work.
     - See R(Setting list option values,ansible_collections.microsoft.ad.docsite.guide_list_values)
       for more information on how to add/remove/set list options.
     type: dict
@@ -128,20 +138,20 @@ options:
         description:
         - The groups to add the user to.
         type: list
-        elements: str
+        elements: raw
       remove:
         description:
         - The groups to remove the user from.
         type: list
-        elements: str
+        elements: raw
       set:
         description:
         - The only groups the user is a member of.
         - This will clear out any existing groups if not in the specified list.
         - Set to an empty list to clear all group membership of the user.
         type: list
-        elements: str
-      missing_behaviour:
+        elements: raw
+      lookup_failure_action:
         description:
         - Controls what happens when a group specified by C(groups) is an
           invalid group name.
@@ -150,6 +160,8 @@ options:
         - C(ignore) will ignore any groups that does not exist.
         - C(warn) will display a warning for any groups that do not exist but
           will continue without failing.
+        aliases:
+        - missing_behaviour
         choices:
         - fail
         - ignore
