@@ -1098,7 +1098,8 @@
       - Invalid
   register: fail_missing_group
   failed_when:
-  - '"Failed to locate group Invalid: Cannot find an object with identity" not in fail_missing_group.msg'
+  - >-
+    "Failed to find the AD object DNs for groups.add. Invalid identities: 'Invalid'" not in fail_missing_group.msg
 
 - name: warn on group that is missing
   user:
@@ -1107,7 +1108,7 @@
     groups:
       add:
       - Invalid
-      missing_behaviour: warn
+      lookup_failure_action: warn
   register: warn_missing_group
 
 - name: assert warn on group that is missing
@@ -1115,7 +1116,8 @@
     that:
     - not warn_missing_group is changed
     - warn_missing_group.warnings | length == 1
-    - '"Failed to locate group Invalid but continuing on" in warn_missing_group.warnings[0]'
+    - >-
+      "Failed to find the AD object DNs for groups.add. Ignoring invalid identities: 'Invalid'" in warn_missing_group.warnings[0]
 
 - name: ignore on group that is missing
   user:
@@ -1123,7 +1125,7 @@
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     groups:
       add:
-      - Invalid
+      - name: Invalid
       missing_behaviour: ignore
   register: ignore_missing_group
 
@@ -1139,7 +1141,7 @@
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     groups:
       remove:
-      - domain admins
+      - name: domain admins
       - Enterprise Admins
   register: groups_remove
 

@@ -1,0 +1,9 @@
+minor_changes:
+  - >-
+    microsoft.ad.user - Support group member lookup on alternative server using the DN lookup syntax.
+    This syntax uses a dictionary where ``name`` defined the group to lookup and ``server`` defines the
+    server to lookup the group on.
+  - >-
+    microsoft.ad.user - Rename the option ``groups.missing_action`` to ``groups.lookup_failure_action``
+    to make the option more consistent with other modules. The ``missing_action`` option is still
+    supported as an alias.
