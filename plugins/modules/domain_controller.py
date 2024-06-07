@@ -169,7 +169,7 @@ EXAMPLES = r"""
   register: dc_promotion
 
 - name: Reboot after promotion
-  microsoft.ad.win_reboot:
+  ansible.windows.win_reboot:
   when: dc_promotion.reboot_required
 """
 
