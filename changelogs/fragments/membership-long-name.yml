@@ -1,4 +1,0 @@
-bugfixes:
-  - >-
-    microsoft.ad.membership - Fix hostname check to work with hostnames longer than 15 characters long -
-    https://github.com/ansible-collections/microsoft.ad/issues/113
