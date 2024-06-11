@@ -62,6 +62,7 @@ def tls_server(tmp_path_factory: pytest.TempPathFactory) -> TlsServer:
         .not_valid_after(now + datetime.timedelta(days=365))
         .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
         .add_extension(ca_key_usage, critical=True)
+        .add_extension(x509.SubjectKeyIdentifier.from_public_key(ca_key.public_key()), critical=False)
         .sign(ca_key, hashes.SHA256())
     )
 
