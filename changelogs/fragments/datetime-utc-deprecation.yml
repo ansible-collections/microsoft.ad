@@ -1,0 +1,4 @@
+bugfixes:
+  - >-
+    Removed usages of the python call ``datetime.datetime.utcnow()`` in favour of ``datetime.datetime.now(datetime.timezone.utc)``.
+    The original method is now deprecated in Python 3.12 and will be removed in a later version.
