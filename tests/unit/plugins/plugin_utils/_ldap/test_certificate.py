@@ -37,8 +37,19 @@ class TlsServer(t.NamedTuple):
 @pytest.fixture(scope="module")
 def tls_server(tmp_path_factory: pytest.TempPathFactory) -> TlsServer:
     cn = "microsoft.ad.test"
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.timezone.utc)
 
+    ca_key_usage = x509.KeyUsage(
+        digital_signature=True,
+        content_commitment=False,
+        key_encipherment=False,
+        data_encipherment=False,
+        key_agreement=False,
+        key_cert_sign=True,
+        crl_sign=True,
+        encipher_only=False,
+        decipher_only=False,
+    )
     ca_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     ca_name = x509.Name([x509.NameAttribute(x509.NameOID.COMMON_NAME, "microsoft.ad")])
     ca_cert = (
@@ -50,14 +61,18 @@ def tls_server(tmp_path_factory: pytest.TempPathFactory) -> TlsServer:
         .not_valid_before(now)
         .not_valid_after(now + datetime.timedelta(days=365))
         .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
+        .add_extension(ca_key_usage, critical=True)
+        .add_extension(x509.SubjectKeyIdentifier.from_public_key(ca_key.public_key()), critical=False)
         .sign(ca_key, hashes.SHA256())
     )
 
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    ca_aki = x509.AuthorityKeyIdentifier.from_issuer_public_key(
+        ca_cert.public_key())  # type: ignore[arg-type]
 
     name = x509.Name([x509.NameAttribute(x509.NameOID.COMMON_NAME, cn)])
 
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.timezone.utc)
     cert = (
         x509.CertificateBuilder()
         .subject_name(name)
@@ -66,6 +81,7 @@ def tls_server(tmp_path_factory: pytest.TempPathFactory) -> TlsServer:
         .serial_number(x509.random_serial_number())
         .not_valid_before(now)
         .not_valid_after(now + datetime.timedelta(days=365))
+        .add_extension(ca_aki, critical=False)
         .sign(ca_key, hashes.SHA256())
     )
     cert_pem = cert.public_bytes(encoding=serialization.Encoding.PEM)
@@ -95,8 +111,10 @@ def tls_server(tmp_path_factory: pytest.TempPathFactory) -> TlsServer:
 
 @pytest.fixture(scope="module")
 def client_certificate(tls_server: TlsServer) -> t.Tuple["x509.Certificate", "rsa.RSAPrivateKey"]:
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.timezone.utc)
 
+    ca_aki = x509.AuthorityKeyIdentifier.from_issuer_public_key(
+        tls_server.ca.public_key())  # type: ignore[arg-type]
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     name = x509.Name([x509.NameAttribute(x509.NameOID.COMMON_NAME, "client-auth")])
     cert = (
@@ -119,6 +137,7 @@ def client_certificate(tls_server: TlsServer) -> t.Tuple["x509.Certificate", "rs
             False,
         )
         .add_extension(x509.ExtendedKeyUsage([x509.oid.ExtendedKeyUsageOID.CLIENT_AUTH]), False)
+        .add_extension(ca_aki, critical=False)
         .sign(tls_server.ca_key, hashes.SHA256())
     )
 
@@ -143,7 +162,7 @@ def test_get_tls_binding_data_rsa(
 
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     name = x509.Name([x509.NameAttribute(x509.NameOID.COMMON_NAME, "test")])
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.timezone.utc)
     try:
         cert = (
             x509.CertificateBuilder()
@@ -154,7 +173,7 @@ def test_get_tls_binding_data_rsa(
             .not_valid_before(now)
             .not_valid_after(now + datetime.timedelta(days=365))
             .add_extension(x509.ExtendedKeyUsage([x509.oid.ExtendedKeyUsageOID.SERVER_AUTH]), False)
-            .sign(key, cert_algo)
+            .sign(key, cert_algo)  # type: ignore[arg-type]
         ).public_bytes(encoding=serialization.Encoding.DER)
     except (UnsupportedAlgorithm, ValueError) as e:
         pytest.skip(f"Hash algorithm is unavailable: {e}")
@@ -170,7 +189,7 @@ def test_get_tls_binding_data_rsa(
 def test_get_tls_binding_data_ed25519() -> None:
     key = ed25519.Ed25519PrivateKey.generate()
     name = x509.Name([x509.NameAttribute(x509.NameOID.COMMON_NAME, "test")])
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.timezone.utc)
     cert = (
         x509.CertificateBuilder()
         .subject_name(name)
