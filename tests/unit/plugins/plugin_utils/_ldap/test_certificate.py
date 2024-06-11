@@ -39,6 +39,17 @@ def tls_server(tmp_path_factory: pytest.TempPathFactory) -> TlsServer:
     cn = "microsoft.ad.test"
     now = datetime.datetime.now(datetime.timezone.utc)
 
+    ca_key_usage = x509.KeyUsage(
+        digital_signature=True,
+        content_commitment=False,
+        key_encipherment=False,
+        data_encipherment=False,
+        key_agreement=False,
+        key_cert_sign=True,
+        crl_sign=True,
+        encipher_only=False,
+        decipher_only=False,
+    )
     ca_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     ca_name = x509.Name([x509.NameAttribute(x509.NameOID.COMMON_NAME, "microsoft.ad")])
     ca_cert = (
@@ -50,6 +61,7 @@ def tls_server(tmp_path_factory: pytest.TempPathFactory) -> TlsServer:
         .not_valid_before(now)
         .not_valid_after(now + datetime.timedelta(days=365))
         .add_extension(x509.BasicConstraints(ca=True, path_length=None), critical=True)
+        .add_extension(ca_key_usage, critical=True)
         .sign(ca_key, hashes.SHA256())
     )
 
