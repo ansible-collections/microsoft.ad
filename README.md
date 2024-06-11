@@ -3,6 +3,8 @@
 [![Build Status](https://dev.azure.com/ansible/microsoft.ad/_apis/build/status/CI?branchName=main)](https://dev.azure.com/ansible/microsoft.ad/_build/latest?definitionId=24&branchName=main)
 [![codecov](https://codecov.io/gh/ansible-collections/microsoft.ad/branch/main/graph/badge.svg)](https://codecov.io/gh/ansible-collections/microsoft.ad)
 
+fii
+
 The `microsoft.ad` collection includes the plugins supported by Ansible to help the management of Microsoft Active Directory.
 
 ## Ansible version compatibility
