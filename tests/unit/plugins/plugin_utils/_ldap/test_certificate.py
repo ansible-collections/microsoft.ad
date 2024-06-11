@@ -24,7 +24,7 @@ try:
     from cryptography.hazmat.primitives.asymmetric import ed25519
 
 except Exception:
-    pytest.skip("Cannot run certificate tests without cryptography")
+    pytest.skip("Cannot run certificate tests without cryptograph")
 
 
 class TlsServer(t.NamedTuple):
