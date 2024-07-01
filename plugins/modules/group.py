@@ -88,7 +88,7 @@ options:
         elements: raw
   flatten:
     description:
-    - For nested groups, group members are added directly (nested groups are "flattened").
+    - Flattens nested groups.
     type: bool
     default: false
   sam_account_name:
