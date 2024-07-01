@@ -322,6 +322,7 @@
   - name: create sub group and set members
     group:
       name: MySubGroup
+      scope: global
       members:
         set:
           - my_user_1
