@@ -373,7 +373,7 @@
           - my_user_2
     register: sub_group
 
-  - name: set members while flattening sub group
+  - name: set members with sub group flattening
     group:
       name: MyGroup
       flatten: true

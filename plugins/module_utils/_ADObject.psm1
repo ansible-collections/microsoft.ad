@@ -543,7 +543,7 @@ Function ConvertTo-AnsibleADDistinguishedName {
         [string]
         $Server,
 
-        [boolean]
+        [Switch]
         $NestedGroupFlatten,
 
         [PSCredential]
@@ -617,7 +617,7 @@ Function ConvertTo-AnsibleADDistinguishedName {
             $object = Get-AnsibleADObject @getParams
             if ($object) {
                 if ($NestedGroupFlatten -and $object.ObjectClass -eq "group") {
-                    $dns = Get-ADGroupMember $object -Recursive | Select-Object -ExpandProperty DistinguishedName
+                    $dns = Get-ADGroupMember @getParams -Recursive $object | Select-Object -ExpandProperty DistinguishedName
                 }
                 else {
                     $dns = $object | Select-Object -ExpandProperty DistinguishedName
