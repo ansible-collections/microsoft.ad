@@ -1028,7 +1028,7 @@ Function Invoke-AnsibleADObject {
 
     if ($ModuleNoun -eq "ADGroup") {
         $spec.options['flatten'] = @{
-                type = 'bool'
+             type = 'bool'
         }
     }
 
