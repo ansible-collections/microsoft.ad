@@ -363,6 +363,42 @@
       that:
       - not unset_member_again is changed
 
+  - name: create sub group and set members
+    group:
+      name: MySubGroup
+      members:
+        set:
+          - my_user_1
+          - my_user_2
+    register: sub_group
+
+  - name: set members while flattening sub group
+    group:
+      name: MyGroup
+      flatten: true
+      members:
+        set:
+          - MySubGroup
+          - my_user_3
+    register: set_member
+
+  - name: get result of set members with flattening
+    object_info:
+      identity: '{{ object_identity }}'
+      properties:
+      - member
+    register: set_member_actual
+
+  - name: assert set members with flattening
+    assert:
+      that:
+      - set_member is changed
+      - set_member_actual.objects[0].member | length == 3
+      - test_users.results[0].distinguished_name in set_member_actual.objects[0].member
+      - test_users.results[1].distinguished_name in set_member_actual.objects[0].member
+      - test_users.results[2].distinguished_name in set_member_actual.objects[0].member
+      - sub_group.distinguished_name not in set_member_actual.objects[0].member
+
   - name: remove group - check
     group:
       name: MyGroup
