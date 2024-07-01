@@ -86,6 +86,11 @@ options:
         - Set this to an empty list to remove all members from a group.
         type: list
         elements: raw
+  flatten:
+    description:
+    - Flattens nested groups.
+    type: bool
+    default: false
   sam_account_name:
     description:
     - The C(sAMAccountName) value to set for the group.
