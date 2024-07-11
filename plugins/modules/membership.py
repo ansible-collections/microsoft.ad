@@ -52,16 +52,6 @@ options:
       and I(domain_ou_path).
     - It also cannot be used with I(hostname).
     type: str
-  reboot:
-    description:
-    - If C(true), this will reboot the host if a reboot was required to configure the domain.
-    - If C(false), this will not reboot the host if a reboot was required and instead sets the I(reboot_required) return value to C(true).
-    - If changing from a domain to workgroup, the connection account must be a local user that can connect to the host
-      after it has unjoined the domain.
-    - This cannot be used with async mode.
-    - To use this parameter, ensure the fully qualified module name is used in the task or the I(collections) keyword includes this collection.
-    type: bool
-    default: false
   state:
     description:
     - Whether the target host should be a member of a domain or workgroup.
@@ -79,9 +69,14 @@ options:
     type: str
 notes:
 - This module must be run on a Windows target host.
+- If using I(reboot=true) and changing from a domain to workgroup, the connection
+  account must be a local user that can connect to the host after it has
+  unjoined the domain. Also ensure the fully qualified module name is used in
+  the task or the I(collections) keyword includes this collection.
 extends_documentation_fragment:
 - ansible.builtin.action_common_attributes
 - ansible.builtin.action_common_attributes.flow
+- microsoft.ad.action_reboot
 attributes:
   check_mode:
     support: full

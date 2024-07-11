@@ -58,15 +58,6 @@ options:
     - Specifies the fully qualified, non-UNC path to a directory on a fixed disk of the local computer where the log file for this operation is written.
     - If not set then the default path is C(%SYSTEMROOT%\NTDS).
     type: path
-  reboot:
-    description:
-    - If C(true), this will reboot the host if a reboot was required to configure the domain.
-    - If C(false), this will not reboot the host if a reboot was required and instead sets the I(reboot_required) return value to C(true).
-    - Multiple reboots may occur if the host required a reboot before the domain promotion.
-    - This cannot be used with async mode.
-    - To use this parameter, ensure the fully qualified module name is used in the task or the I(collections) keyword includes this collection.
-    type: bool
-    default: false
   safe_mode_password:
     description:
     - Safe mode password for the domain controller.
@@ -80,9 +71,14 @@ options:
     type: path
 notes:
 - This module must be run on a Windows target host.
+- If using I(reboot=true), multiple reboots may occur if the host required a
+  reboot before the domain promotion. Also ensure the fully qualified module
+  name is used in the task or the I(collections) keyword includes this
+  collection.
 extends_documentation_fragment:
 - ansible.builtin.action_common_attributes
 - ansible.builtin.action_common_attributes.flow
+- microsoft.ad.action_reboot
 attributes:
   check_mode:
     support: full

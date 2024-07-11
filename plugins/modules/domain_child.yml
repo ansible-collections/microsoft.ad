@@ -84,17 +84,6 @@ DOCUMENTATION:
           create a new domain tree in.
         - This can only be set when I(domain_type=tree).
       type: str
-    reboot:
-      description:
-        - If C(true), this will reboot the host if a reboot was create the
-          domain.
-        - If C(false), this will not reboot the host if a reboot was required
-          and instead sets the I(reboot_required) return value to C(true).
-        - Multiple reboots may occur if the host required a reboot before the
-          domain promotion.
-        - This cannot be used with async mode.
-      type: bool
-      default: false
     safe_mode_password:
       description:
         - Safe mode password for the domain controller.
@@ -117,9 +106,12 @@ DOCUMENTATION:
       state where it may not be possible for Ansible to reconnect in a
       subsequent task without a reboot.
     - This module must be run on a Windows target host.
+    - If using I(reboot=true), multiple reboots may occur if the host required
+      a reboot before the domain promotion.
   extends_documentation_fragment:
     - ansible.builtin.action_common_attributes
     - ansible.builtin.action_common_attributes.flow
+    - microsoft.ad.action_reboot
   attributes:
     check_mode:
       support: full

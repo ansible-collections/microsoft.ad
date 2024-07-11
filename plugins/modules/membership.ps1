@@ -34,6 +34,10 @@ $spec = @{
             default = $false
             type = 'bool'
         }
+        reboot_timeout = @{
+            default = 600
+            type = 'int'
+        }
         state = @{
             choices = 'domain', 'workgroup'
             required = $true
