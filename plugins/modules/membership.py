@@ -32,6 +32,11 @@ options:
     - This is only used when adding the target host to a domain, if it is already a member then it is ignored.
     - This cannot be set when I(offline_join_blob) is specified.
     type: str
+  domain_server:
+    description:
+    - Specifies the domain controller to use when joining the domain.
+    type: str
+    version_added: 1.7.0
   hostname:
     description:
     - The desired hostname for the Windows host.

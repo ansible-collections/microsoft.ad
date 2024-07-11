@@ -20,6 +20,9 @@ $spec = @{
         domain_ou_path = @{
             type = 'str'
         }
+        domain_server = @{
+            type = 'str'
+        }
         hostname = @{
             type = 'str'
         }
@@ -69,6 +72,7 @@ $domainCredential = if ($module.Params.domain_admin_user) {
     )
 }
 $domainOUPath = $module.Params.domain_ou_path
+$domainServer = $module.Params.domain_server
 $hostname = $module.Params.hostname
 $state = $module.Params.state
 $workgroupName = $module.Params.workgroup_name
@@ -205,6 +209,9 @@ if ($state -eq 'domain') {
             }
             if ($domainOUPath) {
                 $joinParams.OUPath = $domainOUPath
+            }
+            if ($domainServer) {
+                $joinParams.Server = $domainServer
             }
 
             try {
