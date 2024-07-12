@@ -56,15 +56,6 @@ options:
     - Whether to install the domain controller as a read only replica for an existing domain.
     type: bool
     default: no
-  reboot:
-    description:
-    - If C(true), this will reboot the host if a reboot was required to configure the server.
-    - If C(false), this will not reboot the host if a reboot was required and instead sets the I(reboot_required) return value to C(true).
-    - Multiple reboots may occur if the host required a reboot before the domain promotion.
-    - This cannot be used with async mode.
-    - To use this parameter, ensure the fully qualified module name is used in the task or the I(collections) keyword includes this collection.
-    type: bool
-    default: false
   safe_mode_password:
     description:
     - Safe mode password for the domain controller (required when I(state=domain_controller)).
@@ -93,9 +84,14 @@ notes:
   this module puts the host in a state where it may not be possible for Ansible to reconnect in a subsequent task
   without a reboot.
 - This module must be run on a Windows target host.
+- If using I(reboot=true), multiple reboots may occur if the host required a
+  reboot before the domain promotion. Also ensure the fully qualified module
+  name is used in the task or the I(collections) keyword includes this
+  collection.
 extends_documentation_fragment:
 - ansible.builtin.action_common_attributes
 - ansible.builtin.action_common_attributes.flow
+- microsoft.ad.action_reboot
 attributes:
   check_mode:
     support: full

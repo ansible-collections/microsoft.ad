@@ -111,6 +111,7 @@ class ActionModuleWithReboot(ActionBase):
 
         wrap_async = self._task.async_val and not self._connection.has_native_async
         reboot = self._task.args.get("reboot", False)
+        reboot_timeout = self._task.args.get("reboot_timeout", 600)
 
         if self._task.async_val > 0 and reboot:
             return {
@@ -136,6 +137,7 @@ class ActionModuleWithReboot(ActionBase):
                     reboot_res = reboot_host(
                         self._task.action,
                         self._connection,
+                        reboot_timeout=reboot_timeout,
                         previous_boot_time=previous_boot_time,
                     )
 

@@ -46,6 +46,10 @@ $spec = @{
             default = $false
             type = 'bool'
         }
+        reboot_timeout = @{
+            default = 600
+            type = 'int'
+        }
         safe_mode_password = @{
             type = 'str'
             required = $true
