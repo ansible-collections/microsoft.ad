@@ -237,11 +237,9 @@ To check whether it is installed, run <code class="code docutils literal notrans
 <div class="ansibleOptionAnchor" id="parameter-reboot"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-membership-module-parameter-reboot"><strong>reboot</strong></p>
 <a class="ansibleOptionLink" href="#parameter-reboot" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
 </div></td>
-<td><div class="ansible-option-cell"><p>If <code class="docutils literal notranslate"><span class="pre">true</span></code>, this will reboot the host if a reboot was required to configure the domain.</p>
+<td><div class="ansible-option-cell"><p>If <code class="docutils literal notranslate"><span class="pre">true</span></code>, this will reboot the host if a reboot was required by the module.</p>
 <p>If <code class="docutils literal notranslate"><span class="pre">false</span></code>, this will not reboot the host if a reboot was required and instead sets the <em>reboot_required</em> return value to <code class="docutils literal notranslate"><span class="pre">true</span></code>.</p>
-<p>If changing from a domain to workgroup, the connection account must be a local user that can connect to the host after it has unjoined the domain.</p>
 <p>This cannot be used with async mode.</p>
-<p>To use this parameter, ensure the fully qualified module name is used in the task or the <em>collections</em> keyword includes this collection.</p>
 <p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
 <ul class="simple">
 <li><p><code class="ansible-option-default-bold docutils literal notranslate"><strong><span class="pre">false</span></strong></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
@@ -250,6 +248,16 @@ To check whether it is installed, run <code class="code docutils literal notrans
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-reboot_timeout"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-membership-module-parameter-reboot-timeout"><strong>reboot_timeout</strong></p>
+<a class="ansibleOptionLink" href="#parameter-reboot_timeout" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">integer</span></p>
+<p><em class="ansible-option-versionadded">added in microsoft.ad 1.7.0</em></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Maximum seconds to wait for machine to re-appear after a reboot and respond to a test command.</p>
+<p>This timeout is evaluated separately for both the reboot verification and test command success so the total timeout can be twice this value.</p>
+<p class="ansible-option-line"><strong class="ansible-option-default-bold">Default:</strong> <code class="ansible-option-default docutils literal notranslate"><span class="pre">600</span></code></p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-state"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-membership-module-parameter-state"><strong>state</strong></p>
 <a class="ansibleOptionLink" href="#parameter-state" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span> / <span class="ansible-option-required">required</span></p>
 </div></td>
@@ -263,7 +271,7 @@ To check whether it is installed, run <code class="code docutils literal notrans
 </ul>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-workgroup_name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-membership-module-parameter-workgroup-name"><strong>workgroup_name</strong></p>
 <a class="ansibleOptionLink" href="#parameter-workgroup_name" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -343,6 +351,7 @@ To check whether it is installed, run <code class="code docutils literal notrans
 <p class="admonition-title">Note</p>
 <ul class="simple">
 <li><p>This module must be run on a Windows target host.</p></li>
+<li><p>If using <em>reboot=true</em> and changing from a domain to workgroup, the connection account must be a local user that can connect to the host after it has unjoined the domain. Also ensure the fully qualified module name is used in the task or the <em>collections</em> keyword includes this collection.</p></li>
 </ul>
 </div>
 </section>
