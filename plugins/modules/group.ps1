@@ -34,6 +34,11 @@ $setParams = @{
             Attribute = 'member'
             DNLookup = $true
             IsRawAttribute = $true
+            # If the group is part of the CN=Builtin groups, it cannot
+            # use -Replace. This ensures it always uses -Add/-Remove when
+            # setting a changed value to handle this.
+            # https://github.com/ansible-collections/microsoft.ad/issues/130
+            SupportsReplace = $false
         }
         [PSCustomObject]@{
             Name = 'sam_account_name'

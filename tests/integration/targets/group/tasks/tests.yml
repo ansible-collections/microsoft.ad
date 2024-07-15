@@ -67,6 +67,50 @@
     that:
     - not create_group_again is changed
 
+- name: add member to builtin group
+  group:
+    name: Administrators
+    path: CN=Builtin,{{ setup_domain_info.output[0].defaultNamingContext }}
+    members:
+      add:
+      - '{{ create_group.distinguished_name }}'
+  register: add_member_to_builtin
+
+- name: get result of add member to builtin group
+  object_info:
+    identity: '{{ add_member_to_builtin.object_guid }}'
+    properties:
+    - member
+  register: add_member_to_builtin_actual
+
+- name: assert add member to builtin group
+  assert:
+    that:
+    - add_member_to_builtin is changed
+    - create_group.distinguished_name in add_member_to_builtin_actual.objects[0].member
+
+- name: remove member on builtin group
+  group:
+    name: Administrators
+    path: CN=Builtin,{{ setup_domain_info.output[0].defaultNamingContext }}
+    members:
+      remove:
+      - '{{ create_group.distinguished_name }}'
+  register: remove_member_from_builtin
+
+- name: get result of add member to builtin group
+  object_info:
+    identity: '{{ add_member_to_builtin.object_guid }}'
+    properties:
+    - member
+  register: remove_member_from_builtin_actual
+
+- name: assert remove member to builtin group
+  assert:
+    that:
+    - remove_member_from_builtin is changed
+    - create_group.distinguished_name not in remove_member_from_builtin_actual.objects[0].member
+
 - name: create ou to store group members
   ou:
     name: MyOU
