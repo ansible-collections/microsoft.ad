@@ -769,6 +769,7 @@ Function Invoke-AnsibleADObject {
         StateRequired - Set to 'present' or 'absent' if this needs to be defined for either state
         DNLookup - Whether each value needs to be looked up to get the DN
         IsRawAttribute - Whether the attribute is a raw LDAP attribute name and not a parameter name
+        SupportsReplace - Whether the IsRawAttribute supports setting through -Replace or needs -Add/-Remove
         New - Called when the option is to be set on the New-AD* cmdlet splat
         Set - Called when the option is to be set on the Set-AD* cmdlet splat
 
@@ -996,6 +997,11 @@ Function Invoke-AnsibleADObject {
             }
             elseif ($propInfo.DNLookup) {
                 $option.type = 'raw'
+            }
+
+            if (-not $propInfo.PSObject.Properties.Match('SupportsReplace')) {
+                $propInfo.PSObject.Properties.Add(
+                    [System.Management.Automation.PSNoteProperty]::new('SupportsReplace', $true))
             }
 
             $spec.options[$ansibleOption] = $option
@@ -1362,10 +1368,25 @@ Function Invoke-AnsibleADObject {
                     if ($res.Changed) {
                         if ($propInfo.IsRawAttribute) {
                             if ($newValue) {
-                                if (-not $setParams.ContainsKey('Replace')) {
-                                    $setParams['Replace'] = @{}
+                                $toSet = @(
+                                    if ($propInfo.SupportsReplace) {
+                                        @{ Prop = 'Replace'; Value = $newValue }
+                                    }
+                                    else {
+                                        @{ Prop = 'Add'; Value = $res.ToAdd }
+                                        @{ Prop = 'Remove'; Value = $res.ToRemove }
+                                    }
+                                )
+
+                                foreach ($setInfo in $toSet) {
+                                    if (-not $setInfo.Value) {
+                                        continue
+                                    }
+                                    if (-not $setParams.ContainsKey($setInfo.Prop)) {
+                                        $setParams[$setInfo.Prop] = @{}
+                                    }
+                                    $setParams[$setInfo.Prop][$propInfo.Attribute] = $setInfo.Value
                                 }
-                                $setParams['Replace'][$propInfo.Attribute] = $newValue
                             }
                             else {
                                 if (-not $setParams.ContainsKey('Clear')) {
