@@ -708,6 +708,7 @@ Function Get-AnsibleADObject {
     # The -Identity parameter is used where possible as LDAPFilter is limited
     # to just the defaultNamingContext as defined by -SearchBase.
     $objectGuid = [Guid]::Empty
+    $tryDollarFallback = $false
     if ([System.Guid]::TryParse($Identity, [ref]$objectGuid)) {
         $getParams.Identity = $objectGuid
     }
@@ -727,6 +728,7 @@ Function Get-AnsibleADObject {
         }
         catch [System.ArgumentException] {
             if ($Identity -match '^(?:[^:*?""<>|\/\\]+\\)?(?<username>[^;:""<>|?,=\*\+\\\(\)]+)$') {
+                $tryDollarFallback = -not $Matches.username.EndsWith('$')
                 $getParams.LDAPFilter = "(sAMAccountName=$($Matches.username))"
             }
             else {
@@ -746,7 +748,19 @@ Function Get-AnsibleADObject {
         $obj = & $GetCommand @getParams | Select-Object -First 1
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-        $obj = $null
+        # AD cmdlets only raise this error when -Identity was used.
+        # This means the account wasn't found and we don't need the fallback
+        # logic below.
+        return
+    }
+
+    # If we are dealing with a known object type where the sAMAccountName
+    # typically ends with $ we want to try again with the $ append to the
+    # filter.
+    # https://github.com/ansible-collections/microsoft.ad/issues/124
+    if (-not $obj -and $tryDollarFallback -and $GetCommand.Name -in @('Get-ADComputer')) {
+        $getParams.LDAPFilter = $getParams.LDAPFilter.Substring(0, $getParams.LDAPFilter.Length - 1) + '$)'
+        $obj = & $GetCommand @getParams | Select-Object -First 1
     }
 
     $obj
