@@ -310,6 +310,20 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-do_not_append_dollar_to_sam"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-do-not-append-dollar-to-sam"><strong>do_not_append_dollar_to_sam</strong></p>
+<a class="ansibleOptionLink" href="#parameter-do_not_append_dollar_to_sam" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
+<p><em class="ansible-option-versionadded">added in microsoft.ad 1.7.0</em></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Do not automatically append <code class="docutils literal notranslate"><span class="pre">$</span></code> to the <em>sam_account_name</em> value.</p>
+<p>This only applies when <em>sam_account_name</em> is explicitly set and can be used to create a computer account without the <code class="docutils literal notranslate"><span class="pre">$</span></code> suffix.</p>
+<p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
+<ul class="simple">
+<li><p><code class="ansible-option-default-bold docutils literal notranslate"><strong><span class="pre">false</span></strong></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
+<li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">true</span></code></p></li>
+</ul>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-domain_credentials"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-domain-credentials"><strong>domain_credentials</strong></p>
 <a class="ansibleOptionLink" href="#parameter-domain_credentials" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=dictionary</span></p>
 </div></td>
@@ -320,7 +334,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <p class="ansible-option-line"><strong class="ansible-option-default-bold">Default:</strong> <code class="ansible-option-default docutils literal notranslate"><span class="pre">[]</span></code></p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-domain_credentials/name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-domain-credentials-name"><strong>name</strong></p>
 <a class="ansibleOptionLink" href="#parameter-domain_credentials/name" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -329,21 +343,21 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <p>This key can be omitted in one entry to specify the default credentials to use when a server is not specified instead of using <em>domain_username</em> and <em>domain_password</em>.</p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-domain_credentials/password"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-domain-credentials-password"><strong>password</strong></p>
 <a class="ansibleOptionLink" href="#parameter-domain_credentials/password" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span> / <span class="ansible-option-required">required</span></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The password to use when connecting to the server specified by <em>name</em>.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-domain_credentials/username"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-domain-credentials-username"><strong>username</strong></p>
 <a class="ansibleOptionLink" href="#parameter-domain_credentials/username" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span> / <span class="ansible-option-required">required</span></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The username to use when connecting to the server specified by <em>name</em>.</p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-domain_password"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-domain-password"><strong>domain_password</strong></p>
 <a class="ansibleOptionLink" href="#parameter-domain_password" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -352,7 +366,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <p>This can be set under the <a class="reference external" href="https://docs.ansible.com/ansible/devel/playbook_guide/playbooks_module_defaults.html#module-defaults-groups" title="(in Ansible vdevel)"><span class="xref std std-ref">play’s module defaults</span></a> under the <code class="docutils literal notranslate"><span class="pre">group/microsoft.ad.domain</span></code> group.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-domain_server"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-domain-server"><strong>domain_server</strong></p>
 <a class="ansibleOptionLink" href="#parameter-domain_server" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -363,7 +377,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <p>This can be set under the <a class="reference external" href="https://docs.ansible.com/ansible/devel/playbook_guide/playbooks_module_defaults.html#module-defaults-groups" title="(in Ansible vdevel)"><span class="xref std std-ref">play’s module defaults</span></a> under the <code class="docutils literal notranslate"><span class="pre">group/microsoft.ad.domain</span></code> group.</p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-domain_username"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-domain-username"><strong>domain_username</strong></p>
 <a class="ansibleOptionLink" href="#parameter-domain_username" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -374,12 +388,12 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <p>This can be set under the <a class="reference external" href="https://docs.ansible.com/ansible/devel/playbook_guide/playbooks_module_defaults.html#module-defaults-groups" title="(in Ansible vdevel)"><span class="xref std std-ref">play’s module defaults</span></a> under the <code class="docutils literal notranslate"><span class="pre">group/microsoft.ad.domain</span></code> group.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-enabled"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-enabled"><strong>enabled</strong></p>
 <a class="ansibleOptionLink" href="#parameter-enabled" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
 </div></td>
-<td><div class="ansible-option-cell"><p><code class="docutils literal notranslate"><span class="pre">yes</span></code> will enable the group.</p>
-<p><code class="docutils literal notranslate"><span class="pre">no</span></code> will disable the group.</p>
+<td><div class="ansible-option-cell"><p><code class="docutils literal notranslate"><span class="pre">yes</span></code> will enable the computer.</p>
+<p><code class="docutils literal notranslate"><span class="pre">no</span></code> will disable the computer.</p>
 <p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
 <ul class="simple">
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">false</span></code></p></li>
@@ -387,7 +401,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 </ul>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-identity"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-identity"><strong>identity</strong></p>
 <a class="ansibleOptionLink" href="#parameter-identity" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -395,9 +409,10 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <p>This must be specified if; <em>name</em> is not set, when trying to rename the object with a new <em>name</em>, or when trying to move the object into a different <em>path</em>.</p>
 <p>The identity can be in the form of a GUID representing the <code class="docutils literal notranslate"><span class="pre">objectGUID</span></code> value, the <code class="docutils literal notranslate"><span class="pre">userPrincipalName</span></code>, <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code>, <code class="docutils literal notranslate"><span class="pre">objectSid</span></code>, or <code class="docutils literal notranslate"><span class="pre">distinguishedName</span></code>.</p>
 <p>If omitted, the AD object to manage is selected by the <code class="docutils literal notranslate"><span class="pre">distinguishedName</span></code> using the format <code class="docutils literal notranslate"><span class="pre">CN={{</span> <span class="pre">name</span> <span class="pre">}},{{</span> <span class="pre">path</span> <span class="pre">}}</span></code>. If <em>path</em> is not defined, the <code class="docutils literal notranslate"><span class="pre">defaultNamingContext</span></code> is used instead.</p>
+<p>When using the <a class="reference internal" href="#ansible-collections-microsoft-ad-computer-module"><span class="std std-ref">microsoft.ad.computer</span></a> module, the identity will automatically append <code class="docutils literal notranslate"><span class="pre">$</span></code> to the end of the <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> if the provided value did not result in a match and did not already have a <code class="docutils literal notranslate"><span class="pre">$</span></code> at the end.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-kerberos_encryption_types"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-kerberos-encryption-types"><strong>kerberos_encryption_types</strong></p>
 <a class="ansibleOptionLink" href="#parameter-kerberos_encryption_types" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">dictionary</span></p>
 </div></td>
@@ -408,7 +423,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <p>See <a class="reference internal" href="docsite/guide_list_values.html#ansible-collections-microsoft-ad-docsite-guide-list-values"><span class="std std-ref">Setting list option values</span></a> for more information on how to add/remove/set list options.</p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-kerberos_encryption_types/add"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-kerberos-encryption-types-add"><strong>add</strong></p>
 <a class="ansibleOptionLink" href="#parameter-kerberos_encryption_types/add" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
 </div></td>
@@ -423,7 +438,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 </ul>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-kerberos_encryption_types/remove"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-kerberos-encryption-types-remove"><strong>remove</strong></p>
 <a class="ansibleOptionLink" href="#parameter-kerberos_encryption_types/remove" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
 </div></td>
@@ -438,7 +453,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 </ul>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-kerberos_encryption_types/set"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-kerberos-encryption-types-set"><strong>set</strong></p>
 <a class="ansibleOptionLink" href="#parameter-kerberos_encryption_types/set" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
 </div></td>
@@ -454,7 +469,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 </ul>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-location"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-location"><strong>location</strong></p>
 <a class="ansibleOptionLink" href="#parameter-location" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -462,7 +477,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <p>This is the value set on the <code class="docutils literal notranslate"><span class="pre">location</span></code> LDAP attribute.</p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-managed_by"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-managed-by"><strong>managed_by</strong></p>
 <a class="ansibleOptionLink" href="#parameter-managed_by" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">any</span></p>
 </div></td>
@@ -472,7 +487,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <p>See <a class="reference internal" href="docsite/guide_attributes.html#ansible-collections-microsoft-ad-docsite-guide-attributes-dn-lookup-attributes"><span class="std std-ref">DN Lookup Attributes</span></a> for more information on how DN lookups work.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-name"><strong>name</strong></p>
 <a class="ansibleOptionLink" href="#parameter-name" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -481,7 +496,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <p>This must be specified if <em>identity</em> is not set.</p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-path"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-path"><strong>path</strong></p>
 <a class="ansibleOptionLink" href="#parameter-path" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -492,7 +507,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <p>This can be set to the literal value <code class="docutils literal notranslate"><span class="pre">microsoft.ad.default_path</span></code> which will equal the default value used when creating a new object.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-protect_from_deletion"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-protect-from-deletion"><strong>protect_from_deletion</strong></p>
 <a class="ansibleOptionLink" href="#parameter-protect_from_deletion" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
 </div></td>
@@ -506,7 +521,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 </ul>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-sam_account_name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-sam-account-name"><strong>sam_account_name</strong></p>
 <a class="ansibleOptionLink" href="#parameter-sam_account_name" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -514,11 +529,11 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <p>If omitted, the <em>name</em> value is used when creating a new group.</p>
 <p>It has a maximum of 256 characters, 15 is advised for older operating systems compatibility.</p>
 <p>If ommitted the value is the same as <code class="docutils literal notranslate"><span class="pre">name$</span></code> when the computer is created.</p>
-<p>Note that all computer <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> values need to end with a <code class="docutils literal notranslate"><span class="pre">$</span></code>.</p>
-<p>If <code class="docutils literal notranslate"><span class="pre">$</span></code> is omitted, it will be added to the end.</p>
+<p>Note that all computer <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> values typically end with a <code class="docutils literal notranslate"><span class="pre">$</span></code>.</p>
+<p>By default if <code class="docutils literal notranslate"><span class="pre">$</span></code> is omitted, it will be added to the end. If <em>do_not_append_dollar_to_sam=True</em> then the provided value will be used as is without adding <code class="docutils literal notranslate"><span class="pre">$</span></code> to the end.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-spn"></div>
 <div class="ansibleOptionAnchor" id="parameter-spns"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-spns"><span id="ansible-collections-microsoft-ad-computer-module-parameter-spn"></span><strong>spn</strong></p>
 <a class="ansibleOptionLink" href="#parameter-spn" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-aliases">aliases: spns</span></p>
@@ -530,7 +545,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <p>See <a class="reference internal" href="docsite/guide_list_values.html#ansible-collections-microsoft-ad-docsite-guide-list-values"><span class="std std-ref">Setting list option values</span></a> for more information on how to add/remove/set list options.</p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-spn/add"></div>
 <div class="ansibleOptionAnchor" id="parameter-spns/add"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-spns-add"><span id="ansible-collections-microsoft-ad-computer-module-parameter-spn-add"></span><strong>add</strong></p>
 <a class="ansibleOptionLink" href="#parameter-spn/add" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
@@ -538,7 +553,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The SPNs to add to <code class="docutils literal notranslate"><span class="pre">servicePrincipalName</span></code>.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-spn/remove"></div>
 <div class="ansibleOptionAnchor" id="parameter-spns/remove"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-spns-remove"><span id="ansible-collections-microsoft-ad-computer-module-parameter-spn-remove"></span><strong>remove</strong></p>
 <a class="ansibleOptionLink" href="#parameter-spn/remove" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
@@ -546,7 +561,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The SPNs to remove from <code class="docutils literal notranslate"><span class="pre">servicePrincipalName</span></code>.</p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-spn/set"></div>
 <div class="ansibleOptionAnchor" id="parameter-spns/set"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-spns-set"><span id="ansible-collections-microsoft-ad-computer-module-parameter-spn-set"></span><strong>set</strong></p>
 <a class="ansibleOptionLink" href="#parameter-spn/set" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
@@ -556,7 +571,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <p>Set to an empty list to clear all SPNs on the AD object.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-state"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-state"><strong>state</strong></p>
 <a class="ansibleOptionLink" href="#parameter-state" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -571,7 +586,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 </ul>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-trusted_for_delegation"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-trusted-for-delegation"><strong>trusted_for_delegation</strong></p>
 <a class="ansibleOptionLink" href="#parameter-trusted_for_delegation" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
 </div></td>
@@ -585,7 +600,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 </ul>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-upn"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-upn"><strong>upn</strong></p>
 <a class="ansibleOptionLink" href="#parameter-upn" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
@@ -641,6 +656,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <ul class="simple">
 <li><p>See <a class="reference internal" href="docsite/guide_migration.html#ansible-collections-microsoft-ad-docsite-guide-migration-migrated-modules-win-domain-computer"><span class="std std-ref">win_domain_computer migration</span></a> for help on migrating from <a class="reference external" href="https://docs.ansible.com/ansible/devel/collections/community/windows/win_domain_computer_module.html#ansible-collections-community-windows-win-domain-computer-module" title="(in Ansible vdevel)"><span class="xref std std-ref">community.windows.win_domain_computer</span></a> to this module.</p></li>
 <li><p>This module must be run on a Windows target host with the <code class="docutils literal notranslate"><span class="pre">ActiveDirectory</span></code> module installed.</p></li>
+<li><p>When matching by <em>identity</em> with a <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> value, the value should end with <code class="docutils literal notranslate"><span class="pre">$</span></code>. If the provided value does not end with <code class="docutils literal notranslate"><span class="pre">$</span></code> the module will still attempt to find the computer account with the provided value before attempting a fallback lookup with <code class="docutils literal notranslate"><span class="pre">$</span></code> appended to the end. This fallback behaviour was added with version <code class="docutils literal notranslate"><span class="pre">1.7.0</span></code> of this collection.</p></li>
 <li><p>Some LDAP attributes can have only a single value set while others can have multiple. Some attributes are also read only and cannot be changed. It is recommended to look at the schema metadata for an attribute where <code class="docutils literal notranslate"><span class="pre">System-Only</span></code> are read only values and <code class="docutils literal notranslate"><span class="pre">Is-Single-Value</span></code> are attributes with only 1 value.</p></li>
 <li><p>Attempting to set multiple values to a <code class="docutils literal notranslate"><span class="pre">Is-Single-Value</span></code> attribute results in undefined behaviour.</p></li>
 <li><p>If running on a server that is not a Domain Controller, credential delegation through CredSSP or Kerberos with delegation must be used or the <em>domain_username</em>, <em>domain_password</em> must be set.</p></li>
@@ -687,12 +703,12 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Remove linux computer from Active Directory using a windows machine</span>
 <span class="w">  </span><span class="nt">microsoft.ad.computer</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">one_linux_server</span>
+<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">one_linux_server$</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">absent</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Add SPNs to computer</span>
 <span class="w">  </span><span class="nt">microsoft.ad.computer</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TheComputer</span>
+<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TheComputer$</span>
 <span class="w">    </span><span class="nt">spn</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">add</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HOST/TheComputer</span>
@@ -701,7 +717,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Remove SPNs on the computer</span>
 <span class="w">  </span><span class="nt">microsoft.ad.computer</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TheComputer</span>
+<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TheComputer$</span>
 <span class="w">    </span><span class="nt">spn</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">remove</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HOST/TheComputer</span>
@@ -710,11 +726,17 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set the principals the computer trusts for delegation from</span>
 <span class="w">  </span><span class="nt">microsoft.ad.computer</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TheComputer</span>
+<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TheComputer$</span>
 <span class="w">    </span><span class="nt">delegates</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">set</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=FileShare,OU=Computers,DC=domain,DC=test</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OtherServer$</span><span class="w">  </span><span class="c1"># Lookup by sAMAaccountName</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Add computer with sAMAccountName without $ suffix</span>
+<span class="w">  </span><span class="nt">microsoft.ad.computer</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TheComputer</span>
+<span class="w">    </span><span class="nt">sam_account_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TheComputer</span>
+<span class="w">    </span><span class="nt">do_not_append_dollar_to_sam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </pre></div>
 </div>
 </section>
