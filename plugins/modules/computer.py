@@ -70,10 +70,18 @@ options:
     - Specifies the fully qualified domain name (FQDN) of the computer.
     - This is the value set on the C(dNSHostName) LDAP attribute.
     type: str
+  do_not_append_dollar_to_sam:
+    description:
+    - Do not automatically append C($) to the I(sam_account_name) value.
+    - This only applies when I(sam_account_name) is explicitly set and can be
+      used to create a computer account without the C($) suffix.
+    default: false
+    type: bool
+    version_added: 1.7.0
   enabled:
     description:
-    - C(yes) will enable the group.
-    - C(no) will disable the group.
+    - C(yes) will enable the computer.
+    - C(no) will disable the computer.
     type: bool
   kerberos_encryption_types:
     description:
@@ -150,8 +158,10 @@ options:
       operating systems compatibility.
     - If ommitted the value is the same as C(name$) when the computer is
       created.
-    - Note that all computer C(sAMAccountName) values need to end with a C($).
-    - If C($) is omitted, it will be added to the end.
+    - Note that all computer C(sAMAccountName) values typically end with a C($).
+    - By default if C($) is omitted, it will be added to the end. If
+      I(do_not_append_dollar_to_sam=True) then the provided value will be used
+      as is without adding C($) to the end.
     type: str
   spn:
     description:
@@ -201,6 +211,11 @@ notes:
   module.
 - This module must be run on a Windows target host with the C(ActiveDirectory)
   module installed.
+- When matching by I(identity) with a C(sAMAccountName) value, the value should
+  end with C($). If the provided value does not end with C($) the module will
+  still attempt to find the computer account with the provided value before
+  attempting a fallback lookup with C($) appended to the end. This fallback
+  behaviour was added with version C(1.7.0) of this collection.
 extends_documentation_fragment:
 - microsoft.ad.ad_object
 - ansible.builtin.action_common_attributes
@@ -240,12 +255,12 @@ EXAMPLES = r"""
 
 - name: Remove linux computer from Active Directory using a windows machine
   microsoft.ad.computer:
-    identity: one_linux_server
+    identity: one_linux_server$
     state: absent
 
 - name: Add SPNs to computer
   microsoft.ad.computer:
-    identity: TheComputer
+    identity: TheComputer$
     spn:
       add:
         - HOST/TheComputer
@@ -254,7 +269,7 @@ EXAMPLES = r"""
 
 - name: Remove SPNs on the computer
   microsoft.ad.computer:
-    identity: TheComputer
+    identity: TheComputer$
     spn:
       remove:
         - HOST/TheComputer
@@ -263,11 +278,17 @@ EXAMPLES = r"""
 
 - name: Set the principals the computer trusts for delegation from
   microsoft.ad.computer:
-    identity: TheComputer
+    identity: TheComputer$
     delegates:
       set:
         - CN=FileShare,OU=Computers,DC=domain,DC=test
         - OtherServer$  # Lookup by sAMAaccountName
+
+- name: Add computer with sAMAccountName without $ suffix
+  microsoft.ad.computer:
+    identity: TheComputer
+    sam_account_name: TheComputer
+    do_not_append_dollar_to_sam: true
 """
 
 RETURN = r"""

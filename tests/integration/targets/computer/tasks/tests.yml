@@ -293,8 +293,7 @@
 
 - name: add and remove list options
   computer:
-    name: MyComputer
-    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    identity: MyComputer2
     delegates:
       add:
       - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
@@ -343,8 +342,7 @@
 
 - name: add and remove list options - idempotent
   computer:
-    name: MyComputer
-    path: CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
+    identity: MyComputer2$
     delegates:
       add:
       - CN=Administrator,CN=Users,{{ setup_domain_info.output[0].defaultNamingContext }}
@@ -473,3 +471,144 @@
     that:
     - spn_add is changed
     - spn_add_actual.objects[0].servicePrincipalName == ['HTTP/fake', 'HTTP/host.domain:8080', 'HTTP/host']
+
+- name: remove computer before sAMAccountName tests
+  computer:
+    identity: '{{ object_identity }}'
+    state: absent
+
+- name: create computer without sAMAccountName $ suffix - check mode
+  computer:
+    identity: MyComputer
+    sam_account_name: MyComputer
+    do_not_append_dollar_to_sam: true
+    state: present
+  register: create_comp_no_sam_check
+  check_mode: true
+
+- name: get result of create computer without sAMAccountName $ suffix - check mode
+  object_info:
+    identity: '{{ create_comp_no_sam_check.distinguished_name }}'
+    properties:
+    - sAMAccountName
+  register: create_comp_no_sam_check_actual
+
+- name: assert create computer without sAMAccountName $ suffix - check mode
+  assert:
+    that:
+    - create_comp_no_sam_check is changed
+    - create_comp_no_sam_check_actual.objects == []
+
+- name: create computer without sAMAccountName $ suffix
+  computer:
+    identity: MyComputer
+    sam_account_name: MyComputer
+    do_not_append_dollar_to_sam: true
+    state: present
+  register: create_comp_no_sam
+
+- set_fact:
+    object_identity: '{{ create_comp_no_sam.object_guid }}'
+
+- name: get result of create computer without sAMAccountName $ suffix
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - sAMAccountName
+  register: create_comp_no_sam_actual
+
+- name: assert create computer without sAMAccountName $ suffix
+  assert:
+    that:
+    - create_comp_no_sam is changed
+    - create_comp_no_sam_actual.objects[0].sAMAccountName == 'MyComputer'
+
+- name: create computer without sAMAccountName $ suffix - idempotent
+  computer:
+    identity: MyComputer
+    sam_account_name: MyComputer
+    do_not_append_dollar_to_sam: true
+    state: present
+  register: create_comp_no_sam_again
+
+- name: assert create computer without sAMAccountName $ suffix - idempotent
+  assert:
+    that:
+    - not create_comp_no_sam_again is changed
+
+- name: change computer without sAMAccountName $ suffix - check mode
+  computer:
+    name: MyComputer
+    sam_account_name: MyComputerFoo
+    do_not_append_dollar_to_sam: true
+    state: present
+  register: change_comp_no_sam_check
+  check_mode: true
+
+- name: get result of change computer without sAMAccountName $ suffix - check mode
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - sAMAccountName
+  register: change_comp_no_sam_check_actual
+
+- name: assert change computer without sAMAccountName $ suffix - check mode
+  assert:
+    that:
+    - change_comp_no_sam_check is changed
+    - change_comp_no_sam_check_actual.objects[0].sAMAccountName == 'MyComputer'
+
+- name: change computer without sAMAccountName $ suffix
+  computer:
+    name: MyComputer
+    sam_account_name: MyComputerFoo
+    do_not_append_dollar_to_sam: true
+    state: present
+  register: change_comp_no_sam
+
+- name: get result of change computer without sAMAccountName $ suffix
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - sAMAccountName
+  register: change_comp_no_sam_actual
+
+- name: assert change computer without sAMAccountName $ suffix - check mode
+  assert:
+    that:
+    - change_comp_no_sam is changed
+    - change_comp_no_sam_actual.objects[0].sAMAccountName == 'MyComputerFoo'
+
+- name: change computer without sAMAccountName $ suffix - idempotent
+  computer:
+    name: MyComputer
+    sam_account_name: MyComputerFoo
+    do_not_append_dollar_to_sam: true
+    state: present
+  register: change_comp_no_sam_again
+
+- name: assert change computer without sAMAccountName $ suffix - idempotent
+  assert:
+    that:
+    - not change_comp_no_sam_again is changed
+
+- name: find computer by identity sAMAccountName without $ suffix
+  computer:
+    identity: MyComputerFoo
+    display_name: Test
+    state: present
+  register: find_by_sam_no_suffix
+
+- name: get result of find computer by identity sAMAccountName without $ suffix
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - displayName
+  register: find_by_sam_no_suffix_actual
+
+- name: assert find computer by identity sAMAccountName without $ suffix
+  assert:
+    that:
+    - find_by_sam_no_suffix is changed
+    - find_by_sam_no_suffix.object_guid == object_identity
+    - find_by_sam_no_suffix_actual.objects[0].DisplayName == 'Test'

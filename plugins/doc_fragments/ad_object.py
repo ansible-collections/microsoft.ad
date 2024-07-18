@@ -155,6 +155,10 @@ options:
     - If omitted, the AD object to manage is selected by the
       C(distinguishedName) using the format C(CN={{ name }},{{ path }}). If
       I(path) is not defined, the C(defaultNamingContext) is used instead.
+    - When using the M(microsoft.ad.computer) module, the identity will
+      automatically append C($) to the end of the C(sAMAccountName) if the
+      provided value did not result in a match and did not already have a C($)
+      at the end.
     type: str
   name:
     description:
