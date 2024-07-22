@@ -6,4 +6,5 @@ action_groups:
     - object_info
     - object
     - ou
+    - service_account
     - user

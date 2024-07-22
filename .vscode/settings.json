@@ -1,4 +1,8 @@
 {
+    "editor.rulers": [
+        80,
+        160
+    ],
     "python.testing.pytestArgs": [
         "tests/unit",
         "-vv"
