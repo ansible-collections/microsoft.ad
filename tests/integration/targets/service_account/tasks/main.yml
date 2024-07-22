@@ -1,0 +1,27 @@
+- name: remove temp service account
+  service_account:
+    name: MySA
+    state: absent
+
+- name: create KDS root key if not present
+  ansible.windows.win_powershell:
+    error_action: stop
+    script: |
+      $Ansible.Changed = $false
+      if (-not (Get-KdsRootKey)) {
+          Add-KdsRootKey -EffectiveTime ((Get-Date).AddHours(-10))
+          $Ansible.Changed = $true
+      }
+  become: true
+  become_method: runas
+  become_user: SYSTEM
+
+- block:
+  - import_tasks: tests.yml
+
+  always:
+  - name: remove temp service account
+    service_account:
+      name: MySA
+      identity: '{{ object_identity | default(omit) }}'
+      state: absent

@@ -758,7 +758,11 @@ Function Get-AnsibleADObject {
     # typically ends with $ we want to try again with the $ append to the
     # filter.
     # https://github.com/ansible-collections/microsoft.ad/issues/124
-    if (-not $obj -and $tryDollarFallback -and $GetCommand.Name -in @('Get-ADComputer')) {
+    $dollarCommands = @(
+        'Get-ADComputer'
+        'Get-ADServiceAccount'
+    )
+    if (-not $obj -and $tryDollarFallback -and $GetCommand.Name -in $dollarCommands) {
         $getParams.LDAPFilter = $getParams.LDAPFilter.Substring(0, $getParams.LDAPFilter.Length - 1) + '$)'
         $obj = & $GetCommand @getParams | Select-Object -First 1
     }
@@ -986,6 +990,9 @@ Function Invoke-AnsibleADObject {
                 $option = @{
                     type = 'dict'
                     options = @{}
+                }
+                if ($optionElement.ContainsKey('no_log')) {
+                    $option.no_log = $optionElement.no_log
                 }
 
                 if ($propInfo.DNLookup) {

@@ -1,0 +1,752 @@
+- name: expect failure if dns_hostname is not set for state=present
+  service_account:
+    name: MySA
+    state: present
+  register: fail_no_dns
+  failed_when: >-
+    fail_no_dns.msg != 'dns_hostname is required when creating a new service account.'
+
+- name: expect failure if dns_hostname and outbound_auth_only is set
+  service_account:
+    name: MySA
+    dns_hostname: DNSName
+    outbound_auth_only: true
+  register: fail_dns_outbound
+  failed_when: >-
+    fail_dns_outbound.msg != 'dns_hostname can not be set when outbound_auth_only=true.'
+
+- name: create sa - check
+  service_account:
+    name: MySA
+    dns_hostname: DNSName
+    state: present
+  register: create_sa_check
+  check_mode: true
+
+- name: get result of create sa - check
+  object_info:
+    identity: '{{ create_sa_check.distinguished_name }}'
+  register: create_sa_check_actual
+
+- name: assert create sa - check
+  assert:
+    that:
+    - create_sa_check is changed
+    - create_sa_check.distinguished_name == 'CN=MySA,CN=Managed Service Accounts,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_sa_check.object_guid == '00000000-0000-0000-0000-000000000000'
+    - create_sa_check.sid == 'S-1-5-0000'
+    - create_sa_check_actual.objects == []
+
+- name: create sa
+  service_account:
+    name: MySA
+    dns_hostname: DNSName
+    state: present
+  register: create_sa
+
+- set_fact:
+    object_identity: '{{ create_sa.object_guid }}'
+
+- name: get result of create sa
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - dnsHostName
+    - objectSid
+    - sAMAccountName
+    - userAccountControl
+  register: create_sa_actual
+
+- name: assert create sa
+  assert:
+    that:
+    - create_sa is changed
+    - create_sa_actual.objects | length == 1
+    - create_sa.distinguished_name == 'CN=MySA,CN=Managed Service Accounts,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_sa.object_guid == create_sa_actual.objects[0].ObjectGUID
+    - create_sa.sid == create_sa_actual.objects[0].objectSid.Sid
+    - create_sa_actual.objects[0].DistinguishedName == create_sa.distinguished_name
+    - create_sa_actual.objects[0].Name == 'MySA'
+    - create_sa_actual.objects[0].dnsHostName == 'DNSName'
+    - create_sa_actual.objects[0].sAMAccountName == 'MySA$'
+    - create_sa_actual.objects[0].ObjectClass == 'msDS-GroupManagedServiceAccount'
+    - '"ADS_UF_ACCOUNTDISABLE" not in create_sa_actual.objects[0].userAccountControl_AnsibleFlags'
+
+- name: create sa - idempotent
+  service_account:
+    name: MySA
+    dns_hostname: DNSName
+    state: present
+  register: create_sa_again
+
+- name: assert create sa - idempotent
+  assert:
+    that:
+    - not create_sa_again is changed
+
+- name: remove sa - check
+  service_account:
+    identity: MySA
+    state: absent
+  register: remove_sa_check
+  check_mode: true
+
+- name: get result of remove sa - check
+  object_info:
+    identity: '{{ object_identity }}'
+  register: remove_sa_check_actual
+
+- name: assert remove sa - check
+  assert:
+    that:
+    - remove_sa_check is changed
+    - remove_sa_check.distinguished_name == create_sa.distinguished_name
+    - remove_sa_check.object_guid == create_sa.object_guid
+    - remove_sa_check.sid == create_sa.sid
+    - remove_sa_check_actual.objects | length == 1
+
+- name: remove sa
+  service_account:
+    identity: MySA
+    state: absent
+  register: remove_sa
+
+- name: get result of remove sa
+  object_info:
+    identity: '{{ object_identity }}'
+  register: remove_sa_actual
+
+- name: assert remove sa - check
+  assert:
+    that:
+    - remove_sa is changed
+    - remove_sa.distinguished_name == create_sa.distinguished_name
+    - remove_sa.object_guid == create_sa.object_guid
+    - remove_sa.sid == create_sa.sid
+    - remove_sa_actual.objects == []
+
+- name: remove sa - idempotent
+  service_account:
+    identity: MySA
+    state: absent
+  register: remove_sa_again
+
+- name: assert remove sa - idempotent
+  assert:
+    that:
+    - not remove_sa_again is changed
+
+- name: create test OU container
+  ou:
+    name: TestOU
+    state: present
+  register: test_ou
+
+- block:
+  - name: create sa with outbound auth only - check
+    service_account:
+      identity: MySA
+      path: '{{ test_ou.distinguished_name }}'
+      sam_account_name: OtherSA
+      allowed_to_retrieve_password:
+        set:
+        - Domain Admins
+      outbound_auth_only: true
+    register: create_sa_outbound_check
+    check_mode: true
+
+  - name: get result of create sa with outbound auth only - check
+    object_info:
+      identity: '{{ create_sa_outbound_check.distinguished_name }}'
+    register: create_sa_outbound_actual_check
+
+  - name: assert create sa with outbound auth only - check
+    assert:
+      that:
+      - create_sa_outbound_check is changed
+      - create_sa_outbound_check.distinguished_name == 'CN=MySA,' ~ test_ou.distinguished_name
+      - create_sa_outbound_actual_check.objects == []
+
+  - name: create sa with outbound auth only
+    service_account:
+      name: MySA
+      path: '{{ test_ou.distinguished_name }}'
+      sam_account_name: OtherSA
+      allowed_to_retrieve_password:
+        set:
+        - Domain Admins
+      outbound_auth_only: true
+    register: create_sa_outbound
+
+  - set_fact:
+      object_identity: '{{ create_sa_outbound.object_guid }}'
+
+  - name: get result of create sa with outbound auth only
+    ansible.windows.win_powershell:
+      parameters:
+        Identity: '{{ object_identity }}'
+        Properties:
+        - DistinguishedName
+        - Name
+        - ObjectGUID
+        - SID
+        - SamAccountName
+        - PrincipalsAllowedToRetrieveManagedPassword
+      script: |
+        param ($Identity, $Properties)
+
+        Get-ADServiceAccount -Identity $Identity -Properties $Properties |
+          Select-Object -Property $Properties
+    register: create_sa_outbound_actual
+
+  - name: assert create sa with outbound auth only
+    assert:
+      that:
+      - create_sa_outbound is changed
+      - create_sa_outbound.distinguished_name == 'CN=MySA,' ~ test_ou.distinguished_name
+      - create_sa_outbound_actual.output | length == 1
+      - create_sa_outbound_actual.output[0].DistinguishedName == create_sa_outbound.distinguished_name
+      - create_sa_outbound_actual.output[0].Name == 'MySA'
+      - create_sa_outbound_actual.output[0].ObjectGUID == create_sa_outbound.object_guid
+      - create_sa_outbound_actual.output[0].PrincipalsAllowedToRetrieveManagedPassword == ['CN=Domain Admins,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext]
+      - create_sa_outbound_actual.output[0].SID.Value == create_sa_outbound.sid
+      - create_sa_outbound_actual.output[0].SamAccountName == 'OtherSA$'
+
+  - name: create sa with outbound auth only - idempotent
+    service_account:
+      identity: OtherSA
+      path: '{{ test_ou.distinguished_name }}'
+      sam_account_name: OtherSA
+      allowed_to_retrieve_password:
+        set:
+        - name: Domain Admins
+      outbound_auth_only: true
+    register: create_sa_outbound_again
+
+  - name: assert create sa with outbound auth only - idempotent
+    assert:
+      that:
+      - not create_sa_outbound_again is changed
+
+  - name: remove sa with outbound auth only
+    service_account:
+      identity: OtherSA$
+      state: absent
+    register: remove_sa_outbound
+
+  - name: get result of remove sa with outbound auth only
+    object_info:
+      identity: '{{ object_identity }}'
+    register: remove_sa_outbound_actual
+
+  - name: assert remove sa with outbound auth only
+    assert:
+      that:
+      - remove_sa_outbound is changed
+      - remove_sa_outbound.distinguished_name == create_sa_outbound.distinguished_name
+      - remove_sa_outbound.object_guid == create_sa_outbound.object_guid
+      - remove_sa_outbound.sid == create_sa_outbound.sid
+      - remove_sa_outbound_actual.objects == []
+
+  always:
+  - name: remove test OU container
+    ou:
+      identity: '{{ test_ou.object_guid }}'
+      state: absent
+
+- name: create sa with no $ suffix - check
+  service_account:
+    name: MySA
+    dns_hostname: DNSName
+    state: present
+    sam_account_name: SATest
+    do_not_append_dollar_to_sam: true
+    kerberos_encryption_types:
+      add:
+      - aes128
+      - aes256
+  register: create_sa_no_dollar_check
+  check_mode: true
+
+- name: get result of create sa with no $ suffix - check
+  object_info:
+    identity: '{{ create_sa_no_dollar_check.distinguished_name }}'
+  register: create_sa_no_dollar_check_actual
+
+- name: create sa with no $ suffix - check
+  assert:
+    that:
+    - create_sa_no_dollar_check is changed
+    - create_sa_no_dollar_check_actual.objects == []
+
+- name: create sa with no $ suffix
+  service_account:
+    name: MySA
+    dns_hostname: DNSName
+    state: present
+    sam_account_name: SATest
+    do_not_append_dollar_to_sam: true
+    kerberos_encryption_types:
+      add:
+      - aes128
+      - aes256
+  register: create_sa_no_dollar
+
+- set_fact:
+    object_identity: '{{ create_sa_no_dollar.object_guid }}'
+
+- name: get result of create sa with no $ suffix
+  object_info:
+    identity: '{{ create_sa_no_dollar_check.distinguished_name }}'
+    properties:
+    - msDS-SupportedEncryptionTypes
+    - sAMAccountName
+  register: create_sa_no_dollar_actual
+
+- name: create sa with no $ suffix
+  assert:
+    that:
+    - create_sa_no_dollar is changed
+    - create_sa_no_dollar_actual.objects | length == 1
+    - create_sa_no_dollar_actual.objects[0].DistinguishedName == create_sa_no_dollar.distinguished_name
+    - create_sa_no_dollar_actual.objects[0]['msDS-SupportedEncryptionTypes'] == 24
+    - create_sa_no_dollar_actual.objects[0].Name == 'MySA'
+    - create_sa_no_dollar_actual.objects[0].ObjectGUID == create_sa_no_dollar.object_guid
+    - create_sa_no_dollar_actual.objects[0].sAMAccountName == 'SATest'
+
+- name: create sa with no $ suffix - idempotent
+  service_account:
+    name: MySA
+    dns_hostname: DNSName
+    state: present
+    sam_account_name: SATest
+    do_not_append_dollar_to_sam: true
+    kerberos_encryption_types:
+      add:
+      - aes128
+      - aes256
+  register: create_sa_no_dollar_again
+
+- name: assert create sa with no $ suffix - idempotent
+  assert:
+    that:
+    - not create_sa_no_dollar_again is changed
+
+- name: convert sa to outbound auth and change sAMAccountName - check
+  service_account:
+    name: MySA
+    state: present
+    kerberos_encryption_types:
+      remove:
+      - aes128
+      - des
+    sam_account_name: NewSATest
+    outbound_auth_only: true
+  register: convert_sa_outbound_check
+  check_mode: true
+
+- name: get result of convert sa to outbound auth and change sAMAccountName - check
+  object_info:
+    identity: '{{ create_sa_no_dollar_check.distinguished_name }}'
+    properties:
+    - dnsHostName
+    - msDS-SupportedEncryptionTypes
+    - sAMAccountName
+  register: convert_sa_outbound_check_actual
+
+- name: assert get result of convert sa to outbound auth and change sAMAccountName - check
+  assert:
+    that:
+    - convert_sa_outbound_check is changed
+    - convert_sa_outbound_check_actual.objects | length == 1
+    - convert_sa_outbound_check_actual.objects[0].DistinguishedName == create_sa_no_dollar.distinguished_name
+    - convert_sa_outbound_check_actual.objects[0].dnsHostName == 'DNSName'
+    - convert_sa_outbound_check_actual.objects[0]['msDS-SupportedEncryptionTypes'] == 24
+    - convert_sa_outbound_check_actual.objects[0].Name == 'MySA'
+    - convert_sa_outbound_check_actual.objects[0].ObjectGUID == create_sa_no_dollar.object_guid
+    - convert_sa_outbound_check_actual.objects[0].sAMAccountName == 'SATest'
+
+- name: convert sa to outbound auth and change sAMAccountName
+  service_account:
+    name: MySA
+    state: present
+    kerberos_encryption_types:
+      remove:
+      - aes128
+      - des
+    sam_account_name: NewSATest
+    outbound_auth_only: true
+  register: convert_sa_outbound
+
+- name: get result of convert sa to outbound auth and change sAMAccountName
+  object_info:
+    identity: '{{ create_sa_no_dollar_check.distinguished_name }}'
+    properties:
+    - dnsHostName
+    - msDS-SupportedEncryptionTypes
+    - sAMAccountName
+  register: convert_sa_outbound_actual
+
+- name: assert get result of convert sa to outbound auth and change sAMAccountName
+  assert:
+    that:
+    - convert_sa_outbound is changed
+    - convert_sa_outbound_actual.objects | length == 1
+    - convert_sa_outbound_actual.objects[0].DistinguishedName == create_sa_no_dollar.distinguished_name
+    - convert_sa_outbound_actual.objects[0].dnsHostName == None
+    - convert_sa_outbound_actual.objects[0]['msDS-SupportedEncryptionTypes'] == 16
+    - convert_sa_outbound_actual.objects[0].Name == 'MySA'
+    - convert_sa_outbound_actual.objects[0].ObjectGUID == create_sa_no_dollar.object_guid
+    - convert_sa_outbound_actual.objects[0].sAMAccountName == 'NewSATest$'
+
+- name: convert sa to outbound auth and change sAMAccountName - idempotent
+  service_account:
+    name: MySA
+    state: present
+    kerberos_encryption_types:
+      remove:
+      - aes128
+      - des
+    sam_account_name: NewSATest
+    outbound_auth_only: true
+  register: convert_sa_outbound_again
+
+- name: assert convert sa to outbound auth and change sAMAccountName - idempotent
+  assert:
+    that:
+    - not convert_sa_outbound_again is changed
+
+- name: change sa details - check
+  service_account:
+    identity: NewSATest$
+    state: present
+    allowed_to_retrieve_password:
+      add:
+      - Domain Users
+      remove:
+      - name: Domain Admins
+      - Administrators
+    enabled: false
+    kerberos_encryption_types:
+      set: []
+    spn:
+      set:
+      - HTTP/SPN
+      - HTTP/SPN2
+    trusted_for_delegation: true
+    upn: saUPN@{{ setup_domain_info.output[0].dnsHostName }}
+  register: change_sa_check
+  check_mode: true
+
+- name: get result of change sa details - check
+  ansible.windows.win_powershell:
+    parameters:
+      Identity: '{{ object_identity }}'
+      Properties:
+      - DistinguishedName
+      - DNSHostName
+      - Enabled
+      - KerberosEncryptionType
+      - Name
+      - ObjectGUID
+      - PrincipalsAllowedToRetrieveManagedPassword
+      - ServicePrincipalName
+      - SID
+      - SamAccountName
+      - TrustedForDelegation
+      - UserPrincipalName
+    script: |
+      param ($Identity, $Properties)
+
+      Get-ADServiceAccount -Identity $Identity -Properties $Properties |
+        Select-Object -Property $Properties
+  register: change_sa_check_actual
+
+- name: assert change sa details - check
+  assert:
+    that:
+    - change_sa_check is changed
+    - change_sa_check_actual.output[0].DNSHostName == None
+    - change_sa_check_actual.output[0].DistinguishedName == change_sa_check.distinguished_name
+    - change_sa_check_actual.output[0].Enabled == true
+    - change_sa_check_actual.output[0].KerberosEncryptionType == [16]
+    - change_sa_check_actual.output[0].Name == "MySA"
+    - change_sa_check_actual.output[0].ObjectGUID == object_identity
+    - change_sa_check_actual.output[0].PrincipalsAllowedToRetrieveManagedPassword == []
+    - change_sa_check_actual.output[0].SID.Value == change_sa_check.sid
+    - change_sa_check_actual.output[0].SamAccountName == "NewSATest$"
+    - change_sa_check_actual.output[0].ServicePrincipalName == []
+    - change_sa_check_actual.output[0].TrustedForDelegation == false
+    - change_sa_check_actual.output[0].UserPrincipalName == None
+
+- name: change sa details
+  service_account:
+    identity: NewSATest$
+    state: present
+    allowed_to_retrieve_password:
+      add:
+      - Domain Users
+      remove:
+      - name: Domain Admins
+      - Administrators
+    enabled: false
+    kerberos_encryption_types:
+      set: []
+    spn:
+      set:
+      - HTTP/SPN
+      - HTTP/SPN2
+    trusted_for_delegation: true
+    upn: saUPN@{{ setup_domain_info.output[0].dnsHostName }}
+  register: change_sa
+
+- name: get result of change sa details
+  ansible.windows.win_powershell:
+    parameters:
+      Identity: '{{ object_identity }}'
+      Properties:
+      - DistinguishedName
+      - DNSHostName
+      - Enabled
+      - KerberosEncryptionType
+      - Name
+      - ObjectGUID
+      - PrincipalsAllowedToRetrieveManagedPassword
+      - ServicePrincipalName
+      - SID
+      - SamAccountName
+      - TrustedForDelegation
+      - UserPrincipalName
+    script: |
+      param ($Identity, $Properties)
+
+      Get-ADServiceAccount -Identity $Identity -Properties $Properties |
+        Select-Object -Property $Properties
+  register: change_sa_actual
+
+- name: assert change sa details
+  assert:
+    that:
+    - change_sa is changed
+    - change_sa_actual.output[0].DNSHostName == None
+    - change_sa_actual.output[0].DistinguishedName == change_sa.distinguished_name
+    - change_sa_actual.output[0].Enabled == false
+    - change_sa_actual.output[0].KerberosEncryptionType == [0]
+    - change_sa_actual.output[0].Name == "MySA"
+    - change_sa_actual.output[0].ObjectGUID == object_identity
+    - change_sa_actual.output[0].PrincipalsAllowedToRetrieveManagedPassword == ["CN=Domain Users,CN=Users," ~ setup_domain_info.output[0].defaultNamingContext]
+    - change_sa_actual.output[0].SID.Value == change_sa.sid
+    - change_sa_actual.output[0].SamAccountName == "NewSATest$"
+    - change_sa_actual.output[0].ServicePrincipalName | length == 2
+    - '"HTTP/SPN" in change_sa_actual.output[0].ServicePrincipalName'
+    - '"HTTP/SPN2" in change_sa_actual.output[0].ServicePrincipalName'
+    - change_sa_actual.output[0].TrustedForDelegation == true
+    - change_sa_actual.output[0].UserPrincipalName == "saUPN@" ~ setup_domain_info.output[0].dnsHostName
+
+- name: change sa details - idempotent
+  service_account:
+    identity: NewSATest$
+    state: present
+    allowed_to_retrieve_password:
+      add:
+      - Domain Users
+      remove:
+      - name: Domain Admins
+      - Administrators
+    enabled: false
+    kerberos_encryption_types:
+      set: []
+    spn:
+      set:
+      - HTTP/SPN
+      - HTTP/SPN2
+    trusted_for_delegation: true
+    upn: saUPN@{{ setup_domain_info.output[0].dnsHostName }}
+  register: change_sa_again
+
+- name: assert change sa details - idempotent
+  assert:
+    that:
+    - not change_sa_again is changed
+
+- name: convert sa to service auth and no $ suffix - check
+  service_account:
+    name: MySA
+    state: present
+    dns_hostname: MyHostName
+    sam_account_name: MySA
+    do_not_append_dollar_to_sam: true
+    allowed_to_retrieve_password:
+      add:
+      - Domain Admins
+      remove:
+      - name: Domain Users
+      - Administrators
+    enabled: true
+    kerberos_encryption_types:
+      add:
+      - aes128
+      remove:
+      - aes256
+    spn:
+      add:
+      - HTTP/SPN
+      - HTTP/spn3
+      remove:
+      - HTTP/SPN1
+      - HTTP/SPN2
+    trusted_for_delegation: false
+    upn: otherUPN@{{ setup_domain_info.output[0].dnsHostName }}
+  register: change_sa_check
+  check_mode: true
+
+- name: get result of convert sa to service auth and no $ suffix - check
+  ansible.windows.win_powershell:
+    parameters:
+      Identity: '{{ object_identity }}'
+      Properties:
+      - DistinguishedName
+      - DNSHostName
+      - Enabled
+      - KerberosEncryptionType
+      - Name
+      - ObjectGUID
+      - PrincipalsAllowedToRetrieveManagedPassword
+      - ServicePrincipalName
+      - SID
+      - SamAccountName
+      - TrustedForDelegation
+      - UserPrincipalName
+    script: |
+      param ($Identity, $Properties)
+
+      Get-ADServiceAccount -Identity $Identity -Properties $Properties |
+        Select-Object -Property $Properties
+  register: change_sa_check_actual
+
+- name: assert convert sa to service auth and no $ suffix - check
+  assert:
+    that:
+    - change_sa_check is changed
+    - change_sa_check_actual.output[0].DNSHostName == None
+    - change_sa_check_actual.output[0].DistinguishedName == change_sa.distinguished_name
+    - change_sa_check_actual.output[0].Enabled == false
+    - change_sa_check_actual.output[0].KerberosEncryptionType == [0]
+    - change_sa_check_actual.output[0].Name == "MySA"
+    - change_sa_check_actual.output[0].ObjectGUID == object_identity
+    - change_sa_check_actual.output[0].PrincipalsAllowedToRetrieveManagedPassword == ["CN=Domain Users,CN=Users," ~ setup_domain_info.output[0].defaultNamingContext]
+    - change_sa_check_actual.output[0].SID.Value == change_sa.sid
+    - change_sa_check_actual.output[0].SamAccountName == "NewSATest$"
+    - change_sa_check_actual.output[0].ServicePrincipalName | length == 2
+    - '"HTTP/SPN" in change_sa_check_actual.output[0].ServicePrincipalName'
+    - '"HTTP/SPN2" in change_sa_check_actual.output[0].ServicePrincipalName'
+    - change_sa_check_actual.output[0].TrustedForDelegation == true
+    - change_sa_check_actual.output[0].UserPrincipalName == "saUPN@" ~ setup_domain_info.output[0].dnsHostName
+
+- name: convert sa to service auth and no $ suffix
+  service_account:
+    name: MySA
+    state: present
+    dns_hostname: MyHostName
+    sam_account_name: MySA
+    do_not_append_dollar_to_sam: true
+    allowed_to_retrieve_password:
+      add:
+      - Domain Admins
+      remove:
+      - name: Domain Users
+      - Administrators
+    enabled: true
+    kerberos_encryption_types:
+      add:
+      - aes128
+      remove:
+      - aes256
+    spn:
+      add:
+      - HTTP/SPN
+      - HTTP/spn3
+      remove:
+      - HTTP/SPN1
+      - HTTP/SPN2
+    trusted_for_delegation: false
+    upn: otherUPN@{{ setup_domain_info.output[0].dnsHostName }}
+  register: change_sa
+
+- name: get result of convert sa to service auth and no $ suffix
+  ansible.windows.win_powershell:
+    parameters:
+      Identity: '{{ object_identity }}'
+      Properties:
+      - DistinguishedName
+      - DNSHostName
+      - Enabled
+      - KerberosEncryptionType
+      - Name
+      - ObjectGUID
+      - PrincipalsAllowedToRetrieveManagedPassword
+      - ServicePrincipalName
+      - SID
+      - SamAccountName
+      - TrustedForDelegation
+      - UserPrincipalName
+    script: |
+      param ($Identity, $Properties)
+
+      Get-ADServiceAccount -Identity $Identity -Properties $Properties |
+        Select-Object -Property $Properties
+  register: change_sa_actual
+
+- name: assert convert sa to service auth and no $ suffix
+  assert:
+    that:
+    - change_sa is changed
+    - change_sa_actual.output[0].DNSHostName == 'MyHostName'
+    - change_sa_actual.output[0].DistinguishedName == change_sa.distinguished_name
+    - change_sa_actual.output[0].Enabled == true
+    - change_sa_actual.output[0].KerberosEncryptionType == [8]
+    - change_sa_actual.output[0].Name == "MySA"
+    - change_sa_actual.output[0].ObjectGUID == object_identity
+    - change_sa_actual.output[0].PrincipalsAllowedToRetrieveManagedPassword == ["CN=Domain Admins,CN=Users," ~ setup_domain_info.output[0].defaultNamingContext]
+    - change_sa_actual.output[0].SID.Value == change_sa.sid
+    - change_sa_actual.output[0].SamAccountName == "MySA"
+    - change_sa_actual.output[0].ServicePrincipalName | length == 2
+    - '"HTTP/SPN" in change_sa_actual.output[0].ServicePrincipalName'
+    - '"HTTP/spn3" in change_sa_actual.output[0].ServicePrincipalName'
+    - change_sa_actual.output[0].TrustedForDelegation == false
+    - change_sa_actual.output[0].UserPrincipalName == "otherUPN@" ~ setup_domain_info.output[0].dnsHostName
+
+- name: convert sa to service auth and no $ suffix - idempotent
+  service_account:
+    name: MySA
+    state: present
+    dns_hostname: MyHostName
+    sam_account_name: MySA
+    do_not_append_dollar_to_sam: true
+    allowed_to_retrieve_password:
+      add:
+      - Domain Admins
+      remove:
+      - name: Domain Users
+      - Administrators
+    enabled: true
+    kerberos_encryption_types:
+      add:
+      - aes128
+      remove:
+      - aes256
+    spn:
+      add:
+      - HTTP/SPN
+      - HTTP/spn3
+      remove:
+      - HTTP/SPN1
+      - HTTP/SPN2
+    trusted_for_delegation: false
+    upn: otherUPN@{{ setup_domain_info.output[0].dnsHostName }}
+  register: change_sa_again
+
+- name: assert convert sa to service auth and no $ suffix - idempotent
+  assert:
+    that:
+    - not change_sa_again is changed
