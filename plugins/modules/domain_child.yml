@@ -12,6 +12,7 @@ DOCUMENTATION:
     - This module will only check if the domain specified by I(dns_domain_name)
       exists or not. If the domain already exists under the same name, no other
       options, other than the domain name will be checked during the run.
+  version_added: 1.6.0
   options:
     create_dns_delegation:
       description:
