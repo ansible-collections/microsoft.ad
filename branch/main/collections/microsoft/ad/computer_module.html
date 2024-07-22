@@ -24,7 +24,7 @@
         <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="microsoft.ad.debug_ldap_client module – Get host information for debugging LDAP connections" href="debug_ldap_client_module.html" />
+    <link rel="next" title="microsoft.ad.domain module – Ensures the existence of a Windows domain" href="domain_module.html" />
     <link rel="prev" title="Migration guide" href="docsite/guide_migration.html" /><!-- extra head elements for Ansible beyond RTD Sphinx Theme -->
 
 
@@ -123,7 +123,7 @@
       <li class="breadcrumb-item active">microsoft.ad.computer module – Manage Active Directory computer objects</li>
       <li class="wy-breadcrumbs-aside">
               <!-- User defined GitHub URL -->
-              <a href="https://github.com/ansible-collections/microsoft.ad/edit/main/plugins/modules/computer.py?description=%23%23%23%23%23%20SUMMARY%0A%3C!—%20Your%20description%20here%20–%3E%0A%0A%0A%23%23%23%23%23%20ISSUE%20TYPE%0A-%20Docs%20Pull%20Request%0A%0A%2Blabel:%20docsite_pr" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/ansible-collections/microsoft.ad/edit/main/plugins/modules/computer.yml?description=%23%23%23%23%23%20SUMMARY%0A%3C!—%20Your%20description%20here%20–%3E%0A%0A%0A%23%23%23%23%23%20ISSUE%20TYPE%0A-%20Docs%20Pull%20Request%0A%0A%2Blabel:%20docsite_pr" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -525,8 +525,8 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 <div class="ansibleOptionAnchor" id="parameter-sam_account_name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-computer-module-parameter-sam-account-name"><strong>sam_account_name</strong></p>
 <a class="ansibleOptionLink" href="#parameter-sam_account_name" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
-<td><div class="ansible-option-cell"><p>The <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> value to set for the group.</p>
-<p>If omitted, the <em>name</em> value is used when creating a new group.</p>
+<td><div class="ansible-option-cell"><p>The <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> value to set for the computer account.</p>
+<p>If omitted, the <em>name</em> value is used when creating a new account.</p>
 <p>It has a maximum of 256 characters, 15 is advised for older operating systems compatibility.</p>
 <p>If ommitted the value is the same as <code class="docutils literal notranslate"><span class="pre">name$</span></code> when the computer is created.</p>
 <p>Note that all computer <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> values typically end with a <code class="docutils literal notranslate"><span class="pre">$</span></code>.</p>
@@ -806,7 +806,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-comput
 
 <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="docsite/guide_migration.html" class="btn btn-neutral float-left" title="Migration guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="debug_ldap_client_module.html" class="btn btn-neutral float-right" title="microsoft.ad.debug_ldap_client module – Get host information for debugging LDAP connections" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="domain_module.html" class="btn btn-neutral float-right" title="microsoft.ad.domain module – Ensures the existence of a Windows domain" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
