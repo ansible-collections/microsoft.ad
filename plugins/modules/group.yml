@@ -84,7 +84,7 @@ DOCUMENTATION:
           elements: raw
     flatten:
       description:
-      - Flattens nested groups.
+        - Flattens nested groups.
       type: bool
       default: false
       version_added: 1.7.0
