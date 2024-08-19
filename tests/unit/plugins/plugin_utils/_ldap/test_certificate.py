@@ -546,7 +546,7 @@ def test_client_auth_path_der_key(
     perform_handshake(context, tls_server, client_certificate[0])
 
 
-@pytest.mark.parametrize("password", [None, b"Password123!\xFF"])
+@pytest.mark.parametrize("password", [None, b"P\xc3\xa4ssword123!"])
 def test_client_auth_path_pfx_file(
     password: t.Optional[bytes],
     tls_server: TlsServer,
