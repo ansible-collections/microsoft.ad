@@ -1253,7 +1253,9 @@ Function Invoke-AnsibleADObject {
                         $propValue = $propValue | ConvertTo-AnsibleADDistinguishedName @adParams -Module $module -Context $propInfo.Name
                     }
 
-                    if ($propInfo.IsRawAttribute) {
+                    # If the value is empty we don't want to explicitly set it
+                    # as that will be the default and can fail if empty.
+                    if ($propInfo.IsRawAttribute -and @($propValue).Count) {
                         if (-not $newParams.ContainsKey('OtherAttributes')) {
                             $newParams.OtherAttributes = @{}
                         }
@@ -1262,7 +1264,7 @@ Function Invoke-AnsibleADObject {
                         # ForEach-Object to get back a vanilla object[] to set.
                         $newParams.OtherAttributes[$propInfo.Attribute] = $propValue | ForEach-Object { "$_" }
                     }
-                    else {
+                    elseif (-not $propInfo.IsRawAttribute) {
                         $newParams[$propInfo.Attribute] = $propValue
                     }
 

@@ -409,6 +409,79 @@
       that:
       - not remove_group_again is changed
 
+  - name: create group with empty members - check
+    group:
+      name: MyGroup
+      state: present
+      scope: domainlocal
+      members:
+        set: []
+    register: group_empty_members_check
+    check_mode: true
+
+  - name: get result of create group - check
+    object_info:
+      identity: '{{ group_empty_members_check.distinguished_name }}'
+    register: group_empty_members_check_actual
+
+  - name: assert create group with empty members - check
+    assert:
+      that:
+      - group_empty_members_check is changed
+      - group_empty_members_check.distinguished_name == 'CN=MyGroup,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+      - group_empty_members_check.object_guid == '00000000-0000-0000-0000-000000000000'
+      - group_empty_members_check.sid == 'S-1-5-0000'
+      - group_empty_members_check_actual.objects == []
+
+  - name: create group with empty members
+    group:
+      name: MyGroup
+      state: present
+      scope: domainlocal
+      members:
+        set: []
+    register: group_empty_members
+
+  - set_fact:
+      object_identity: '{{ group_empty_members.object_guid }}'
+
+  - name: get result of create group
+    object_info:
+      identity: '{{ group_empty_members.distinguished_name }}'
+      properties:
+      - member
+      - objectSid
+    register: group_empty_members_actual
+
+  - name: assert create group with empty members
+    assert:
+      that:
+      - group_empty_members is changed
+      - group_empty_members.distinguished_name == 'CN=MyGroup,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+      - group_empty_members_actual.objects | length == 1
+      - group_empty_members.object_guid == group_empty_members_actual.objects[0].ObjectGUID
+      - group_empty_members.sid == group_empty_members_actual.objects[0].objectSid.Sid
+      - group_empty_members_actual.objects[0].member == None
+
+  - name: create group with empty members - idempotent
+    group:
+      name: MyGroup
+      state: present
+      scope: domainlocal
+      members:
+        set: []
+    register: group_empty_members_again
+
+  - name: assert create group with empty members - idempotent
+    assert:
+      that:
+      - not group_empty_members_again is changed
+
+  - name: remove group for next steps
+    group:
+      name: MyGroup
+      state: absent
+
   - name: fail to create group with invalid members
     group:
       name: MyGroup

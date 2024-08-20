@@ -1,0 +1,4 @@
+bugfixes:
+  - >-
+    group - fix error when creating a group with no members explicitly set -
+    https://github.com/ansible-collections/microsoft.ad/issues/141
