@@ -1295,7 +1295,6 @@ Function Invoke-AnsibleADObject {
                 $adObject = & $newCommand @newParams @adParams
             }
             catch {
-                $module.Result.zzz = $newParams
                 # Using FailJson means other useful debugging information
                 # like the diff output is returned
                 $module.FailJson("New-$ModuleNoun failed: $_", $_)
