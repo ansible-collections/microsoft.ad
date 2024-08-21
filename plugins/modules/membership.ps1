@@ -205,11 +205,20 @@ if ($state -eq 'domain') {
                 WhatIf = $module.CheckMode
             }
             if ($hostname -ne $currentState.HostName) {
-                $joinParams.NewName = $hostname
-
-                # By setting this here, the Rename-Computer call is skipped as
-                # joining the domain will rename the host for us.
+                $renameParams = @{
+                    NewName = $hostname
+                    WhatIf = $module.CheckMode
+                    Force = $true
+                }
+                Rename-Computer @renameParams
+                # Update this now to reflect the new name
                 $hostname = $currentState.HostName
+
+                $module.Result.changed = $true
+                $module.Result.reboot_required = $true
+
+                # Note: AccountCreate is default behavior, but needs included when Options is set
+                $joinParams.Options = 'AccountCreate,JoinWithNewName'
             }
             if ($domainOUPath) {
                 $joinParams.OUPath = $domainOUPath
