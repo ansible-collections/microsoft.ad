@@ -1,0 +1,4 @@
+bugfixes:
+  - >-
+    membership - allow domain join with hostname change if the account for that
+    host already exists - https://github.com/ansible-collections/microsoft.ad/pull/145

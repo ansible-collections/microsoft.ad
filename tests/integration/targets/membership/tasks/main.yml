@@ -1,37 +1,3 @@
-- set_fact:
-    get_result_script: |
-      $Ansible.Changed = $false
-      $cs = Get-CimInstance -ClassName Win32_ComputerSystem -Property DNSHostName, Domain, PartOfDomain, Workgroup
-      $domainName = if ($cs.PartOfDomain) {
-          try {
-              [System.DirectoryServices.ActiveDirectory.Domain]::GetComputerDomain().Name
-          }
-          catch [System.Security.Authentication.AuthenticationException] {
-              $cs.Domain
-          }
-      }
-      else {
-          $null
-      }
-
-      [PSCustomObject]@{
-          HostName = $cs.DNSHostName
-          NetbiosName = $env:COMPUTERNAME
-          PartOfDomain = $cs.PartOfDomain
-          DnsDomainName = $domainName
-          WorkgroupName = $cs.Workgroup
-      }
-
-    get_ad_result_script: |
-      $Ansible.Changed = $false
-      Get-ADComputer -Filter { Name -ne 'DC' } -Properties DistinguishedName, DNSHostName, Name, Enabled |
-          Select-Object -Property @(
-              'DistinguishedName'
-              @{ N = 'DNSHostName'; E = { $_.DNSHostName.Substring(0, $_.DNSHostName.IndexOf('.')) } }
-              'Name'
-              'Enabled'
-          )
-
 - name: join domain invalid OU
   membership:
     dns_domain_name: '{{ domain_realm }}'
@@ -630,7 +596,7 @@
   register: join_ou_ad_actual
   delegate_to: DC
 
-- name: assert join domain with hostname and OUT
+- name: assert join domain with hostname and OU
   assert:
     that:
     - join_ou is changed
@@ -735,7 +701,8 @@
 
 - name: remove orphaned AD account for later tests
   microsoft.ad.computer:
-    name: BAR
+    name: TEST1-LONG-HOST
+    path: '{{ custom_ou.output[0] }}'
     state: absent
   delegate_to: DC
 

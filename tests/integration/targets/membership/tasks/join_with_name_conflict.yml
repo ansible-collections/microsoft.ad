@@ -1,0 +1,101 @@
+- name: create existing AD account to match desired rename
+  microsoft.ad.computer:
+    name: RENAME-HOSTNAME
+    dns_hostname: RENAME-HOSTNAME1-long-toremove.{{ domain_realm }}
+    state: present
+  delegate_to: DC
+
+- name: get pre state before change
+  ansible.windows.win_powershell:
+    script: '{{ get_result_script }}'
+  register: previous_state
+
+- block:
+  - name: join domain with hostname that already exists - check mode
+    membership:
+      dns_domain_name: '{{ domain_realm }}'
+      domain_admin_user: '{{ domain_user_upn }}'
+      domain_admin_password: '{{ domain_password }}'
+      hostname: RENAME-HOSTNAME1-long
+      state: domain
+    register: rename_check
+    check_mode: true
+
+  - name: get result of join domain with hostname that already exists - check mode
+    ansible.windows.win_powershell:
+      script: '{{ get_result_script }}'
+    register: rename_check_actual
+
+  - name: assert join domain with hostname that already exists - check mode
+    assert:
+      that:
+      - rename_check is changed
+      - rename_check.reboot_required == True
+      - rename_check_actual.output[0] == previous_state.output[0]
+
+  - name: join domain with hostname that already exists
+    membership:
+      dns_domain_name: '{{ domain_realm }}'
+      domain_admin_user: '{{ domain_user_upn }}'
+      domain_admin_password: '{{ domain_password }}'
+      hostname: RENAME-HOSTNAME1-long
+      state: domain
+      reboot: true
+    register: rename
+
+  - name: get result of join domain with hostname that already exists
+    ansible.windows.win_powershell:
+      script: '{{ get_result_script }}'
+    register: rename_actual
+
+  - name: get ad result of join domain with hostname that already exists
+    ansible.windows.win_powershell:
+      script: '{{ get_ad_result_script }}'
+    delegate_to: DC
+    register: rename_ad_actual
+
+  - name: assert join domain with hostname that already exists
+    assert:
+      that:
+      - rename is changed
+      - rename.reboot_required == False
+      - rename_actual.output[0]['DnsDomainName'] == domain_realm
+      - rename_actual.output[0]['HostName'] == 'RENAME-HOSTNAME1-long'
+      - rename_actual.output[0]['NetbiosName'] == 'RENAME-HOSTNAME'
+      - rename_actual.output[0]['PartOfDomain'] == true
+      - rename_actual.output[0]['WorkgroupName'] == None
+      - rename_ad_actual.output | length == 1
+      - rename_ad_actual.output[0]['DNSHostName'] == 'RENAME-HOSTNAME1-long'
+      - rename_ad_actual.output[0]['DistinguishedName'] == 'CN=RENAME-HOSTNAME,CN=Computers,' ~ domain_dn_base
+      - rename_ad_actual.output[0]['Name'] == 'RENAME-HOSTNAME'
+
+  - name: join domain with hostname that already exists - idempotent
+    membership:
+      dns_domain_name: '{{ domain_realm }}'
+      domain_admin_user: '{{ domain_user_upn }}'
+      domain_admin_password: '{{ domain_password }}'
+      hostname: RENAME-HOSTNAME1-long
+      state: domain
+      reboot: true
+    register: rename_again
+
+  - name: assert join domain with hostname that already exists - idempotent
+    assert:
+      that:
+      - not rename_again is changed
+
+  always:
+  - name: change domain to workgroup
+    membership:
+      workgroup_name: WORKGROUP
+      domain_admin_user: '{{ domain_user_upn }}'
+      domain_admin_password: '{{ domain_password }}'
+      hostname: TEST
+      state: workgroup
+      reboot: true
+
+  - name: remove AD account if present
+    microsoft.ad.computer:
+      name: RENAME-HOSTNAME
+      state: absent
+    delegate_to: DC
