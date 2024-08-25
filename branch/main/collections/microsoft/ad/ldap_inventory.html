@@ -350,7 +350,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <a class="ansibleOptionLink" href="#parameter-filter" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The LDAP filter string used to query the computer objects.</p>
-<p>By default, this will be combined with the filter “(objectClass=computer)”. Use <em>filter_without_computer</em> to override this behavior and have <em>filter</em> be the only filter used.</p>
+<p>By default, this will be combined with the filter “(objectCategory=computer)”. Use <em>filter_without_computer</em> to override this behavior and have <em>filter</em> be the only filter used.</p>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
@@ -358,7 +358,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-ldap-i
 <a class="ansibleOptionLink" href="#parameter-filter_without_computer" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
 <p><em class="ansible-option-versionadded">added in microsoft.ad 1.3.0</em></p>
 </div></td>
-<td><div class="ansible-option-cell"><p>Will not combine the <em>filter</em> value with the filter “(objectClass=computer)”.</p>
+<td><div class="ansible-option-cell"><p>Will not combine the <em>filter</em> value with the default filter “(objectCategory=computer)”.</p>
 <p>In most cases this should be <code class="docutils literal notranslate"><span class="pre">false</span></code> but can be set to <code class="docutils literal notranslate"><span class="pre">true</span></code> to have the <em>filter</em> value specified be the only filter used.</p>
 <p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
 <ul class="simple">
