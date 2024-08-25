@@ -285,6 +285,9 @@
             'msDS-AllowedToDelegateTo' = 'dns 2'
         }
 
+        New-ADServiceAccount -Name MyGMSA -DNSHostName MyGMSA -Path $adParams.Path
+        New-ADServiceAccount -Name MySMSA -RestrictToSingleComputer -Path $adParams.Path
+
         Add-ADGroupMember -Identity $group1 -Members $comp1, $comp2
         Add-ADGroupMember -Identity $group2 -Members $comp1
 
