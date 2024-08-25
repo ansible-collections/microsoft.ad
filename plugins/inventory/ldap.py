@@ -41,13 +41,13 @@ options:
     description:
     - The LDAP filter string used to query the computer objects.
     - By default, this will be combined with the filter
-      "(objectClass=computer)". Use I(filter_without_computer) to override
+      "(objectCategory=computer)". Use I(filter_without_computer) to override
       this behavior and have I(filter) be the only filter used.
     type: str
   filter_without_computer:
     description:
-    - Will not combine the I(filter) value with the filter
-      "(objectClass=computer)".
+    - Will not combine the I(filter) value with the default filter
+      "(objectCategory=computer)".
     - In most cases this should be C(false) but can be set to C(true) to have
       the I(filter) value specified be the only filter used.
     type: bool
@@ -293,7 +293,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
             "subtree": sansldap.SearchScope.SUBTREE,
         }[search_scope]
 
-        computer_filter = sansldap.FilterEquality("objectClass", b"computer")
+        computer_filter = sansldap.FilterEquality("objectCategory", b"computer")
         final_filter: sansldap.LDAPFilter
         if ldap_filter:
             ldap_filter_obj = sansldap.LDAPFilter.from_string(ldap_filter)
@@ -324,22 +324,24 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
 
         # These options are in ../doc_fragments/ldap_connection.py
         template_fields = {
-            'auth_protocol',
-            'ca_cert',
-            'cert_validation',
-            'certificate',
-            'certificate_key',
-            'certificate_password',
-            'connection_timeout',
-            'encrypt',
-            'password',
-            'port',
-            'server',
-            'tls_mode',
-            'username',
+            "auth_protocol",
+            "ca_cert",
+            "cert_validation",
+            "certificate",
+            "certificate_key",
+            "certificate_password",
+            "connection_timeout",
+            "encrypt",
+            "password",
+            "port",
+            "server",
+            "tls_mode",
+            "username",
         }
         for option_name, option_value in connection_options.items():
-            if option_name in template_fields and self.templar.is_template(option_value):
+            if option_name in template_fields and self.templar.is_template(
+                option_value
+            ):
                 self.display.vvv(f"Templating option {option_name}")
                 connection_options[option_name] = self.templar.template(
                     variable=option_value,
