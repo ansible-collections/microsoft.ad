@@ -130,11 +130,16 @@ stages:
           nameFormat: Server {0}
           testFormat: devel/windows/{0}
           targets:
-            - test: 2016/winrm/http
-            - test: 2019/winrm/https
-            - test: 2022/winrm/https
-            - test: 2022/psrp/https
-            - test: 2022/ssh/key
+            - name: Server 2016 WinRM HTTP
+              test: 2016/winrm/http
+            - name: Server 2019 WinRM HTTPS
+              test: 2019/winrm/https
+            - name: Server 2022 WinRM HTTPS
+              test: 2022/winrm/https
+            - name: Server 2022 PSRP HTTPS
+              test: 2022/psrp/https
+            - name: Server 2022 SSH Key
+              test: 2022/ssh/key
           groups:
             - 1
   - stage: Summary
