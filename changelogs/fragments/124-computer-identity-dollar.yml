@@ -1,5 +1,0 @@
-bugfixes:
-  - >-
-    microsoft.ad.computer - Added fallback ``identity`` lookup for ``sAMAccountName`` with the ``$`` suffix. This
-    ensures that finding the computer object will work with or without the ``$`` suffix.
-    - https://github.com/ansible-collections/microsoft.ad/issues/124

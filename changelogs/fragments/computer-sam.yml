@@ -1,4 +1,0 @@
-minor_changes:
-  - >-
-    microsoft.ad.computer - Added the ``do_not_append_dollar_to_sam`` option which can create a computer account
-    without the ``$`` suffix when an explicit ``sam_account_name`` was provided without one.

@@ -1,4 +1,0 @@
-bugfixes:
-  - >-
-    ldap - Filter out managed service accounts in the default LDAP filter used. The ``filter_without_computer`` can be
-    used to disable the default filter if needed.

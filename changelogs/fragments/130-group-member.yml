@@ -1,4 +1,0 @@
-bugfixes:
-  - >-
-    microsoft.ad.group - Fix setting group members of Builtin groups of a domain controller -
-    https://github.com/ansible-collections/microsoft.ad/issues/130
