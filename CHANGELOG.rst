@@ -4,6 +4,40 @@ Ansible Microsoft Active Directory Release Notes
 
 .. contents:: Topics
 
+v1.7.0
+======
+
+Release Summary
+---------------
+
+Release summary for v1.7.0
+
+Minor Changes
+-------------
+
+- Set minimum supported Ansible version to 2.15 to align with the versions still supported by Ansible.
+- microsoft.ad.computer - Added the ``do_not_append_dollar_to_sam`` option which can create a computer account without the ``$`` suffix when an explicit ``sam_account_name`` was provided without one.
+- microsoft.ad.domain - Added ``reboot_timeout`` option to control how long a reboot can go for.
+- microsoft.ad.domain_child - Added ``reboot_timeout`` option to control how long a reboot can go for.
+- microsoft.ad.domain_controller - Added ``reboot_timeout`` option to control how long a reboot can go for.
+- microsoft.ad.membership - Added ``domain_server`` option to specify the DC to use for domain join operations - https://github.com/ansible-collections/microsoft.ad/issues/131#issuecomment-2201151651
+- microsoft.ad.membership - Added ``reboot_timeout`` option to control how long a reboot can go for.
+
+Bugfixes
+--------
+
+- Removed usages of the python call ``datetime.datetime.utcnow()`` in favour of ``datetime.datetime.now(datetime.timezone.utc)``. The original method is now deprecated in Python 3.12 and will be removed in a later version.
+- group - fix error when creating a group with no members explicitly set - https://github.com/ansible-collections/microsoft.ad/issues/141
+- ldap - Filter out managed service accounts in the default LDAP filter used. The ``filter_without_computer`` can be used to disable the default filter if needed.
+- membership - allow domain join with hostname change if the account for that host already exists - https://github.com/ansible-collections/microsoft.ad/pull/145
+- microsoft.ad.computer - Added fallback ``identity`` lookup for ``sAMAccountName`` with the ``$`` suffix. This ensures that finding the computer object will work with or without the ``$`` suffix. - https://github.com/ansible-collections/microsoft.ad/issues/124
+- microsoft.ad.group - Fix setting group members of Builtin groups of a domain controller - https://github.com/ansible-collections/microsoft.ad/issues/130
+
+New Modules
+-----------
+
+- service_account - Manage Active Directory service account objects
+
 v1.6.0
 ======
 

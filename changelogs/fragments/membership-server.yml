@@ -1,4 +1,0 @@
-minor_changes:
-  - >-
-    microsoft.ad.membership - Added ``domain_server`` option to specify the DC to use for domain join operations -
-    https://github.com/ansible-collections/microsoft.ad/issues/131#issuecomment-2201151651

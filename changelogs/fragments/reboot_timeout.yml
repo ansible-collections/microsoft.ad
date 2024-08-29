@@ -1,5 +1,0 @@
-minor_changes:
-  - microsoft.ad.domain_child - Added ``reboot_timeout`` option to control how long a reboot can go for.
-  - microsoft.ad.domain_controller - Added ``reboot_timeout`` option to control how long a reboot can go for.
-  - microsoft.ad.domain - Added ``reboot_timeout`` option to control how long a reboot can go for.
-  - microsoft.ad.membership - Added ``reboot_timeout`` option to control how long a reboot can go for.
