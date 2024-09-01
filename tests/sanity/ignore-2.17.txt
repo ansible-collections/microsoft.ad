@@ -1,4 +1,3 @@
-plugins/action/debug_ldap_client.py action-plugin-docs # ansible-test is ignoring sidecar docs
 plugins/action/domain.py action-plugin-docs # ansible-test is ignoring sidecar docs
 plugins/action/domain_child.py action-plugin-docs # ansible-test is ignoring sidecar docs
 plugins/action/domain_controller.py action-plugin-docs # ansible-test is ignoring sidecar docs
