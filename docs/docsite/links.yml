@@ -16,10 +16,3 @@ communication:
   matrix_rooms:
     - topic: General usage and support questions
       room: "#windows:ansible.im"
-  irc_channels:
-    - topic: General usage and support questions
-      network: Libera
-      channel: "#ansible-windows"
-  mailing_lists:
-    - topic: Ansible Project List
-      url: https://groups.google.com/g/ansible-project
