@@ -4,6 +4,19 @@ Ansible Microsoft Active Directory Release Notes
 
 .. contents:: Topics
 
+v1.7.1
+======
+
+Release Summary
+---------------
+
+Release summary for v1.7.1. Minor fix for broken action plugin docs
+
+Bugfixes
+--------
+
+- Fix ``microsoft.ad.debug_ldap_client`` documentation problem so it appears in the ``ansible-doc`` plugin list and online documentation.
+
 v1.7.0
 ======
 

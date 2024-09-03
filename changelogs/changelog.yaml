@@ -241,3 +241,14 @@ releases:
       name: service_account
       namespace: ''
     release_date: '2024-08-30'
+  1.7.1:
+    changes:
+      bugfixes:
+      - Fix ``microsoft.ad.debug_ldap_client`` documentation problem so it appears
+        in the ``ansible-doc`` plugin list and online documentation.
+      release_summary: Release summary for v1.7.1. Minor fix for broken action plugin
+        docs
+    fragments:
+    - debug-ldap-client-doc.yml
+    - release-summary.yml
+    release_date: '2024-09-04'

@@ -1,4 +1,0 @@
-bugfixes:
-  - >-
-    Fix ``microsoft.ad.debug_ldap_client`` documentation problem so it appears in the ``ansible-doc`` plugin list and
-    online documentation.
