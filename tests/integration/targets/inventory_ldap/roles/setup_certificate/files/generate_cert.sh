@@ -5,65 +5,18 @@ set -o pipefail -eux
 TARGET="${1}"
 PASSWORD="${2}"
 
-generate () {
-    NAME="${1}"
-    SUBJECT="${2}"
-    KEY="${3}"
-    CA_NAME="${4}"
-    CA_OPTIONS=("-CA" "${CA_NAME}.pem" "-CAkey" "${CA_NAME}.key" "-CAcreateserial")
-
-    cat > openssl.conf << EOL
+echo "Generating CA certificate"
+cat > openssl.conf << EOL
 distinguished_name = req_distinguished_name
 
 [req_distinguished_name]
-
-[req]
-basicConstraints = CA:FALSE
-keyUsage = digitalSignature,keyEncipherment
-extendedKeyUsage = serverAuth
-subjectAltName = DNS:${SUBJECT}
+[v3_ca]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:true
+keyUsage = critical, keyCertSign
 EOL
 
-    echo "Generating ${NAME} signed cert"
-    openssl req \
-        -new \
-        "-${KEY}" \
-        -subj "/CN=${SUBJECT}" \
-        -newkey rsa:2048 \
-        -keyout "${NAME}.key" \
-        -out "${NAME}.csr" \
-        -config openssl.conf \
-        -reqexts req \
-        -passin pass:"${PASSWORD}" \
-        -passout pass:"${PASSWORD}"
-
-    openssl x509 \
-        -req \
-        -in "${NAME}.csr" \
-        "-${KEY}" \
-        -out "${NAME}.pem" \
-        -days 365 \
-        -extfile openssl.conf \
-        -extensions req \
-        -passin pass:"${PASSWORD}" \
-        "${CA_OPTIONS[@]}"
-
-    # PBE-SHA1-3DES/nomac is used for compatibility with Server 2016 and older
-    openssl pkcs12 \
-        -export \
-        -out "${NAME}.pfx" \
-        -inkey "${NAME}.key" \
-        -in "${NAME}.pem" \
-        -keypbe PBE-SHA1-3DES \
-        -certpbe PBE-SHA1-3DES \
-        -nomac \
-        -passin pass:"${PASSWORD}" \
-        -passout pass:"${PASSWORD}"
-
-    rm openssl.conf
-}
-
-echo "Generating CA certificate"
 openssl genrsa \
     -aes256 \
     -out ca.key \
@@ -74,9 +27,62 @@ openssl req \
     -x509 \
     -days 365 \
     -key ca.key \
+    -config openssl.conf \
+    -extensions v3_ca \
     -out ca.pem \
     -subj "/CN=microsoft.ad root" \
     -passin pass:"${PASSWORD}"
 
 echo "Generating ${TARGET} LDAPS certificate"
-generate ldaps "${TARGET}" sha256 ca
+cat > openssl.conf << EOL
+distinguished_name = req_distinguished_name
+
+[req_distinguished_name]
+
+[req]
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature,keyEncipherment
+extendedKeyUsage = serverAuth
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+subjectAltName = DNS:${TARGET}
+EOL
+
+openssl req \
+    -new \
+    -sha256 \
+    -subj "/CN=${TARGET}" \
+    -newkey rsa:2048 \
+    -keyout "ldaps.key" \
+    -out "ldaps.csr" \
+    -passin pass:"${PASSWORD}" \
+    -passout pass:"${PASSWORD}"
+
+openssl x509 \
+    -req \
+    -in "ldaps.csr" \
+    -sha256 \
+    -out "ldaps.pem" \
+    -days 365 \
+    -extfile openssl.conf \
+    -extensions req \
+    -passin pass:"${PASSWORD}" \
+    -CA "ca.pem" \
+    -CAkey "ca.key" \
+    -CAcreateserial
+
+# PBE-SHA1-3DES/nomac is used for compatibility with Server 2016 and older
+openssl pkcs12 \
+    -export \
+    -out "ldaps.pfx" \
+    -inkey "ldaps.key" \
+    -in "ldaps.pem" \
+    -keypbe PBE-SHA1-3DES \
+    -certpbe PBE-SHA1-3DES \
+    -nomac \
+    -passin pass:"${PASSWORD}" \
+    -passout pass:"${PASSWORD}"
+
+rm ca.srl
+rm ldaps.csr
+rm openssl.conf
