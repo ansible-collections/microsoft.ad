@@ -85,6 +85,12 @@ DOCUMENTATION:
           create a new domain tree in.
         - This can only be set when I(domain_type=tree).
       type: str
+    replication_source_dc:
+      description:
+        - Specifies the name of an existing domain controller in the forest that
+          will be used as the replication source for the new domain.
+      type: str
+      version_added: 1.8.0
     safe_mode_password:
       description:
         - Safe mode password for the domain controller.

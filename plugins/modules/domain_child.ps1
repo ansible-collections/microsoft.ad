@@ -50,6 +50,9 @@ $spec = @{
             default = 600
             type = 'int'
         }
+        replication_source_dc = @{
+            type = 'str'
+        }
         safe_mode_password = @{
             type = 'str'
             required = $true
@@ -83,6 +86,7 @@ $domainType = $module.Params.domain_type
 $installDns = $module.Params.install_dns
 $logPath = $module.Params.log_path
 $parentDomainName = $module.Params.parent_domain_name
+$replicationSourceDC = $module.Params.replication_source_dc
 $safeModePassword = $module.Params.safe_mode_password
 $siteName = $module.Params.site_name
 $sysvolPath = $module.Params.sysvol_path
@@ -168,6 +172,9 @@ if ($null -ne $installDns) {
 }
 if ($logPath) {
     $installParams.LogPath = $logPath
+}
+if ($replicationSourceDC) {
+    $installParams.ReplicationSourceDC = $replicationSourceDC
 }
 if ($siteName) {
     $installParams.SiteName = $siteName

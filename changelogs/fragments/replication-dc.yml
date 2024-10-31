@@ -1,0 +1,7 @@
+minor_changes:
+  - >-
+    domain - Added ``replication_source_dc`` to specify the domain controller to use as the replication source for the
+    new domain - https://github.com/ansible-collections/microsoft.ad/issues/159
+  - >-
+    domain_controller - Added ``replication_source_dc`` to specify the domain controller to use as the replication
+    source for the new domain controller - https://github.com/ansible-collections/microsoft.ad/issues/159
