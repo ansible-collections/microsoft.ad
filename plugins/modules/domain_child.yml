@@ -50,7 +50,7 @@ DOCUMENTATION:
           functional level, but it can be higher.
         - The default is automatically computed and set.
         - Current known modes are C(Win2003), C(Win2008), C(Win2008R2),
-          C(Win2012), C(Win2012R2), or C(WinThreshold).
+          C(Win2012), C(Win2012R2), C(WinThreshold), or C(Win2025).
       type: str
     domain_type:
       description:

@@ -39,7 +39,7 @@ DOCUMENTATION:
           level, but it can be higher.
         - The default is automatically computed and set.
         - Current known modes are C(Win2003), C(Win2008), C(Win2008R2),
-          C(Win2012), C(Win2012R2), or C(WinThreshold).
+          C(Win2012), C(Win2012R2), C(WinThreshold), or C(Win2025).
       type: str
     domain_netbios_name:
       description:
@@ -55,7 +55,7 @@ DOCUMENTATION:
         - The default forest functional level in Windows Server is typically the
           same as the version you are running.
         - Current known modes are C(Win2003), C(Win2008), C(Win2008R2),
-          C(Win2012), C(Win2012R2), or C(WinThreshold).
+          C(Win2012), C(Win2012R2), C(WinThreshold), or C(Win2025).
       type: str
     install_dns:
       description:

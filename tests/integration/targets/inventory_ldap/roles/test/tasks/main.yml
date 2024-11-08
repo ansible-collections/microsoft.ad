@@ -192,6 +192,17 @@
     - inventory_out._meta.hostvars == {}
     - '"Cannot use simple auth with encryption" in inventory_out_raw.stderr'
 
+- name: Get OS version number
+  ansible.windows.win_powershell:
+    script: '[Environment]::OSVersion.Version.ToString()'
+  register: os_version
+  changed_when: False
+
+# Server 2025+ disables Simple LDAP bind not over TLS
+- name: Check if we should skip Simple LDAP Bind
+  ansible.builtin.set_fact:
+    run_simple_bind: '{{ os_version.output[0] is version("10.0.26100", "<") }}'
+
 - import_tasks: invoke.yml
   vars:
     scenario: Simple auth over LDAP with no encryption
@@ -202,10 +213,12 @@
       password: '{{ ldap_pass }}'
       auth_protocol: simple
       encrypt: false
+  when: run_simple_bind
 
 - name: assert Simple auth over LDAP with no encryption
   assert:
     that: *default-assertion
+  when: run_simple_bind
 
 - import_tasks: invoke.yml
   vars:

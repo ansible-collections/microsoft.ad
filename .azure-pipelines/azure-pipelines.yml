@@ -154,6 +154,10 @@ stages:
               test: 2022/psrp/https
             - name: Server 2022 SSH Key
               test: 2022/ssh/key
+            - name: Server 2025 PSRP HTTPS
+              test: 2025/psrp/https
+            - name: Server 2025 SSH Key
+              test: 2025/ssh/key
           groups:
             - 1
   - stage: Summary
