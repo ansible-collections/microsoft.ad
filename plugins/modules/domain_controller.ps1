@@ -48,6 +48,9 @@ $spec = @{
             default = 600
             type = 'int'
         }
+        replication_source_dc = @{
+            type = 'str'
+        }
         safe_mode_password = @{
             no_log = $true
             type = 'str'
@@ -81,6 +84,7 @@ $installDns = $module.Params.install_dns
 $installMediaPath = $module.Params.install_media_path
 $logPath = $module.Params.domain_log_path
 $readOnly = $module.Params.read_only
+$replicationSourceDC = $module.Params.replication_source_dc
 $siteName = $module.Params.site_name
 $state = $module.Params.state
 $sysvolPath = $module.Params.sysvol_path
@@ -171,6 +175,9 @@ if ($state -eq 'domain_controller') {
             # while this is a switch value, if we set on $false site_name is required
             # https://github.com/ansible/ansible/issues/35858
             $installParams.ReadOnlyReplica = $true
+        }
+        if ($replicationSourceDC) {
+            $installParams.ReplicationSourceDC = $replicationSourceDC
         }
         if ($siteName) {
             $installParams.SiteName = $siteName
