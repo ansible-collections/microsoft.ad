@@ -135,7 +135,7 @@
 <h1>microsoft.ad.domain_child module – Manage domain children in an existing Active Directory forest.<a class="headerlink" href="#microsoft-ad-domain-child-module-manage-domain-children-in-an-existing-active-directory-forest" title="Link to this heading"></a></h1>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This module is part of the <a class="reference external" href="https://galaxy.ansible.com/ui/repo/published/microsoft/ad/">microsoft.ad collection</a> (version 1.7.1).</p>
+<p>This module is part of the <a class="reference external" href="https://galaxy.ansible.com/ui/repo/published/microsoft/ad/">microsoft.ad collection</a> (version 1.8.0).</p>
 <p>It is not included in <code class="docutils literal notranslate"><span class="pre">ansible-core</span></code>.
 To check whether it is installed, run <code class="code docutils literal notranslate"><span class="pre">ansible-galaxy</span> <span class="pre">collection</span> <span class="pre">list</span></code>.</p>
 <p>To install it, use: <code class="code docutils literal notranslate"><span class="pre">ansible-galaxy</span> <span class="pre">collection</span> <span class="pre">install</span> <span class="pre">microsoft.ad</span></code>.</p>
@@ -294,20 +294,28 @@ To check whether it is installed, run <code class="code docutils literal notrans
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-replication_source_dc"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-domain-child-module-parameter-replication-source-dc"><strong>replication_source_dc</strong></p>
+<a class="ansibleOptionLink" href="#parameter-replication_source_dc" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+<p><em class="ansible-option-versionadded">added in microsoft.ad 1.8.0</em></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Specifies the name of an existing domain controller in the forest that will be used as the replication source for the new domain.</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-safe_mode_password"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-domain-child-module-parameter-safe-mode-password"><strong>safe_mode_password</strong></p>
 <a class="ansibleOptionLink" href="#parameter-safe_mode_password" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span> / <span class="ansible-option-required">required</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>Safe mode password for the domain controller.</p>
 </div></td>
 </tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
+<tr class="row-even"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-site_name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-domain-child-module-parameter-site-name"><strong>site_name</strong></p>
 <a class="ansibleOptionLink" href="#parameter-site_name" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>Specifies the name of an existing site where you can place the new domain controller.</p>
 </div></td>
 </tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
+<tr class="row-odd"><td><div class="ansible-option-cell">
 <div class="ansibleOptionAnchor" id="parameter-sysvol_path"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-domain-child-module-parameter-sysvol-path"><strong>sysvol_path</strong></p>
 <a class="ansibleOptionLink" href="#parameter-sysvol_path" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">path</span></p>
 </div></td>
