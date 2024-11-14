@@ -141,6 +141,12 @@ $setParams = @{
                         default = 'fail'
                         type = 'str'
                     }
+                    permissions_failure_action = @{
+                        choices = 'fail', 'ignore', 'warn'
+                        default = 'fail'
+                        type = 'str'
+                    }
+
                 }
             }
         }
@@ -396,7 +402,7 @@ $setParams = @{
         }
         $dnServerParams = @{}
         foreach ($actionKvp in $Module.Params.groups.GetEnumerator()) {
-            if ($null -eq $actionKvp.Value -or $actionKvp.Key -in @('lookup_failure_action', 'missing_behaviour')) {
+            if ($null -eq $actionKvp.Value -or $actionKvp.Key -in @('lookup_failure_action', 'missing_behaviour', 'permission_failure_action')) {
                 continue
             }
 
@@ -448,10 +454,21 @@ $setParams = @{
                     $ADParams
                 }
                 if ($ADObject) {
-                    Set-ADObject -Identity $member -Add @{
-                        member = $ADObject.DistinguishedName
-                    } @lookupParams @commonParams
-
+                    try {
+                        Set-ADObject -Identity $member -Add @{
+                            member = $ADObject.DistinguishedName
+                        } @lookupParams @commonParams
+                    }
+                    catch [Microsoft.ActiveDirectory.Management.ADException] {
+                        if ($Module.Params.groups.permissions_failure_action -ne "fail") {
+                            if ($Module.Params.groups.permissions_failure_action -eq "warn") {
+                                $Module.Warn("Cannot add group '$member'. You do not have the required permissions, skipping: $($_.Exception.Message)")
+                            }
+                        }
+                        else {
+                            throw
+                        }
+                    }
                 }
                 $Module.Result.changed = $true
             }
@@ -478,6 +495,11 @@ $setParams = @{
                                 $Module.Warn("Cannot remove group '$member' as it's the primary group of the user, skipping: $($_.Exception.Message)")
                             }
                             $Module.Diff.after.groups = @($Module.Diff.after.groups; $member)
+                        }
+                        elseif ($Module.Params.groups.permissions_failure_action -ne "fail") {
+                            if ($Module.Params.groups.permissions_failure_action -eq "warn") {
+                                $Module.Warn("Cannot remove group '$member'. You do not have the required permissions, skipping: $($_.Exception.Message)")
+                            }
                         }
                         else {
                             throw
