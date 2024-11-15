@@ -402,7 +402,7 @@ $setParams = @{
         }
         $dnServerParams = @{}
         foreach ($actionKvp in $Module.Params.groups.GetEnumerator()) {
-            if ($null -eq $actionKvp.Value -or $actionKvp.Key -in @('lookup_failure_action', 'missing_behaviour', 'permission_failure_action')) {
+            if ($null -eq $actionKvp.Value -or $actionKvp.Key -in @('lookup_failure_action', 'missing_behaviour', 'permissions_failure_action')) {
                 continue
             }
 
