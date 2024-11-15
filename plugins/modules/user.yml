@@ -177,7 +177,7 @@ DOCUMENTATION:
             - Controls what happens when a group specified by C(groups) is not
               able to be modified by the user specified by C(domain_username)
             - C(fail) is the default and will return an error if any groups 
-            membership is not modifiable by the user.
+              membership is not modifiable by the user.
             - C(ignore) will ignore any groups that cannot be modified.
             - C(warn) will display a warning for any groups that cannot be
               modified but will continue without failing.
