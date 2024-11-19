@@ -187,6 +187,7 @@ DOCUMENTATION:
             - warn
           default: fail
           type: str
+          version_added: 1.8.0
     password:
       description:
         - Optionally set the user's password to this (plain text) value.
