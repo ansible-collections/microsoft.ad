@@ -252,3 +252,26 @@ releases:
     - debug-ldap-client-doc.yml
     - release-summary.yml
     release_date: '2024-09-04'
+  1.8.0:
+    changes:
+      minor_changes:
+      - Added support for Windows Server 2025
+      - domain - Added ``replication_source_dc`` to specify the domain controller
+        to use as the replication source for the new domain - https://github.com/ansible-collections/microsoft.ad/issues/159
+      - domain_controller - Added ``replication_source_dc`` to specify the domain
+        controller to use as the replication source for the new domain controller
+        - https://github.com/ansible-collections/microsoft.ad/issues/159
+      - microsoft.ad.user - Added ``groups.permissions_failure_action`` to control
+        the behaviour when failing to modify the user's groups - (https://github.com/ansible-collections/microsoft.ad/issues/140).
+      release_summary: Release summary for v1.8.0
+    fragments:
+    - release-summary.yml
+    - replication-dc.yml
+    - user-permissions-handling.yml
+    - win-2025.yml
+    plugins:
+      filter:
+      - description: Splits an LDAP DistinguishedName.
+        name: split_dn
+        namespace: null
+    release_date: '2024-12-11'
