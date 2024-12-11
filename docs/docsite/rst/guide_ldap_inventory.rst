@@ -226,6 +226,7 @@ The following filters can be used as an easy way to further convert the coerced 
 * :ref:`microsoft.ad.as_guid <ansible_collections.microsoft.ad.as_guid_filter>`
 * :ref:`microsoft.ad.as_sid <ansible_collections.microsoft.ad.as_sid_filter>`
 * :ref:`microsoft.ad.parse_dn <ansible_collections.microsoft.ad.parse_dn_filter>`
+* :ref:`microsoft.ad.split_dn <ansible_collections.microsoft.ad.split_dn_filter>`
 
 An example of these filters being used in the ``attributes`` option can be seen below:
 

@@ -14,6 +14,7 @@ from ansible_collections.microsoft.ad.plugins.filter.ldap_converters import (
     as_datetime,
     dn_escape,
     parse_dn,
+    split_dn,
 )
 
 
@@ -236,3 +237,61 @@ def test_parse_dn_invalid_attr_value_escape() -> None:
     expected = r"Found invalid escape sequence in attribute value at '\\1z"
     with pytest.raises(AnsibleFilterError, match=expected):
         parse_dn("foo=bar \\1z")
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        ("", ""),
+        ("CN=foo", "CN=foo"),
+        (r"CN=foo,DC=bar", "CN=foo"),
+        (r"CN=foo, DC=bar", "CN=foo"),
+        (r"CN=foo , DC=bar", "CN=foo"),
+        (r"CN=foo  ,  DC=bar", "CN=foo"),
+        (r"UID=jsmith,DC=example,DC=net", "UID=jsmith"),
+        (r"OU=Sales+CN=J.  Smith,DC=example,DC=net", "OU=Sales+CN=J.  Smith"),
+        (r"OU=Sales + CN=J.  Smith,DC=example,DC=net", "OU=Sales+CN=J.  Smith"),
+        (
+            r"CN=James \"Jim\" Smith\, III,DC=example,DC=net",
+            r"CN=James \"Jim\" Smith\, III",
+        ),
+        (r"CN=Before\0dAfter,DC=example,DC=net", r"CN=Before\0DAfter"),
+        (r"1.3.6.1.4.1.1466.0=#FE04024869", "1.3.6.1.4.1.1466.0=\udcfe\x04\x02Hi"),
+        (r"1.3.6.1.4.1.1466.0 = #FE04024869", "1.3.6.1.4.1.1466.0=\udcfe\x04\x02Hi"),
+        (r"CN=Lu\C4\8Di\C4\87", "CN=Lučić"),
+    ],
+)
+def test_split_dn_leaf(value: str, expected: str) -> None:
+    actual = split_dn(value)
+    assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        ("", ""),
+        ("CN=foo", ""),
+        (r"CN=foo,DC=bar", "DC=bar"),
+        (r"CN=foo, DC=bar", "DC=bar"),
+        (r"CN=foo , DC=bar", "DC=bar"),
+        (r"CN=foo  ,  DC=bar", "DC=bar"),
+        (r"UID=jsmith,DC=example,DC=net", "DC=example,DC=net"),
+        (r"OU=Sales+CN=J.  Smith,DC=example,DC=net", "DC=example,DC=net"),
+        (r"OU=Sales + CN=J.  Smith,DC=example,DC=net", "DC=example,DC=net"),
+        (
+            r"CN=James \"Jim\" Smith\, III,DC=example,DC=net",
+            r"DC=example,DC=net",
+        ),
+        (r"CN=Before\0dAfter,DC=example,DC=net", r"DC=example,DC=net"),
+        (r"1.3.6.1.4.1.1466.0=#FE04024869", ""),
+        (r"1.3.6.1.4.1.1466.0 = #FE04024869", ""),
+        (r"CN=Lu\C4\8Di\C4\87", ""),
+        (
+            r"CN=foo,DC=bar+C=US\, test+OU=Fake\+Test,DC=end",
+            r"DC=bar+C=US\, test+OU=Fake\+Test,DC=end",
+        ),
+    ],
+)
+def test_split_dn_parent(value: str, expected: str) -> None:
+    actual = split_dn(value, "parent")
+    assert actual == expected
