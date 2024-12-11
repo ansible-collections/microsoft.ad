@@ -4,6 +4,30 @@ Ansible Microsoft Active Directory Release Notes
 
 .. contents:: Topics
 
+v1.8.0
+======
+
+Release Summary
+---------------
+
+Release summary for v1.8.0
+
+Minor Changes
+-------------
+
+- Added support for Windows Server 2025
+- domain - Added ``replication_source_dc`` to specify the domain controller to use as the replication source for the new domain - https://github.com/ansible-collections/microsoft.ad/issues/159
+- domain_controller - Added ``replication_source_dc`` to specify the domain controller to use as the replication source for the new domain controller - https://github.com/ansible-collections/microsoft.ad/issues/159
+- microsoft.ad.user - Added ``groups.permissions_failure_action`` to control the behaviour when failing to modify the user's groups - (https://github.com/ansible-collections/microsoft.ad/issues/140).
+
+New Plugins
+-----------
+
+Filter
+~~~~~~
+
+- split_dn - Splits an LDAP DistinguishedName.
+
 v1.7.1
 ======
 
