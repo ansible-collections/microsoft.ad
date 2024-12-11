@@ -7,7 +7,7 @@
 <meta content="2.16.1" name="antsibull-docs" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>microsoft.ad.parse_dn filter – Parses an LDAP DistinguishedName string into an object. &mdash; Ansible collections  documentation</title>
+  <title>microsoft.ad.split_dn filter – Splits an LDAP DistinguishedName. &mdash; Ansible collections  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=5707b69d" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/ansible.css?v=c5b67dd2" />
       <link rel="stylesheet" type="text/css" href="../../../_static/antsibull-minimal.css" />
@@ -22,8 +22,8 @@
       <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="microsoft.ad.split_dn filter – Splits an LDAP DistinguishedName." href="split_dn_filter.html" />
-    <link rel="prev" title="microsoft.ad.dn_escape filter – Escape an LDAP DistinguishedName value string." href="dn_escape_filter.html" /><!-- extra head elements for Ansible beyond RTD Sphinx Theme -->
+    <link rel="next" title="microsoft.ad.ldap inventory – Inventory plugin for Active Directory" href="ldap_inventory.html" />
+    <link rel="prev" title="microsoft.ad.parse_dn filter – Parses an LDAP DistinguishedName string into an object." href="parse_dn_filter.html" /><!-- extra head elements for Ansible beyond RTD Sphinx Theme -->
 
 
 
@@ -118,10 +118,10 @@
           <li class="breadcrumb-item"><a href="../../index.html">Collection Index</a></li>
           <li class="breadcrumb-item"><a href="../index.html">Collections in the Microsoft Namespace</a></li>
           <li class="breadcrumb-item"><a href="index.html">Microsoft.Ad</a></li>
-      <li class="breadcrumb-item active">microsoft.ad.parse_dn filter – Parses an LDAP DistinguishedName string into an object.</li>
+      <li class="breadcrumb-item active">microsoft.ad.split_dn filter – Splits an LDAP DistinguishedName.</li>
       <li class="wy-breadcrumbs-aside">
               <!-- User defined GitHub URL -->
-              <a href="https://github.com/ansible-collections/microsoft.ad/edit/main/plugins/filter/parse_dn.yml?description=%23%23%23%23%23%20SUMMARY%0A%3C!—%20Your%20description%20here%20–%3E%0A%0A%0A%23%23%23%23%23%20ISSUE%20TYPE%0A-%20Docs%20Pull%20Request%0A%0A%2Blabel:%20docsite_pr" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/ansible-collections/microsoft.ad/edit/main/plugins/filter/split_dn.yml?description=%23%23%23%23%23%20SUMMARY%0A%3C!—%20Your%20description%20here%20–%3E%0A%0A%0A%23%23%23%23%23%20ISSUE%20TYPE%0A-%20Docs%20Pull%20Request%0A%0A%2Blabel:%20docsite_pr" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -131,40 +131,42 @@
   
            <div itemprop="articleBody">
              
-  <span class="target" id="ansible-collections-microsoft-ad-parse-dn-filter"></span><section id="microsoft-ad-parse-dn-filter-parses-an-ldap-distinguishedname-string-into-an-object">
-<h1>microsoft.ad.parse_dn filter – Parses an LDAP DistinguishedName string into an object.<a class="headerlink" href="#microsoft-ad-parse-dn-filter-parses-an-ldap-distinguishedname-string-into-an-object" title="Link to this heading"></a></h1>
+  <span class="target" id="ansible-collections-microsoft-ad-split-dn-filter"></span><section id="microsoft-ad-split-dn-filter-splits-an-ldap-distinguishedname">
+<h1>microsoft.ad.split_dn filter – Splits an LDAP DistinguishedName.<a class="headerlink" href="#microsoft-ad-split-dn-filter-splits-an-ldap-distinguishedname" title="Link to this heading"></a></h1>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This filter plugin is part of the <a class="reference external" href="https://galaxy.ansible.com/ui/repo/published/microsoft/ad/">microsoft.ad collection</a> (version 1.8.0).</p>
 <p>It is not included in <code class="docutils literal notranslate"><span class="pre">ansible-core</span></code>.
 To check whether it is installed, run <code class="code docutils literal notranslate"><span class="pre">ansible-galaxy</span> <span class="pre">collection</span> <span class="pre">list</span></code>.</p>
 <p>To install it, use: <code class="code docutils literal notranslate"><span class="pre">ansible-galaxy</span> <span class="pre">collection</span> <span class="pre">install</span> <span class="pre">microsoft.ad</span></code>.</p>
-<p>To use it in a playbook, specify: <code class="code docutils literal notranslate"><span class="pre">microsoft.ad.parse_dn</span></code>.</p>
+<p>To use it in a playbook, specify: <code class="code docutils literal notranslate"><span class="pre">microsoft.ad.split_dn</span></code>.</p>
 </div>
-<p class="ansible-version-added">New in microsoft.ad 1.5.0</p>
+<p class="ansible-version-added">New in microsoft.ad 1.8.0</p>
 <nav class="contents local" id="contents">
 <ul class="simple">
 <li><p><a class="reference internal" href="#synopsis" id="id1">Synopsis</a></p></li>
 <li><p><a class="reference internal" href="#input" id="id2">Input</a></p></li>
-<li><p><a class="reference internal" href="#see-also" id="id3">See Also</a></p></li>
-<li><p><a class="reference internal" href="#examples" id="id4">Examples</a></p></li>
-<li><p><a class="reference internal" href="#return-value" id="id5">Return Value</a></p></li>
+<li><p><a class="reference internal" href="#keyword-parameters" id="id3">Keyword parameters</a></p></li>
+<li><p><a class="reference internal" href="#see-also" id="id4">See Also</a></p></li>
+<li><p><a class="reference internal" href="#examples" id="id5">Examples</a></p></li>
+<li><p><a class="reference internal" href="#return-value" id="id6">Return Value</a></p></li>
 </ul>
 </nav>
 <section id="synopsis">
 <h2><a class="toc-backref" href="#id1" role="doc-backlink">Synopsis</a><a class="headerlink" href="#synopsis" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p>Parses the provided LDAP DistinguishedName (<code class="docutils literal notranslate"><span class="pre">DN</span></code>) string value into a structured object.</p></li>
+<li><p>Splits the provided LDAP DistinguishedName (<code class="docutils literal notranslate"><span class="pre">DN</span></code>) string value giving you the first/leaf RDN component or the remaining/parent RDN components.</p></li>
 <li><p>The rules for parsing as defined in <a class="reference external" href="https://www.ietf.org/rfc/rfc4514.txt">RFC 4514</a>.</p></li>
-<li><p>Each DN contains Relative DistinguishedNames (<code class="docutils literal notranslate"><span class="pre">RDN</span></code>) separated by <code class="docutils literal notranslate"><span class="pre">,</span></code> and each RDN can contain multiple attribute type values also known as an <code class="docutils literal notranslate"><span class="pre">AVA</span></code>. While Microsoft Active Directory DNs can only contain 1 AVA in an RDN this parser supports multiple AVAs.</p></li>
-<li><p>The returned object for each DN will be provided as a list of lists where the outer list is each RDN component separated by <code class="docutils literal notranslate"><span class="pre">,</span></code> and the inner list is each AVA separated by <code class="docutils literal notranslate"><span class="pre">=</span></code> and <code class="docutils literal notranslate"><span class="pre">+</span></code>. Each RDN entry is guaranteed to have 2 string values for the AVA type and value but can contain more if the RDN contains multiple AVAs separated by <code class="docutils literal notranslate"><span class="pre">+</span></code>.</p></li>
-<li><p>The parsed RDN attribute values will be unescaped to represent the actual value rather than the raw string in the DN.</p></li>
+<li><p>Each DN contains Relative DistinguishedNames (<code class="docutils literal notranslate"><span class="pre">RDN</span></code>) separated by <code class="docutils literal notranslate"><span class="pre">,</span></code>.</p></li>
+<li><p>The returned string for each DN will be either the first/leaf RDN component representing the name of the object, or the remaining/parent components representing the parent DN path. Use the <em>section</em> kwarg to control what should be returned.</p></li>
 <li><p>A DN that is invalid will raise a filter error.</p></li>
+<li><p>As the values are canonicalized, the returned values may not match the original DN string provided but do represent the same LDAP DN value.</p></li>
+<li><p>Leading and trailing whitespace from each component is removed from the returned value.</p></li>
 </ul>
 </section>
 <section id="input">
 <h2><a class="toc-backref" href="#id2" role="doc-backlink">Input</a><a class="headerlink" href="#input" title="Link to this heading"></a></h2>
-<p>This describes the input of the filter, the value before <code class="docutils literal notranslate"><span class="pre">|</span> <span class="pre">microsoft.ad.parse_dn</span></code>.</p>
+<p>This describes the input of the filter, the value before <code class="docutils literal notranslate"><span class="pre">|</span> <span class="pre">microsoft.ad.split_dn</span></code>.</p>
 <table class="longtable ansible-option-table docutils align-default" style="width: 100%">
 <thead>
 <tr class="row-odd"><th class="head"><p>Parameter</p></th>
@@ -173,61 +175,78 @@ To check whether it is installed, run <code class="code docutils literal notrans
 </thead>
 <tbody>
 <tr class="row-even"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-_input"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-parse-dn-filter-parameter-input"><strong>Input</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-_input"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-split-dn-filter-parameter-input"><strong>Input</strong></p>
 <a class="ansibleOptionLink" href="#parameter-_input" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span> / <span class="ansible-option-required">required</span></p>
 </div></td>
-<td><div class="ansible-option-cell"><p>The LDAP DistinguishedName string to parse.</p>
+<td><div class="ansible-option-cell"><p>The LDAP DistinguishedName string to split.</p>
+</div></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="keyword-parameters">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Keyword parameters</a><a class="headerlink" href="#keyword-parameters" title="Link to this heading"></a></h2>
+<p>This describes keyword parameters of the filter. These are the values <code class="docutils literal notranslate"><span class="pre">key1=value1</span></code>, <code class="docutils literal notranslate"><span class="pre">key2=value2</span></code> and so on in the following
+example: <code class="docutils literal notranslate"><span class="pre">input</span> <span class="pre">|</span> <span class="pre">microsoft.ad.split_dn(key1=value1,</span> <span class="pre">key2=value2,</span> <span class="pre">...)</span></code></p>
+<table class="longtable ansible-option-table docutils align-default" style="width: 100%">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Comments</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-section"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-split-dn-filter-parameter-section"><strong>section</strong></p>
+<a class="ansibleOptionLink" href="#parameter-section" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>The DN section to return.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">leaf</span></code> which will return the first RDN component.</p>
+<p>Set to <code class="docutils literal notranslate"><span class="pre">parent</span></code> to return the remaining RDN components.</p>
+<p>Do not specify <code class="docutils literal notranslate"><span class="pre">section</span></code> as a keyword, this value is passed as a positional argument.</p>
+<p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
+<ul class="simple">
+<li><p><code class="ansible-option-default-bold docutils literal notranslate"><strong><span class="pre">&quot;leaf&quot;</span></strong></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
+<li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;parent&quot;</span></code></p></li>
+</ul>
 </div></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="see-also">
-<h2><a class="toc-backref" href="#id3" role="doc-backlink">See Also</a><a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">See Also</a><a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
 <dt><a class="reference internal" href="dn_escape_filter.html#ansible-collections-microsoft-ad-dn-escape-filter"><span class="std std-ref">microsoft.ad.dn_escape</span></a></dt><dd><p>microsoft.ad.dn_escape filter</p>
 </dd>
-<dt><a class="reference internal" href="split_dn_filter.html#ansible-collections-microsoft-ad-split-dn-filter"><span class="std std-ref">microsoft.ad.split_dn</span></a></dt><dd><p>microsoft.ad.split_dn filter</p>
-</dd>
-<dt><a class="reference internal" href="ldap_inventory.html#ansible-collections-microsoft-ad-ldap-inventory"><span class="std std-ref">microsoft.ad.ldap</span></a></dt><dd><p>microsoft.ad.ldap inventory</p>
+<dt><a class="reference internal" href="parse_dn_filter.html#ansible-collections-microsoft-ad-parse-dn-filter"><span class="std std-ref">microsoft.ad.parse_dn</span></a></dt><dd><p>microsoft.ad.parse_dn filter</p>
 </dd>
 </dl>
 </div>
 </section>
 <section id="examples">
-<h2><a class="toc-backref" href="#id4" role="doc-backlink">Examples</a><a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
-<div class="highlight-yaml+jinja notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Parses a simple DN</span>
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Examples</a><a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
+<div class="highlight-yaml+jinja notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gets the leaf RDN of a DN</span>
 <span class="w">  </span><span class="nt">set_fact</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">my_dn</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;</span><span class="cp">{{</span> <span class="s2">&quot;CN=Foo,DC=domain,DC=com&quot;</span> <span class="o">|</span> <span class="nf">microsoft</span><span class="nv">.ad.parse_dn</span> <span class="cp">}}</span><span class="s">&#39;</span>
+<span class="w">    </span><span class="nt">my_dn</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;</span><span class="cp">{{</span> <span class="s2">&quot;CN=Foo,DC=domain,DC=com&quot;</span> <span class="o">|</span> <span class="nf">microsoft</span><span class="nv">.ad.split_dn</span> <span class="cp">}}</span><span class="s">&#39;</span>
 
-<span class="c1"># [</span>
-<span class="c1">#   [&quot;CN&quot;, &quot;Foo&quot;],</span>
-<span class="c1">#   [&quot;DC&quot;, &quot;domain&quot;],</span>
-<span class="c1">#   [&quot;DC&quot;, &quot;com&quot;],</span>
-<span class="c1"># ]</span>
+<span class="c1"># CN=Foo</span>
 
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Parses a DN with an escaped and multi attribute values</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Gets the parent RDNs of a DN</span>
 <span class="w">  </span><span class="nt">set_fact</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">my_dn</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;</span><span class="cp">{{</span> <span class="s2">&quot;CN=CA,O=Acme\, Inc.,C=AU+ST=Queensland&quot;</span> <span class="o">|</span> <span class="nf">microsoft</span><span class="nv">.ad.parse_dn</span> <span class="cp">}}</span><span class="s">&#39;</span>
+<span class="w">    </span><span class="nt">my_dn</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
+<span class="w">      </span><span class="cp">{{</span>
+        <span class="s2">&quot;CN=Acme\, Inc.,O=OrgName,C=AU+ST=Queensland&quot;</span> <span class="o">|</span>
+          <span class="nf">microsoft</span><span class="nv">.ad.split_dn</span><span class="o">(</span><span class="s2">&quot;parent&quot;</span><span class="o">)</span>
+      <span class="cp">}}</span>
 
-<span class="c1"># [</span>
-<span class="c1">#   [&quot;CN&quot;, &quot;CA&quot;],</span>
-<span class="c1">#   [&quot;O&quot;, &quot;Acme, Inc.&quot;],</span>
-<span class="c1">#   [&quot;C&quot;, &quot;AU&quot;, &quot;ST&quot;, &quot;Queensland&quot;]</span>
-<span class="c1"># ]</span>
-
-<span class="c1"># Extract the group names the computer is a member of in the ldap inventory</span>
-<span class="c1"># plugin, for example gets the first RDN value inside the parsed DN.</span>
-<span class="nt">attributes</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">memberOf</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">computer_membership</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">this | microsoft.ad.parse_dn | map(attribute=&quot;0.1&quot;)</span>
+<span class="c1"># O=OrgName,C=AU+ST=Queensland,</span>
 </pre></div>
 </div>
 </section>
 <section id="return-value">
-<h2><a class="toc-backref" href="#id5" role="doc-backlink">Return Value</a><a class="headerlink" href="#return-value" title="Link to this heading"></a></h2>
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Return Value</a><a class="headerlink" href="#return-value" title="Link to this heading"></a></h2>
 <table class="longtable ansible-option-table docutils align-default" style="width: 100%">
 <thead>
 <tr class="row-odd"><th class="head"><p>Key</p></th>
@@ -236,12 +255,12 @@ To check whether it is installed, run <code class="code docutils literal notrans
 </thead>
 <tbody>
 <tr class="row-even"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="return-_value"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-parse-dn-filter-return-value"><strong>Return value</strong></p>
-<a class="ansibleOptionLink" href="#return-_value" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=list</span></p>
+<div class="ansibleOptionAnchor" id="return-_value"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-split-dn-filter-return-value"><strong>Return value</strong></p>
+<a class="ansibleOptionLink" href="#return-_value" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
-<td><div class="ansible-option-cell"><p>The parsed LDAP DN values.</p>
+<td><div class="ansible-option-cell"><p>The split RDN components based on the section requested.</p>
 <p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> success</p>
-<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">[[&quot;CN&quot;,</span> <span class="pre">&quot;Foo&quot;],</span> <span class="pre">[&quot;DC&quot;,</span> <span class="pre">&quot;domain&quot;],</span> <span class="pre">[&quot;DC&quot;,</span> <span class="pre">&quot;com&quot;]]</span></code></p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;CN=Foo&quot;</span></code></p>
 </div></td>
 </tr>
 </tbody>
@@ -274,8 +293,8 @@ To check whether it is installed, run <code class="code docutils literal notrans
           
 
 <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="dn_escape_filter.html" class="btn btn-neutral float-left" title="microsoft.ad.dn_escape filter – Escape an LDAP DistinguishedName value string." accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="split_dn_filter.html" class="btn btn-neutral float-right" title="microsoft.ad.split_dn filter – Splits an LDAP DistinguishedName." accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="parse_dn_filter.html" class="btn btn-neutral float-left" title="microsoft.ad.parse_dn filter – Parses an LDAP DistinguishedName string into an object." accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ldap_inventory.html" class="btn btn-neutral float-right" title="microsoft.ad.ldap inventory – Inventory plugin for Active Directory" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
