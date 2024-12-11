@@ -10,6 +10,8 @@ DOCUMENTATION:
   seealso:
     - ref: microsoft.ad.dn_escape <ansible_collections.microsoft.ad.dn_escape_filter>
       description: microsoft.ad.dn_escape filter
+    - ref: microsoft.ad.split_dn <ansible_collections.microsoft.ad.split_dn_filter>
+      description: microsoft.ad.split_dn filter
     - ref: microsoft.ad.ldap <ansible_collections.microsoft.ad.ldap_inventory>
       description: microsoft.ad.ldap inventory
   description:

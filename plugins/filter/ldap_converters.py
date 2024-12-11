@@ -1,6 +1,8 @@
 # Copyright: (c) 2023, Ansible Project
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+from __future__ import annotations
+
 import base64
 import datetime
 import re
@@ -318,6 +320,30 @@ def parse_dn(value: str) -> t.List[t.List[str]]:
     return dn
 
 
+@per_sequence
+def split_dn(
+    value: str,
+    section: t.Literal["leaf", "parent"] = "leaf",
+    /,
+) -> str:
+    """Splits a DistinguishedName into either the leaf or parent RDNs."""
+
+    parsed_dn = parse_dn(value)
+
+    if not parsed_dn:
+        return ""
+
+    def join_rdn(rdn: list[str]) -> str:
+        pairs = zip(rdn[0::2], rdn[1::2])
+        return "+".join([f"{atv[0]}={dn_escape(atv[1])}" for atv in pairs])
+
+    if section == "leaf":
+        return join_rdn(parsed_dn[0])
+    else:
+
+        return ",".join(join_rdn(rdn) for rdn in parsed_dn[1:])
+
+
 class FilterModule:
     def filters(self) -> t.Dict[str, t.Callable]:
         return {
@@ -326,4 +352,5 @@ class FilterModule:
             "as_sid": as_sid,
             "dn_escape": dn_escape,
             "parse_dn": parse_dn,
+            "split_dn": split_dn,
         }
