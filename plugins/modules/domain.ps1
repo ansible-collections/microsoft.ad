@@ -114,7 +114,18 @@ catch [System.DirectoryServices.ActiveDirectory.ActiveDirectoryOperationExceptio
     $forest = $null
 }
 
-if (-not $forest) {
+try {
+    # ProductType 2 means the host is a domain controller, 1 means it's a workstation and 3 means it's a server that is a server
+    $host_is_dc = (Get-CimInstance -ClassName Win32_OperatingSystem -Property ProductType).ProductType -eq 2
+}
+catch {
+    $module.FailJson("Failed to determine if the host is already a domain controller: $($_.Exception.Message)", $_)
+}
+
+# Only installing the domain if the forest does not exist or the host is not a domain controller
+# This is to avoid an issue where the domain may already exist in another domain controller but the host itself is not a DC
+# By trying to run Install-ADDSForest in that scenario it will fail with the correct error message
+if (-not $forest -or -not $host_is_dc) {
     $installParams = @{
         DomainName = $dns_domain_name
         SafeModeAdministratorPassword = (ConvertTo-SecureString $safe_mode_password -AsPlainText -Force)
