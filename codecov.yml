@@ -1,8 +1,6 @@
 ---
 ignore:
-  - .azure-pipelines/*
-  - tests/unit/compat/*
-  - tests/unit/mock/*
+  - .azure-pipelines
   - tests/unit/**/conftest.py
   - tests/unit/conftest.py
 
