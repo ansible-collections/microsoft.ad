@@ -275,3 +275,9 @@ releases:
         name: split_dn
         namespace: null
     release_date: '2024-12-11'
+  1.8.1:
+    changes:
+      release_summary: Minor release for Galaxy/AH documention update
+    fragments:
+    - release-summary.yml
+    release_date: '2025-03-27'

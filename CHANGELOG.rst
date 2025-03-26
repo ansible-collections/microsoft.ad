@@ -4,6 +4,14 @@ Ansible Microsoft Active Directory Release Notes
 
 .. contents:: Topics
 
+v1.8.1
+======
+
+Release Summary
+---------------
+
+Minor release for Galaxy/AH documention update
+
 v1.8.0
 ======
 
