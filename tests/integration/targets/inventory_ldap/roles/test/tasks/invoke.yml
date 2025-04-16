@@ -11,4 +11,4 @@
 
 - name: '{{ scenario }} - get ansible-inventory output'
   set_fact:
-    inventory_out: '{{ inventory_out_raw.stdout | from_json }}'
+    inventory_out: '{{ inventory_out_raw.stdout | from_json(profile="inventory_legacy") }}'
