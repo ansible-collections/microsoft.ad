@@ -1,2 +1,5 @@
 collections:
-  - name: ansible.windows
+  # - name: ansible.windows
+  - name: https://github.com/jborean93/ansible.windows.git
+    type: git
+    version: dt-fixes
