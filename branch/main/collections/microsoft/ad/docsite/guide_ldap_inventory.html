@@ -240,7 +240,7 @@
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The host fact names are used literally, there are no conversions from <code class="docutils literal notranslate"><span class="pre">-</span></code> to <code class="docutils literal notranslate"><span class="pre">_</span></code> when using this format.</p>
+<p>Fact names under each attribute key should follow Python conventions for variable names, for example <code class="docutils literal notranslate"><span class="pre">_</span></code> should be used instead of <code class="docutils literal notranslate"><span class="pre">-</span></code>. Some Ansible versions will fail if using a name that is not valid.</p>
 </div>
 </section>
 </section>
