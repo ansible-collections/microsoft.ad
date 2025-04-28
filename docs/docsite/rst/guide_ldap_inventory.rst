@@ -128,7 +128,7 @@ The final value that can be set on each attribute values is a dictionary where t
     microsoft_ad_distinguished_name: CN=MYHOST,CN=Computers,DC=domain,DC=com
 
 .. note::
-    The host fact names are used literally, there are no conversions from ``-`` to ``_`` when using this format.
+    Fact names under each attribute key should follow Python conventions for variable names, for example ``_`` should be used instead of ``-``. Some Ansible versions will fail if using a name that is not valid.
 
 
 .. _ansible_collections.microsoft.ad.docsite.guide_ldap_inventory.inventory_hostname:

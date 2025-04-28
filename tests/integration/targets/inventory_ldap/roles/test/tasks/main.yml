@@ -65,6 +65,7 @@
     scenario: LDAP
     inventory:
       plugin: microsoft.ad.ldap
+      strict: true
       server: '{{ ldap_server }}'
       username: '{{ ldap_user }}'
       password: '{{ ldap_pass }}'
@@ -84,6 +85,7 @@
     scenario: LDAP through environment variables
     inventory:
       plugin: microsoft.ad.ldap
+      strict: true
   environment:
     MICROSOFT_AD_LDAP_SERVER: '{{ ldap_server }}'
     MICROSOFT_AD_LDAP_USERNAME: '{{ ldap_user }}'
@@ -98,6 +100,7 @@
     scenario: LDAP through lookup templates
     inventory:
       plugin: microsoft.ad.ldap
+      strict: true
       server: !unsafe '{{ lookup("ansible.builtin.env", "LDAP_SERVER") }}'
       username: !unsafe '{{ lookup("ansible.builtin.env", "LDAP_USERNAME") }}'
       password: !unsafe '{{ lookup("ansible.builtin.env", "LDAP_PASSWORD") }}'
@@ -115,6 +118,7 @@
     scenario: LDAPS
     inventory:
       plugin: microsoft.ad.ldap
+      strict: true
       server: '{{ ldap_server }}'
       tls_mode: ldaps
       ca_cert: '{{ ldap_ca_cert }}'
@@ -148,6 +152,7 @@
     scenario: StartTLS
     inventory:
       plugin: microsoft.ad.ldap
+      strict: true
       server: '{{ ldap_server }}'
       tls_mode: start_tls
       ca_cert: '{{ ldap_ca_cert }}'
@@ -164,6 +169,7 @@
     scenario: Simple auth
     inventory:
       plugin: microsoft.ad.ldap
+      strict: true
       server: '{{ ldap_server }}'
       tls_mode: ldaps
       ca_cert: '{{ lookup("file", ldap_ca_cert) }}'
@@ -181,6 +187,7 @@
     scenario: Simple auth fails over LDAP
     inventory:
       plugin: microsoft.ad.ldap
+      strict: true
       server: '{{ ldap_server }}'
       username: '{{ ldap_user }}'
       password: '{{ ldap_pass }}'
@@ -208,6 +215,7 @@
     scenario: Simple auth over LDAP with no encryption
     inventory:
       plugin: microsoft.ad.ldap
+      strict: true
       server: '{{ ldap_server }}'
       username: '{{ ldap_user }}'
       password: '{{ ldap_pass }}'
@@ -225,6 +233,7 @@
     scenario: Certificate auth with LDAPS
     inventory:
       plugin: microsoft.ad.ldap
+      strict: true
       server: '{{ ldap_server }}'
       tls_mode: ldaps
       ca_cert: '{{ ldap_ca_cert }}'
@@ -245,6 +254,7 @@
 #     scenario: Certificate auth with StartTLS
 #     inventory:
 #       plugin: microsoft.ad.ldap
+#       strict: true
 #       server: '{{ ldap_server }}'
 #       tls_mode: start_tls
 #       ca_cert: '{{ ldap_ca_cert }}'
@@ -261,6 +271,7 @@
     scenario: TLS ignoring cert validation
     inventory:
       plugin: microsoft.ad.ldap
+      strict: true
       server: '{{ ldap_server }}'
       tls_mode: ldaps
       cert_validation: ignore
@@ -337,6 +348,7 @@
       scenario: Search with search_base and scope
       inventory:
         plugin: microsoft.ad.ldap
+        strict: true
         server: '{{ ldap_server }}'
         username: '{{ ldap_user }}'
         password: '{{ ldap_pass }}'
@@ -358,6 +370,7 @@
       scenario: Search with filter
       inventory:
         plugin: microsoft.ad.ldap
+        strict: true
         server: '{{ ldap_server }}'
         username: '{{ ldap_user }}'
         password: '{{ ldap_pass }}'
@@ -377,6 +390,7 @@
       scenario: Set inventory_hostname from attributes
       inventory:
         plugin: microsoft.ad.ldap
+        strict: true
         server: '{{ ldap_server }}'
         username: '{{ ldap_user }}'
         password: '{{ ldap_pass }}'
@@ -393,24 +407,29 @@
       - (inventory_out._meta.hostvars.keys() | list | sort) == ["Comp1", "Comp2Sam"]
 
       - (inventory_out._meta.hostvars.Comp1.keys() | list | sort) == ['ansible_host', 'microsoft_ad_distinguished_name', 'sAMAccountName']
-      - "inventory_out._meta.hostvars.Comp1.ansible_host == {'__ansible_unsafe': 'Comp1'}"
+      - inventory_out._meta.hostvars.Comp1.ansible_host == 'Comp1'
+      - not inventory_out._meta.hostvars.Comp1.ansible_host is ansible._protomatter.tagged_with('TrustedAsTemplate')
       - inventory_out._meta.hostvars.Comp1.microsoft_ad_distinguished_name == test_data.output[0].Comp1.DistinguishedName
-      - "inventory_out._meta.hostvars.Comp1.sAMAccountName == {'__ansible_unsafe': 'Comp1$'}"
+      - inventory_out._meta.hostvars.Comp1.sAMAccountName == 'Comp1$'
+      - not inventory_out._meta.hostvars.Comp1.sAMAccountName is ansible._protomatter.tagged_with('TrustedAsTemplate')
 
       - (inventory_out._meta.hostvars.Comp2Sam.keys() | list | sort) == ['ansible_host', 'microsoft_ad_distinguished_name', 'sAMAccountName']
-      - "inventory_out._meta.hostvars.Comp2Sam.ansible_host == {'__ansible_unsafe': 'Comp2Sam'}"
+      - inventory_out._meta.hostvars.Comp2Sam.ansible_host == 'Comp2Sam'
+      - not inventory_out._meta.hostvars.Comp2Sam.ansible_host is ansible._protomatter.tagged_with('TrustedAsTemplate')
       - inventory_out._meta.hostvars.Comp2Sam.microsoft_ad_distinguished_name == test_data.output[0].Comp2.DistinguishedName
-      - "inventory_out._meta.hostvars.Comp2Sam.sAMAccountName == {'__ansible_unsafe': 'Comp2Sam$'}"
+      - inventory_out._meta.hostvars.Comp2Sam.sAMAccountName == 'Comp2Sam$'
+      - not inventory_out._meta.hostvars.Comp2Sam.sAMAccountName is ansible._protomatter.tagged_with('TrustedAsTemplate')
 
       - inventory_out.ungrouped.hosts | length == 2
-      - inventory_out.ungrouped.hosts[0]['__ansible_unsafe'] in ['Comp1', 'Comp2Sam']
-      - inventory_out.ungrouped.hosts[1]['__ansible_unsafe'] in ['Comp1', 'Comp2Sam']
+      - inventory_out.ungrouped.hosts[0] in ['Comp1', 'Comp2Sam']
+      - inventory_out.ungrouped.hosts[1] in ['Comp1', 'Comp2Sam']
 
   - import_tasks: invoke.yml
     vars:
       scenario: Set inventory_hostname from compose
       inventory:
         plugin: microsoft.ad.ldap
+        strict: true
         server: '{{ ldap_server }}'
         username: '{{ ldap_user }}'
         password: '{{ ldap_pass }}'
@@ -428,18 +447,22 @@
       - (inventory_out._meta.hostvars.keys() | list | sort) == ["Comp1", "Comp2Sam"]
 
       - (inventory_out._meta.hostvars.Comp1.keys() | list | sort) == ['ansible_host', 'microsoft_ad_distinguished_name', 'sAMAccountName']
-      - "inventory_out._meta.hostvars.Comp1.ansible_host == {'__ansible_unsafe': 'Comp1'}"
+      - inventory_out._meta.hostvars.Comp1.ansible_host == 'Comp1'
+      - not inventory_out._meta.hostvars.Comp1.ansible_host is ansible._protomatter.tagged_with('TrustedAsTemplate')
       - inventory_out._meta.hostvars.Comp1.microsoft_ad_distinguished_name == test_data.output[0].Comp1.DistinguishedName
-      - "inventory_out._meta.hostvars.Comp1.sAMAccountName == {'__ansible_unsafe': 'Comp1$'}"
+      - inventory_out._meta.hostvars.Comp1.sAMAccountName == 'Comp1$'
+      - not inventory_out._meta.hostvars.Comp1.sAMAccountName is ansible._protomatter.tagged_with('TrustedAsTemplate')
 
       - (inventory_out._meta.hostvars.Comp2Sam.keys() | list | sort) == ['ansible_host', 'microsoft_ad_distinguished_name', 'sAMAccountName']
-      - "inventory_out._meta.hostvars.Comp2Sam.ansible_host == {'__ansible_unsafe': 'Comp2Sam'}"
+      - inventory_out._meta.hostvars.Comp2Sam.ansible_host == 'Comp2Sam'
+      - not inventory_out._meta.hostvars.Comp2Sam.ansible_host is ansible._protomatter.tagged_with('TrustedAsTemplate')
       - inventory_out._meta.hostvars.Comp2Sam.microsoft_ad_distinguished_name == test_data.output[0].Comp2.DistinguishedName
-      - "inventory_out._meta.hostvars.Comp2Sam.sAMAccountName == {'__ansible_unsafe': 'Comp2Sam$'}"
+      - inventory_out._meta.hostvars.Comp2Sam.sAMAccountName == 'Comp2Sam$'
+      - not inventory_out._meta.hostvars.Comp2Sam.sAMAccountName is ansible._protomatter.tagged_with('TrustedAsTemplate')
 
       - inventory_out.ungrouped.hosts | length == 2
-      - inventory_out.ungrouped.hosts[0]['__ansible_unsafe'] in ['Comp1', 'Comp2Sam']
-      - inventory_out.ungrouped.hosts[1]['__ansible_unsafe'] in ['Comp1', 'Comp2Sam']
+      - inventory_out.ungrouped.hosts[0] in ['Comp1', 'Comp2Sam']
+      - inventory_out.ungrouped.hosts[1] in ['Comp1', 'Comp2Sam']
 
   - import_tasks: invoke.yml
     vars:
@@ -461,7 +484,6 @@
           location:
           msDS-SupportedEncryptionTypes:
           msDS-AllowedToDelegateTo:
-            msDS-AllowedToDelegateTo:
           memberOf:
             previous_reference: PwdLastSet | microsoft.ad.as_datetime
             nothing_member:
@@ -469,12 +491,13 @@
             raw_member: raw
             computer_membership: this | microsoft.ad.parse_dn | map(attribute="0.1")
         compose:
+          # References hostvar that doesn't exist, verifies that it doesn't error or set this value.
           host_var: computer_sid
         groups:
           testing: true
           production: '"Group2" in computer_membership'
         keyed_groups:
-        - key: location | default(omit)
+        - key: location | default('', boolean=True)
           prefix: site
           default_value: unknown
 
@@ -484,40 +507,65 @@
       - inventory_out._meta.hostvars | length == 2
       - (inventory_out._meta.hostvars.keys() | list | sort) == ["Comp1", "Comp2"]
 
-      - (inventory_out._meta.hostvars.Comp1.keys() | list | sort) == ['ansible_host', 'computer_membership', 'location', 'microsoft_ad_distinguished_name', 'msDS-AllowedToDelegateTo', 'msDS_SupportedEncryptionTypes', 'nothing_member', 'nothing_sid', 'previous_reference', 'PwdLastSet', 'raw_member', 'raw_sid', 'raw_sid_filter', 'sAMAccountName', 'this_member', 'this_sid']
+      - (inventory_out._meta.hostvars.Comp1.keys() | list | sort) == ['ansible_host', 'computer_membership', 'location', 'microsoft_ad_distinguished_name', 'msDS_AllowedToDelegateTo', 'msDS_SupportedEncryptionTypes', 'nothing_member', 'nothing_sid', 'previous_reference', 'PwdLastSet', 'raw_member', 'raw_sid', 'raw_sid_filter', 'sAMAccountName', 'this_member', 'this_sid']
       - inventory_out._meta.hostvars.Comp1['ansible_host'] == 'CustomName'
-      - "inventory_out._meta.hostvars.Comp1['computer_membership'] == [{'__ansible_unsafe': 'Group2'}, {'__ansible_unsafe': 'Group1'}]"
-      - "inventory_out._meta.hostvars.Comp1['location'] == {'__ansible_unsafe': 'my_location'}"
+      - inventory_out._meta.hostvars.Comp1['computer_membership'] == ['Group2', 'Group1']
+      - not inventory_out._meta.hostvars.Comp1['computer_membership'][0] is ansible._protomatter.tagged_with('TrustedAsTemplate')
+      - not inventory_out._meta.hostvars.Comp1['computer_membership'][1] is ansible._protomatter.tagged_with('TrustedAsTemplate')
+      - inventory_out._meta.hostvars.Comp1['location'] == 'my_location'
+      - not inventory_out._meta.hostvars.Comp1['location'] is ansible._protomatter.tagged_with('TrustedAsTemplate')
       - inventory_out._meta.hostvars.Comp1['microsoft_ad_distinguished_name'] == test_data.output[0].Comp1.DistinguishedName
-      - "inventory_out._meta.hostvars.Comp1['msDS-AllowedToDelegateTo'] == [{'__ansible_unsafe': 'dns 1'}]"
+      - inventory_out._meta.hostvars.Comp1['msDS_AllowedToDelegateTo'] == ['dns 1']
+      - not inventory_out._meta.hostvars.Comp1['msDS_AllowedToDelegateTo'][0] is ansible._protomatter.tagged_with('TrustedAsTemplate')
       - inventory_out._meta.hostvars.Comp1['msDS_SupportedEncryptionTypes'] == None
-      - "inventory_out._meta.hostvars.Comp1['nothing_member'] == [{'__ansible_unsafe': test_data.output[0].Comp1.MemberOf[0]}, {'__ansible_unsafe': test_data.output[0].Comp1.MemberOf[1]}]"
-      - "inventory_out._meta.hostvars.Comp1['nothing_sid'] == {'__ansible_unsafe': test_data.output[0].Comp1.SID}"
+      - inventory_out._meta.hostvars.Comp1['nothing_member'] == [test_data.output[0].Comp1.MemberOf[0], test_data.output[0].Comp1.MemberOf[1]]
+      - not inventory_out._meta.hostvars.Comp1['nothing_member'][0] is ansible._protomatter.tagged_with('TrustedAsTemplate')
+      - not inventory_out._meta.hostvars.Comp1['nothing_member'][1] is ansible._protomatter.tagged_with('TrustedAsTemplate')
+      - inventory_out._meta.hostvars.Comp1['nothing_sid'] == test_data.output[0].Comp1.SID
+      - not inventory_out._meta.hostvars.Comp1['nothing_sid'] is ansible._protomatter.tagged_with('TrustedAsTemplate')
       - inventory_out._meta.hostvars.Comp1['previous_reference'] == test_data.output[0].Comp1.PwdLastSet | microsoft.ad.as_datetime
       - inventory_out._meta.hostvars.Comp1['PwdLastSet'] == test_data.output[0].Comp1.PwdLastSet
-      - "inventory_out._meta.hostvars.Comp1['raw_member'] == [{'__ansible_unsafe': test_data.output[0].Comp1.RawMemberOf[0]}, {'__ansible_unsafe': test_data.output[0].Comp1.RawMemberOf[1]}]"
-      - "inventory_out._meta.hostvars.Comp1['raw_sid'] == [{'__ansible_unsafe': test_data.output[0].Comp1.RawSID}]"
-      - "inventory_out._meta.hostvars.Comp1['raw_sid_filter'] == [{'__ansible_unsafe': test_data.output[0].Comp1.SID}]"
-      - "inventory_out._meta.hostvars.Comp1['sAMAccountName'] == {'__ansible_unsafe': 'Comp1$'}"
-      - "inventory_out._meta.hostvars.Comp1['this_member'] == [{'__ansible_unsafe': test_data.output[0].Comp1.MemberOf[0]}, {'__ansible_unsafe': test_data.output[0].Comp1.MemberOf[1]}]"
-      - "inventory_out._meta.hostvars.Comp1['this_sid'] == {'__ansible_unsafe': test_data.output[0].Comp1.SID}"
+      - inventory_out._meta.hostvars.Comp1['raw_member'] == [test_data.output[0].Comp1.RawMemberOf[0], test_data.output[0].Comp1.RawMemberOf[1]]
+      - not inventory_out._meta.hostvars.Comp1['raw_member'][0] is ansible._protomatter.tagged_with('TrustedAsTemplate')
+      - not inventory_out._meta.hostvars.Comp1['raw_member'][1] is ansible._protomatter.tagged_with('TrustedAsTemplate')
+      - inventory_out._meta.hostvars.Comp1['raw_sid'] == [test_data.output[0].Comp1.RawSID]
+      - not inventory_out._meta.hostvars.Comp1['raw_sid'][0] is ansible._protomatter.tagged_with('TrustedAsTemplate')
+      - inventory_out._meta.hostvars.Comp1['raw_sid_filter'] == [test_data.output[0].Comp1.SID]
+      - not inventory_out._meta.hostvars.Comp1['raw_sid'][0] is ansible._protomatter.tagged_with('TrustedAsTemplate')
+      - inventory_out._meta.hostvars.Comp1['sAMAccountName'] == 'Comp1$'
+      - not inventory_out._meta.hostvars.Comp1['sAMAccountName'] is ansible._protomatter.tagged_with('TrustedAsTemplate')
+      - inventory_out._meta.hostvars.Comp1['this_member'] == [test_data.output[0].Comp1.MemberOf[0], test_data.output[0].Comp1.MemberOf[1]]
+      - not inventory_out._meta.hostvars.Comp1['this_member'][0] is ansible._protomatter.tagged_with('TrustedAsTemplate')
+      - not inventory_out._meta.hostvars.Comp1['this_member'][1] is ansible._protomatter.tagged_with('TrustedAsTemplate')
+      - inventory_out._meta.hostvars.Comp1['this_sid'] == test_data.output[0].Comp1.SID
+      - not inventory_out._meta.hostvars.Comp1['this_sid'] is ansible._protomatter.tagged_with('TrustedAsTemplate')
 
-      - (inventory_out._meta.hostvars.Comp2.keys() | list | sort) == ['computer_membership', 'location', 'microsoft_ad_distinguished_name', 'msDS-AllowedToDelegateTo', 'msDS_SupportedEncryptionTypes', 'nothing_member', 'nothing_sid', 'previous_reference', 'PwdLastSet', 'raw_member', 'raw_sid', 'raw_sid_filter', 'sAMAccountName', 'this_member', 'this_sid']
-      - "inventory_out._meta.hostvars.Comp2['computer_membership'] == [{'__ansible_unsafe': 'Group1'}]"
+      - (inventory_out._meta.hostvars.Comp2.keys() | list | sort) == ['computer_membership', 'location', 'microsoft_ad_distinguished_name', 'msDS_AllowedToDelegateTo', 'msDS_SupportedEncryptionTypes', 'nothing_member', 'nothing_sid', 'previous_reference', 'PwdLastSet', 'raw_member', 'raw_sid', 'raw_sid_filter', 'sAMAccountName', 'this_member', 'this_sid']
+      - inventory_out._meta.hostvars.Comp2['computer_membership'] == ['Group1']
+      - not inventory_out._meta.hostvars.Comp2['computer_membership'] is ansible._protomatter.tagged_with('TrustedAsTemplate')
       - inventory_out._meta.hostvars.Comp2['location'] == None
       - inventory_out._meta.hostvars.Comp2['microsoft_ad_distinguished_name'] == test_data.output[0].Comp2.DistinguishedName
-      - "inventory_out._meta.hostvars.Comp2['msDS-AllowedToDelegateTo'] == [{'__ansible_unsafe': 'dns 2'}]"
+      - inventory_out._meta.hostvars.Comp2['msDS_AllowedToDelegateTo'] == ['dns 2']
+      - not inventory_out._meta.hostvars.Comp2['msDS_AllowedToDelegateTo'][0] is ansible._protomatter.tagged_with('TrustedAsTemplate')
       - inventory_out._meta.hostvars.Comp2['msDS_SupportedEncryptionTypes'] == None
-      - "inventory_out._meta.hostvars.Comp2['nothing_member'] == [{'__ansible_unsafe': test_data.output[0].Comp2.MemberOf[0]}]"
-      - "inventory_out._meta.hostvars.Comp2['nothing_sid'] == {'__ansible_unsafe': test_data.output[0].Comp2.SID}"
+      - inventory_out._meta.hostvars.Comp2['nothing_member'] == [test_data.output[0].Comp2.MemberOf[0]]
+      - not inventory_out._meta.hostvars.Comp2['nothing_member'][0] is ansible._protomatter.tagged_with('TrustedAsTemplate')
+      - inventory_out._meta.hostvars.Comp2['nothing_sid'] == test_data.output[0].Comp2.SID
+      - not inventory_out._meta.hostvars.Comp2['nothing_sid'] is ansible._protomatter.tagged_with('TrustedAsTemplate')
       - inventory_out._meta.hostvars.Comp2['previous_reference'] == test_data.output[0].Comp2.PwdLastSet | microsoft.ad.as_datetime
       - inventory_out._meta.hostvars.Comp2['PwdLastSet'] == test_data.output[0].Comp2.PwdLastSet
-      - "inventory_out._meta.hostvars.Comp2['raw_member'] == [{'__ansible_unsafe': test_data.output[0].Comp2.RawMemberOf[0]}]"
-      - "inventory_out._meta.hostvars.Comp2['raw_sid'] == [{'__ansible_unsafe': test_data.output[0].Comp2.RawSID}]"
-      - "inventory_out._meta.hostvars.Comp2['raw_sid_filter'] == [{'__ansible_unsafe': test_data.output[0].Comp2.SID}]"
-      - "inventory_out._meta.hostvars.Comp2['sAMAccountName'] == {'__ansible_unsafe': 'Comp2Sam$'}"
-      - "inventory_out._meta.hostvars.Comp2['this_member'] == [{'__ansible_unsafe': test_data.output[0].Comp2.MemberOf[0]}]"
-      - "inventory_out._meta.hostvars.Comp2['this_sid'] == {'__ansible_unsafe': test_data.output[0].Comp2.SID}"
+      - inventory_out._meta.hostvars.Comp2['raw_member'] == [test_data.output[0].Comp2.RawMemberOf[0]]
+      - not inventory_out._meta.hostvars.Comp2['raw_member'][0] is ansible._protomatter.tagged_with('TrustedAsTemplate')
+      - inventory_out._meta.hostvars.Comp2['raw_sid'] == [test_data.output[0].Comp2.RawSID]
+      - not inventory_out._meta.hostvars.Comp2['raw_sid'][0] is ansible._protomatter.tagged_with('TrustedAsTemplate')
+      - inventory_out._meta.hostvars.Comp2['raw_sid_filter'] == [test_data.output[0].Comp2.SID]
+      - not inventory_out._meta.hostvars.Comp2['raw_sid_filter'][0] is ansible._protomatter.tagged_with('TrustedAsTemplate')
+      - inventory_out._meta.hostvars.Comp2['sAMAccountName'] == 'Comp2Sam$'
+      - not inventory_out._meta.hostvars.Comp2['sAMAccountName'] is ansible._protomatter.tagged_with('TrustedAsTemplate')
+      - inventory_out._meta.hostvars.Comp2['this_member'] == [test_data.output[0].Comp2.MemberOf[0]]
+      - not inventory_out._meta.hostvars.Comp2['this_member'][0] is ansible._protomatter.tagged_with('TrustedAsTemplate')
+      - inventory_out._meta.hostvars.Comp2['this_sid'] == test_data.output[0].Comp2.SID
+      - not inventory_out._meta.hostvars.Comp2['this_sid'] is ansible._protomatter.tagged_with('TrustedAsTemplate')
 
       - inventory_out.production.hosts == ["Comp1"]
       - inventory_out.site_my_location.hosts == ["Comp1"]
