@@ -1,2 +1,0 @@
-bugfixes:
-  - ldap inventory - Fix up support for Ansible 2.19.

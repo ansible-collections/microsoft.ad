@@ -281,3 +281,16 @@ releases:
     fragments:
     - release-summary.yml
     release_date: '2025-03-27'
+  1.9.0:
+    changes:
+      bugfixes:
+      - ldap inventory - Fix up support for Ansible 2.19.
+      minor_changes:
+      - Set minimum supported Ansible version to 2.16 to align with the versions still
+        supported by Ansible.
+      release_summary: Release summary for v1.9.0
+    fragments:
+    - ansible-ver.yml
+    - ldap-dt.yml
+    - release-summary.yml
+    release_date: '2025-04-29'
