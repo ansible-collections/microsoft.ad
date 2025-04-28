@@ -4,6 +4,24 @@ Ansible Microsoft Active Directory Release Notes
 
 .. contents:: Topics
 
+v1.9.0
+======
+
+Release Summary
+---------------
+
+Release summary for v1.9.0
+
+Minor Changes
+-------------
+
+- Set minimum supported Ansible version to 2.16 to align with the versions still supported by Ansible.
+
+Bugfixes
+--------
+
+- ldap inventory - Fix up support for Ansible 2.19.
+
 v1.8.1
 ======
 
