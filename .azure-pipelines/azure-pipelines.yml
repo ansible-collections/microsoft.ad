@@ -71,6 +71,20 @@ stages:
               test: sanity
             - name: Units
               test: units
+  - stage: Ansible_2_19
+    displayName: Ansible 2.19
+    dependsOn:
+      - Dependencies
+    jobs:
+      - template: templates/matrix.yml
+        parameters:
+          nameFormat: "{0}"
+          testFormat: "2.19/{0}"
+          targets:
+            - name: Sanity
+              test: sanity
+            - name: Units
+              test: units
   - stage: Ansible_2_18
     displayName: Ansible 2.18
     dependsOn:
@@ -115,20 +129,6 @@ stages:
               test: sanity
             - name: Units
               test: units
-  - stage: Ansible_2_15
-    displayName: Ansible 2.15
-    dependsOn:
-      - Dependencies
-    jobs:
-      - template: templates/matrix.yml
-        parameters:
-          nameFormat: "{0}"
-          testFormat: "2.15/{0}"
-          targets:
-            - name: Sanity
-              test: sanity
-            - name: Units
-              test: units
   - stage: Windows
     displayName: Windows
     dependsOn:
@@ -159,10 +159,10 @@ stages:
     condition: succeededOrFailed()
     dependsOn:
       - Ansible_devel
+      - Ansible_2_19
       - Ansible_2_18
       - Ansible_2_17
       - Ansible_2_16
-      - Ansible_2_15
       - Windows
     jobs:
       - template: templates/coverage.yml
