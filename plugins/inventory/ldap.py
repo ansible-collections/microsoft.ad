@@ -391,7 +391,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
                     )
 
                     if name.lower() == "mslaps-encryptedpassword" and raw_values:
-                        host_vars["this"] = laps_decryptor.decrypt(raw_values[0])
+                        host_vars["this"] = wrap_var(laps_decryptor.decrypt(raw_values[0]))
                     else:
                         host_vars["this"] = wrap_var(values)
 
