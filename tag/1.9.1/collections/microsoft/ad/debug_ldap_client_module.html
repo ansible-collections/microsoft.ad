@@ -1,0 +1,530 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta content="2.16.3" name="antsibull-docs" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>microsoft.ad.debug_ldap_client module – Get host information for debugging LDAP connections &mdash; Ansible collections  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=41de9001" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/ansible.css?v=c5b67dd2" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/antsibull-minimal.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/rtd-ethical-ads.css?v=289b023e" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/images/Ansible-Mark-RGB_Black.png"/>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=7f41d439"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="microsoft.ad.domain module – Ensures the existence of a Windows domain" href="domain_module.html" />
+    <link rel="prev" title="microsoft.ad.computer module – Manage Active Directory computer objects" href="computer_module.html" /><!-- extra head elements for Ansible beyond RTD Sphinx Theme -->
+
+
+
+
+</head>
+
+<body class="wy-body-for-nav"><!-- extra body elements for Ansible beyond RTD Sphinx Theme -->
+
+<div class="DocSite-globalNav ansibleNav">
+  <ul>
+    <li><a href="https://www.ansible.com/blog" target="_blank">Blog</a></li>
+    <li><a href="https://forum.ansible.com/" target="_blank">Ansible community forum</a></li>
+    <li><a href="https://docs.ansible.com/" target="_blank">Documentation</a></li>
+  </ul>
+</div>
+
+<a class="DocSite-nav" href="/" style="padding-bottom: 30px;">
+
+  <img class="DocSiteNav-logo"
+    src="../../../_static/images/Ansible-Mark-RGB_White.png"
+    alt="Ansible Logo">
+  <div class="DocSiteNav-title">Ansible Collections Documentation</div>
+</a>
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Ansible collections
+          </a><!--- Based on https://github.com/rtfd/sphinx_rtd_theme/pull/438/files -->
+
+<div class="version">
+  
+    
+  
+</div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <label class="sr-only" for="q">Search docs:</label>
+    <input type="text" class="st-default-search-input" id="q" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+  
+              <p class="caption" role="heading"><span class="caption-text">Collections:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Collection Index</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Collections in the Microsoft Namespace</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Microsoft.Ad</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="index.html#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#communication">Communication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#scenario-guides">Scenario Guides</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="index.html#plugin-index">Plugin Index</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugin indexes:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index_filter.html">Index of all Filter Plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../index_inventory.html">Index of all Inventory Plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../index_module.html">Index of all Modules</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference indexes:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../environment_variables.html">Index of all Collection Environment Variables</a></li>
+</ul>
+<!-- extra nav elements for Ansible beyond RTD Sphinx Theme -->
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Ansible collections</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Collection Index</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Collections in the Microsoft Namespace</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Microsoft.Ad</a></li>
+      <li class="breadcrumb-item active">microsoft.ad.debug_ldap_client module – Get host information for debugging LDAP connections</li>
+      <li class="wy-breadcrumbs-aside">
+              <!-- User defined GitHub URL -->
+              <a href="https://github.com/ansible-collections/microsoft.ad/edit/main/plugins/modules/debug_ldap_client.yml?description=%23%23%23%23%23%20SUMMARY%0A%3C!—%20Your%20description%20here%20–%3E%0A%0A%0A%23%23%23%23%23%20ISSUE%20TYPE%0A-%20Docs%20Pull%20Request%0A%0A%2Blabel:%20docsite_pr" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+  
+           <div itemprop="articleBody">
+             
+  <span class="target" id="ansible-collections-microsoft-ad-debug-ldap-client-module"></span><section id="microsoft-ad-debug-ldap-client-module-get-host-information-for-debugging-ldap-connections">
+<h1>microsoft.ad.debug_ldap_client module – Get host information for debugging LDAP connections<a class="headerlink" href="#microsoft-ad-debug-ldap-client-module-get-host-information-for-debugging-ldap-connections" title="Link to this heading"></a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This module is part of the <a class="reference external" href="https://galaxy.ansible.com/ui/repo/published/microsoft/ad/">microsoft.ad collection</a> (version 1.9.1).</p>
+<p>It is not included in <code class="docutils literal notranslate"><span class="pre">ansible-core</span></code>.
+To check whether it is installed, run <code class="code docutils literal notranslate"><span class="pre">ansible-galaxy</span> <span class="pre">collection</span> <span class="pre">list</span></code>.</p>
+<p>To install it, use: <code class="code docutils literal notranslate"><span class="pre">ansible-galaxy</span> <span class="pre">collection</span> <span class="pre">install</span> <span class="pre">microsoft.ad</span></code>.</p>
+<p>To use it in a playbook, specify: <code class="code docutils literal notranslate"><span class="pre">microsoft.ad.debug_ldap_client</span></code>.</p>
+</div>
+<p class="ansible-version-added">New in microsoft.ad 1.1.0</p>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#synopsis" id="id1">Synopsis</a></p></li>
+<li><p><a class="reference internal" href="#attributes" id="id2">Attributes</a></p></li>
+<li><p><a class="reference internal" href="#notes" id="id3">Notes</a></p></li>
+<li><p><a class="reference internal" href="#examples" id="id4">Examples</a></p></li>
+<li><p><a class="reference internal" href="#return-values" id="id5">Return Values</a></p></li>
+</ul>
+</nav>
+<section id="synopsis">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Synopsis</a><a class="headerlink" href="#synopsis" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Get information about the current Ansible host to debug LDAP connections and their capabilities.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This module has a corresponding <a class="reference external" href="https://docs.ansible.com/ansible/devel/plugins/action.html#action-plugins" title="(in Ansible vdevel)"><span class="xref std std-ref">action plugin</span></a>.</p>
+</div>
+</section>
+<section id="attributes">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Attributes</a><a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<table class="longtable ansible-option-table docutils align-default" style="width: 100%">
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>Support</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="attribute-action"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-attribute-action"><strong>action</strong></p>
+<a class="ansibleOptionLink" href="#attribute-action" title="Permalink to this attribute"></a></div></td>
+<td><div class="ansible-option-cell"><p><strong class="ansible-attribute-support-label">Support: </strong><strong class="ansible-attribute-support-full">full</strong></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Indicates this has a corresponding action plugin so some parts of the options can be executed on the controller</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="attribute-async"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-attribute-async"><strong>async</strong></p>
+<a class="ansibleOptionLink" href="#attribute-async" title="Permalink to this attribute"></a></div></td>
+<td><div class="ansible-option-cell"><p><strong class="ansible-attribute-support-label">Support: </strong><strong class="ansible-attribute-support-full">full</strong></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Supports being used with the <code class="docutils literal notranslate"><span class="pre">async</span></code> keyword</p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="attribute-bypass_host_loop"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-attribute-bypass-host-loop"><strong>bypass_host_loop</strong></p>
+<a class="ansibleOptionLink" href="#attribute-bypass_host_loop" title="Permalink to this attribute"></a></div></td>
+<td><div class="ansible-option-cell"><p><strong class="ansible-attribute-support-label">Support: </strong><strong class="ansible-attribute-support-none">none</strong></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Forces a ‘global’ task that does not execute per host, this bypasses per host templating and serial, throttle and other loop considerations</p>
+<p>Conditionals will work as if <code class="docutils literal notranslate"><span class="pre">run_once</span></code> is being used, variables used will be from the first available host</p>
+<p>This action will not work normally outside of lockstep strategies</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="attribute-check_mode"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-attribute-check-mode"><strong>check_mode</strong></p>
+<a class="ansibleOptionLink" href="#attribute-check_mode" title="Permalink to this attribute"></a></div></td>
+<td><div class="ansible-option-cell"><p><strong class="ansible-attribute-support-label">Support: </strong><strong class="ansible-attribute-support-full">full</strong></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Can run in check_mode and return changed status prediction without modifying target, if not supported the action will be skipped.</p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="attribute-diff_mode"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-attribute-diff-mode"><strong>diff_mode</strong></p>
+<a class="ansibleOptionLink" href="#attribute-diff_mode" title="Permalink to this attribute"></a></div></td>
+<td><div class="ansible-option-cell"><p><strong class="ansible-attribute-support-label">Support: </strong><strong class="ansible-attribute-support-none">none</strong></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Will return details on what has changed (or possibly needs changing in check_mode), when in diff mode</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="attribute-platform"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-attribute-platform"><strong>platform</strong></p>
+<a class="ansibleOptionLink" href="#attribute-platform" title="Permalink to this attribute"></a></div></td>
+<td><div class="ansible-option-cell"><p><strong class="ansible-attribute-support-property">Platform:</strong> <strong class="ansible-attribute-support-full">posix</strong></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Target OS/families that can be operated against</p>
+</div></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="notes">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Notes</a><a class="headerlink" href="#notes" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>See <a class="reference internal" href="docsite/guide_ldap_connection.html#ansible-collections-microsoft-ad-docsite-guide-ldap-connection"><span class="std std-ref">LDAP connection help</span></a> for more information about LDAP connections.</p></li>
+<li><p>The return values are not part of any contract and can change in the future. It is meant to give a snapshot of the Ansible host that can help debug LDAP connection issues and not be used as part of a normal playbook.</p></li>
+</ul>
+</div>
+</section>
+<section id="examples">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Examples</a><a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
+<div class="highlight-yaml+jinja notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Get information about the Ansible host&#39;s LDAP capabilities</span>
+<span class="w">  </span><span class="nt">microsoft.ad.debug_ldap_client</span><span class="p">:</span>
+</pre></div>
+</div>
+</section>
+<section id="return-values">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Return Values</a><a class="headerlink" href="#return-values" title="Link to this heading"></a></h2>
+<p>Common return values are documented <a class="reference external" href="https://docs.ansible.com/ansible/devel/reference_appendices/common_return_values.html#common-return-values" title="(in Ansible vdevel)"><span class="xref std std-ref">here</span></a>, the following are the fields unique to this module:</p>
+<table class="longtable ansible-option-table docutils align-default" style="width: 100%">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-dns"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-dns"><strong>dns</strong></p>
+<a class="ansibleOptionLink" href="#return-dns" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">complex</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Details about the SRV LDAP server lookup.</p>
+<p>The values will only be populated if dnspython is installed.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> always</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-dns/default_port"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-dns-default-port"><strong>default_port</strong></p>
+<a class="ansibleOptionLink" href="#return-dns/default_port" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">integer</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The default port of the SRV record chosen.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> dnspython is installed</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">389</span></code></p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-dns/default_server"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-dns-default-server"><strong>default_server</strong></p>
+<a class="ansibleOptionLink" href="#return-dns/default_server" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The default hostname of the SRV record chosen.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> dnspython is installed</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;dc01.domain.com&quot;</span></code></p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-dns/exception"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-dns-exception"><strong>exception</strong></p>
+<a class="ansibleOptionLink" href="#return-dns/exception" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>Any exceptions that occurred when getting the SRV records.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> dnspython is installed</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;&quot;</span></code></p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-dns/records"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-dns-records"><strong>records</strong></p>
+<a class="ansibleOptionLink" href="#return-dns/records" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The SRV records that were found during the LDAP server lookup.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> dnspython is installed</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-dns/records/port"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-dns-records-port"><strong>port</strong></p>
+<a class="ansibleOptionLink" href="#return-dns/records/port" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">integer</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The port of this SRV record.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> dnspython is installed and default_realm is found</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">389</span></code></p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-dns/records/priority"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-dns-records-priority"><strong>priority</strong></p>
+<a class="ansibleOptionLink" href="#return-dns/records/priority" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">integer</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The record priority value.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> dnspython is installed and default_realm is found</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">0</span></code></p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-dns/records/target"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-dns-records-target"><strong>target</strong></p>
+<a class="ansibleOptionLink" href="#return-dns/records/target" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The target name of the SRV record.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> dnspython is installed and default_realm is found</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;dc01.domain.com.&quot;</span></code></p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-dns/records/weight"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-dns-records-weight"><strong>weight</strong></p>
+<a class="ansibleOptionLink" href="#return-dns/records/weight" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">integer</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The record weight value.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> dnspython is installed and default_realm is found</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">100</span></code></p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-kerberos"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-kerberos"><strong>kerberos</strong></p>
+<a class="ansibleOptionLink" href="#return-kerberos" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">complex</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Details about the host Kerberos setup.</p>
+<p>The values will only be populated if krb5 is installed.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> always</p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-kerberos/default_cc"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-kerberos-default-cc"><strong>default_cc</strong></p>
+<a class="ansibleOptionLink" href="#return-kerberos/default_cc" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">complex</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>Details about the default Kerberos credential cache.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> krb5 is installed</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-kerberos/default_cc/creds"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-kerberos-default-cc-creds"><strong>creds</strong></p>
+<a class="ansibleOptionLink" href="#return-kerberos/default_cc/creds" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">complex</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>A list of credentials that is stored in the ccache.</p>
+<p>This requires <code class="docutils literal notranslate"><span class="pre">krb5</span> <span class="pre">&gt;=</span> <span class="pre">0.5.0</span></code> to be populated.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> krb5 is installed</p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-indent"></div><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-kerberos/default_cc/creds/client"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-kerberos-default-cc-creds-client"><strong>client</strong></p>
+<a class="ansibleOptionLink" href="#return-kerberos/default_cc/creds/client" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-indent-desc"></div><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The client principal name the credential is for.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> krb5 &gt;= 0.5.0 is installed</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;username&#64;DOMAIN.COM&quot;</span></code></p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-indent"></div><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-kerberos/default_cc/creds/server"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-kerberos-default-cc-creds-server"><strong>server</strong></p>
+<a class="ansibleOptionLink" href="#return-kerberos/default_cc/creds/server" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-indent-desc"></div><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The server principal name the credential is for.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> krb5 &gt;= 0.5.0 is installed</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;krbtgt/DOMAIN.COM&#64;DOMAIN.COM&quot;</span></code></p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-kerberos/default_cc/exception"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-kerberos-default-cc-exception"><strong>exception</strong></p>
+<a class="ansibleOptionLink" href="#return-kerberos/default_cc/exception" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>Any exceptions that occurred when getting the ccache information.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> krb5 is installed</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;&quot;</span></code></p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-kerberos/default_cc/name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-kerberos-default-cc-name"><strong>name</strong></p>
+<a class="ansibleOptionLink" href="#return-kerberos/default_cc/name" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The default ccache type and name.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> krb5 is installed</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;FILE:/tmp/krb5cc_1000&quot;</span></code></p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-kerberos/default_cc/principal"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-kerberos-default-cc-principal"><strong>principal</strong></p>
+<a class="ansibleOptionLink" href="#return-kerberos/default_cc/principal" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The default principal of the ccache</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> krb5 is installed</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;username&#64;DOMAIN.COM&quot;</span></code></p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-kerberos/default_realm"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-kerberos-default-realm"><strong>default_realm</strong></p>
+<a class="ansibleOptionLink" href="#return-kerberos/default_realm" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The default_realm as reported by Kerberos.</p>
+<p>This value is used for the automatic server lookup.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> krb5 is installed</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;domain.com&quot;</span></code></p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-kerberos/exception"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-kerberos-exception"><strong>exception</strong></p>
+<a class="ansibleOptionLink" href="#return-kerberos/exception" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>Exception details if the default realm could not be retrieved.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> krb5 is installed</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;&quot;</span></code></p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-packages"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-packages"><strong>packages</strong></p>
+<a class="ansibleOptionLink" href="#return-packages" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">complex</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>All the packages used by this collection for LDAP connections and their installed versions.</p>
+<p>If the package is not installed, or failed to import, the value is the traceback from the import process.</p>
+<p>This can be used to determine the availability of optional features like Kerberos authentication or server lookups.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> always</p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-packages/dnspython"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-packages-dnspython"><strong>dnspython</strong></p>
+<a class="ansibleOptionLink" href="#return-packages/dnspython" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The installed version of <code class="docutils literal notranslate"><span class="pre">dnspython</span></code> or the import error if not installed.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> always</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;2.3.0&quot;</span></code></p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-packages/dpapi_ng"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-packages-dpapi-ng"><strong>dpapi_ng</strong></p>
+<a class="ansibleOptionLink" href="#return-packages/dpapi_ng" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The installed version of <code class="docutils literal notranslate"><span class="pre">dpapi-ng</span></code> or the import error if not installed.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> always</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;0.1.0&quot;</span></code></p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-packages/krb5"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-packages-krb5"><strong>krb5</strong></p>
+<a class="ansibleOptionLink" href="#return-packages/krb5" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The installed version of <code class="docutils literal notranslate"><span class="pre">krb5</span></code> or the import error if not installed.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> always</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;0.5.0&quot;</span></code></p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-packages/pyspnego"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-packages-pyspnego"><strong>pyspnego</strong></p>
+<a class="ansibleOptionLink" href="#return-packages/pyspnego" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The installed version of <code class="docutils literal notranslate"><span class="pre">pyspnego</span></code> or the import error if not installed.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> always</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;0.8.0&quot;</span></code></p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-packages/sansldap"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-debug-ldap-client-module-return-packages-sansldap"><strong>sansldap</strong></p>
+<a class="ansibleOptionLink" href="#return-packages/sansldap" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The installed version of <code class="docutils literal notranslate"><span class="pre">sansldap</span></code> or the import error if not installed.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> always</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;0.1.0&quot;</span></code></p>
+</div></td>
+</tr>
+</tbody>
+</table>
+<section id="authors">
+<h3>Authors<a class="headerlink" href="#authors" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Jordan Borean (&#64;jborean93)</p></li>
+</ul>
+</section>
+<section id="collection-links">
+<h3>Collection links<a class="headerlink" href="#collection-links" title="Link to this heading"></a></h3>
+<ul class="ansible-links">
+<li><span><a aria-role="button" class="ansible-link reference external" href="https://github.com/ansible-collections/microsoft.ad/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc" rel="noopener external" target="_blank">Issue Tracker</a></span></li>
+<li><span><a aria-role="button" class="ansible-link reference external" href="https://github.com/ansible-collections/microsoft.ad" rel="noopener external" target="_blank">Repository (Sources)</a></span></li>
+<li><span><a aria-role="button" class="ansible-link reference external" href="https://github.com/ansible-collections/microsoft.ad/issues/new/choose" rel="noopener external" target="_blank">Report an issue</a></span></li>
+<li><span><a class="reference internal" href="index.html#communication-for-microsoft-ad"><span class="std std-ref">Communication</span></a></span></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          
+
+<footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="computer_module.html" class="btn btn-neutral float-left" title="microsoft.ad.computer module – Manage Active Directory computer objects" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="domain_module.html" class="btn btn-neutral float-right" title="microsoft.ad.domain module – Ensures the existence of a Windows domain" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Ansible contributors.</p>
+  </div>
+
+  
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script><!-- extra footer elements for Ansible beyond RTD Sphinx Theme -->
+
+</body>
+</html>

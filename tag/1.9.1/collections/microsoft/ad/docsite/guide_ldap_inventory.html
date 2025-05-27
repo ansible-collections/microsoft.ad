@@ -1,0 +1,559 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LDAP Inventory guide &mdash; Ansible collections  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=41de9001" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/ansible.css?v=c5b67dd2" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/antsibull-minimal.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/rtd-ethical-ads.css?v=289b023e" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/images/Ansible-Mark-RGB_Black.png"/>
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=7f41d439"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Setting list option values guide" href="guide_list_values.html" />
+    <link rel="prev" title="LDAP Connection guide" href="guide_ldap_connection.html" /><!-- extra head elements for Ansible beyond RTD Sphinx Theme -->
+
+
+
+
+</head>
+
+<body class="wy-body-for-nav"><!-- extra body elements for Ansible beyond RTD Sphinx Theme -->
+
+<div class="DocSite-globalNav ansibleNav">
+  <ul>
+    <li><a href="https://www.ansible.com/blog" target="_blank">Blog</a></li>
+    <li><a href="https://forum.ansible.com/" target="_blank">Ansible community forum</a></li>
+    <li><a href="https://docs.ansible.com/" target="_blank">Documentation</a></li>
+  </ul>
+</div>
+
+<a class="DocSite-nav" href="/" style="padding-bottom: 30px;">
+
+  <img class="DocSiteNav-logo"
+    src="../../../../_static/images/Ansible-Mark-RGB_White.png"
+    alt="Ansible Logo">
+  <div class="DocSiteNav-title">Ansible Collections Documentation</div>
+</a>
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Ansible collections
+          </a><!--- Based on https://github.com/rtfd/sphinx_rtd_theme/pull/438/files -->
+
+<div class="version">
+  
+    
+  
+</div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <label class="sr-only" for="q">Search docs:</label>
+    <input type="text" class="st-default-search-input" id="q" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+  
+              <p class="caption" role="heading"><span class="caption-text">Collections:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">Collection Index</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html">Collections in the Microsoft Namespace</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html">Microsoft.Ad</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../index.html#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#communication">Communication</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html#scenario-guides">Scenario Guides</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#plugin-index">Plugin Index</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugin indexes:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index_filter.html">Index of all Filter Plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../index_inventory.html">Index of all Inventory Plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../index_module.html">Index of all Modules</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference indexes:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../environment_variables.html">Index of all Collection Environment Variables</a></li>
+</ul>
+<!-- extra nav elements for Ansible beyond RTD Sphinx Theme -->
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Ansible collections</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Collection Index</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Collections in the Microsoft Namespace</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Microsoft.Ad</a></li>
+      <li class="breadcrumb-item active">LDAP Inventory guide</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+  
+           <div itemprop="articleBody">
+             
+  <section id="ldap-inventory-guide">
+<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-inventory"></span><h1>LDAP Inventory guide<a class="headerlink" href="#ldap-inventory-guide" title="Link to this heading"></a></h1>
+<p>This guide covers information about the LDAP inventory plugin included in this collection. This inventory plugin can be used to build an inventory from an LDAP server source, like Microsoft Active Directory.</p>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#connection-info" id="id1">Connection info</a></p></li>
+<li><p><a class="reference internal" href="#attributes" id="id2">Attributes</a></p></li>
+<li><p><a class="reference internal" href="#inventory-hostname" id="id3">Inventory hostname</a></p></li>
+<li><p><a class="reference internal" href="#value-types-and-templating" id="id4">Value types and templating</a></p></li>
+<li><p><a class="reference internal" href="#laps" id="id5">LAPS</a></p></li>
+</ul>
+</nav>
+<section id="connection-info">
+<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-connection-info"></span><h2><a class="toc-backref" href="#id1" role="doc-backlink">Connection info</a><a class="headerlink" href="#connection-info" title="Link to this heading"></a></h2>
+<p>Details on how to configure an LDAP connection can be found under <a class="reference internal" href="guide_ldap_connection.html#ansible-collections-microsoft-ad-docsite-guide-ldap-connection"><span class="std std-ref">the LDAP connection guide</span></a>. Each of the connection options described by the plugin documentation are specified in the inventory yml configuration file like the below.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">plugin</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">microsoft.ad.ldap</span>
+
+<span class="c1"># LDAP connection options can be defined in the yaml config.</span>
+<span class="nt">auth_protocol</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">simple</span>
+<span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UserName</span>
+<span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyPassword123</span>
+<span class="nt">tls_mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ldaps</span>
+</pre></div>
+</div>
+</section>
+<section id="attributes">
+<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-attributes"></span><h2><a class="toc-backref" href="#id2" role="doc-backlink">Attributes</a><a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<p>The LDAP inventory plugin can be used to set custom facts for each host it retrieves based on the computer object’s LDAP attributes. Retrieving custom attributes is done through the <code class="docutils literal notranslate"><span class="pre">attributes</span></code> option in the inventory plugin definition. The value is set to one of the three following types:</p>
+<ul class="simple">
+<li><p>Empty string or null</p></li>
+<li><p>A template string</p></li>
+<li><p>A dictionary</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>While an individual attribute can only be set to one of these types, it is possible to use the different value types for different attributes.</p>
+</div>
+<p>It is also possible to use the <code class="docutils literal notranslate"><span class="pre">compose</span></code> inventory option to use the builtin compose templating provided by inventory plugins but the LDAP attributes must first be requested through the <code class="docutils literal notranslate"><span class="pre">attributes</span></code> option and referenced in the <code class="docutils literal notranslate"><span class="pre">compose</span></code> template through the host fact the <code class="docutils literal notranslate"><span class="pre">attributes</span></code> set it on.</p>
+<section id="empty-string-or-null">
+<h3>Empty string or null<a class="headerlink" href="#empty-string-or-null" title="Link to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">attributes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">comment</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">objectSid</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
+<span class="w">  </span><span class="nt">ms-Mcs-AdmPwd</span><span class="p">:</span>
+</pre></div>
+</div>
+<p>In this case each of the attribute values will be set as a host fact as they are coerced by the LDAP schema, see <a class="reference internal" href="#ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-value-types"><span class="std std-ref">value types and templating</span></a>. The name of each fact will be based on the attribute name with <code class="docutils literal notranslate"><span class="pre">-</span></code> being replaced by <code class="docutils literal notranslate"><span class="pre">_</span></code>. In the above example the host facts <code class="docutils literal notranslate"><span class="pre">comment</span></code>, <code class="docutils literal notranslate"><span class="pre">objectSid</span></code>, and <code class="docutils literal notranslate"><span class="pre">ms_Mcs_AdmPwd</span></code> will be set to the coerced values.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml</span>
+
+<span class="nt">ansible_host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYHOST.domain.com</span>
+<span class="nt">comment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test comment</span>
+<span class="nt">ms_Mcs_AdmPwd</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Password123!</span>
+<span class="nt">objectSid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">S-1-5-21-1234-1108</span>
+<span class="nt">microsoft_ad_distinguished_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=MYHOST,CN=Computers,DC=domain,DC=com</span>
+</pre></div>
+</div>
+</section>
+<section id="template-string">
+<h3>Template string<a class="headerlink" href="#template-string" title="Link to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">attributes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">comment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">this</span>
+<span class="w">  </span><span class="nt">objectSid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raw | microsoft.ad.as_sid</span>
+<span class="w">  </span><span class="nt">ms-Mcs-AdmPwd</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raw | first</span>
+</pre></div>
+</div>
+<p>This format will set the host fact based on the template value specified. Each template is implicitly wrapped with <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">...</span> <span class="pre">}}</span></code> and processed through Jinja2 to produce a result. This means the template string can contain filters provided by Ansible and other collections to convert the raw LDAP value into something more useful. The <code class="docutils literal notranslate"><span class="pre">this</span></code> variable refers to the coerced LDAP attribute value and <code class="docutils literal notranslate"><span class="pre">raw</span></code> refers to a list of base64 encoded byte strings of the raw LDAP attribute value. See <a class="reference internal" href="#ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-value-types"><span class="std std-ref">value types and templating</span></a> for more information around what can be done inside the templates. Each host fact will be named after the attribute name with <code class="docutils literal notranslate"><span class="pre">-</span></code> being replaced by <code class="docutils literal notranslate"><span class="pre">_</span></code>. In the above example the host facts <code class="docutils literal notranslate"><span class="pre">command</span></code>, <code class="docutils literal notranslate"><span class="pre">objectSid</span></code>, and <code class="docutils literal notranslate"><span class="pre">ms_Mcs_AdmPwd</span></code> will be set to the template results.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml</span>
+
+<span class="nt">ansible_host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYHOST.domain.com</span>
+<span class="nt">comment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test comment</span>
+<span class="nt">ms_Mcs_AdmPwd</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">UGFzc3dvcmQxMjMh</span>
+<span class="nt">objectSid</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">S-1-5-21-1234-1108</span>
+<span class="nt">microsoft_ad_distinguished_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=MYHOST,CN=Computers,DC=domain,DC=com</span>
+</pre></div>
+</div>
+</section>
+<section id="dictionary">
+<h3>Dictionary<a class="headerlink" href="#dictionary" title="Link to this heading"></a></h3>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">attributes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">comment</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># Jinja2 native types will automatically convert this to a dict as</span>
+<span class="w">    </span><span class="c1"># the value is a json string.</span>
+<span class="w">    </span><span class="nt">my_comment</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">other_var</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">this | from_json</span>
+<span class="w">  </span><span class="nt">objectSid</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">sid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raw | microsoft.ad.as_sid | first</span>
+<span class="w">  </span><span class="nt">ms-Mcs-AdmPwd</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ansible_password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">this</span>
+</pre></div>
+</div>
+<p>The final value that can be set on each attribute values is a dictionary where the keys are the host facts to set and the value is the template used to dervice the final value. It can be null or an empty string to refer to the LDAP coerced value of that attribute (<code class="docutils literal notranslate"><span class="pre">this</span></code>) or a template string to template a new value based on the requirements at hand. See the above two formats for more info on null/empty string vs a string template value. In the above example there are 4 host facts set:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">my_command</span></code> - the coerced value for the <code class="docutils literal notranslate"><span class="pre">comment</span></code> attribute</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">other_var</span></code> - a dictionary created from the coerced value of <code class="docutils literal notranslate"><span class="pre">comment</span></code> if it was a json string</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sid</span></code> - the computer SID value as a string derived from <code class="docutils literal notranslate"><span class="pre">objectSid</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ansible_password</span></code> - the LAPS password coerced value derived from <code class="docutils literal notranslate"><span class="pre">ms-Mcs-AdmPwd</span></code></p></li>
+</ul>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml</span>
+
+<span class="nt">ansible_host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYHOST.domain.com</span>
+<span class="nt">ansible_password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Password123!</span>
+<span class="nt">my_comment</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">foo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bar</span>
+<span class="nt">other_var</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">foo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bar</span>
+<span class="nt">sid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">S-1-5-21-1234-1108</span>
+<span class="nt">microsoft_ad_distinguished_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=MYHOST,CN=Computers,DC=domain,DC=com</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Fact names under each attribute key should follow Python conventions for variable names, for example <code class="docutils literal notranslate"><span class="pre">_</span></code> should be used instead of <code class="docutils literal notranslate"><span class="pre">-</span></code>. Some Ansible versions will fail if using a name that is not valid.</p>
+</div>
+</section>
+</section>
+<section id="inventory-hostname">
+<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-inventory-hostname"></span><h2><a class="toc-backref" href="#id3" role="doc-backlink">Inventory hostname</a><a class="headerlink" href="#inventory-hostname" title="Link to this heading"></a></h2>
+<p>By default the <code class="docutils literal notranslate"><span class="pre">inventory_hostname</span></code> for a found host will be based on the <code class="docutils literal notranslate"><span class="pre">name</span></code> LDAP attribute value. If the <code class="docutils literal notranslate"><span class="pre">dNSHostName</span></code> attribute is set for the computer account found, it will be set as the <code class="docutils literal notranslate"><span class="pre">ansible_host</span></code> fact. To define a custom <code class="docutils literal notranslate"><span class="pre">inventory_hostname</span></code> or <code class="docutils literal notranslate"><span class="pre">ansible_host</span></code> either set it in the <code class="docutils literal notranslate"><span class="pre">attributes</span></code> or <code class="docutils literal notranslate"><span class="pre">compose</span></code> plugin option under that key. For example this will set the <code class="docutils literal notranslate"><span class="pre">inventory_hostname</span></code> to the value of <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> without the ending <code class="docutils literal notranslate"><span class="pre">$</span></code> rather than the computer account LDAP <code class="docutils literal notranslate"><span class="pre">name</span></code> attribute.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">attributes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sAMAccountName</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">inventory_hostname</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sAMAccountName[:-1]</span>
+</pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml</span>
+
+<span class="nt">ansible_host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYHOST.domain.com</span>
+<span class="nt">microsoft_ad_distinguished_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=OtherName,CN=Computers,DC=domain,DC=com</span>
+<span class="nt">sAMAccountName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYHOST$</span>
+</pre></div>
+</div>
+<p>It is also possible to set <code class="docutils literal notranslate"><span class="pre">inventory_hostname</span></code> under the <code class="docutils literal notranslate"><span class="pre">compose</span></code> key. The following will produce the same output as the above.</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">attributes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sAMAccountName</span><span class="p">:</span>
+
+<span class="nt">compose</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">inventory_hostname</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sAMAccountName[:-1]</span>
+</pre></div>
+</div>
+<p>An example of setting a custom <code class="docutils literal notranslate"><span class="pre">ansible_host</span></code> fact that is used as the connection host but leaving the default <code class="docutils literal notranslate"><span class="pre">inventory_hostname</span></code> of the computer account name is:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">attributes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sAMAccountName</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ansible_host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sAMAccountName[:-1]</span>
+</pre></div>
+</div>
+</section>
+<section id="value-types-and-templating">
+<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-value-types"></span><h2><a class="toc-backref" href="#id4" role="doc-backlink">Value types and templating</a><a class="headerlink" href="#value-types-and-templating" title="Link to this heading"></a></h2>
+<p>Each LDAP attribute value is stored as a list of bytes but the schema supplied in the LDAP database can describe how those raw list of bytes are represented as a proper type, like a string, integer, boolean, etc. Currently only these four types are used when coercing LDAP attribute values</p>
+<ul class="simple">
+<li><p>Booleans</p></li>
+<li><p>Integers</p></li>
+<li><p>Bytes</p></li>
+<li><p>Strings</p></li>
+</ul>
+<p>Booleans, integers, and strings are coerced into those specific Python types but bytes are coerced into a base64 string encoding of those bytes.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">objectGuid</span></code> and <code class="docutils literal notranslate"><span class="pre">objectSid</span></code> attributes are always coerced into strings representing the security identifier and guid respectively. These are the only attributes that have special coercion rules outside of the LDAP schema syntax.</p>
+</div>
+<p>LDAP attribute values may also be marked as a a single or multi valued attribute. A single value contains just the coerced value, or <code class="docutils literal notranslate"><span class="pre">None/null</span></code> if it has not been set while a multi valued attribute will be set as a list of coerced values. For example the <code class="docutils literal notranslate"><span class="pre">comment</span></code> is a single valued string while <code class="docutils literal notranslate"><span class="pre">servicePrincipalName</span></code> is a multi valued string. Using this inventory configuration that requests <code class="docutils literal notranslate"><span class="pre">comment</span></code>, and <code class="docutils literal notranslate"><span class="pre">servicePrincipalName</span></code> we get the following inventory host definition:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">plugin</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">microsoft.ad.ldap</span>
+
+<span class="nt">attributes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">comment</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">servicePrincipalName</span><span class="p">:</span>
+</pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml</span>
+
+<span class="nt">ansible_host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYHOST.domain.com</span>
+<span class="nt">comment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test comment</span>
+<span class="nt">servicePrincipalName</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">WSMAN/MYHOST</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">WSMAN/MYHOST.domain.com</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TERMSRV/MYHOST</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TERMSRV/MYHOST.domain.com</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RestrictedKrbHost/MYHOST</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HOST/MYHOST</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RestrictedKrbHost/MYHOST.domain.com</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HOST/MYHOST.domain.com</span>
+<span class="nt">microsoft_ad_distinguished_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=MYHOST,CN=Computers,DC=domain,DC=com</span>
+</pre></div>
+</div>
+<p>Some attributes like <code class="docutils literal notranslate"><span class="pre">pwdLastSet</span></code> are typically represented as a datetime value but internally are stored as integers. As there is no metadata in the LDAP schema to denote these integer values as datetime objects they will only be coerced into integer values by default.</p>
+<p>The following filters can be used as an easy way to further convert the coerced values into something more readable:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../as_datetime_filter.html#ansible-collections-microsoft-ad-as-datetime-filter"><span class="std std-ref">microsoft.ad.as_datetime</span></a></p></li>
+<li><p><a class="reference internal" href="../as_guid_filter.html#ansible-collections-microsoft-ad-as-guid-filter"><span class="std std-ref">microsoft.ad.as_guid</span></a></p></li>
+<li><p><a class="reference internal" href="../as_sid_filter.html#ansible-collections-microsoft-ad-as-sid-filter"><span class="std std-ref">microsoft.ad.as_sid</span></a></p></li>
+<li><p><a class="reference internal" href="../parse_dn_filter.html#ansible-collections-microsoft-ad-parse-dn-filter"><span class="std std-ref">microsoft.ad.parse_dn</span></a></p></li>
+<li><p><a class="reference internal" href="../split_dn_filter.html#ansible-collections-microsoft-ad-split-dn-filter"><span class="std std-ref">microsoft.ad.split_dn</span></a></p></li>
+</ul>
+<p>An example of these filters being used in the <code class="docutils literal notranslate"><span class="pre">attributes</span></code> option can be seen below:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">plugin</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">microsoft.ad.ldap</span>
+
+<span class="nt">attributes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">pwdLastSet</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">password_last_set_int</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">this</span>
+<span class="w">    </span><span class="nt">password_last_set_datetime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">this | microsoft.ad.as_datetime</span>
+</pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml</span>
+
+<span class="nt">ansible_host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYHOST.domain.com</span>
+<span class="nt">password_last_set_datetime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2023-02-06T07:39:09.195321+0000</span>
+<span class="nt">password_last_set_int</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">133201427491953218</span>
+<span class="nt">microsoft_ad_distinguished_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=MYHOST,CN=Computers,DC=domain,DC=com</span>
+</pre></div>
+</div>
+<p>The templates can also reference other filters that exist outside the collection, like the Ansible builtin <code class="docutils literal notranslate"><span class="pre">from_json</span></code> and more. The value is simply what would be placed inside <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">...</span> <span class="pre">}}</span></code> during a normal template operation.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Lookups cannot be used in the attribute value templates, only filters.</p>
+</div>
+<p>Each template used in the <code class="docutils literal notranslate"><span class="pre">attributes</span></code> inventory option can reference the following variables:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">this</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">raw</span></code></p></li>
+<li><p>Any previously defined attributes</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">this</span></code> variable refers to the coerced LDAP attribute value while <code class="docutils literal notranslate"><span class="pre">raw</span></code> refers to the list of base64 encoded strings representing the raw LDAP value that hasn’t been coerced. As each attribute host fact is processed, it is also available in the subsequent templates under that host fact name. Here is an example of a more complex set of attributes:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">plugin</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">microsoft.ad.ldap</span>
+
+<span class="nt">attributes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">objectSid</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">sid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">this</span>
+<span class="w">    </span><span class="nt">sid_raw</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raw</span>
+<span class="w">    </span><span class="nt">sid_raw_filtered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raw | microsoft.ad.as_sid | first</span>
+<span class="w">  </span><span class="nt">objectGuid</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sAMAccountName</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">computer_name</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">comment</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">comment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">this</span>
+<span class="w">    </span><span class="c1"># Can refer to previously set attributes above</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">computer_name ~ &quot; - &quot; ~ sid ~ &quot; - &quot; ~ objectGuid ~ &quot; - &quot; ~ this</span>
+
+<span class="c1"># Can also be used as a template and refer to the vars retrieved above</span>
+<span class="nt">compose</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">comment2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">comment</span>
+</pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml</span>
+
+<span class="nt">ansible_host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYHOST.domain.com</span>
+<span class="nt">comment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test comment</span>
+<span class="nt">comment2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test comment</span>
+<span class="nt">computer_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYHOST$</span>
+<span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYHOST$ - S-1-5-21-1234-1108 - 51cc490f-1de0-41ae-98ad-dc065d5b33e2 - test comment</span>
+<span class="nt">objectGuid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">51cc490f-1de0-41ae-98ad-dc065d5b33e2</span>
+<span class="nt">sid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">S-1-5-21-1234-1108</span>
+<span class="nt">sid_raw</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AQMAAAAAAAUVAAAA0gQAAFQEAAA=</span>
+<span class="nt">sid_raw_filtered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">S-1-5-21-1234-1108</span>
+<span class="nt">microsoft_ad_distinguished_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=MYHOST,CN=Computers,DC=domain,DC=com</span>
+</pre></div>
+</div>
+</section>
+<section id="laps">
+<span id="ansible-collections-microsoft-ad-docsite-guide-ldap-inventory-laps"></span><h2><a class="toc-backref" href="#id5" role="doc-backlink">LAPS</a><a class="headerlink" href="#laps" title="Link to this heading"></a></h2>
+<p>Local Administrator Administrator Password Solution (LAPS) can be used to automatically change the password of the local administrator account on domain joined hosts. The LDAP connection plugin can retrieve the LAPS-managed value and assign it as the connection password for the target host.</p>
+<p>There are three different attributes that can be used by LAPS to store the password information:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ms-Mcs-AdmPwd</span></code> - The legacy LAPS attribute containing the password</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">msLAPS-Password</span></code> - The Windows LAPS attribute containing the username and password</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">msLAPS-EncryptedPassword</span></code> - The Windows LAPS attribute containing the encrypted username and password</p></li>
+</ul>
+<p>If using the legacy LAPS setup, the following will retrieve and assign the connection username and password to the LAPS-managed value:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">plugin</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">microsoft.ad.ldap</span>
+
+<span class="nt">attributes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ms-Mcs-AdmPwd</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ansible_user</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&quot;Administrator&quot;&#39;</span>
+<span class="w">    </span><span class="nt">ansible_password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">this</span>
+</pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml</span>
+
+<span class="nt">ansible_host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYHOST.domain.com</span>
+<span class="nt">ansible_password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">aR$lmrqK1l622H</span>
+<span class="nt">ansible_user</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Administrator</span>
+<span class="nt">microsoft_ad_distinguished_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=MYHOST,CN=Computers,DC=domain,DC=com</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Legacy LAPS does not store the username, the above example hardcodes the user name <code class="docutils literal notranslate"><span class="pre">Administrator</span></code>.</p>
+</div>
+<p>If using Windows LAPS without encryption, the following will assign the connection username and password to the LAPS-managed values:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">plugin</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">microsoft.ad.ldap</span>
+
+<span class="nt">attributes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">msLAPS-Password</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ansible_user</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(this | from_json).n</span>
+<span class="w">    </span><span class="nt">ansible_password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(this | from_json).p</span>
+<span class="w">    </span><span class="nt">raw_example</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raw</span>
+<span class="w">    </span><span class="nt">this_example</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">this</span>
+</pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml</span>
+
+<span class="nt">ansible_host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYHOST.domain.com</span>
+<span class="nt">ansible_password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWznso@ZJ+J6p9</span>
+<span class="nt">ansible_user</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Administrator</span>
+<span class="nt">microsoft_ad_distinguished_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=MYHOST,CN=Computers,DC=domain,DC=com</span>
+<span class="nt">raw_example</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eyJuIjoiQWRtaW5pc3RyYXRvciIsInQiOiIxZDk4MmI0MzdiN2E1YzYiLCJwIjoiQVd6bnNvQFpKK0o2cDkifQ==</span>
+<span class="nt">this_example</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">n</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Administrator</span>
+<span class="w">  </span><span class="nt">p</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWznso@ZJ+J6p9</span>
+<span class="w">  </span><span class="nt">t</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1d982b437b7a5c6</span>
+</pre></div>
+</div>
+<p>Unlike Legacy LAPS, the attribute value is a json string that contains the keys:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">n</span></code> - The account name the password was encrypted for</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">p</span></code> - The password for the account</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">t</span></code> - The time the password was set encoded as a FILETIME in base16</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is recommended to use the <code class="docutils literal notranslate"><span class="pre">from_json</span></code> filter (as shown in the example above) on the <code class="docutils literal notranslate"><span class="pre">this</span></code> value to ensure consistent behavior in the presence or absence of Jinja2 native type support.</p>
+</div>
+<p>Getting an encrypted Windows LAPS value requires the <code class="docutils literal notranslate"><span class="pre">dpapi-ng</span></code> Python library to be installed. See <a class="reference internal" href="guide_ldap_connection.html#ansible-collections-microsoft-ad-docsite-guide-ldap-connection-requirements"><span class="std std-ref">the LDAP connection requirements</span></a> for more information on this optional package and how to debug whether it’s installed or not.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Using Windows LAPS encrypted password is currently an experimental feature.</p>
+</div>
+<p>With the <code class="docutils literal notranslate"><span class="pre">dpapi-ng</span></code> package installed, an authorized LDAP user can decrypt and assign the LAPS-managed username and password to the target host connection as follows:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">plugin</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">microsoft.ad.ldap</span>
+
+<span class="nt">attributes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">msLAPS-EncryptedPassword</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ansible_user</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(this.value | from_json).n</span>
+<span class="w">    </span><span class="nt">ansible_password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">(this.value | from_json).p</span>
+<span class="w">    </span><span class="nt">raw_example</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raw</span>
+<span class="w">    </span><span class="nt">this_example</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">this</span>
+</pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml</span>
+
+<span class="nt">ansible_host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYHOST.domain.com</span>
+<span class="nt">ansible_password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">6jr&amp;}yK++{0Q}&amp;</span>
+<span class="nt">ansible_user</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Administrator</span>
+<span class="nt">microsoft_ad_distinguished_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=MYHOST,CN=Computers,DC=domain,DC=com</span>
+<span class="nt">raw_example</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">toLZAWR7rgfk...</span>
+<span class="nt">this_example</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">encrypted_value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MIIETgYJKoZI...</span>
+<span class="w">  </span><span class="nt">flags</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">  </span><span class="nt">info</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
+<span class="w">  </span><span class="nt">update_timestamp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">133281382308674404</span>
+<span class="w">  </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{&quot;n&quot;:&quot;Administrator&quot;,&quot;t&quot;:&quot;1d982b607ae7b64&quot;,&quot;p&quot;:&quot;6jr&amp;}yK++{0Q}&amp;&quot;}&#39;</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">raw</span></code> value contains the raw base64 encoded value as stored in AD. The <code class="docutils literal notranslate"><span class="pre">this</span></code> value contains a dictionary with the following keys:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">encrypted_value</span></code>: The encrypted password blob as a base64 string</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">flags</span></code>: The flags set as a bitwise int value, currently these are undocumented by Microsoft</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">update_timestamp</span></code>: The FILETIME value of when the</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">value</span></code>: The decrypted value containing the username and password as a JSON string</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">debug</span></code>: Debug information that indicates why it failed to decrypt the value</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">value</span></code> key will only be present if the decryption process was successful. If it failed, the <code class="docutils literal notranslate"><span class="pre">debug</span></code> key will be present and contain the reason why it failed to be decrypted.</p>
+<p>If the <code class="docutils literal notranslate"><span class="pre">dpapi-ng</span></code> library is not installed this is what the output would look like:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml</span>
+
+<span class="nt">ansible_host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYHOST.domain.com</span>
+<span class="nt">microsoft_ad_distinguished_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=MYHOST,CN=Computers,DC=domain,DC=com</span>
+<span class="nt">raw_example</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">toLZAWR7rgfk...</span>
+<span class="nt">this_example</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">debug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Cannot decrypt value as the Python library dpapi-ng is not installed</span>
+<span class="w">  </span><span class="nt">encrypted_value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MIIETgYJKoZI...</span>
+<span class="w">  </span><span class="nt">flags</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">  </span><span class="nt">update_timestamp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">133281382308674404</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">value</span></code> key is no longer present and <code class="docutils literal notranslate"><span class="pre">debug</span></code> contains the message that <code class="docutils literal notranslate"><span class="pre">dpapi-ng</span></code> is not installed.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">dpapi-ng</span></code> library was installed but the connection user is not authorized to decrypt the value this is what the output would look like:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># ansible-inventory -i microsoft.ad.ldap.yml --host MYHOST --vars --yaml</span>
+
+<span class="nt">ansible_host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MYHOST.domain.com</span>
+<span class="nt">microsoft_ad_distinguished_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=MYHOST,CN=Computers,DC=domain,DC=com</span>
+<span class="nt">raw_example</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">toLZAWR7rgfk...</span>
+<span class="nt">this_example</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">debug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Failed to decrypt value due to error - ValueError GetKey failed 0x80070005</span>
+<span class="w">  </span><span class="nt">encrypted_value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MIIETgYJKoZI...</span>
+<span class="w">  </span><span class="nt">flags</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
+<span class="w">  </span><span class="nt">update_timestamp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">133281382308674404</span>
+</pre></div>
+</div>
+<p>A simple way to test that the connection user is able to decrypt the password is to run <code class="docutils literal notranslate"><span class="pre">Get-LapsADPassword</span> <span class="pre">-Identity</span> <span class="pre">MYHOST</span></code> on a Windows host as that user.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          
+
+<footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="guide_ldap_connection.html" class="btn btn-neutral float-left" title="LDAP Connection guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="guide_list_values.html" class="btn btn-neutral float-right" title="Setting list option values guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Ansible contributors.</p>
+  </div>
+
+  
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script><!-- extra footer elements for Ansible beyond RTD Sphinx Theme -->
+
+</body>
+</html>
