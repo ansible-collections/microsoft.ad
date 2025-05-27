@@ -294,3 +294,13 @@ releases:
     - ldap-dt.yml
     - release-summary.yml
     release_date: '2025-04-29'
+  1.9.1:
+    changes:
+      bugfixes:
+      - microsoft.ad.ldap - Ensure the encrypted LAPS value is marked as unsafe to
+        stop unexpected templating of the raw JSON result value - https://github.com/ansible-collections/microsoft.ad/issues/194
+      release_summary: Release summary for v1.9.1
+    fragments:
+    - laps-templating.yml
+    - release-summary.yml
+    release_date: '2025-05-27'

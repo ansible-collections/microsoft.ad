@@ -4,6 +4,19 @@ Ansible Microsoft Active Directory Release Notes
 
 .. contents:: Topics
 
+v1.9.1
+======
+
+Release Summary
+---------------
+
+Release summary for v1.9.1
+
+Bugfixes
+--------
+
+- microsoft.ad.ldap - Ensure the encrypted LAPS value is marked as unsafe to stop unexpected templating of the raw JSON result value - https://github.com/ansible-collections/microsoft.ad/issues/194
+
 v1.9.0
 ======
 
