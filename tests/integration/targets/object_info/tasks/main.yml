@@ -39,6 +39,8 @@
 - name: get properties for single user by DN
   object_info:
     identity: '{{ test_user.distinguished_name }}'
+    properties:
+      - memberOf
   register: by_identity
   check_mode: yes  # Just verifies it runs in check mode
 
@@ -47,11 +49,12 @@
     that:
     - not by_identity is changed
     - by_identity.objects | length == 1
-    - by_identity.objects[0].keys() | list | length == 4
+    - by_identity.objects[0].keys() | list | length == 5
     - by_identity.objects[0].DistinguishedName == test_user.distinguished_name
     - by_identity.objects[0].Name == 'Ansible Test'
     - by_identity.objects[0].ObjectClass == 'user'
     - by_identity.objects[0].ObjectGUID == test_user_id
+    - by_identity.objects[0].memberOf == []
 
 - name: get specific properties by GUID
   object_info:
