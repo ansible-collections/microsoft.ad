@@ -298,9 +298,11 @@ $module.Result.objects = @(foreach ($adId in $foundGuids) {
 
             $value = $adObject.$name
             if ($value -is [Microsoft.ActiveDirectory.Management.ADPropertyValueCollection]) {
-                $value = foreach ($v in $value) {
-                    ConvertTo-OutputValue -InputObject $v
+                $value_tmp = @()
+                foreach ($v in $value) {
+                    $value_tmp += ConvertTo-OutputValue -InputObject $v
                 }
+                $value = $value_tmp
             }
             else {
                 $value = ConvertTo-OutputValue -InputObject $value
