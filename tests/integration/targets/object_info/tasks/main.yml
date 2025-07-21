@@ -60,7 +60,8 @@
     - by_identity.objects[0].Name == 'Ansible Test User'
     - by_identity.objects[0].ObjectClass == 'user'
     - by_identity.objects[0].ObjectGUID == test_user_id
-    - by_identity.objects[0].memberOf == ['Ansible Test Group']
+    - by_identity.objects[0].memberOf | length == 1
+    - by_identity.objects[0].memberOf[0] is match("CN=Ansible Test Group,.*")
 
 - name: get specific properties by GUID
   object_info:
