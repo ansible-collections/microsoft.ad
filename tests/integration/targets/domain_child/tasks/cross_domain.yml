@@ -236,7 +236,7 @@
     - set_with_creds1_actual.objects[0].Name == 'ParentUser1'
     - set_with_creds1_actual.objects[0].ObjectGUID == user_with_creds1.object_guid
     - set_with_creds1_actual.objects[0].comment == "My comment"
-    - set_with_creds1_actual.objects[0].servicePrincipalName == "HTTP/ParentUser1"
+    - set_with_creds1_actual.objects[0].servicePrincipalName == ["HTTP/ParentUser1"]
 
 - name: edit user with domain_credentials creds - check mode
   microsoft.ad.user:
@@ -325,7 +325,7 @@
     - set_with_creds2_actual.objects[0].Name == 'ParentUser2'
     - set_with_creds2_actual.objects[0].ObjectGUID == user_with_creds2.object_guid
     - set_with_creds2_actual.objects[0].comment == "My comment"
-    - set_with_creds2_actual.objects[0].servicePrincipalName == "HTTP/ParentUser2"
+    - set_with_creds2_actual.objects[0].servicePrincipalName == ["HTTP/ParentUser2"]
 
 - name: set value with DN lookup and creds
   microsoft.ad.group:

@@ -152,7 +152,7 @@
     - create_ou_custom_actual.objects[0].st == 'QLD'
     - create_ou_custom_actual.objects[0].street == 'Main St'
     - create_ou_custom_actual.objects[0].ProtectedFromAccidentalDeletion == False
-    - create_ou_custom_actual.objects[0].postOfficeBox == 'My Box'
+    - create_ou_custom_actual.objects[0].postOfficeBox == ['My Box']
 
 - name: change ou with custom options
   ou:
@@ -204,7 +204,7 @@
     - change_ou_actual.objects[0].st == None
     - change_ou_actual.objects[0].street == 'Main'
     - change_ou_actual.objects[0].ProtectedFromAccidentalDeletion == False
-    - change_ou_actual.objects[0].postOfficeBox == 'My box'
+    - change_ou_actual.objects[0].postOfficeBox == ['My box']
 
 - name: create new sub OU
   ou:

@@ -1020,7 +1020,7 @@
   assert:
     that:
     - remove_attr is changed
-    - remove_attr_actual.objects[0]['ansible-BoolMulti'] == True
+    - remove_attr_actual.objects[0]['ansible-BoolMulti'] == [True]
     - remove_attr_actual.objects[0]['ansible-BytesMulti'] | length == 2
     - "'YmFy' in remove_attr_actual.objects[0]['ansible-BytesMulti']"
     - "'Zm9v' in remove_attr_actual.objects[0]['ansible-BytesMulti']"
@@ -1148,7 +1148,7 @@
     that:
     - set_attr_check is changed
     - set_attr_check_actual.objects[0]['ansible-BoolSingle'] == False
-    - set_attr_check_actual.objects[0]['ansible-BoolMulti'] == True
+    - set_attr_check_actual.objects[0]['ansible-BoolMulti'] == [True]
     - set_attr_check_actual.objects[0]['ansible-BytesSingle'] == "Zm9v"
     - set_attr_check_actual.objects[0]['ansible-BytesMulti'] | length == 2
     - "'YmFy' in set_attr_check_actual.objects[0]['ansible-BytesMulti']"
@@ -1237,7 +1237,7 @@
     that:
     - set_attr is changed
     - set_attr_actual.objects[0]['ansible-BoolSingle'] == True
-    - set_attr_actual.objects[0]['ansible-BoolMulti'] == False
+    - set_attr_actual.objects[0]['ansible-BoolMulti'] == [False]
     - set_attr_actual.objects[0]['ansible-BytesSingle'] == "YmFy"
     - set_attr_actual.objects[0]['ansible-BytesMulti'] | length == 2
     - "'YmFy' in set_attr_actual.objects[0]['ansible-BytesMulti']"
@@ -1354,7 +1354,7 @@
     that:
     - clear_attr_check is changed
     - clear_attr_check_actual.objects[0]['ansible-BoolSingle'] == True
-    - clear_attr_check_actual.objects[0]['ansible-BoolMulti'] == False
+    - clear_attr_check_actual.objects[0]['ansible-BoolMulti'] == [False]
     - clear_attr_check_actual.objects[0]['ansible-BytesSingle'] == "YmFy"
     - clear_attr_check_actual.objects[0]['ansible-BytesMulti'] | length == 2
     - "'YmFy' in clear_attr_check_actual.objects[0]['ansible-BytesMulti']"
