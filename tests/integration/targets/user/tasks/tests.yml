@@ -669,13 +669,13 @@
     - create_user_actual.objects[0].l == 'Brisbane'
     - create_user_actual.objects[0].mail == 'user@EMAIL.COM'
     # Domain Users is the primaryGroupID entry
-    - create_user_actual.objects[0].memberOf == 'CN=Domain Admins,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_user_actual.objects[0].memberOf == ['CN=Domain Admins,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext]
     - create_user_actual.objects[0].postalcode == '4000'
     - create_user_actual.objects[0].primaryGroupID == 513  # Domain Users
     - create_user_actual.objects[0].ProtectedFromAccidentalDeletion == false
     - create_user_actual.objects[0].pwdLastSet > 0
     - create_user_actual.objects[0].sAMAccountName == 'MyUserSam'
-    - create_user_actual.objects[0].servicePrincipalName == 'HTTP/MyUser'
+    - create_user_actual.objects[0].servicePrincipalName == ['HTTP/MyUser']
     - create_user_actual.objects[0].sn == 'LastName'
     - create_user_actual.objects[0].st == 'QLD'
     - create_user_actual.objects[0].streetaddress == 'Main'
@@ -839,13 +839,13 @@
     - update_user_check_actual.objects[0].l == 'Brisbane'
     - update_user_check_actual.objects[0].mail == 'user@EMAIL.COM'
     # Domain Users is the primaryGroupID entry
-    - update_user_check_actual.objects[0].memberOf == 'CN=Domain Admins,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - update_user_check_actual.objects[0].memberOf == ['CN=Domain Admins,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext]
     - update_user_check_actual.objects[0].postalcode == '4001'
     - update_user_check_actual.objects[0].primaryGroupID == 513  # Domain Users
     - update_user_check_actual.objects[0].ProtectedFromAccidentalDeletion == false
     - update_user_check_actual.objects[0].pwdLastSet > 0
     - update_user_check_actual.objects[0].sAMAccountName == 'MyUserSam'
-    - update_user_check_actual.objects[0].servicePrincipalName == 'HTTP/MyUser'
+    - update_user_check_actual.objects[0].servicePrincipalName == ['HTTP/MyUser']
     - update_user_check_actual.objects[0].sn == 'LastName'
     - update_user_check_actual.objects[0].st == 'QLD'
     - update_user_check_actual.objects[0].streetaddress == 'Main'
@@ -958,7 +958,7 @@
     - update_user_actual.objects[0].primaryGroupID == 513  # Domain Users
     - update_user_actual.objects[0].pwdLastSet == create_user_actual.objects[0].pwdLastSet
     - update_user_actual.objects[0].sAMAccountName == 'myUserSam'
-    - update_user_actual.objects[0].servicePrincipalName == 'HTTP/MyUser'
+    - update_user_actual.objects[0].servicePrincipalName == ['HTTP/MyUser']
     - update_user_actual.objects[0].sn == 'lastName'
     - update_user_actual.objects[0].st == 'NY'
     - update_user_actual.objects[0].streetaddress == 'main'
@@ -1086,7 +1086,7 @@
     - set_groups is changed
     - set_groups.warnings | length == 1
     - '"the primary group of the user, skipping" in set_groups.warnings[0]'
-    - set_groups_actual.objects[0].memberOf == "CN=Domain Admins,CN=Users," ~ setup_domain_info.output[0].defaultNamingContext
+    - set_groups_actual.objects[0].memberOf == ["CN=Domain Admins,CN=Users," ~ setup_domain_info.output[0].defaultNamingContext]
     - set_groups_actual.objects[0].primaryGroupID == 513  # Domain Users
 
 - name: fail to add group that is missing
@@ -1182,7 +1182,7 @@
   assert:
     that:
     - groups_add is changed
-    - groups_add_actual.objects[0].memberOf == "CN=Domain Admins,CN=Users," ~ setup_domain_info.output[0].defaultNamingContext
+    - groups_add_actual.objects[0].memberOf == ["CN=Domain Admins,CN=Users," ~ setup_domain_info.output[0].defaultNamingContext]
     - groups_add_actual.objects[0].primaryGroupID == 513  # Domain Users
 
 - name: set spns

@@ -204,7 +204,7 @@
     - custom_comp_actual.objects[0].sAMAccountName == 'SamMyComputer$'
     - custom_comp_actual.objects[0].ObjectClass == 'computer'
     - custom_comp_actual.objects[0].ProtectedFromAccidentalDeletion == true
-    - custom_comp_actual.objects[0].servicePrincipalName == 'HTTP/MyComputer'
+    - custom_comp_actual.objects[0].servicePrincipalName == ['HTTP/MyComputer']
     - custom_comp_actual.objects[0].userPrincipalName == 'MyComputer@' ~ domain_realm
     - '"ADS_UF_ACCOUNTDISABLE" in custom_comp_actual.objects[0].userAccountControl_AnsibleFlags'
     - '"ADS_UF_TRUSTED_FOR_DELEGATION" in custom_comp_actual.objects[0].userAccountControl_AnsibleFlags'
