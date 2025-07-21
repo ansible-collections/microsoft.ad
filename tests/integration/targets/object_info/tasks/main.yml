@@ -1,6 +1,11 @@
+- name: create test ad group
+  microsoft.ad.group:
+    name: Ansible Test Group
+    scope: global
+
 - name: create test ad user
   microsoft.ad.user:
-    name: Ansible Test
+    name: Ansible Test User
     firstname: Ansible
     surname: Test
     company: Contoso R Us
@@ -10,6 +15,7 @@
     groups:
       set:
       - Domain Users
+      - Ansible Test Group
     enabled: false
   register: test_user
   notify: remove test domain user
@@ -51,10 +57,10 @@
     - by_identity.objects | length == 1
     - by_identity.objects[0].keys() | list | length == 5
     - by_identity.objects[0].DistinguishedName == test_user.distinguished_name
-    - by_identity.objects[0].Name == 'Ansible Test'
+    - by_identity.objects[0].Name == 'Ansible Test User'
     - by_identity.objects[0].ObjectClass == 'user'
     - by_identity.objects[0].ObjectGUID == test_user_id
-    - by_identity.objects[0].memberOf == []
+    - by_identity.objects[0].memberOf == ['Ansible Test Group']
 
 - name: get specific properties by GUID
   object_info:
@@ -78,7 +84,7 @@
     - not by_guid_custom_props is changed
     - by_guid_custom_props.objects | length == 1
     - by_guid_custom_props.objects[0].DistinguishedName == test_user.distinguished_name
-    - by_guid_custom_props.objects[0].Name == 'Ansible Test'
+    - by_guid_custom_props.objects[0].Name == 'Ansible Test User'
     - by_guid_custom_props.objects[0].ObjectClass == 'user'
     - by_guid_custom_props.objects[0].ObjectGUID == test_user_id
     - not by_guid_custom_props.objects[0].ProtectedFromAccidentalDeletion
@@ -142,7 +148,7 @@
 
 - name: get invalid property
   object_info:
-    filter: sAMAccountName -eq 'Ansible Test'
+    filter: sAMAccountName -eq 'Ansible Test User'
     properties:
     - FakeProperty
   register: invalid_prop_warning
