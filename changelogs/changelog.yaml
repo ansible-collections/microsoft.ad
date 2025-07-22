@@ -304,3 +304,13 @@ releases:
     - laps-templating.yml
     - release-summary.yml
     release_date: '2025-05-27'
+  1.9.2:
+    changes:
+      bugfixes:
+      - microsoft.ad.object_info - Correctly return multivalued attributes with one
+        entry as array with on item (instead of returning a string) - https://github.com/ansible-collections/microsoft.ad/issues/199
+      release_summary: Release summary for v1.9.2
+    fragments:
+    - correctly-return-multivalued-attributes-with-one-entry-as-array-instead-of-string.yml
+    - release-summary.yml
+    release_date: '2025-07-22'

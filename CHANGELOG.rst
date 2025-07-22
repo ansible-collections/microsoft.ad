@@ -4,6 +4,19 @@ Ansible Microsoft Active Directory Release Notes
 
 .. contents:: Topics
 
+v1.9.2
+======
+
+Release Summary
+---------------
+
+Release summary for v1.9.2
+
+Bugfixes
+--------
+
+- microsoft.ad.object_info - Correctly return multivalued attributes with one entry as array with on item (instead of returning a string) - https://github.com/ansible-collections/microsoft.ad/issues/199
+
 v1.9.1
 ======
 
