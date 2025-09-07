@@ -175,7 +175,7 @@ EXAMPLES: |
     microsoft.ad.win_reboot:
     when: dc_promotion.reboot_required
 
-RETURNS:
+RETURN:
   reboot_required:
     description: True if changes were made that require a reboot.
     returned: always
