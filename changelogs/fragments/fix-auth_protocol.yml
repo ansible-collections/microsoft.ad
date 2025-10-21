@@ -1,0 +1,4 @@
+---
+bugfixes:
+  - >-
+    microsoft.ad.ldap - Fix issue where auth_protocol config option was never used when creating the spnego client.

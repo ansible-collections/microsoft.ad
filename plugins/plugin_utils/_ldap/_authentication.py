@@ -101,6 +101,7 @@ class NegotiateCredential(Credential):
             hostname=client.server,
             service="ldap",
             context_req=context_req,
+            protocol=self.protocol,
         )
 
         cbt = None
