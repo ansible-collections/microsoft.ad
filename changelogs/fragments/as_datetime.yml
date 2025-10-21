@@ -1,0 +1,3 @@
+---
+bugfixes:
+   - as_datetime - set upper limit for the user input (https://github.com/ansible-collections/microsoft.ad/issues/182).
