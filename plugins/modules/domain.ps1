@@ -4,6 +4,7 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 #AnsibleRequires -CSharpUtil Ansible.Basic
+#AnsibleRequires -PowerShell ..module_utils._DomainFeature
 
 $spec = @{
     options = @{
@@ -76,36 +77,25 @@ if ($domain_netbios_name -and $domain_netbios_name.Length -gt 15) {
     $module.FailJson("The parameter 'domain_netbios_name' should not exceed 15 characters in length")
 }
 
-$requiredFeatures = @("AD-Domain-Services", "RSAT-ADDS")
-$features = Get-WindowsFeature -Name $requiredFeatures
-$unavailableFeatures = Compare-Object -ReferenceObject $requiredFeatures -DifferenceObject $features.Name -PassThru
+$featureRes = Install-DomainServicesFeature -CheckMode:$module.CheckMode -GetDomainModes
+$module.Result.changed = $featureRes.Changed
+$module.Result.reboot_required = $featureRes.RebootRequired
 
-if ($unavailableFeatures) {
-    $module.FailJson("The following features required for a domain controller are unavailable: $($unavailableFeatures -join ',')")
-}
-
-$missingFeatures = $features | Where-Object InstallState -NE Installed
-if ($missingFeatures) {
-    $res = Install-WindowsFeature -Name $missingFeatures -WhatIf:$module.CheckMode
-    $module.Result.changed = $true
-    $module.Result.reboot_required = [bool]$res.RestartNeeded
-
-    # When in check mode and the prereq was "installed" we need to exit early as
-    # the AD cmdlets weren't really installed
-    if ($module.CheckMode) {
-        $module.ExitJson()
-    }
+if ($featureRes.Changed -and $module.CheckMode) {
+    # If we had to install features in check mode then we need to exit early as
+    # the AD cmdlets won't be available
+    $module.ExitJson()
 }
 
 # Check that we got a valid domain_mode
-$validDomainModes = [Enum]::GetNames((Get-Command -Name Install-ADDSForest).Parameters.DomainMode.ParameterType)
+$validDomainModes = $featureRes.ValidDomainModes
 if (($null -ne $domain_mode) -and -not ($domain_mode -in $validDomainModes)) {
     $validModes = $validDomainModes -join ", "
     $module.FailJson("The parameter 'domain_mode' does not accept '$domain_mode', please use one of: $validModes")
 }
 
 # Check that we got a valid forest_mode
-$validForestModes = [Enum]::GetNames((Get-Command -Name Install-ADDSForest).Parameters.ForestMode.ParameterType)
+$validForestModes = $featureRes.ValidForestModes
 if (($null -ne $forest_mode) -and -not ($forest_mode -in $validForestModes)) {
     $validModes = $validForestModes -join ", "
     $module.FailJson("The parameter 'forest_mode' does not accept '$forest_mode', please use one of: $validModes")
@@ -163,51 +153,12 @@ if (-not $forest) {
         $installParams.ForestMode = $forest_mode
     }
 
-    $res = $null
-    try {
-        $res = Install-ADDSForest @installParams
+    $wrapperParams = @{
+        AnsibleModule = $module
+        Command = 'Install-ADDSForest'
+        CommandParams = $installParams
     }
-    catch [Microsoft.DirectoryServices.Deployment.DCPromoExecutionException] {
-        # ExitCode 15 == 'Role change is in progress or this computer needs to be restarted.'
-        # DCPromo exit codes details can be found at
-        # https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/deploy/troubleshooting-domain-controller-deployment
-        if ($_.Exception.ExitCode -in @(15, 19)) {
-            $module.Result.reboot_required = $true
-            $module.Result._do_action_reboot = $true
-        }
-
-        $module.FailJson("Failed to install ADDSForest, DCPromo exited with $($_.Exception.ExitCode): $($_.Exception.Message)", $_)
-    }
-    finally {
-        # The Netlogon service is set to auto start but is not started. This is
-        # required for Ansible to connect back to the host and reboot in a
-        # later task. Even if this fails Ansible can still connect but only
-        # with ansible_winrm_transport=basic so we just display a warning if
-        # this fails.
-        if (-not $module.CheckMode) {
-            try {
-                Start-Service -Name Netlogon
-            }
-            catch {
-                $msg = -join @(
-                    "Failed to start the Netlogon service after promoting the host, "
-                    "Ansible may be unable to connect until the host is manually rebooting: $($_.Exception.Message)"
-                )
-                $module.Warn($msg)
-            }
-        }
-    }
-
-    $module.Result.changed = $true
-
-    if ($module.CheckMode) {
-        # the return value after -WhatIf does not have RebootRequired populated
-        # manually set to True as the domain would have been installed
-        $module.Result.reboot_required = $true
-    }
-    elseif ($res.RebootRequired) {
-        $module.Result.reboot_required = $true
-    }
+    Invoke-ADDSWrapper @wrapperParams
 }
 
 $module.ExitJson()

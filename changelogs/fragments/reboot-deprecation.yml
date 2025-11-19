@@ -1,0 +1,3 @@
+bugfixes:
+  - >-
+    Removed use of deprecated ``_encode_script`` function used by the internal reboot functionality of the AD plugins.

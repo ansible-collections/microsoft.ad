@@ -77,7 +77,7 @@
     that:
     - not domain_no_reboot is changed
     - domain_no_reboot is failed
-    - '"Failed to install ADDSForest" in domain_no_reboot.msg'
+    - '"Failed to run Install-ADDSForest" in domain_no_reboot.msg'
     - '"A reboot is required" in domain_no_reboot.msg'
     - domain_no_reboot.reboot_required == True
 
