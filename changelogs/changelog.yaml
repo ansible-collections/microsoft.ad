@@ -42,6 +42,24 @@ releases:
         name: ldap
         namespace: null
     release_date: '2023-05-02'
+  1.10.0:
+    changes:
+      bugfixes:
+      - microsoft.ad.domain_child - Fix return document key so it displays when using
+        the standard Ansible documentation tools.
+      - microsoft.ad.ldap - Fix issue where auth_protocol config option was never
+        used when creating the spnego client.
+      - microsoft.ad.service_account - Fix return document key so it displays when
+        using the standard Ansible documentation tools.
+      minor_changes:
+      - Add official support for Ansible 2.20
+      release_summary: Release summary for v1.10.0
+    fragments:
+    - ansible-2.20.yml
+    - fix-auth_protocol.yml
+    - release-summary.yml
+    - service_account-docs.yml
+    release_date: '2025-11-20'
   1.2.0:
     changes:
       bugfixes:
