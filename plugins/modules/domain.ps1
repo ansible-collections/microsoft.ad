@@ -124,7 +124,18 @@ catch [System.DirectoryServices.ActiveDirectory.ActiveDirectoryOperationExceptio
     $forest = $null
 }
 
-if (-not $forest) {
+# Check if the host is already a domain controller
+try {
+    Get-ADDomainController | Out-Null
+    $host_is_dc = $true
+}
+catch {
+    $host_is_dc = $null
+}
+
+# Only installing the domain if the forest does not exist or the host is not a domain controller
+# This is to avoid an issue where the domain already exists in another domain controller but the host itself is not a DC leaving the host in a limbo state
+if (-not $forest -or -not $host_is_dc) {
     $installParams = @{
         DomainName = $dns_domain_name
         SafeModeAdministratorPassword = (ConvertTo-SecureString $safe_mode_password -AsPlainText -Force)
