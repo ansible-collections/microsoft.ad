@@ -4,6 +4,26 @@ Ansible Microsoft Active Directory Release Notes
 
 .. contents:: Topics
 
+v1.10.0
+=======
+
+Release Summary
+---------------
+
+Release summary for v1.10.0
+
+Minor Changes
+-------------
+
+- Add official support for Ansible 2.20
+
+Bugfixes
+--------
+
+- microsoft.ad.domain_child - Fix return document key so it displays when using the standard Ansible documentation tools.
+- microsoft.ad.ldap - Fix issue where auth_protocol config option was never used when creating the spnego client.
+- microsoft.ad.service_account - Fix return document key so it displays when using the standard Ansible documentation tools.
+
 v1.9.2
 ======
 
