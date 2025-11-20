@@ -1,0 +1,266 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Setting list option values guide &mdash; Ansible collections  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=41de9001" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/ansible.css?v=c5b67dd2" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/antsibull-minimal.css" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/rtd-ethical-ads.css?v=289b023e" />
+
+  
+    <link rel="shortcut icon" href="../../../../_static/images/Ansible-Mark-RGB_Black.png"/>
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=7f41d439"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Migration guide" href="guide_migration.html" />
+    <link rel="prev" title="LDAP Inventory guide" href="guide_ldap_inventory.html" /><!-- extra head elements for Ansible beyond RTD Sphinx Theme -->
+
+
+
+
+</head>
+
+<body class="wy-body-for-nav"><!-- extra body elements for Ansible beyond RTD Sphinx Theme -->
+
+<div class="DocSite-globalNav ansibleNav">
+  <ul>
+    <li><a href="https://www.ansible.com/blog" target="_blank">Blog</a></li>
+    <li><a href="https://forum.ansible.com/" target="_blank">Ansible community forum</a></li>
+    <li><a href="https://docs.ansible.com/" target="_blank">Documentation</a></li>
+  </ul>
+</div>
+
+<a class="DocSite-nav" href="/" style="padding-bottom: 30px;">
+
+  <img class="DocSiteNav-logo"
+    src="../../../../_static/images/Ansible-Mark-RGB_White.png"
+    alt="Ansible Logo">
+  <div class="DocSiteNav-title">Ansible Collections Documentation</div>
+</a>
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Ansible collections
+          </a><!--- Based on https://github.com/rtfd/sphinx_rtd_theme/pull/438/files -->
+
+<div class="version">
+  
+    
+  
+</div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <label class="sr-only" for="q">Search docs:</label>
+    <input type="text" class="st-default-search-input" id="q" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+  
+              <p class="caption" role="heading"><span class="caption-text">Collections:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">Collection Index</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html">Collections in the Microsoft Namespace</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html">Microsoft.Ad</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../index.html#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#communication">Communication</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="../index.html#scenario-guides">Scenario Guides</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../index.html#plugin-index">Plugin Index</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugin indexes:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index_filter.html">Index of all Filter Plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../index_inventory.html">Index of all Inventory Plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../index_module.html">Index of all Modules</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference indexes:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../environment_variables.html">Index of all Collection Environment Variables</a></li>
+</ul>
+<!-- extra nav elements for Ansible beyond RTD Sphinx Theme -->
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Ansible collections</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Collection Index</a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Collections in the Microsoft Namespace</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Microsoft.Ad</a></li>
+      <li class="breadcrumb-item active">Setting list option values guide</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+  
+           <div itemprop="articleBody">
+             
+  <section id="setting-list-option-values-guide">
+<span id="ansible-collections-microsoft-ad-docsite-guide-list-values"></span><h1>Setting list option values guide<a class="headerlink" href="#setting-list-option-values-guide" title="Link to this heading"></a></h1>
+<p>Some AD options accept multiple values which require special rules when it comes to checking for idempotency in Ansible. This collection has been designed so that each of the modules which manage AD objects follow the same style when it comes to their options. In particular, they should all follow the style documented in this guide when it comes to options that contain multiple values like <code class="docutils literal notranslate"><span class="pre">spn</span></code>, <code class="docutils literal notranslate"><span class="pre">delegates</span></code>, etc.</p>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#add-remove-and-set" id="id1">Add, remove, and set</a></p></li>
+<li><p><a class="reference internal" href="#examples" id="id2">Examples</a></p></li>
+</ul>
+</nav>
+<section id="add-remove-and-set">
+<span id="ansible-collections-microsoft-ad-docsite-guide-list-values-something"></span><h2><a class="toc-backref" href="#id1" role="doc-backlink">Add, remove, and set</a><a class="headerlink" href="#add-remove-and-set" title="Link to this heading"></a></h2>
+<p>For each module option that manage a multi valued LDAP attribute there exists three actions:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">add</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">remove</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">set</span></code></p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">add</span></code> and <code class="docutils literal notranslate"><span class="pre">remove</span></code> option will add or remove the specified value(s) from the existing value. The <code class="docutils literal notranslate"><span class="pre">set</span></code> option will replace the existing values with what was specified in the task.
+Using an example of an AD object with the following <code class="docutils literal notranslate"><span class="pre">servicePrincipalNames</span></code> values:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">HTTP/host1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HTTP/host1.domain.com</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HTTP/host1.domain.com:443</span></code></p></li>
+</ul>
+<p>Doing <code class="docutils literal notranslate"><span class="pre">add:</span> <span class="pre">['HTTP/host1','HTTP/host2']</span></code> will add <code class="docutils literal notranslate"><span class="pre">HTTP/host2</span></code> to the existing values bringing it to:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">HTTP/host1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HTTP/host1.domain.com</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HTTP/host1.domain.com:443</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HTTP/host2</span></code></p></li>
+</ul>
+<p>Doing <code class="docutils literal notranslate"><span class="pre">remove:</span> <span class="pre">['HTTP/host1','HTTP/host3']</span></code> will remove <code class="docutils literal notranslate"><span class="pre">HTTP/host1</span></code> from the existing values bringing it to:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">HTTP/host1.domain.com</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HTTP/host1.domain.com:443</span></code></p></li>
+</ul>
+<p>Doing <code class="docutils literal notranslate"><span class="pre">set:</span> <span class="pre">['HTTP/host1',</span> <span class="pre">'HTTP/host2']</span></code> will remove any values not in that list and add values in that list but not set bringing it to:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">HTTP/host1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HTTP/host2</span></code></p></li>
+</ul>
+<p>It is possible to use <code class="docutils literal notranslate"><span class="pre">add</span></code> and <code class="docutils literal notranslate"><span class="pre">remove</span></code> together but setting <code class="docutils literal notranslate"><span class="pre">set</span></code> will always take precedence over the others.
+It is also possible to clear all the existing values by setting the <code class="docutils literal notranslate"><span class="pre">set</span></code> value to an empty list, for example <code class="docutils literal notranslate"><span class="pre">set:</span> <span class="pre">[]</span></code>.</p>
+</section>
+<section id="examples">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Examples</a><a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">add</span></code>, <code class="docutils literal notranslate"><span class="pre">remove</span></code>, and <code class="docutils literal notranslate"><span class="pre">set</span></code> options are subkeys of the module option it controls. For example the <a class="reference internal" href="../user_module.html#ansible-collections-microsoft-ad-user-module"><span class="std std-ref">microsoft.ad.user</span></a> has an option called <code class="docutils literal notranslate"><span class="pre">groups</span></code> which control the list of groups the user is a member of. To add a group to the user, simply use the <code class="docutils literal notranslate"><span class="pre">add</span></code> key like so:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">add a user to a group</span>
+<span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyUser</span>
+<span class="w">    </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">add</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Group 1</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Group 2</span>
+</pre></div>
+</div>
+<p>This will ensure the user is added to the groups <code class="docutils literal notranslate"><span class="pre">Group</span> <span class="pre">1</span></code> and <code class="docutils literal notranslate"><span class="pre">Group</span> <span class="pre">2</span></code> while also preserving the existing membership. To remove a user from a user, simple use the <code class="docutils literal notranslate"><span class="pre">remove</span></code> key like so:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">remove a user from a group</span>
+<span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyUser</span>
+<span class="w">    </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">remove</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Group 1</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Group 2</span>
+</pre></div>
+</div>
+<p>This does the opposite to add and will remove the user from <code class="docutils literal notranslate"><span class="pre">Group</span> <span class="pre">1</span></code> and <code class="docutils literal notranslate"><span class="pre">Group</span> <span class="pre">2</span></code> but it will still preserve any existing group memberships of that user. It is also possible to combine <code class="docutils literal notranslate"><span class="pre">add</span></code> and <code class="docutils literal notranslate"><span class="pre">remove</span></code> together:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">add and remove user groups</span>
+<span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyUser</span>
+<span class="w">    </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">add</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Group 1</span>
+<span class="w">      </span><span class="nt">remove</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Group 2</span>
+</pre></div>
+</div>
+<p>This will ensure the user is a member of <code class="docutils literal notranslate"><span class="pre">Group</span> <span class="pre">1</span></code> and is not a member of <code class="docutils literal notranslate"><span class="pre">Group</span> <span class="pre">2</span></code>. Like before it will not touch the existing group membership if they are not specified.</p>
+<p>The set option following the same format like so:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">set user groups</span>
+<span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyUser</span>
+<span class="w">    </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">set</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Group 1</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Group 2</span>
+</pre></div>
+</div>
+<p>This will ensure the user is only members of <code class="docutils literal notranslate"><span class="pre">Group</span> <span class="pre">1</span></code> and <code class="docutils literal notranslate"><span class="pre">Group</span> <span class="pre">2</span></code>, removing any other group not in that list. While it is possible to combine <code class="docutils literal notranslate"><span class="pre">set</span></code> with either <code class="docutils literal notranslate"><span class="pre">add</span></code> or <code class="docutils literal notranslate"><span class="pre">remove</span></code>, the module will completely ignore the values in <code class="docutils literal notranslate"><span class="pre">add</span></code> or <code class="docutils literal notranslate"><span class="pre">remove</span></code>.</p>
+<p>Finally to remove a user from all groups, use an empty list for the <code class="docutils literal notranslate"><span class="pre">set</span></code> option like so:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">remove user groups</span>
+<span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyUser</span>
+<span class="w">    </span><span class="nt">groups</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">set</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is not actually possible for user groups as it will always be a member of its primary group, it is just used for demonstration purposes.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          
+
+<footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="guide_ldap_inventory.html" class="btn btn-neutral float-left" title="LDAP Inventory guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="guide_migration.html" class="btn btn-neutral float-right" title="Migration guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Ansible contributors.</p>
+  </div>
+
+  
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script><!-- extra footer elements for Ansible beyond RTD Sphinx Theme -->
+
+</body>
+</html>
