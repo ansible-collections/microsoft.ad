@@ -43,10 +43,12 @@ def test_as_datetime_with_format() -> None:
 
 
 def test_as_datetime_from_list() -> None:
-    actual = as_datetime([133220025750000000, 133220025751000020])
+    actual = as_datetime([133220025750000000, 133220025751000020, 9223372036854775807])
+
     assert actual == [
         "2023-02-27T20:16:15.000000+0000",
         "2023-02-27T20:16:15.100002+0000",
+        "9999-12-31T00:00:00.000000+0000",
     ]
 
 
