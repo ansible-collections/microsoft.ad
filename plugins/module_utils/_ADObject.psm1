@@ -543,6 +543,9 @@ Function ConvertTo-AnsibleADDistinguishedName {
         [string]
         $Server,
 
+        [Switch]
+        $NestedGroupFlatten,
+
         [PSCredential]
         $Credential,
 
@@ -611,10 +614,17 @@ Function ConvertTo-AnsibleADDistinguishedName {
                 continue
             }
 
-            $adDN = Get-AnsibleADObject @getParams |
-                Select-Object -ExpandProperty DistinguishedName
-            if ($adDN) {
-                $results.Add($adDN)
+            $object = Get-AnsibleADObject @getParams
+            if ($object) {
+                if ($NestedGroupFlatten -and $object.ObjectClass -eq "group") {
+                    $dns = Get-ADGroupMember @getParams -Recursive | Select-Object -ExpandProperty DistinguishedName
+                }
+                else {
+                    $dns = $object | Select-Object -ExpandProperty DistinguishedName
+                }
+                foreach ($dn in $dns) {
+                    $results.Add($dn)
+                }
             }
             else {
                 $invalidIdentities.Add($getParams.Identity)
@@ -1043,6 +1053,13 @@ Function Invoke-AnsibleADObject {
         }
     )
 
+    if ($ModuleNoun -eq "ADGroup") {
+        $spec.options['flatten'] = @{
+            type = 'bool'
+            default = $false
+        }
+    }
+
     $module = [Ansible.Basic.AnsibleModule]::Create(@(), $spec)
     $module.Result.distinguished_name = $null
     $module.Result.object_guid = $null
@@ -1365,6 +1382,9 @@ Function Invoke-AnsibleADObject {
                                     Module = $module
                                     Context = "$($propInfo.Name).$($actionKvp.Key)"
                                     FailureAction = $propValue.lookup_failure_action
+                                }
+                                if ($propInfo.Name -eq 'members' -and $module.Params.flatten) {
+                                    $convertParams['NestedGroupFlatten'] = $true
                                 }
                                 $dns = $actionKvp.Value | ConvertTo-AnsibleADDistinguishedName @adParams @convertParams
                                 $compareParams[$actionKvp.Key] = @($dns)
