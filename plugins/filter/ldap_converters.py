@@ -183,6 +183,15 @@ def as_datetime(
     if isinstance(value, str):
         value = int(value)
 
+    if value >= 9223372036854775807:  # 2^63 - 1
+        max_date = datetime.datetime(
+            year=datetime.MAXYEAR,
+            month=12,
+            day=31,
+            tzinfo=datetime.timezone.utc,
+        )
+        return max_date.strftime(format)
+
     # FILETIME is 100s of nanoseconds since 1601-01-01. As Python does not
     # support nanoseconds the delta is number of microseconds.
     ft_epoch = datetime.datetime(
