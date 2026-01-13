@@ -1,0 +1,3 @@
+---
+trivial:
+  - Add AAP event query file for microsoft.ad.object_info module. This file is used by AAP to parse module output and extract node information.
