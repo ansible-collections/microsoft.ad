@@ -34,12 +34,12 @@
       - _create_1_hour_force is ansible.builtin.changed
 
       - _create_immediate.kds_root_keys | length == 1
-      - _create_immediate.kds_root_keys[0].key_id is not None
-      - _create_immediate.kds_root_keys[0].effective_time is not None
+      - _create_immediate.kds_root_keys[0].key_id | length > 0
+      - _create_immediate.kds_root_keys[0].effective_time | length > 0
 
       - _create_1_hour_force.kds_root_keys | length == 2
-      - _create_1_hour_force.kds_root_keys[0].key_id is not None
-      - _create_1_hour_force.kds_root_keys[0].effective_time is not None
+      - _create_1_hour_force.kds_root_keys[0].key_id | length > 0
+      - _create_1_hour_force.kds_root_keys[0].effective_time | length > 0
       - >-
         _create_1_hour_force.kds_root_keys[0].effective_time >
         _create_1_hour.kds_root_keys[0].effective_time
