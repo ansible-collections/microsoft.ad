@@ -1,0 +1,66 @@
+# Copyright (c) 2022 Ansible Project
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+DOCUMENTATION:
+  module: kds_root_key
+  short_description: Ensures the a KDS root key is present
+  description:
+    - Ensure that a KDS root key is present, creating one if needed.
+    - This module does not support removing a KDS root key. Microsoft warns against removing KDS root keys, since it
+      can lead to failed services and accounts.
+  options:
+    effective_time_hours:
+      description:
+        - The number of hours to wait before the key is effective.
+        - This is recommended to be set to a value greater than 0, so that the key can be replicated
+          to all domain controllers. Using a key before it has been replicated will result in an error.
+        - If set to 0, the key will be effective immediately.
+      type: int
+      default: 10
+    force:
+      description:
+        - Whether to force the creation of a new key, even if one already exists.
+        - When a new key is created, existing keys are not removed or modified.
+      type: bool
+      default: false
+
+  notes:
+    - This module must be run on a Windows target host.
+  extends_documentation_fragment:
+    - microsoft.ad.ad_authentication
+  attributes:
+    check_mode:
+      support: full
+    diff_mode:
+      support: none
+    platform:
+      platforms:
+        - windows
+  author:
+    - Mike Morency (@mikemorency)
+
+EXAMPLES: |
+  - name: Create a new KDS root key with an effective time of 10 hours, if one does not already exist
+    microsoft.ad.kds_root_key:
+      effective_time_hours: 10
+      force: false
+
+  - name: Create a new KDS root key immediately, even if one already exists
+    microsoft.ad.kds_root_key:
+      effective_time_hours: 0
+      force: true
+
+RETURN:
+  kds_root_keys:
+    description: A list of KDS root keys that exist.
+    returned: always
+    type: list
+    elements: dict
+    sample:
+      - key_id: 12345678-1234-1234-1234-123456789012
+        effective_time: "2026-01-01 12:00:00"
+  created_kds_root_key:
+    description: The ID of the newly created KDS root key, if one was created.
+    returned: when the key is created
+    type: str
+    sample: 12345678-1234-1234-1234-123456789012

@@ -1,0 +1,3 @@
+---
+minor_changes:
+  - microsoft.ad.kds_root_key - Add a new module that can be used to create a KDS root key.

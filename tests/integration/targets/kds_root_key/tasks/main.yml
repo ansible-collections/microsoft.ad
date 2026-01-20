@@ -1,0 +1,45 @@
+- name: Create a KDS root key effective immediately
+  microsoft.ad.kds_root_key:
+    effective_time_hours: 0
+  register: _create_immediate
+
+- name: Create a KDS root key effective immediately - idempotence
+  microsoft.ad.kds_root_key:
+    effective_time_hours: 0
+  register: _create_immediate_idem
+
+- name: Create a KDS root key effective in 1 hour
+  microsoft.ad.kds_root_key:
+    effective_time_hours: 1
+  register: _create_1_hour
+
+- name: Create a KDS root key effective in 1 hour - idempotence
+  microsoft.ad.kds_root_key:
+    effective_time_hours: 1
+  register: _create_1_hour_idem
+
+- name: Force create a KDS root key effective in 1 hour
+  microsoft.ad.kds_root_key:
+    effective_time_hours: 1
+    force: true
+  register: _create_1_hour_force
+
+- name: Check module outputs
+  ansible.builtin.assert:
+    that:
+      - _create_immediate is ansible.builtin.changed
+      - _create_immediate_idem is not ansible.builtin.changed
+      - _create_1_hour is not ansible.builtin.changed
+      - _create_1_hour_idem is not ansible.builtin.changed
+      - _create_1_hour_force is ansible.builtin.changed
+
+      - _create_immediate.kds_root_keys | length == 1
+      - _create_immediate.kds_root_keys[0].key_id is not None
+      - _create_immediate.kds_root_keys[0].effective_time is not None
+
+      - _create_1_hour_force.kds_root_keys | length == 2
+      - _create_1_hour_force.kds_root_keys[0].key_id is not None
+      - _create_1_hour_force.kds_root_keys[0].effective_time is not None
+      - >-
+        _create_1_hour_force.kds_root_keys[0].effective_time >
+        _create_1_hour.kds_root_keys[0].effective_time

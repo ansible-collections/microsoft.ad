@@ -9,6 +9,60 @@
 
 #AnsibleRequires -CSharpUtil Ansible.Basic
 
+Function Initialize-ADConnection {
+    <#
+    .SYNOPSIS
+    Common code to initialize an AD connection, using the various authentication params that
+    a user may specify in a module.
+
+    .PARAMETER module
+    The Ansible module object that should be used to find authentication params and
+    updated with the initialized AD connection.
+    #>
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]
+        $module
+    )
+    $adParams = @{}
+    $serverCredentials = @{}
+    foreach ($domainCred in $module.Params.domain_credentials) {
+        $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @(
+            $domainCred.username,
+            (ConvertTo-SecureString -AsPlainText -Force -String $domainCred.password)
+        )
+
+        if ($domainCred.name) {
+            $serverCredentials[$domainCred.name] = $cred
+        }
+        elseif ($adParams.Credential) {
+            $module.FailJson("Cannot specify default domain_credentials with domain_username and domain_password")
+        }
+        else {
+            $adParams.Credential = $cred
+        }
+    }
+    $module | Add-Member -MemberType NoteProperty -Name ServerCredentials -Value $serverCredentials
+
+    if ($module.Params.domain_server) {
+        $adParams.Server = $module.Params.domain_server
+    }
+
+    if ($module.Params.domain_username) {
+        if ($adParams.Credential) {
+            $msg = "Cannot specify domain_username/domain_password and domain_credentials with an entry that has no name."
+            $module.FailJson($msg)
+        }
+        $adParams.Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @(
+            $module.Params.domain_username,
+            (ConvertTo-SecureString -AsPlainText -Force -String $module.Params.domain_password)
+        )
+        $module | Add-Member -MemberType NoteProperty -Name DefaultCredentialSet -Value $true
+    }
+
+    return $adParams
+}
 Function Compare-AnsibleADAttribute {
     <#
     .SYNOPSIS
@@ -1047,41 +1101,7 @@ Function Invoke-AnsibleADObject {
     $module.Result.distinguished_name = $null
     $module.Result.object_guid = $null
 
-    $adParams = @{}
-    $serverCredentials = @{}
-    foreach ($domainCred in $module.Params.domain_credentials) {
-        $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @(
-            $domainCred.username,
-            (ConvertTo-SecureString -AsPlainText -Force -String $domainCred.password)
-        )
-
-        if ($domainCred.name) {
-            $serverCredentials[$domainCred.name] = $cred
-        }
-        elseif ($adParams.Credential) {
-            $module.FailJson("Cannot specify default domain_credentials with domain_username and domain_password")
-        }
-        else {
-            $adParams.Credential = $cred
-        }
-    }
-    $module | Add-Member -MemberType NoteProperty -Name ServerCredentials -Value $serverCredentials
-
-    if ($module.Params.domain_server) {
-        $adParams.Server = $module.Params.domain_server
-    }
-
-    if ($module.Params.domain_username) {
-        if ($adParams.Credential) {
-            $msg = "Cannot specify domain_username/domain_password and domain_credentials with an entry that has no name."
-            $module.FailJson($msg)
-        }
-        $adParams.Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList @(
-            $module.Params.domain_username,
-            (ConvertTo-SecureString -AsPlainText -Force -String $module.Params.domain_password)
-        )
-        $module | Add-Member -MemberType NoteProperty -Name DefaultCredentialSet -Value $true
-    }
+    $adParams = Initialize-ADConnection -Module $module
 
     $defaultObjectPath = & $DefaultPath $module $adParams
     $getCommand = Get-Command -Name "Get-$ModuleNoun" -Module ActiveDirectory
@@ -1531,6 +1551,7 @@ $exportMembers = @{
         "ConvertTo-AnsibleADDistinguishedName"
         "Get-AnsibleADObject"
         "Invoke-AnsibleADObject"
+        "Initialize-ADConnection"
     )
 }
 Export-ModuleMember @exportMembers
