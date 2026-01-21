@@ -130,7 +130,7 @@ if ((-not $existing_kds_keys) -or $force) {
     $module.Result.changed = $true
     if (-not $module.CheckMode) {
         try {
-            $module.Result.created_kds_root_key = (Add-KdsRootKey @effctive_time_cmdlet_param).KeyId
+            $module.Result.created_kds_root_key = Add-KdsRootKey @effctive_time_cmdlet_param
         }
         catch {
             $module.FailJson("Failed to create KDS root key: $_", $_)
