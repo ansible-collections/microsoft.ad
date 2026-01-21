@@ -45,5 +45,5 @@
         (_force_existing_key.effective_time | ansible.builtin.to_datetime)
   vars:
     _datetime_str: "%A, %B %d, %Y %I:%M:%S %p"
-    _force_created_key: "{{ _create_1_hour_force.kds_root_keys | selectattr('id', 'equalto', _create_1_hour_force.created_kds_root_key) | first }}"
-    _force_existing_key: "{{ _create_1_hour_force.kds_root_keys | rejectattr('id', 'equalto', _create_1_hour_force.created_kds_root_key) | first }}"
+    _force_created_key: "{{ _create_1_hour_force.kds_root_keys | selectattr('key_id', 'equalto', _create_1_hour_force.created_kds_root_key) | first }}"
+    _force_existing_key: "{{ _create_1_hour_force.kds_root_keys | rejectattr('key_id', 'equalto', _create_1_hour_force.created_kds_root_key) | first }}"
