@@ -105,6 +105,7 @@ $spec = @{
 $module = [Ansible.Basic.AnsibleModule]::Create($args, $spec)
 $module.Result.kds_root_keys = @()
 $module.Result.created_kds_root_key = $null
+$module.Result.current_time = (Get-Date).ToString()
 $module.Result.changed = $false
 
 $effective_time_hours = $module.Params.effective_time_hours
