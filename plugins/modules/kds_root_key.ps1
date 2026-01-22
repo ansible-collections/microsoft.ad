@@ -132,7 +132,6 @@ if ((-not $existing_kds_keys) -or $force) {
         try {
             $new_key = Add-KdsRootKey @effctive_time_cmdlet_param
             $module.Result.created_kds_root_key = $new_key
-            $module.Result.created_kds_root_key_id = $new_key.KeyId.Guid.ToString()
         }
         catch {
             $module.FailJson("Failed to create KDS root key: $_", $_)
