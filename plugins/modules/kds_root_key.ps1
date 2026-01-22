@@ -130,18 +130,9 @@ if ((-not $existing_kds_keys) -or $force) {
     $module.Result.changed = $true
     if (-not $module.CheckMode) {
         try {
-            Add-KdsRootKey @effctive_time_cmdlet_param
-            $new_key_info = Get-FormattedKdsRootKeyInfo
-
-            foreach ($key in $new_key_info) {
-                if ($existing_kds_keys.key_id -contains $new_key_info.key_id) {
-                    continue
-                }
-                else {
-                    $module.Result.created_kds_root_key = $key.key_id
-                    break
-                }
-            }
+            $new_key = Add-KdsRootKey @effctive_time_cmdlet_param
+            $module.Result.created_kds_root_key = $new_key
+            $module.Result.created_kds_root_key_id = $new_key.KeyId.Guid.ToString()
         }
         catch {
             $module.FailJson("Failed to create KDS root key: $_", $_)
