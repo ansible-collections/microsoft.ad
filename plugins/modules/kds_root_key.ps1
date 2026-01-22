@@ -105,7 +105,6 @@ $spec = @{
 $module = [Ansible.Basic.AnsibleModule]::Create($args, $spec)
 $module.Result.kds_root_keys = @()
 $module.Result.created_kds_root_key = $null
-$module.Result.current_time = (Get-Date).ToString()
 $module.Result.changed = $false
 
 $effective_time_hours = $module.Params.effective_time_hours
@@ -113,7 +112,9 @@ $force = $module.Params.force
 
 Initialize-ADConnection -Module $module > $null
 if ($effective_time_hours -eq 0) {
-    $effctive_time_cmdlet_param = @{ EffectiveImmediately = $true }
+    # Note: The EffectiveImmediately parameter does not seem to work as expected.
+    # https://learn.microsoft.com/en-us/answers/questions/441587/i-ran-add-kdsrootkey-effectiveimmediately-and-now
+    $effctive_time_cmdlet_param = @{ EffectiveTime = (Get-Date).AddHours(-10) }
 }
 else {
     $effctive_time_cmdlet_param = @{ EffectiveTime = (Get-Date).AddHours($effective_time_hours) }
