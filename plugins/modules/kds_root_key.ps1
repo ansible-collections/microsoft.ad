@@ -26,6 +26,9 @@ $spec = @{
         }
     }
     supports_check_mode = $true
+    required_if = @(
+        , @('state', 'absent', @('key_id'))
+    )
 }
 
 
