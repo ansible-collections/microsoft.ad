@@ -1,13 +1,11 @@
-# Copyright (c) 2022 Ansible Project
+# Copyright (c) 2026 Ansible Project
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 DOCUMENTATION:
   module: kds_root_key
   short_description: Ensures the a KDS root key is present
   description:
-    - Ensure that a KDS root key is present, creating one if needed.
-    - This module does not support removing a KDS root key. Microsoft warns against removing KDS root keys, since it
-      can lead to failed services and accounts.
+    - Ensure that a KDS root key is present or absent, performing changes only when necessary.
   options:
     effective_time_hours:
       description:
@@ -23,12 +21,24 @@ DOCUMENTATION:
         - When a new key is created, existing keys are not removed or modified.
       type: bool
       default: false
+    key_id:
+      description:
+        - The ID of the key that should be removed. This is only used when O(state) is C(absent).
+      type: str
+    state:
+      description:
+        - Whether to ensure a key is present or absent.
+        - Note that Microsoft warns against removing KDS root keys, since it
+          can lead to failed services and accounts.
+      type: str
+      default: present
+      choices: [present, absent]
 
   notes:
     - This module must be run on a Windows target host.
+    - This module requires the Domain Administrator or Enterprise Administrator role to manage KDS keys.
   extends_documentation_fragment:
     - ansible.builtin.action_common_attributes
-    - microsoft.ad.ad_authentication
   attributes:
     check_mode:
       support: full
@@ -52,16 +62,8 @@ EXAMPLES: |
       force: true
 
 RETURN:
-  kds_root_keys:
-    description: A list of KDS root keys that exist.
-    returned: always
-    type: list
-    elements: dict
-    sample:
-      - key_id: 12345678-1234-1234-1234-123456789012
-        effective_time: "2026-01-01 12:00:00"
-  created_kds_root_key:
-    description: The ID of the newly created KDS root key, if one was created.
-    returned: when the key is created
+  kds_root_key:
+    description: The ID of the newly created or removed KDS root key.
+    returned: on change
     type: str
     sample: 12345678-1234-1234-1234-123456789012

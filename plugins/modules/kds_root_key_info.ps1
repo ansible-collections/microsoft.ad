@@ -52,6 +52,8 @@ $module = [Ansible.Basic.AnsibleModule]::Create($args, $spec)
 $module.Result.changed = $false
 $module.Result.kds_root_keys = @()
 
+$search_key_id = $module.Params.key_id
+
 
 try {
     foreach ($key in $(Get-KdsRootKey)) {
@@ -65,9 +67,9 @@ try {
             effective_time = $time
         }
 
-        if ((-not [string]::IsNullOrWhiteSpace($searchKeyId))) {
+        if ((-not [string]::IsNullOrWhiteSpace($search_key_id))) {
             # only emit the key that matches the specified ID
-            if ($searchKeyId -eq $found_key_id) {
+            if ($search_key_id -eq $found_key_id) {
                 $module.Result.kds_root_keys += $found_key
                 break
             }
