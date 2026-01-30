@@ -83,9 +83,9 @@
       microsoft.ad.kds_root_key:
         key_id: "{{ _create_immediate.kds_root_key }}"
         state: absent
-      when: _create_immediate is ansible.builtin.changed and _create_immediate.kds_root_key is defined
+      when: _create_immediate is defined and _create_immediate is ansible.builtin.changed
     - name: Remove second key
       microsoft.ad.kds_root_key:
         key_id: "{{ _create_1_hour_force.kds_root_key }}"
         state: absent
-      when: _create_1_hour_force is ansible.builtin.changed and _create_1_hour_force.kds_root_key is defined
+      when: _create_1_hour_force is defined and _create_1_hour_force is ansible.builtin.changed
