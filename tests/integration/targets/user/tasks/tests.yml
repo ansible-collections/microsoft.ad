@@ -510,6 +510,7 @@
   user:
     name: MyUser
     state: present
+    account_locked: False
     city: Brisbane
     company: Red Hat
     country: au
@@ -563,6 +564,7 @@
   user:
     name: MyUser
     state: present
+    account_locked: False
     city: Brisbane
     company: Red Hat
     country: au
@@ -667,13 +669,13 @@
     - create_user_actual.objects[0].l == 'Brisbane'
     - create_user_actual.objects[0].mail == 'user@EMAIL.COM'
     # Domain Users is the primaryGroupID entry
-    - create_user_actual.objects[0].memberOf == 'CN=Domain Admins,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - create_user_actual.objects[0].memberOf == ['CN=Domain Admins,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext]
     - create_user_actual.objects[0].postalcode == '4000'
     - create_user_actual.objects[0].primaryGroupID == 513  # Domain Users
     - create_user_actual.objects[0].ProtectedFromAccidentalDeletion == false
     - create_user_actual.objects[0].pwdLastSet > 0
     - create_user_actual.objects[0].sAMAccountName == 'MyUserSam'
-    - create_user_actual.objects[0].servicePrincipalName == 'HTTP/MyUser'
+    - create_user_actual.objects[0].servicePrincipalName == ['HTTP/MyUser']
     - create_user_actual.objects[0].sn == 'LastName'
     - create_user_actual.objects[0].st == 'QLD'
     - create_user_actual.objects[0].streetaddress == 'Main'
@@ -685,6 +687,7 @@
   user:
     name: MyUser
     state: present
+    account_locked: False
     city: Brisbane
     company: Red Hat
     country: au
@@ -836,13 +839,13 @@
     - update_user_check_actual.objects[0].l == 'Brisbane'
     - update_user_check_actual.objects[0].mail == 'user@EMAIL.COM'
     # Domain Users is the primaryGroupID entry
-    - update_user_check_actual.objects[0].memberOf == 'CN=Domain Admins,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
+    - update_user_check_actual.objects[0].memberOf == ['CN=Domain Admins,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext]
     - update_user_check_actual.objects[0].postalcode == '4001'
     - update_user_check_actual.objects[0].primaryGroupID == 513  # Domain Users
     - update_user_check_actual.objects[0].ProtectedFromAccidentalDeletion == false
     - update_user_check_actual.objects[0].pwdLastSet > 0
     - update_user_check_actual.objects[0].sAMAccountName == 'MyUserSam'
-    - update_user_check_actual.objects[0].servicePrincipalName == 'HTTP/MyUser'
+    - update_user_check_actual.objects[0].servicePrincipalName == ['HTTP/MyUser']
     - update_user_check_actual.objects[0].sn == 'LastName'
     - update_user_check_actual.objects[0].st == 'QLD'
     - update_user_check_actual.objects[0].streetaddress == 'Main'
@@ -955,7 +958,7 @@
     - update_user_actual.objects[0].primaryGroupID == 513  # Domain Users
     - update_user_actual.objects[0].pwdLastSet == create_user_actual.objects[0].pwdLastSet
     - update_user_actual.objects[0].sAMAccountName == 'myUserSam'
-    - update_user_actual.objects[0].servicePrincipalName == 'HTTP/MyUser'
+    - update_user_actual.objects[0].servicePrincipalName == ['HTTP/MyUser']
     - update_user_actual.objects[0].sn == 'lastName'
     - update_user_actual.objects[0].st == 'NY'
     - update_user_actual.objects[0].streetaddress == 'main'
@@ -1083,7 +1086,7 @@
     - set_groups is changed
     - set_groups.warnings | length == 1
     - '"the primary group of the user, skipping" in set_groups.warnings[0]'
-    - set_groups_actual.objects[0].memberOf == "CN=Domain Admins,CN=Users," ~ setup_domain_info.output[0].defaultNamingContext
+    - set_groups_actual.objects[0].memberOf == ["CN=Domain Admins,CN=Users," ~ setup_domain_info.output[0].defaultNamingContext]
     - set_groups_actual.objects[0].primaryGroupID == 513  # Domain Users
 
 - name: fail to add group that is missing
@@ -1095,7 +1098,8 @@
       - Invalid
   register: fail_missing_group
   failed_when:
-  - '"Failed to locate group Invalid: Cannot find an object with identity" not in fail_missing_group.msg'
+  - >-
+    "Failed to find the AD object DNs for groups.add. Invalid identities: 'Invalid'" not in fail_missing_group.msg
 
 - name: warn on group that is missing
   user:
@@ -1104,7 +1108,7 @@
     groups:
       add:
       - Invalid
-      missing_behaviour: warn
+      lookup_failure_action: warn
   register: warn_missing_group
 
 - name: assert warn on group that is missing
@@ -1112,7 +1116,8 @@
     that:
     - not warn_missing_group is changed
     - warn_missing_group.warnings | length == 1
-    - '"Failed to locate group Invalid but continuing on" in warn_missing_group.warnings[0]'
+    - >-
+      "Failed to find the AD object DNs for groups.add. Ignoring invalid identities: 'Invalid'" in warn_missing_group.warnings[0]
 
 - name: ignore on group that is missing
   user:
@@ -1120,7 +1125,7 @@
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     groups:
       add:
-      - Invalid
+      - name: Invalid
       missing_behaviour: ignore
   register: ignore_missing_group
 
@@ -1136,7 +1141,7 @@
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
     groups:
       remove:
-      - domain admins
+      - name: domain admins
       - Enterprise Admins
   register: groups_remove
 
@@ -1177,7 +1182,7 @@
   assert:
     that:
     - groups_add is changed
-    - groups_add_actual.objects[0].memberOf == "CN=Domain Admins,CN=Users," ~ setup_domain_info.output[0].defaultNamingContext
+    - groups_add_actual.objects[0].memberOf == ["CN=Domain Admins,CN=Users," ~ setup_domain_info.output[0].defaultNamingContext]
     - groups_add_actual.objects[0].primaryGroupID == 513  # Domain Users
 
 - name: set spns

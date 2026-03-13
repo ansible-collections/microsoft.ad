@@ -20,6 +20,9 @@ $spec = @{
         domain_ou_path = @{
             type = 'str'
         }
+        domain_server = @{
+            type = 'str'
+        }
         hostname = @{
             type = 'str'
         }
@@ -30,6 +33,10 @@ $spec = @{
         reboot = @{
             default = $false
             type = 'bool'
+        }
+        reboot_timeout = @{
+            default = 600
+            type = 'int'
         }
         state = @{
             choices = 'domain', 'workgroup'
@@ -69,6 +76,7 @@ $domainCredential = if ($module.Params.domain_admin_user) {
     )
 }
 $domainOUPath = $module.Params.domain_ou_path
+$domainServer = $module.Params.domain_server
 $hostname = $module.Params.hostname
 $state = $module.Params.state
 $workgroupName = $module.Params.workgroup_name
@@ -143,7 +151,7 @@ Function Get-CurrentState {
     }
 
     [PSCustomObject]@{
-        HostName = $env:COMPUTERNAME
+        HostName = [System.Net.Dns]::GetHostName()
         PartOfDomain = $cs.PartOfDomain
         DnsDomainName = $domainName
         WorkgroupName = $cs.Workgroup
@@ -197,17 +205,49 @@ if ($state -eq 'domain') {
                 WhatIf = $module.CheckMode
             }
             if ($hostname -ne $currentState.HostName) {
-                $joinParams.NewName = $hostname
-
-                # By setting this here, the Rename-Computer call is skipped as
-                # joining the domain will rename the host for us.
+                $renameParams = @{
+                    NewName = $hostname
+                    WhatIf = $module.CheckMode
+                    Force = $true
+                }
+                Rename-Computer @renameParams
+                # Update this now to reflect the new name
                 $hostname = $currentState.HostName
+
+                $module.Result.changed = $true
+                $module.Result.reboot_required = $true
+
+                # Note: AccountCreate is default behavior, but needs included when Options is set
+                $joinParams.Options = 'AccountCreate,JoinWithNewName'
             }
             if ($domainOUPath) {
                 $joinParams.OUPath = $domainOUPath
             }
+            if ($domainServer) {
+                $joinParams.Server = $domainServer
+            }
 
-            Add-Computer @joinParams
+            try {
+                Add-Computer @joinParams
+            }
+            catch {
+                $failMsg = [string]$_
+
+                # The error if the domain_ou_path does not exist is a bit
+                # vague, we try to catch that specific error type and provide
+                # a more helpful hint to what is wrong. As the exception does
+                # not have an error code to check, we compare the Win32 error
+                # code message with a localized variant for
+                # ERROR_FILE_NOT_FOUND. .NET Framework does not end with .
+                # whereas .NET 5+ does so we use regex to match both patterns.
+                # https://github.com/ansible-collections/microsoft.ad/issues/88
+                $fileNotFound = [System.ComponentModel.Win32Exception]::new(2).Message
+                if ($_.Exception.Message -match ".*$([Regex]::Escape($fileNotFound))\.?`$") {
+                    $failMsg += " Check domain_ou_path is pointing to a valid OU in the target domain."
+                }
+
+                $module.FailJson($failMsg, $_)
+            }
 
             $module.Result.changed = $true
             $module.Result.reboot_required = $true

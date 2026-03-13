@@ -76,15 +76,61 @@ options:
     - The display name of the AD object to set.
     - This is the value of the C(displayName) LDAP attribute.
     type: str
+  domain_credentials:
+    description:
+    - Specifies the credentials that should be used when using the server
+      specified by I(name).
+    - To specify credentials for the default domain server, use an entry
+      without the I(name) key or use the I(domain_username) and
+      I(domain_password) option.
+    - This can be set under the R(play's module defaults,module_defaults_groups)
+      under the C(group/microsoft.ad.domain) group.
+    - See R(AD authentication in modules,ansible_collections.microsoft.ad.docsite.guide_ad_module_authentication)
+      for more information.
+    default: []
+    type: list
+    elements: dict
+    suboptions:
+      name:
+        description:
+        - The name of the server these credentials are for.
+        - This value should correspond to the value used in other options that
+          specify a custom server to use, for example an option that references
+          an AD identity located on a different AD server.
+        - This key can be omitted in one entry to specify the default
+          credentials to use when a server is not specified instead of using
+          I(domain_username) and I(domain_password).
+        type: str
+      username:
+        description:
+        - The username to use when connecting to the server specified by
+          I(name).
+        type: str
+        required: true
+      password:
+        description:
+        - The password to use when connecting to the server specified by
+          I(name).
+        type: str
+        required: true
   domain_password:
     description:
     - The password for I(domain_username).
+    - The I(domain_credentials) sub entry without a I(name) key can also be
+      used to specify the credentials for the default domain authentication.
+    - This can be set under the R(play's module defaults,module_defaults_groups)
+      under the C(group/microsoft.ad.domain) group.
     type: str
   domain_server:
     description:
     - Specified the Active Directory Domain Services instance to connect to.
     - Can be in the form of an FQDN or NetBIOS name.
     - If not specified then the value is based on the default domain of the computer running PowerShell.
+    - Custom credentials can be specified under a I(domain_credentials) entry
+      without a I(name) key or through I(domain_username) and
+      I(domain_password).
+    - This can be set under the R(play's module defaults,module_defaults_groups)
+      under the C(group/microsoft.ad.domain) group.
     type: str
   domain_username:
     description:
@@ -92,29 +138,37 @@ options:
     - If this is not set then the user that is used for authentication will be the connection user.
     - Ansible will be unable to use the connection user unless auth is Kerberos with credential delegation or CredSSP,
       or become is used on the task.
+    - The I(domain_credentials) sub entry without a I(name) key can also be
+      used to specify the credentials for the default domain authentication.
+    - This can be set under the R(play's module defaults,module_defaults_groups)
+      under the C(group/microsoft.ad.domain) group.
     type: str
   identity:
     description:
     - The identity of the AD object used to find the AD object to manage.
-    - Must be specified if I(name) is not set, when trying to rename the object
-      with a new I(name), or when trying to move the object into a different
-      I(path).
+    - This must be specified if; I(name) is not set, when trying to rename the
+      object with a new I(name), or when trying to move the object into a
+      different I(path).
     - The identity can be in the form of a GUID representing the C(objectGUID)
       value, the C(userPrincipalName), C(sAMAccountName), C(objectSid), or
       C(distinguishedName).
-    - If omitted, the AD object to managed is selected by the
+    - If omitted, the AD object to manage is selected by the
       C(distinguishedName) using the format C(CN={{ name }},{{ path }}). If
       I(path) is not defined, the C(defaultNamingContext) is used instead.
+    - When using the M(microsoft.ad.computer) module, the identity will
+      automatically append C($) to the end of the C(sAMAccountName) if the
+      provided value did not result in a match and did not already have a C($)
+      at the end.
     type: str
   name:
     description:
-    - The C(name) of the AD object to manage.
-    - If I(identity) is specified, and the name of the object it found does not
-      match this value, the object will be renamed.
-    - This if I(identity) must be set to find the object to manage.
-    - This is not always going to be the same as the C(sAMAccountName) for user
-      objects. It is strictly the C(name) of the object in the path specified.
-      Use I(identity) to select an object to manage by C(sAMAccountName).
+    - The C(name) of the AD object to manage, this is not the C(sAMAccountName)
+      of the object but the LDAP C(cn) or C(name) entry of the object in the
+      path specified. Use I(identity) to select an object to manage by its
+      C(sAMAccountName).
+    - If I(identity) is specified, and the name of the object found by that
+      identity does not match this value, the object will be renamed.
+    - This must be specified if I(identity) is not set.
     type: str
   path:
     description:
@@ -128,8 +182,8 @@ options:
     - The modules M(microsoft.ad.computer), M(microsoft.ad.user), and
       M(microsoft.ad.group) have their own default path that is
       configured on the Active Directory domain controller.
-    - This can be set to C(microsoft.ad.default_path) which will equal the
-      default value used when creating a new object.
+    - This can be set to the literal value C(microsoft.ad.default_path) which
+      will equal the default value used when creating a new object.
     type: str
   protect_from_deletion:
     description:

@@ -1,0 +1,596 @@
+- name: create test object in parent domain with domain_username creds - check mode
+  microsoft.ad.user:
+    name: ParentUser1
+    path: '{{ parent_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_server: '{{ domain_realm }}'
+    domain_username: '{{ domain_user_upn }}'
+    domain_password: '{{ domain_password }}'
+  register: user_with_creds1_check
+  check_mode: true
+  delegate_to: CHILD
+
+- name: get result of create test object in parent domain with domain_username creds - check mode
+  microsoft.ad.object_info:
+    identity: CN=ParentUser1,{{ parent_ou }}
+  register: user_with_creds1_check_actual
+  delegate_to: PARENT
+
+- name: assert create test object in parent domain with domain_username creds - check mode
+  assert:
+    that:
+    - user_with_creds1_check is changed
+    - user_with_creds1_check.distinguished_name == "CN=ParentUser1," ~ parent_ou
+    - user_with_creds1_check_actual.objects == []
+
+- name: create test object in parent domain with domain_username creds
+  microsoft.ad.user:
+    name: ParentUser1
+    path: '{{ parent_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_server: '{{ domain_realm }}'
+    domain_username: '{{ domain_user_upn }}'
+    domain_password: '{{ domain_password }}'
+  register: user_with_creds1
+  delegate_to: CHILD
+
+- name: get result of create test object in parent domain with domain_username creds
+  microsoft.ad.object_info:
+    identity: CN=ParentUser1,{{ parent_ou }}
+  register: user_with_creds1_actual
+  delegate_to: PARENT
+
+- name: assert create test object in parent domain with domain_username creds
+  assert:
+    that:
+    - user_with_creds1 is changed
+    - user_with_creds1.distinguished_name == "CN=ParentUser1," ~ parent_ou
+    - user_with_creds1_actual.objects | count == 1
+    - user_with_creds1_actual.objects[0].ObjectGUID == user_with_creds1.object_guid
+    - user_with_creds1_actual.objects[0].DistinguishedName == user_with_creds1.distinguished_name
+
+- name: create test object in parent domain with domain_username creds - idempotent
+  microsoft.ad.user:
+    name: ParentUser1
+    path: '{{ parent_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_server: '{{ domain_realm }}'
+    domain_username: '{{ domain_user_upn }}'
+    domain_password: '{{ domain_password }}'
+  register: user_with_creds1_again
+  delegate_to: CHILD
+
+- name: assert create test object in parent domain with domain_username creds - idempotent
+  assert:
+    that:
+    - not user_with_creds1_again is changed
+    - user_with_creds1_again.distinguished_name == user_with_creds1.distinguished_name
+    - user_with_creds1_again.object_guid == user_with_creds1.object_guid
+
+- name: create test object in parent domain with domain_credentials creds - check mode
+  microsoft.ad.user:
+    name: ParentUser2
+    path: '{{ parent_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_server: '{{ domain_realm }}'
+    domain_credentials:
+    - username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+  register: user_with_creds2_check
+  check_mode: true
+  delegate_to: CHILD
+
+- name: get result of create test object in parent domain with domain_credentials creds - check mode
+  microsoft.ad.object_info:
+    identity: CN=ParentUser2,{{ parent_ou }}
+  register: user_with_creds2_check_actual
+  delegate_to: PARENT
+
+- name: assert create test object in parent domain with domain_credentials creds - check mode
+  assert:
+    that:
+    - user_with_creds2_check is changed
+    - user_with_creds2_check.distinguished_name == "CN=ParentUser2," ~ parent_ou
+    - user_with_creds2_check_actual.objects == []
+
+- name: create test object in parent domain with domain_credentials creds
+  microsoft.ad.user:
+    name: ParentUser2
+    path: '{{ parent_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_server: '{{ domain_realm }}'
+    domain_credentials:
+    - username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+  register: user_with_creds2
+  delegate_to: CHILD
+
+- name: get result of create test object in parent domain with domain_credentials creds
+  microsoft.ad.object_info:
+    identity: CN=ParentUser2,{{ parent_ou }}
+  register: user_with_creds2_actual
+  delegate_to: PARENT
+
+- name: assert create test object in parent domain with domain_credentials creds
+  assert:
+    that:
+    - user_with_creds2 is changed
+    - user_with_creds2.distinguished_name == "CN=ParentUser2," ~ parent_ou
+    - user_with_creds2_actual.objects | count == 1
+    - user_with_creds2_actual.objects[0].ObjectGUID == user_with_creds2.object_guid
+    - user_with_creds2_actual.objects[0].DistinguishedName == user_with_creds2.distinguished_name
+
+- name: create test object in parent domain with domain_credentials creds - idempotent
+  microsoft.ad.user:
+    name: ParentUser2
+    path: '{{ parent_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_server: '{{ domain_realm }}'
+    domain_credentials:
+    - username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+  register: user_with_creds2_again
+  delegate_to: CHILD
+
+- name: assert create test object in parent domain with domain_credentials creds - idempotent
+  assert:
+    that:
+    - not user_with_creds2_again is changed
+    - user_with_creds2_again.distinguished_name == user_with_creds2.distinguished_name
+    - user_with_creds2_again.object_guid == user_with_creds2.object_guid
+
+- name: edit user with domain_username creds - check mode
+  microsoft.ad.user:
+    name: ParentUser1
+    path: '{{ parent_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_server: '{{ domain_realm }}'
+    domain_username: '{{ domain_user_upn }}'
+    domain_password: '{{ domain_password }}'
+    description: User Description
+    spn:
+      set:
+      - HTTP/ParentUser1
+    attributes:
+      set:
+        comment: My comment
+  register: set_with_creds1_check
+  delegate_to: CHILD
+  check_mode: true
+
+- name: get result of set user with domain_username creds - check mode
+  microsoft.ad.object_info:
+    identity: '{{ user_with_creds1.object_guid }}'
+    properties:
+    - comment
+    - Description
+    - servicePrincipalName
+  register: set_with_creds1_check_actual
+  delegate_to: PARENT
+
+- name: assert set user with domain_username creds - check mode
+  assert:
+    that:
+    - set_with_creds1_check is changed
+    - set_with_creds1_check.distinguished_name == user_with_creds1.distinguished_name
+    - set_with_creds1_check.object_guid == user_with_creds1.object_guid
+    - set_with_creds1_check_actual.objects[0].Description == None
+    - set_with_creds1_check_actual.objects[0].DistinguishedName == user_with_creds1.distinguished_name
+    - set_with_creds1_check_actual.objects[0].Name == 'ParentUser1'
+    - set_with_creds1_check_actual.objects[0].ObjectGUID == user_with_creds1.object_guid
+    - set_with_creds1_check_actual.objects[0].comment == None
+    - set_with_creds1_check_actual.objects[0].servicePrincipalName == None
+
+- name: edit user with domain_username creds
+  microsoft.ad.user:
+    name: ParentUser1
+    path: '{{ parent_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_server: '{{ domain_realm }}'
+    domain_username: '{{ domain_user_upn }}'
+    domain_password: '{{ domain_password }}'
+    description: User Description
+    spn:
+      set:
+      - HTTP/ParentUser1
+    attributes:
+      set:
+        comment: My comment
+  register: set_with_creds1
+  delegate_to: CHILD
+
+- name: get result of set user with domain_username creds
+  microsoft.ad.object_info:
+    identity: '{{ user_with_creds1.object_guid }}'
+    properties:
+    - comment
+    - Description
+    - servicePrincipalName
+  register: set_with_creds1_actual
+  delegate_to: PARENT
+
+- name: assert set user with domain_username creds
+  assert:
+    that:
+    - set_with_creds1 is changed
+    - set_with_creds1.distinguished_name == user_with_creds1.distinguished_name
+    - set_with_creds1.object_guid == user_with_creds1.object_guid
+    - set_with_creds1_actual.objects[0].Description == "User Description"
+    - set_with_creds1_actual.objects[0].DistinguishedName == user_with_creds1.distinguished_name
+    - set_with_creds1_actual.objects[0].Name == 'ParentUser1'
+    - set_with_creds1_actual.objects[0].ObjectGUID == user_with_creds1.object_guid
+    - set_with_creds1_actual.objects[0].comment == "My comment"
+    - set_with_creds1_actual.objects[0].servicePrincipalName == ["HTTP/ParentUser1"]
+
+- name: edit user with domain_credentials creds - check mode
+  microsoft.ad.user:
+    name: ParentUser2
+    path: '{{ parent_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_server: '{{ domain_realm }}'
+    domain_credentials:
+    - username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+    description: User Description
+    spn:
+      set:
+      - HTTP/ParentUser2
+    attributes:
+      set:
+        comment: My comment
+  register: set_with_creds2_check
+  delegate_to: CHILD
+  check_mode: true
+
+- name: get result of set user with domain_credentials creds - check mode
+  microsoft.ad.object_info:
+    identity: '{{ user_with_creds2.object_guid }}'
+    properties:
+    - comment
+    - Description
+    - servicePrincipalName
+  register: set_with_creds2_check_actual
+  delegate_to: PARENT
+
+- name: assert set user with domain_credentials creds - check mode
+  assert:
+    that:
+    - set_with_creds2_check is changed
+    - set_with_creds2_check.distinguished_name == user_with_creds2.distinguished_name
+    - set_with_creds2_check.object_guid == user_with_creds2.object_guid
+    - set_with_creds2_check_actual.objects[0].Description == None
+    - set_with_creds2_check_actual.objects[0].DistinguishedName == user_with_creds2.distinguished_name
+    - set_with_creds2_check_actual.objects[0].Name == 'ParentUser2'
+    - set_with_creds2_check_actual.objects[0].ObjectGUID == user_with_creds2.object_guid
+    - set_with_creds2_check_actual.objects[0].comment == None
+    - set_with_creds2_check_actual.objects[0].servicePrincipalName == None
+
+- name: edit user with domain_credentials creds
+  microsoft.ad.user:
+    name: ParentUser2
+    path: '{{ parent_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_server: '{{ domain_realm }}'
+    domain_credentials:
+    - username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+    description: User Description
+    spn:
+      set:
+      - HTTP/ParentUser2
+    attributes:
+      set:
+        comment: My comment
+  register: set_with_creds2
+  delegate_to: CHILD
+
+- name: get result of set user with domain_credentials creds
+  microsoft.ad.object_info:
+    identity: '{{ user_with_creds2.object_guid }}'
+    properties:
+    - comment
+    - Description
+    - servicePrincipalName
+  register: set_with_creds2_actual
+  delegate_to: PARENT
+
+- name: assert set user with domain_credentials creds
+  assert:
+    that:
+    - set_with_creds2 is changed
+    - set_with_creds2.distinguished_name == user_with_creds2.distinguished_name
+    - set_with_creds2.object_guid == user_with_creds2.object_guid
+    - set_with_creds2_actual.objects[0].Description == "User Description"
+    - set_with_creds2_actual.objects[0].DistinguishedName == user_with_creds2.distinguished_name
+    - set_with_creds2_actual.objects[0].Name == 'ParentUser2'
+    - set_with_creds2_actual.objects[0].ObjectGUID == user_with_creds2.object_guid
+    - set_with_creds2_actual.objects[0].comment == "My comment"
+    - set_with_creds2_actual.objects[0].servicePrincipalName == ["HTTP/ParentUser2"]
+
+- name: set value with DN lookup and creds
+  microsoft.ad.group:
+    name: Group-CHILD
+    path: '{{ child_ou }}'
+    state: present
+    members:
+      add:
+      - User-CHILD
+      - name: User-PARENT
+        server: '{{ domain_realm }}'
+    domain_credentials:
+    - name: '{{ domain_realm }}'
+      username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+  register: lookup_with_creds
+  delegate_to: CHILD
+
+- name: get result of set value with DN lookup and creds
+  microsoft.ad.object_info:
+    identity: '{{ lookup_with_creds.object_guid }}'
+    properties:
+    - member
+  register: lookup_with_creds_actual
+  delegate_to: CHILD
+
+- name: assert set value with DN lookup and creds
+  assert:
+    that:
+    - lookup_with_creds is changed
+    - parent_user in lookup_with_creds_actual.objects[0].member
+    - child_user in lookup_with_creds_actual.objects[0].member
+
+- name: set value with DN lookup and creds - idempotent
+  microsoft.ad.group:
+    name: Group-CHILD
+    path: '{{ child_ou }}'
+    state: present
+    members:
+      add:
+      - User-CHILD
+      - name: User-PARENT
+        server: '{{ domain_realm }}'
+    domain_credentials:
+    - name: '{{ domain_realm }}'
+      username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+  register: lookup_with_creds_again
+  delegate_to: CHILD
+
+- name: assert set value with DN lookup and creds - idempotent
+  assert:
+    that:
+    - not lookup_with_creds_again is changed
+
+- name: create user group with DN lookup and creds - check mode
+  microsoft.ad.user:
+    name: ChildUser1
+    path: '{{ child_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_credentials:
+    - name: '{{ domain_realm }}'
+      username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+    groups:
+      add:
+      - Group-CHILD
+      - name: Group-PARENT
+        server: '{{ domain_realm }}'
+  register: new_user_with_group_check
+  delegate_to: CHILD
+  check_mode: true
+
+- name: get result of create user group with DN lookup and creds - check mode
+  microsoft.ad.object_info:
+    identity: '{{ new_user_with_group_check.distinguished_name }}'
+    properties:
+    - memberOf
+  register: new_user_with_group_check_actual
+  delegate_to: CHILD
+
+- name: assert set value with DN lookup and creds
+  assert:
+    that:
+    - new_user_with_group_check is changed
+    - new_user_with_group_check.distinguished_name == "CN=ChildUser1," ~ child_ou
+    - new_user_with_group_check_actual.objects == []
+
+- name: create user group with DN lookup and creds
+  microsoft.ad.user:
+    name: ChildUser1
+    path: '{{ child_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_credentials:
+    - name: '{{ domain_realm }}'
+      username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+    groups:
+      add:
+      - Group-CHILD
+      - name: Group-PARENT
+        server: '{{ domain_realm }}'
+  register: new_user_with_group
+  delegate_to: CHILD
+
+- name: replicate group membership of parent group to child domain after adding group
+  ansible.windows.win_command: >-
+    repadmin.exe
+    /replsingleobj
+    {{ hostvars["CHILD"]["new_hostname"] }}.{{ hostvars["CHILD"]["child_domain_name"] }}
+    parent.{{ domain_realm }}
+    {{ parent_group }}
+  delegate_to: CHILD
+
+- name: get result of create user group with DN lookup and creds
+  microsoft.ad.object_info:
+    identity: '{{ new_user_with_group.distinguished_name }}'
+    properties:
+    - memberOf
+  register: new_user_with_group_actual
+  delegate_to: CHILD
+
+- name: assert create user group with DN lookup and creds
+  assert:
+    that:
+    - new_user_with_group is changed
+    - new_user_with_group.distinguished_name == "CN=ChildUser1," ~ child_ou
+    - new_user_with_group_actual.objects | count == 1
+    - new_user_with_group_actual.objects[0].DistinguishedName == new_user_with_group.distinguished_name
+    - >-
+      "CN=Group-CHILD," ~ child_ou in new_user_with_group_actual.objects[0].memberOf
+    - >-
+      "CN=Group-PARENT," ~ parent_ou in new_user_with_group_actual.objects[0].memberOf
+
+- name: create user group with DN lookup and creds - idempotent
+  microsoft.ad.user:
+    name: ChildUser1
+    path: '{{ child_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_credentials:
+    - name: '{{ domain_realm }}'
+      username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+    groups:
+      add:
+      - Group-CHILD
+      - name: Group-PARENT
+        server: '{{ domain_realm }}'
+  register: new_user_with_group_again
+  delegate_to: CHILD
+
+- name: assert create user group with DN lookup and creds - idempotent
+  assert:
+    that:
+    - not new_user_with_group_again is changed
+
+- name: remove user group with DN lookup and creds - check mode
+  microsoft.ad.user:
+    name: ChildUser1
+    path: '{{ child_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_credentials:
+    - name: '{{ domain_realm }}'
+      username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+    groups:
+      remove:
+      - Group-CHILD
+      - name: Group-PARENT
+        server: '{{ domain_realm }}'
+  register: remove_user_with_group_check
+  delegate_to: CHILD
+  check_mode: true
+
+- name: get result of remove user group with DN lookup and creds - check mode
+  microsoft.ad.object_info:
+    identity: '{{ remove_user_with_group_check.distinguished_name }}'
+    properties:
+    - memberOf
+  register: remove_user_with_group_check_actual
+  delegate_to: CHILD
+
+- name: assert remove user group with DN lookup and creds - check mode
+  assert:
+    that:
+    - remove_user_with_group_check is changed
+    - remove_user_with_group_check.distinguished_name == "CN=ChildUser1," ~ child_ou
+    - >-
+      "CN=Group-CHILD," ~ child_ou in remove_user_with_group_check_actual.objects[0].memberOf
+    - >-
+      "CN=Group-PARENT," ~ parent_ou in remove_user_with_group_check_actual.objects[0].memberOf
+
+- name: remove user group with DN lookup and creds
+  microsoft.ad.user:
+    name: ChildUser1
+    path: '{{ child_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_credentials:
+    - name: '{{ domain_realm }}'
+      username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+    groups:
+      remove:
+      - Group-CHILD
+      - name: Group-PARENT
+        server: '{{ domain_realm }}'
+  register: remove_user_with_group
+  delegate_to: CHILD
+
+- name: replicate group membership of parent group to child domain after removing group
+  ansible.windows.win_command: >-
+    repadmin.exe
+    /replsingleobj
+    {{ hostvars["CHILD"]["new_hostname"] }}.{{ hostvars["CHILD"]["child_domain_name"] }}
+    parent.{{ domain_realm }}
+    {{ parent_group }}
+  delegate_to: CHILD
+
+- name: get result of remove user group with DN lookup and creds
+  microsoft.ad.object_info:
+    identity: '{{ remove_user_with_group.distinguished_name }}'
+    properties:
+    - memberOf
+  register: remove_user_with_group_actual
+  delegate_to: CHILD
+
+- name: assert remove user group with DN lookup and creds
+  assert:
+    that:
+    - remove_user_with_group is changed
+    - remove_user_with_group.distinguished_name == "CN=ChildUser1," ~ child_ou
+    - remove_user_with_group_actual.objects | count == 1
+    - remove_user_with_group_actual.objects[0].DistinguishedName == new_user_with_group.distinguished_name
+    - remove_user_with_group_actual.objects[0].memberOf == None
+
+- name: remove user group with DN lookup and creds - idempotent
+  microsoft.ad.user:
+    name: ChildUser1
+    path: '{{ child_ou }}'
+    state: present
+    password: '{{ domain_password }}'
+    update_password: when_changed
+    domain_credentials:
+    - name: '{{ domain_realm }}'
+      username: '{{ domain_user_upn }}'
+      password: '{{ domain_password }}'
+    groups:
+      remove:
+      - Group-CHILD
+      - name: Group-PARENT
+        server: '{{ domain_realm }}'
+  register: remove_user_with_group_again
+  delegate_to: CHILD
+
+- name: assert remove user group with DN lookup and creds - idempotent
+  assert:
+    that:
+    - not remove_user_with_group_again is changed

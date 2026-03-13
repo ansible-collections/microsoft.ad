@@ -41,13 +41,13 @@ options:
     description:
     - The LDAP filter string used to query the computer objects.
     - By default, this will be combined with the filter
-      "(objectClass=computer)". Use I(filter_without_computer) to override
+      "(objectCategory=computer)". Use I(filter_without_computer) to override
       this behavior and have I(filter) be the only filter used.
     type: str
   filter_without_computer:
     description:
-    - Will not combine the I(filter) value with the filter
-      "(objectClass=computer)".
+    - Will not combine the I(filter) value with the default filter
+      "(objectCategory=computer)".
     - In most cases this should be C(false) but can be set to C(true) to have
       the I(filter) value specified be the only filter used.
     type: bool
@@ -84,6 +84,9 @@ notes:
   information.
 - This plugin is a tech preview and the module options are subject to change
   based on feedback received.
+- Unless specified otherwise in the option description, the value specified in
+  the config file is used as is. Only the LDAP connection options allow using
+  a Jinja2 template.
 extends_documentation_fragment:
 - constructed
 - microsoft.ad.ldap_connection
@@ -125,6 +128,12 @@ auth_protocol: kerberos
 tls_mode: ldaps
 ca_cert: /home/user/certs/ldap.pem
 
+# The username and password can be retrieved using a template with a lookup.
+# Other connection options can also be set this way, the option description
+# tells you whether it can be set to a template.
+username: '{{ lookup("ansible.builtin.env", "LDAP_USERNAME") }}'
+password: '{{ lookup("ansible.builtin.env", "LDAP_PASSWORD") }}'
+
 
 ##############################################
 #               Search Options               #
@@ -154,7 +163,10 @@ attributes:
   comment:
     host_comment
   memberOf:
-    computer_membership: this | map("regex_search", '^CN=(?P<name>.+?)((?<!\\),)', '\g<name>') | flatten
+    # Gets the value (1) of the first RDN (0) of each memberOf instance (this).
+    # For example 'CN=Domain Admins,CN=Users,DC=domain,DC=test'
+    # will be returned as just 'Domain Admins'
+    computer_membership: this | microsoft.ad.parse_dn | map(attribute="0.1")
   location:
 
 
@@ -209,9 +221,9 @@ groups:
 # Adds the host to a group site_{{ location }} with the default group of
 # site_unknown if the location isn't defined
 keyed_groups:
-- key: location | default(omit)
-  prefix: site
-  default_value: unknown
+  - key: location | default(omit)
+    prefix: site
+    default_value: unknown
 """
 
 import base64
@@ -223,6 +235,15 @@ from ansible.module_utils.basic import missing_required_lib
 from ansible.parsing.dataloader import DataLoader
 from ansible.plugins.inventory import BaseInventoryPlugin, Constructable
 from ansible.utils.unsafe_proxy import wrap_var
+
+USE_DATA_TAGGING = False
+try:
+    from ansible.template import trust_as_template
+
+    USE_DATA_TAGGING = True
+except ImportError:
+    pass
+
 
 try:
     import sansldap
@@ -281,7 +302,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
             "subtree": sansldap.SearchScope.SUBTREE,
         }[search_scope]
 
-        computer_filter = sansldap.FilterEquality("objectClass", b"computer")
+        computer_filter = sansldap.FilterEquality("objectCategory", b"computer")
         final_filter: sansldap.LDAPFilter
         if ldap_filter:
             ldap_filter_obj = sansldap.LDAPFilter.from_string(ldap_filter)
@@ -296,16 +317,50 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
             final_filter = computer_filter
 
         custom_attributes = self._get_custom_attributes()
-        attributes = {"name", "dnshostname"}.union([a.lower() for a in custom_attributes.keys()])
+        attributes = {"name", "dnshostname"}.union(
+            [a.lower() for a in custom_attributes.keys()]
+        )
 
         # If inventory_hostname was defined in compose, set it in the custom
         # attributes so we can set the hostname before processing the rest of
         # compose entries.
         inventory_hostname = compose.pop("inventory_hostname", None)
         if inventory_hostname:
-            custom_attributes["inventory_hostname"] = {"inventory_hostname": inventory_hostname}
-
+            custom_attributes["inventory_hostname"] = {
+                "inventory_hostname": inventory_hostname
+            }
         connection_options = self.get_options()
+
+        # These options are in ../doc_fragments/ldap_connection.py
+        template_fields = {
+            "auth_protocol",
+            "ca_cert",
+            "cert_validation",
+            "certificate",
+            "certificate_key",
+            "certificate_password",
+            "connection_timeout",
+            "encrypt",
+            "password",
+            "port",
+            "server",
+            "tls_mode",
+            "username",
+        }
+        templated_option_kwargs = {}
+        if not USE_DATA_TAGGING:
+            templated_option_kwargs['disable_lookups'] = False
+
+        for option_name, option_value in connection_options.items():
+            if option_name in template_fields and self.templar.is_template(
+                option_value
+            ):
+                self.display.vvv(f"Templating option {option_name}")
+                connection_options[option_name] = self.templar.template(
+                    variable=option_value,
+                    **templated_option_kwargs,
+                )
+
         laps_decryptor = LAPSDecryptor(**connection_options)
         with create_ldap_connection(**connection_options) as client:
             schema = LDAPSchema.load_schema(client)
@@ -331,19 +386,26 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
                     raw_values = insensitive_info.get(name.lower(), [])
                     values = schema.cast_object(name, raw_values)
 
-                    host_vars["raw"] = wrap_var([base64.b64encode(r).decode() for r in raw_values])
+                    host_vars["raw"] = wrap_var(
+                        [base64.b64encode(r).decode() for r in raw_values]
+                    )
 
-                    if name.lower() == 'mslaps-encryptedpassword' and raw_values:
-                        host_vars["this"] = laps_decryptor.decrypt(raw_values[0])
+                    if name.lower() == "mslaps-encryptedpassword" and raw_values:
+                        host_vars["this"] = wrap_var(laps_decryptor.decrypt(raw_values[0]))
                     else:
                         host_vars["this"] = wrap_var(values)
 
                     for n, v in var_info.items():
+                        if USE_DATA_TAGGING:
+                            v = trust_as_template(v)
+
                         try:
                             composite = self._compose(v, host_vars)
                         except Exception as e:
                             if strict:
-                                raise AnsibleError(f"Could not set {n} for host {host_name}: {e}") from e
+                                raise AnsibleError(
+                                    f"Could not set {n} for host {host_name}: {e}"
+                                ) from e
                             continue
 
                         host_vars[n] = composite
@@ -358,9 +420,15 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
                         continue
                     inventory.set_variable(actual_host_name, n, v)
 
-                self._set_composite_vars(compose, host_vars, actual_host_name, strict=strict)
-                self._add_host_to_composed_groups(groups, host_vars, actual_host_name, strict=strict)
-                self._add_host_to_keyed_groups(keyed_groups, host_vars, actual_host_name, strict=strict)
+                self._set_composite_vars(
+                    compose, host_vars, actual_host_name, strict=strict
+                )
+                self._add_host_to_composed_groups(
+                    groups, host_vars, actual_host_name, strict=strict
+                )
+                self._add_host_to_keyed_groups(
+                    keyed_groups, host_vars, actual_host_name, strict=strict
+                )
 
     def _get_custom_attributes(self) -> t.Dict[str, t.Dict[str, str]]:
         custom_attributes = self.get_option("attributes")
@@ -372,7 +440,9 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
             elif isinstance(info, str):
                 info = {name.replace("-", "_"): info}
             elif not isinstance(info, dict):
-                raise AnsibleError(f"Attribute {name} value was {type(info).__name__} but was expecting a dictionary")
+                raise AnsibleError(
+                    f"Attribute {name} value was {type(info).__name__} but was expecting a dictionary"
+                )
 
             for var_name in list(info.keys()):
                 var_template = info[var_name]

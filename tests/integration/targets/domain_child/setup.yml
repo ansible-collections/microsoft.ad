@@ -1,0 +1,71 @@
+- name: setup common Windows information
+  hosts: windows
+  gather_facts: no
+
+  tasks:
+  - name: get network connection names
+    ansible.windows.win_powershell:
+      parameters:
+        IPAddress: '{{ ansible_host }}'
+      script: |
+        param ($IPAddress)
+
+        $Ansible.Changed = $false
+
+        Get-CimInstance -ClassName Win32_NetworkAdapter -Filter "Netenabled='True'" |
+            ForEach-Object -Process {
+                $config = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -Filter "Index='$($_.Index)'"
+                if ($config.IPAddress -contains $IPAddress) {
+                    $_.NetConnectionID
+                }
+            }
+    register: connection_name
+
+- name: create parent forest
+  hosts: PARENT
+  gather_facts: no
+
+  tasks:
+  - name: set the DNS for the internal adapters to localhost
+    ansible.windows.win_dns_client:
+      adapter_names:
+      - '{{ connection_name.output[0] }}'
+      dns_servers:
+      - 127.0.0.1
+
+  - name: ensure domain exists and DC is promoted as a domain controller
+    microsoft.ad.domain:
+      dns_domain_name: '{{ domain_realm }}'
+      safe_mode_password: '{{ domain_password }}'
+      reboot: true
+
+  - name: create parent domain username
+    microsoft.ad.user:
+      name: '{{ domain_username }}'
+      upn: '{{ domain_user_upn }}'
+      description: '{{ domain_username }} Domain Account'
+      password: '{{ domain_password }}'
+      password_never_expires: yes
+      update_password: when_changed
+      groups:
+        add:
+        - Domain Admins
+        - Enterprise Admins
+      state: present
+
+- name: setup test host
+  hosts: CHILD,TREE
+  gather_facts: no
+
+  tasks:
+  - name: set DNS for the private adapter to point to the parent forest DC
+    ansible.windows.win_dns_client:
+      adapter_names:
+      - '{{ connection_name.output[0] }}'
+      dns_servers:
+      - '{{ hostvars["PARENT"]["ansible_host"] }}'
+
+  - name: install RSAT tools for debugging purposes
+    ansible.windows.win_feature:
+      name: RSAT-AD-PowerShell
+      state: present

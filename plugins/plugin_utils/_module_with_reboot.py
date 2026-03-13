@@ -111,6 +111,7 @@ class ActionModuleWithReboot(ActionBase):
 
         wrap_async = self._task.async_val and not self._connection.has_native_async
         reboot = self._task.args.get("reboot", False)
+        reboot_timeout = self._task.args.get("reboot_timeout", 600)
 
         if self._task.async_val > 0 and reboot:
             return {
@@ -136,6 +137,7 @@ class ActionModuleWithReboot(ActionBase):
                     reboot_res = reboot_host(
                         self._task.action,
                         self._connection,
+                        reboot_timeout=reboot_timeout,
                         previous_boot_time=previous_boot_time,
                     )
 
@@ -156,7 +158,7 @@ class ActionModuleWithReboot(ActionBase):
 
                 if self._ad_should_rerun(module_res) and not self._task.check_mode:
                     display.vv(
-                        "Module result has indicated it should rerun after a reboot has occured, rerunning"
+                        "Module result has indicated it should rerun after a reboot has occurred, rerunning"
                     )
                     continue
 
@@ -169,3 +171,38 @@ class ActionModuleWithReboot(ActionBase):
         result = merge_hash(result, module_res)
 
         return self._ad_process_result(result)
+
+
+class DomainPromotionWithReboot(ActionModuleWithReboot):
+    """Domain Promotion Action Plugin with Auto Reboot.
+
+    An action plugin that runs a task that can promote the target Windows host
+    to a domain controller. It implements the common reboot handling for that
+    particular task.
+    """
+
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._ran_once = False
+
+    def _ad_should_rerun(self, result: t.Dict[str, t.Any]) -> bool:
+        ran_once = self._ran_once
+        self._ran_once = True
+
+        if ran_once or not result.get("_do_action_reboot", False):
+            return False
+
+        if self._task.check_mode:
+            # Assume that on a rerun it will not have failed and that it
+            # ran successful.
+            result["failed"] = False
+            result.pop("msg", None)
+            return False
+
+        else:
+            return True
+
+    def _ad_process_result(self, result: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
+        result.pop("_do_action_reboot", None)
+
+        return result

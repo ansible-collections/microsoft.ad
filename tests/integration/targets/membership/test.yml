@@ -27,4 +27,39 @@
   gather_facts: no
 
   tasks:
+  - set_fact:
+      get_result_script: |
+        $Ansible.Changed = $false
+        $cs = Get-CimInstance -ClassName Win32_ComputerSystem -Property DNSHostName, Domain, PartOfDomain, Workgroup
+        $domainName = if ($cs.PartOfDomain) {
+            try {
+                [System.DirectoryServices.ActiveDirectory.Domain]::GetComputerDomain().Name
+            }
+            catch [System.Security.Authentication.AuthenticationException] {
+                $cs.Domain
+            }
+        }
+        else {
+            $null
+        }
+
+        [PSCustomObject]@{
+            HostName = $cs.DNSHostName
+            NetbiosName = $env:COMPUTERNAME
+            PartOfDomain = $cs.PartOfDomain
+            DnsDomainName = $domainName
+            WorkgroupName = $cs.Workgroup
+        }
+
+      get_ad_result_script: |
+        $Ansible.Changed = $false
+        Get-ADComputer -Filter { Name -ne 'DC' } -Properties DistinguishedName, DNSHostName, Name, Enabled |
+            Select-Object -Property @(
+                'DistinguishedName'
+                @{ N = 'DNSHostName'; E = { $_.DNSHostName.Substring(0, $_.DNSHostName.IndexOf('.')) } }
+                'Name'
+                'Enabled'
+            )
+
   - import_tasks: tasks/main.yml
+  - import_tasks: tasks/join_with_name_conflict.yml

@@ -5,13 +5,29 @@
 
 The `microsoft.ad` collection includes the plugins supported by Ansible to help the management of Microsoft Active Directory.
 
+## Communication
+
+* Join the Ansible forum:
+  * [Get Help](https://forum.ansible.com/c/help/6): get help or help others.
+  * [Posts tagged with 'microsoft-ad'](https://forum.ansible.com/tag/microsoft-ad): subscribe to participate in collection-related conversations.
+  * [Social Spaces](https://forum.ansible.com/c/chat/4): gather and interact with fellow enthusiasts.
+  * [News & Announcements](https://forum.ansible.com/c/news/5): track project-wide announcements including social events.
+
+* The Ansible [Bullhorn newsletter](https://docs.ansible.com/ansible/devel/community/communication.html#the-bullhorn): used to announce releases and important changes.
+
+For more information about communication, see the [Ansible communication guide](https://docs.ansible.com/ansible/devel/community/communication.html).
+
 ## Ansible version compatibility
 
-This collection has been tested against following Ansible versions: **>=2.14**.
+This collection has been tested against following Ansible versions: **>=2.16**.
 
 Plugins and modules within a collection may be tested with only specific Ansible versions.
 A collection may contain metadata that identifies these versions.
 PEP440 is the schema used to describe the versions of Ansible.
+
+## Changelog
+
+See [CHANGELOG.rst](https://github.com/ansible-collections/microsoft.ad/blob/main/CHANGELOG.rst) for the release history and changes made to this collection.
 
 ## Collection Documentation
 
@@ -55,8 +71,6 @@ We welcome community contributions to this collection. If you find problems, ple
 
 See [Developing modules for Windows](https://docs.ansible.com/ansible/latest/dev_guide/developing_modules_general_windows.html#developing-modules-general-windows) for specifics on Windows modules.
 
-You can also join us on the ``#ansible-windows`` [libera.chat](https://libera.chat/) IRC channel.
-
 See the [Ansible Community Guide](https://docs.ansible.com/ansible/latest/community/index.html) for details on contributing to Ansible.
 
 
@@ -95,14 +109,11 @@ The current process for publishing new versions of the Microsoft AD Collection i
 After the version is published, verify it exists on the [Active Directory Galaxy page](https://galaxy.ansible.com/microsoft/ad).
 
 
-## More Information
+## Support
 
-For more information about Ansible's Windows integration, join the `#ansible-windows` channel on [libera.chat](https://libera.chat/) IRC, and browse the resources in the [Windows Working Group](https://github.com/ansible/community/wiki/Windows) Community wiki page.
+As a Red Hat Ansible [Certified Content](https://catalog.redhat.com/software/search?target_platforms=Red%20Hat%20Ansible%20Automation%20Platform), this collection is entitled to [support](https://access.redhat.com/support/) through [Ansible Automation Platform](https://www.redhat.com/en/technologies/management/ansible) (AAP) through the Red Hat Ansible team.
 
-- [Ansible Collection overview](https://github.com/ansible-collections/overview)
-- [Ansible User guide](https://docs.ansible.com/ansible/latest/user_guide/index.html)
-- [Ansible Developer guide](https://docs.ansible.com/ansible/latest/dev_guide/index.html)
-- [Ansible Community code of conduct](https://docs.ansible.com/ansible/latest/community/code_of_conduct.html)
+If a support case cannot be opened with Red Hat or the collection has been obtained either from [Galaxy](https://galaxy.ansible.com/ui/) or [GitHub](https://github.com/ansible-collections/microsoft.ad), you can open a GitHub issue on this repo but this has no guarantee of support or timeframes for a response.
 
 
 ## License

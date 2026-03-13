@@ -229,7 +229,7 @@ ConvertTo-Json -Compress -InputObject @{
         if send_reboot_command:
             _perform_reboot(task_action, connection, reboot_command)
 
-        start = datetime.datetime.utcnow()
+        start = datetime.datetime.now(datetime.timezone.utc)
         result["changed"] = True
         result["rebooted"] = True
 
@@ -291,7 +291,7 @@ ConvertTo-Json -Compress -InputObject @{
         result["exception"] = traceback.format_exc()
 
     if start:
-        elapsed = datetime.datetime.utcnow() - start
+        elapsed = datetime.datetime.now(datetime.timezone.utc) - start
         result["elapsed"] = elapsed.seconds
 
     return result
@@ -358,10 +358,10 @@ def _do_until_success_or_timeout(
     **kwargs: t.Any,
 ) -> t.Optional[T]:
     """Runs the function multiple times ignoring errors until a timeout occurs"""
-    max_end_time = datetime.datetime.utcnow() + datetime.timedelta(seconds=timeout)
+    max_end_time = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(seconds=timeout)
 
     def wait_condition(idx):
-        return datetime.datetime.utcnow() < max_end_time
+        return datetime.datetime.now(datetime.timezone.utc) < max_end_time
 
     try:
         return _do_until_success_or_condition(

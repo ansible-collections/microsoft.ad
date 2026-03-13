@@ -1,0 +1,146 @@
+- name: ensure time is in sync
+  hosts: windows
+  gather_facts: false
+  tasks:
+  - name: get current host datetime
+    command: date +%s
+    changed_when: False
+    delegate_to: localhost
+    run_once: True
+    register: local_time
+
+  - name: set datetime on Windows
+    ansible.windows.win_powershell:
+      parameters:
+        SecondsSinceEpoch: '{{ local_time.stdout | trim }}'
+      script: |
+        param($SecondsSinceEpoch)
+
+        $utc = [System.DateTimeKind]::Utc
+        $epoch = New-Object -TypeName System.DateTime -ArgumentList 1970, 1, 1, 0, 0, 0, 0, $utc
+        $date = $epoch.AddSeconds($SecondsSinceEpoch)
+
+        Set-Date -Date $date
+
+  - name: set common test vars
+    ansible.builtin.set_fact:
+      get_role_script: |
+        $Ansible.Changed = $false
+        Get-CimInstance -ClassName Win32_ComputerSystem -Property Domain, DomainRole, PartOfDomain |
+          Select-Object -Property @{
+              N = 'Domain'
+              E = {
+                  if ($_.PartOfDomain) {
+                      $_.Domain
+                  }
+                  else {
+                      $null
+                  }
+              }
+          }, @{
+              N = 'DomainRole'
+              E = {
+                  switch ($_.DomainRole) {
+                      0 { "StandaloneWorkstation" }
+                      1 { "MemberWorkstation" }
+                      2 { "StandaloneServer" }
+                      3 { "MemberServer" }
+                      4 { "BackupDC" }
+                      5 { "PrimaryDC" }
+                  }
+              }
+          }, @{
+              N = 'HostName'
+              E = { $env:COMPUTERNAME }
+          }
+
+- name: run microsoft.ad.domain_child child tests
+  hosts: CHILD
+  gather_facts: false
+
+  tasks:
+  - name: check domain status to see if test will run
+    ansible.windows.win_powershell:
+      script: '{{ get_role_script }}'
+    register: domain_status
+
+  - ansible.builtin.include_tasks: tasks/main_child.yml
+    when: domain_status.output[0].Domain != child_domain_name
+
+- name: run microsoft.ad.domain_child tree tests
+  hosts: TREE
+  gather_facts: false
+
+  tasks:
+  - name: check domain status to see if test will run
+    ansible.windows.win_powershell:
+      script: '{{ get_role_script }}'
+    register: domain_status
+
+  - ansible.builtin.include_tasks: tasks/main_tree.yml
+    when: domain_status.output[0].Domain != child_domain_name
+
+- name: run extra tests to test out cross domain functionality in other modules
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+  - name: create test OU in each domain
+    microsoft.ad.ou:
+      name: Ansible-{{ item }}
+      state: present
+    delegate_to: '{{ item }}'
+    register: ou_info
+    loop:
+    - PARENT
+    - CHILD
+
+  - block:
+    - name: set facts for each OU DN
+      ansible.builtin.set_fact:
+        parent_ou: '{{ ou_info.results[0].distinguished_name }}'
+        child_ou: '{{ ou_info.results[1].distinguished_name }}'
+
+    - name: create test users
+      microsoft.ad.user:
+        name: User-{{ item }}
+        state: present
+        password: '{{ domain_password }}'
+        path: '{{ {"PARENT": parent_ou, "CHILD": child_ou}[item] }}'
+      register: user_info
+      delegate_to: '{{ item }}'
+      loop:
+      - PARENT
+      - CHILD
+
+    - name: create test groups
+      microsoft.ad.group:
+        name: Group-{{ item }}
+        state: present
+        path: '{{ {"PARENT": parent_ou, "CHILD": child_ou}[item] }}'
+        scope: universal
+      register: group_info
+      delegate_to: '{{ item }}'
+      loop:
+      - PARENT
+      - CHILD
+
+    - name: set facts for each test user and group DN
+      ansible.builtin.set_fact:
+        parent_user: '{{ user_info.results[0].distinguished_name }}'
+        parent_group: '{{ group_info.results[0].distinguished_name }}'
+        child_user: '{{ user_info.results[1].distinguished_name }}'
+        child_group: '{{ group_info.results[1].distinguished_name }}'
+
+    - name: run cross domain tests
+      ansible.builtin.import_tasks: tasks/cross_domain.yml
+
+    always:
+    - name: remove test OU in each domain
+      microsoft.ad.ou:
+        name: Ansible-{{ item }}
+        state: absent
+      delegate_to: '{{ item }}'
+      loop:
+      - PARENT
+      - CHILD

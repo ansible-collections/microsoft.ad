@@ -128,7 +128,7 @@ The final value that can be set on each attribute values is a dictionary where t
     microsoft_ad_distinguished_name: CN=MYHOST,CN=Computers,DC=domain,DC=com
 
 .. note::
-    The host fact names are used literally, there are no conversions from ``-`` to ``_`` when using this format.
+    Fact names under each attribute key should follow Python conventions for variable names, for example ``_`` should be used instead of ``-``. Some Ansible versions will fail if using a name that is not valid.
 
 
 .. _ansible_collections.microsoft.ad.docsite.guide_ldap_inventory.inventory_hostname:
@@ -225,6 +225,8 @@ The following filters can be used as an easy way to further convert the coerced 
 * :ref:`microsoft.ad.as_datetime <ansible_collections.microsoft.ad.as_datetime_filter>`
 * :ref:`microsoft.ad.as_guid <ansible_collections.microsoft.ad.as_guid_filter>`
 * :ref:`microsoft.ad.as_sid <ansible_collections.microsoft.ad.as_sid_filter>`
+* :ref:`microsoft.ad.parse_dn <ansible_collections.microsoft.ad.parse_dn_filter>`
+* :ref:`microsoft.ad.split_dn <ansible_collections.microsoft.ad.split_dn_filter>`
 
 An example of these filters being used in the ``attributes`` option can be seen below:
 
@@ -409,7 +411,7 @@ The ``raw`` value contains the raw base64 encoded value as stored in AD. The ``t
 
 * ``encrypted_value``: The encrypted password blob as a base64 string
 * ``flags``: The flags set as a bitwise int value, currently these are undocumented by Microsoft
-* ``update_timestamp``: The FILETIME value of when the 
+* ``update_timestamp``: The FILETIME value of when the
 * ``value``: The decrypted value containing the username and password as a JSON string
 * ``debug``: Debug information that indicates why it failed to decrypt the value
 

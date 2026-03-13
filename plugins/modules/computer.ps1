@@ -12,20 +12,22 @@ $setParams = @{
             Name = 'delegates'
             Option = @{
                 aliases = 'principals_allowed_to_delegate'
-                type = 'dict'
-                options = @{
-                    add = @{ type = 'list'; elements = 'str' }
-                    remove = @{ type = 'list'; elements = 'str' }
-                    set = @{ type = 'list'; elements = 'str' }
-                }
+                type = 'add_remove_set'
             }
             Attribute = 'PrincipalsAllowedToDelegateToAccount'
-            CaseInsensitive = $true
+            DNLookup = $true
         }
         [PSCustomObject]@{
             Name = 'dns_hostname'
             Option = @{ type = 'str' }
             Attribute = 'DNSHostName'
+        }
+        [PSCustomObject]@{
+            Name = 'do_not_append_dollar_to_sam'
+            Option = @{
+                default = $false
+                type = 'bool'
+            }
         }
         [PSCustomObject]@{
             Name = 'enabled'
@@ -35,24 +37,8 @@ $setParams = @{
         [PSCustomObject]@{
             Name = 'kerberos_encryption_types'
             Option = @{
-                type = 'dict'
-                options = @{
-                    add = @{
-                        choices = 'aes128', 'aes256', 'des', 'rc4'
-                        type = 'list'
-                        elements = 'str'
-                    }
-                    remove = @{
-                        choices = 'aes128', 'aes256', 'des', 'rc4'
-                        type = 'list'
-                        elements = 'str'
-                    }
-                    set = @{
-                        choices = 'aes128', 'aes256', 'des', 'rc4'
-                        type = 'list'
-                        elements = 'str'
-                    }
-                }
+                type = 'add_remove_set'
+                choices = 'aes128', 'aes256', 'des', 'rc4'
             }
             Attribute = 'KerberosEncryptionType'
             CaseInsensitive = $true
@@ -107,57 +93,43 @@ $setParams = @{
         }
         [PSCustomObject]@{
             Name = 'managed_by'
-            Option = @{ type = 'str' }
+            Option = @{ type = 'raw' }
             Attribute = 'ManagedBy'
+            DNLookup = $true
         }
         [PSCustomObject]@{
             Name = 'sam_account_name'
             Option = @{ type = 'str' }
             Attribute = 'sAMAccountName'
+            # New handling is done in PostAction as New-ADComputer cannot
+            # set a SAM without the $ suffix.
+            Set = {
+                param($Module, $ADParams, $SetParams, $ADObject)
+
+                # Using the -SAMAccountName parameter will automatically append
+                # '$' to the value. We want to set the provided user value
+                # which may not have the suffix so we use the raw attribute
+                # replacement method.
+                $sam = $Module.Params.sam_account_name
+                if ($sam -ne $ADObject.SAMAccountName) {
+                    if (-not $SetParams.ContainsKey('Replace')) {
+                        $SetParams['Replace'] = @{}
+                    }
+                    $SetParams.Replace['sAMAccountName'] = $sam
+                }
+
+                $module.Diff.after.sam_account_name = $sam
+            }
         }
         [PSCustomObject]@{
             Name = 'spn'
             Option = @{
                 aliases = 'spns'
-                type = 'dict'
-                options = @{
-                    add = @{ type = 'list'; elements = 'str' }
-                    remove = @{ type = 'list'; elements = 'str' }
-                    set = @{ type = 'list'; elements = 'str' }
-                }
+                type = 'add_remove_set'
             }
-            Attribute = 'ServicePrincipalNames'
-            New = {
-                param($Module, $ADParams, $NewParams)
-
-                $spns = @(
-                    $Module.Params.spn.add
-                    $Module.Params.spn.set
-                ) | Select-Object -Unique
-
-                $NewParams.ServicePrincipalNames = $spns
-                $Module.Diff.after.spn = $spns
-            }
-            Set = {
-                param($Module, $ADParams, $SetParams, $ADObject)
-
-                $desired = $Module.Params.spn
-                $compareParams = @{
-                    Existing = $ADObject.ServicePrincipalNames
-                    CaseInsensitive = $true
-                }
-                $res = Compare-AnsibleADIdempotentList @compareParams @desired
-                if ($res.Changed) {
-                    $SetParams.ServicePrincipalNames = @{}
-                    if ($res.ToAdd) {
-                        $SetParams.ServicePrincipalNames.Add = $res.ToAdd
-                    }
-                    if ($res.ToRemove) {
-                        $SetParams.ServicePrincipalNames.Remove = $res.ToRemove
-                    }
-                }
-                $module.Diff.after.kerberos_encryption_types = @($res.Value | Sort-Object)
-            }
+            Attribute = 'servicePrincipalName'
+            CaseInsensitive = $true
+            IsRawAttribute = $true
         }
         [PSCustomObject]@{
             Name = 'trusted_for_delegation'
@@ -185,7 +157,11 @@ $setParams = @{
     PreAction = {
         param ($Module, $ADParams, $ADObject)
 
-        if ($Module.Params.sam_account_name -and -not $Module.Params.sam_account_name.EndsWith('$')) {
+        if (
+            $Module.Params.sam_account_name -and
+            -not $Module.Params.sam_account_name.EndsWith('$') -and
+            -not $Module.Params.do_not_append_dollar_to_sam
+        ) {
             $Module.Params.sam_account_name = "$($Module.Params.sam_account_name)$"
         }
     }
@@ -194,6 +170,20 @@ $setParams = @{
 
         if ($ADObject) {
             $Module.Result.sid = $ADObject.SID.Value
+
+            # This should only happen when the computer account was created.
+            # The code will set sam_account_name to the desired value without
+            # the '$' suffix.
+            if (
+                $Module.Params.state -eq 'present' -and
+                $Module.Params.sam_account_name -and
+                $Module.Params.do_not_append_dollar_to_sam -and
+                $Module.Params.sam_account_name -ne $ADObject.SAMAccountName
+            ) {
+                $ADObject | Set-ADComputer -Replace @{
+                    sAMAccountName = $module.Params.sam_account_name
+                } -WhatIf:$Module.CheckMode @ADParams
+            }
         }
         elseif ($Module.Params.state -eq 'present') {
             # Use dummy value for check mode when creating a new user
