@@ -29,11 +29,15 @@ try {
         # Syntax: UTC Coded Time - .NET DateTimes serialized as in the form "Date(FILETIME)" which isn't easily
         # parsable by Ansible, instead return as an ISO 8601 string in the UTC timezone.
         # Matches the time format in the object info module
-        $time = [TimeZoneInfo]::ConvertTimeToUtc($key.EffectiveTime.DateTime).ToString("o")
+        $time = [TimeZoneInfo]::ConvertTimeToUtc($key.EffectiveTime).ToString("o")
+        $creation_time = [TimeZoneInfo]::ConvertTimeToUtc($key.CreationTime).ToString("o")
+        $version_number = $key.VersionNumber
         $found_key_id = $key.KeyId.Guid.ToString()
         $found_key = @{
             key_id = $found_key_id
             effective_time = $time
+            creation_time = $creation_time
+            version_number = $version_number
         }
 
         if ((-not [string]::IsNullOrWhiteSpace($search_key_id))) {

@@ -4,28 +4,27 @@
     - name: Create a KDS root key effective immediately
       microsoft.ad.kds_root_key:
         effective_time_hours: 0
+        match_by: any
       register: _create_immediate
 
     - name: Create a KDS root key effective immediately - idempotence
       microsoft.ad.kds_root_key:
         effective_time_hours: 0
+        match_by: any
       register: _create_immediate_idem
 
-    - name: Create a KDS root key effective in 1 hour
+    - name: Create a KDS root key effective in 1 hour - check mode
       microsoft.ad.kds_root_key:
         effective_time_hours: 1
-      register: _create_1_hour
-
-    - name: Create a KDS root key effective in 1 hour - idempotence
-      microsoft.ad.kds_root_key:
-        effective_time_hours: 1
-      register: _create_1_hour_idem
+        match_by: never
+      register: _create_1_hour_check_mode
+      check_mode: true
 
     - name: Force create a KDS root key effective in 1 hour
       microsoft.ad.kds_root_key:
         effective_time_hours: 1
-        force: true
-      register: _create_1_hour_force
+        match_by: never
+      register: _create_1_hour_match_by_never
 
     - name: Gather info about keys
       microsoft.ad.kds_root_key_info: {}
@@ -36,44 +35,51 @@
         that:
           - _create_immediate is ansible.builtin.changed
           - _create_immediate_idem is not ansible.builtin.changed
-          - _create_1_hour is not ansible.builtin.changed
-          - _create_1_hour_idem is not ansible.builtin.changed
-          - _create_1_hour_force is ansible.builtin.changed
+          - _create_1_hour_check_mode is ansible.builtin.changed
+          - _create_1_hour_match_by_never is ansible.builtin.changed
 
-          - _create_immediate.kds_root_key | length > 0
-          - _create_1_hour_force.kds_root_key | length > 0
+          - _create_immediate.key_id | length > 0
+          - _create_1_hour_match_by_never.key_id | length > 0
 
           - _key_info.kds_root_keys | length == 2
           - _key_info.kds_root_keys[0].key_id | length > 0
           - _key_info.kds_root_keys[0].effective_time | length > 0
           - >-
-            (_second_created_key.effective_time | ansible.builtin.to_datetime(_datetime_str)) >
-            (_first_created_key.effective_time | ansible.builtin.to_datetime(_datetime_str))
+            ((_second_created_key.effective_time[:26] + 'Z') | ansible.builtin.to_datetime(_datetime_str)) >
+            ((_first_created_key.effective_time[:26] + 'Z') | ansible.builtin.to_datetime(_datetime_str))
       vars:
-        _datetime_str: "%Y-%m-%dT%H:%M:%S.%f0Z"
-        _first_created_key: "{{ _key_info.kds_root_keys | selectattr('key_id', 'equalto', _create_immediate.kds_root_key) | first }}"
-        _second_created_key: "{{ _key_info.kds_root_keys | selectattr('key_id', 'equalto', _create_1_hour_force.kds_root_key) | first }}"
+        _datetime_str: "%Y-%m-%dT%H:%M:%S.%fZ"
+        _first_created_key: "{{ _key_info.kds_root_keys | selectattr('key_id', 'equalto', _create_immediate.key_id) | first }}"
+        _second_created_key: "{{ _key_info.kds_root_keys | selectattr('key_id', 'equalto', _create_1_hour_match_by_never.key_id) | first }}"
+
+    - name: Remove first key - check mode
+      microsoft.ad.kds_root_key:
+        key_id: "{{ _create_immediate.key_id }}"
+        state: absent
+      register: _remove_key_check_mode
+      check_mode: true
 
     - name: Remove first key
       microsoft.ad.kds_root_key:
-        key_id: "{{ _create_immediate.kds_root_key }}"
+        key_id: "{{ _create_immediate.key_id }}"
         state: absent
       register: _remove_key
 
     - name: Remove first key - idempotence
       microsoft.ad.kds_root_key:
-        key_id: "{{ _create_immediate.kds_root_key }}"
+        key_id: "{{ _create_immediate.key_id }}"
         state: absent
       register: _remove_key_idem
 
     - name: Gather info about key
       microsoft.ad.kds_root_key_info:
-        key_id: "{{ _create_immediate.kds_root_key }}"
+        key_id: "{{ _create_immediate.key_id }}"
       register: _key_info
 
     - name: Check removal
       ansible.builtin.assert:
         that:
+          - _remove_key_check_mode is ansible.builtin.changed
           - _remove_key is ansible.builtin.changed
           - _remove_key_idem is not ansible.builtin.changed
           - _key_info.kds_root_keys | length == 0
@@ -81,11 +87,11 @@
   always:
     - name: Remove first key
       microsoft.ad.kds_root_key:
-        key_id: "{{ _create_immediate.kds_root_key }}"
+        key_id: "{{ _create_immediate.key_id }}"
         state: absent
       when: _create_immediate is defined and _create_immediate is ansible.builtin.changed
     - name: Remove second key
       microsoft.ad.kds_root_key:
-        key_id: "{{ _create_1_hour_force.kds_root_key }}"
+        key_id: "{{ _create_1_hour_match_by_never.key_id }}"
         state: absent
-      when: _create_1_hour_force is defined and _create_1_hour_force is ansible.builtin.changed
+      when: _create_1_hour_match_by_never is defined and _create_1_hour_match_by_never is ansible.builtin.changed

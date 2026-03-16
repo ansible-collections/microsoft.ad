@@ -4,6 +4,7 @@
 DOCUMENTATION:
   module: kds_root_key_info
   short_description: Gather information about one or more KDS root keys in a domain.
+  version_added: 1.11.0
   description:
     - Gather information about one or more KDS root keys in a domain.
     - You can specify a key ID to return information about a specific key, or gather
@@ -45,7 +46,29 @@ RETURN:
     description: Information about any keys that were found.
     returned: always
     type: list
-    elements: dict
-    sample:
-      - key_id: 12345678-1234-1234-1234-123456789012
-        effective_time: "2026-01-01 12:00:00"
+    contains:
+      key_id:
+        description:
+          - The Guid of the KDS root key.
+        returned: always
+        type: str
+        sample: 12345678-1234-1234-1234-123456789012
+      effective_time:
+        description:
+          - The effective time of the KDS root key.
+          - Keys are effective 10 hours after the effective time.
+        returned: always
+        type: str
+        sample: "2026-03-16T05:13:36.4151133Z"
+      creation_time:
+        description:
+          - The creation time of the KDS root key.
+        returned: always
+        type: str
+        sample: "2026-03-16T15:13:36.7190000Z"
+      version_number:
+        description:
+          - The version number of the KDS root key.
+        returned: always
+        type: int
+        sample: 1

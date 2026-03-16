@@ -3,7 +3,8 @@
 
 DOCUMENTATION:
   module: kds_root_key
-  short_description: Ensures the a KDS root key is present
+  short_description: Manages a KDS root key in a domain
+  version_added: 1.11.0
   description:
     - Ensure that a KDS root key is present or absent, performing changes only when necessary.
   options:
@@ -15,16 +16,22 @@ DOCUMENTATION:
         - If set to 0, the key will be effective immediately.
       type: int
       default: 10
-    force:
-      description:
-        - Whether to force the creation of a new key, even if one already exists.
-        - When a new key is created, existing keys are not removed or modified.
-      type: bool
-      default: false
     key_id:
       description:
-        - The ID of the key that should be removed. This is only used when O(state) is C(absent).
+        - The ID of the key that should be removed when O(state) is C(absent).
+        - The ID of the key that should be matched when O(state) is C(present) and O(match_by) is C(key_id).
+          Pay attention that the created key will not have the specified ID, the C(key_id) is used for matching existing keys only.
       type: str
+    match_by:
+      description:
+        - The method used to find key for idempotency check when O(state=present).
+        - When V(any), a key will only be created when no key exists.
+        - When V(key_id), O(key_id) must be set and will create the key if one with that
+          id does not already exist. The newly created key will not have the specified ID.
+        - When V(never), the key will always be created.
+      type: str
+      default: any
+      choices: [any, key_id, never]
     state:
       description:
         - Whether to ensure a key is present or absent.
@@ -54,16 +61,27 @@ EXAMPLES: |
   - name: Create a new KDS root key with an effective time of 10 hours, if one does not already exist
     microsoft.ad.kds_root_key:
       effective_time_hours: 10
-      force: false
+      match_by: any
 
   - name: Create a new KDS root key immediately, even if one already exists
     microsoft.ad.kds_root_key:
       effective_time_hours: 0
-      force: true
+      match_by: never
+
+  - name: Create a new KDS root key immediately, if a key with the specified ID does not already exist
+    microsoft.ad.kds_root_key:
+      effective_time_hours: 0
+      match_by: key_id
+      key_id: 2ad622aa-39f0-0583-9cd7-cc8fc85bd2f5
+
+  - name: Remove a KDS root key with the specified ID, if it exists
+    microsoft.ad.kds_root_key:
+      state: absent
+      key_id: 2ad622aa-39f0-0583-9cd7-cc8fc85bd2f5
 
 RETURN:
-  kds_root_key:
+  key_id:
     description: The ID of the newly created or removed KDS root key.
-    returned: on change
+    returned: always
     type: str
     sample: 12345678-1234-1234-1234-123456789012
