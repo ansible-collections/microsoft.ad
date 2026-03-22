@@ -35,7 +35,7 @@ DOCUMENTATION:
 
 EXAMPLES: |
   - name: Gather information about all keys in a domain
-    microsoft.ad.kds_root_key_info: {}
+    microsoft.ad.kds_root_key_info:
 
   - name: Gather information about a specific key
     microsoft.ad.kds_root_key_info:
