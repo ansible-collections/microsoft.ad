@@ -56,9 +56,13 @@ catch {
 }
 
 if ($state -eq "present") {
-    if (($match_by -eq "never") -or
-        ($match_by -eq "any" -and (-not $existing_kds_keys)) -or
-        ($match_by -eq "key_id" -and $existing_kds_keys.KeyId -notcontains $key_id)) {
+    if ($match_by -eq "any" -and $existing_kds_keys) {
+        $module.Result.key_id = [Guid]::Empty
+    }
+    elseif ($match_by -eq "key_id" -and $existing_kds_keys.KeyId -contains $key_id) {
+        $module.Result.key_id = $key_id
+    }
+    else {
         $module.Result.changed = $true
         if (-not $module.CheckMode) {
             try {
@@ -72,12 +76,6 @@ if ($state -eq "present") {
         else {
             $module.Result.key_id = [Guid]::Empty
         }
-    }
-    elseif ($match_by -eq "any" -and $existing_kds_keys) {
-        $module.Result.key_id = [Guid]::Empty
-    }
-    elseif ($match_by -eq "key_id" -and $existing_kds_keys.KeyId -contains $key_id) {
-        $module.Result.key_id = $key_id
     }
 }
 else {

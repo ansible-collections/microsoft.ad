@@ -27,7 +27,7 @@
       register: _create_1_hour_match_by_never
 
     - name: Gather info about keys
-      microsoft.ad.kds_root_key_info: {}
+      microsoft.ad.kds_root_key_info:
       register: _key_info
 
     - name: Check module outputs
