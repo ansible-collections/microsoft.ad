@@ -1,0 +1,18 @@
+---
+microsoft.ad.object_info:
+  query: >-
+    .objects[] | select(.ObjectClass == "computer") | {
+      name: .dNSHostName,
+      canonical_facts: {
+        cn: .CN,
+        name: .Name,
+        object_guid: .ObjectGUID,
+        distinguished_name: .DistinguishedName,
+        dns_host_name: .dNSHostName,
+      },
+      facts: {
+        infra_type: "PrivateCloud",
+        device_type: "Computer",
+        device_category: "Compute"
+      }
+    }
