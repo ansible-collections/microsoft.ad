@@ -76,17 +76,17 @@ microsoft.ad.computer:
 # Guarded to emit ONLY when all three conditions are true:
 #   a. The module emitted a real "object" key (management mode)
 #   b. object_guid and name are non-null (committed AD object)
-#   c. object_class is a non-empty array containing "computer"
-#      — prevents user, group, OU, or other object classes from
-#        being counted as managed infrastructure nodes.
+#   c. object_class contains "computer" — normalised to an array first
+#      so a bare string return value is handled correctly. Prevents
+#      user, group, OU, or other object classes from being counted as
+#      managed infrastructure nodes.
 # -----------------------------------------------------------------
 microsoft.ad.object:
   query: >-
     if ($data | has("object"))
       and ($data.object.object_guid // null) != null
       and ($data.object.name // null) != null
-      and (($data.object.object_class // []) | type == "array")
-      and (($data.object.object_class) | any(. == "computer"))
+      and (($data.object.object_class // [] | if type == "string" then [.] else . end) | any(. == "computer"))
     then {
       name: $data.object.name,
       canonical_facts: {
