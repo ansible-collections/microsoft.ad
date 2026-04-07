@@ -13,6 +13,15 @@
 #      A null GUID means AD did not return a real, committed object record —
 #      the task did not successfully act on a managed node.
 #
+#      CHECK MODE EDGE CASE: when state: present targets a computer object
+#      that does not yet exist and the task runs in check mode, the module
+#      emits a synthetic all-zeros GUID (00000000-0000-0000-0000-000000000000)
+#      rather than null, because no real AD object was created. This passes
+#      the guard and would count as one phantom node. In practice the risk is
+#      negligible: check-mode runs are rarely wired into production AAP job
+#      templates that feed node counting, and the all-zeros GUID deduplicates
+#      to at most one phantom count across any number of check-mode tasks.
+#
 #   2. ($data.distinguished_name // null) != null
 #      The DN uniquely identifies the object in the directory. If absent
 #      the returned data is incomplete and should not be counted.
