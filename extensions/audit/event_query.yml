@@ -6,31 +6,34 @@
 # SCOPE
 # -----
 # Counts only the single AD computer object that each task directly manages.
-# Three layers of guards ensure only the automated object is counted:
+# Two guards ensure only the automated object is counted:
 #
-#   1. ($data | has("object"))
-#      Confirms the module emitted an "object" key at all. Management modules
-#      (computer, object) always emit this key when they successfully acted on
-#      a target. If the key is absent the task did not manage a real object
-#      (e.g. state: absent on a non-existent target, or a failed pre-check).
-#
-#   2. ($data.object.object_guid // null) != null
+#   1. ($data.object_guid // null) != null
 #      The GUID is assigned by AD at object creation and never changes.
 #      A null GUID means AD did not return a real, committed object record —
 #      the task did not successfully act on a managed node.
 #
-#   3. ($data.object.name // null) != null
-#      The SAM-compatible name must be present. If it is null the returned
-#      object is incomplete and should not be counted.
+#   2. ($data.distinguished_name // null) != null
+#      The DN uniquely identifies the object in the directory. If absent
+#      the returned data is incomplete and should not be counted.
 #
-# These three guards together ensure that only objects Ansible actually
-# targeted and successfully interacted with are emitted.
+# NOTE: microsoft.ad.computer returns data flat (object_guid, distinguished_name,
+# sid) — NOT nested under an "object" key. Fields are accessed as $data.object_guid,
+# $data.distinguished_name, $data.sid directly.
 #
 # EXCLUDED MODULES
 # ----------------
 # microsoft.ad.object_info  — returns every object matching an LDAP filter;
 #                             would count the entire AD landscape, not just
 #                             the objects being automated. Excluded entirely.
+# microsoft.ad.object       — generic manager for any AD object class (computer,
+#                             user, group, OU, etc.). The module does NOT return
+#                             object_class in its result set, so filtering to
+#                             computer objects only is not possible. Excluded to
+#                             avoid over-counting non-infrastructure objects.
+#                             Contact ansiblepartners@redhat.com if computer
+#                             objects managed via microsoft.ad.object must be
+#                             counted; a custom taxonomy approach is required.
 # microsoft.ad.user         — directory accounts, not infrastructure nodes;
 #                             no standard taxonomy device_type applies.
 # microsoft.ad.group        — directory groups, not infrastructure nodes.
@@ -46,58 +49,25 @@
 # -----------------------------------------------------------------
 # microsoft.ad.computer
 # Targets one specific computer account per task by name or identity.
+# Return values: object_guid, distinguished_name, sid (flat — not nested).
 # device_type: virtual_machine — computer accounts represent managed hosts.
 #   If your environment is primarily bare-metal, change to "bare_metal" or
 #   contact ansiblepartners@redhat.com for a custom taxonomy type.
 # -----------------------------------------------------------------
 microsoft.ad.computer:
   query: >-
-    if ($data | has("object"))
-      and ($data.object.object_guid // null) != null
-      and ($data.object.name // null) != null
+    if ($data.object_guid // null) != null
+      and ($data.distinguished_name // null) != null
     then {
-      name: $data.object.name,
+      name: $data.distinguished_name,
       canonical_facts: {
-        object_guid: $data.object.object_guid,
-        sid: ($data.object.sid // null)
+        object_guid: $data.object_guid,
+        sid: ($data.sid // null)
       },
       facts: {
         device_type: "virtual_machine",
         platform: "microsoft_ad",
-        distinguished_name: $data.object.distinguished_name,
-        dns_hostname: ($data.object.dns_hostname // null)
-      }
-    }
-    else empty end
-
-# -----------------------------------------------------------------
-# microsoft.ad.object
-# Generic AD object manager — can target any object class.
-# Guarded to emit ONLY when all three conditions are true:
-#   a. The module emitted a real "object" key (management mode)
-#   b. object_guid and name are non-null (committed AD object)
-#   c. object_class contains "computer" — normalised to an array first
-#      so a bare string return value is handled correctly. Prevents
-#      user, group, OU, or other object classes from being counted as
-#      managed infrastructure nodes.
-# -----------------------------------------------------------------
-microsoft.ad.object:
-  query: >-
-    if ($data | has("object"))
-      and ($data.object.object_guid // null) != null
-      and ($data.object.name // null) != null
-      and (($data.object.object_class // [] | if type == "string" then [.] else . end) | any(. == "computer"))
-    then {
-      name: $data.object.name,
-      canonical_facts: {
-        object_guid: $data.object.object_guid,
-        sid: ($data.object.sid // null)
-      },
-      facts: {
-        device_type: "virtual_machine",
-        platform: "microsoft_ad",
-        distinguished_name: $data.object.distinguished_name,
-        dns_hostname: ($data.object.dns_hostname // null)
+        distinguished_name: $data.distinguished_name
       }
     }
     else empty end
