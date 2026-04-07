@@ -1,10 +1,13 @@
 ---
 - name: Test
   block:
+    # We can't guarantee a previous test may have already created a key, so we
+    # use 'never' to ensure a new key is created for testing, and 'any' to
+    # check idempotence.
     - name: Create a KDS root key effective immediately
       microsoft.ad.kds_root_key:
         effective_time_hours: 0
-        match_by: any
+        match_by: never
       register: _create_immediate
 
     - name: Create a KDS root key effective immediately - idempotence
@@ -12,6 +15,20 @@
         effective_time_hours: 0
         match_by: any
       register: _create_immediate_idem
+
+    - name: Create a KDS root key that already exists - check mode
+      microsoft.ad.kds_root_key:
+        match_by: key_id
+        key_id: "{{ _create_immediate.key_id }}"
+      register: _create_match_by_key_id_check_mode
+      check_mode: true
+
+    - name: Create a KDS root key that already exists
+      microsoft.ad.kds_root_key:
+        match_by: key_id
+        key_id: "{{ _create_immediate.key_id }}"
+      register: _create_match_by_key_id
+      check_mode: true
 
     - name: Create a KDS root key effective in 1 hour - check mode
       microsoft.ad.kds_root_key:
@@ -35,13 +52,17 @@
         that:
           - _create_immediate is ansible.builtin.changed
           - _create_immediate_idem is not ansible.builtin.changed
+          - not _create_match_by_key_id_check_mode is ansible.builtin.changed
+          - not _create_match_by_key_id is ansible.builtin.changed
           - _create_1_hour_check_mode is ansible.builtin.changed
           - _create_1_hour_match_by_never is ansible.builtin.changed
 
           - _create_immediate.key_id | length > 0
           - _create_1_hour_match_by_never.key_id | length > 0
 
-          - _key_info.kds_root_keys | length == 2
+          # We create 2 keys in our tests but 1 may already exist so we just
+          # check there is more than 1 keys.
+          - _key_info.kds_root_keys | length > 1
           - _key_info.kds_root_keys[0].key_id | length > 0
           - _key_info.kds_root_keys[0].effective_time | length > 0
           - >-
