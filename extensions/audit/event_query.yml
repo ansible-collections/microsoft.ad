@@ -1,0 +1,82 @@
+---
+# Indirect Node Counting Query — microsoft.ad collection
+# Applies to:  Ansible Automation Platform 2.6+
+# Path:        extensions/audit/event_query.yml
+#
+# SCOPE
+# -----
+# Counts only the single AD computer object that each task directly manages.
+# Two guards ensure only the automated object is counted:
+#
+#   1. ($data.object_guid // null) != null
+#      The GUID is assigned by AD at object creation and never changes.
+#      A null GUID means AD did not return a real, committed object record —
+#      the task did not successfully act on a managed node.
+#
+#      CHECK MODE EDGE CASE: when state: present targets a computer object
+#      that does not yet exist and the task runs in check mode, the module
+#      emits a synthetic all-zeros GUID (00000000-0000-0000-0000-000000000000)
+#      rather than null, because no real AD object was created. This passes
+#      the guard and would count as one phantom node. In practice the risk is
+#      negligible: check-mode runs are rarely wired into production AAP job
+#      templates that feed node counting, and the all-zeros GUID deduplicates
+#      to at most one phantom count across any number of check-mode tasks.
+#
+#   2. ($data.distinguished_name // null) != null
+#      The DN uniquely identifies the object in the directory. If absent
+#      the returned data is incomplete and should not be counted.
+#
+# NOTE: microsoft.ad.computer returns data flat (object_guid, distinguished_name,
+# sid) — NOT nested under an "object" key. Fields are accessed as $data.object_guid,
+# $data.distinguished_name, $data.sid directly.
+#
+# EXCLUDED MODULES
+# ----------------
+# microsoft.ad.object_info  — returns every object matching an LDAP filter;
+#                             would count the entire AD landscape, not just
+#                             the objects being automated. Excluded entirely.
+# microsoft.ad.object       — generic manager for any AD object class (computer,
+#                             user, group, OU, etc.). The module does NOT return
+#                             object_class in its result set, so filtering to
+#                             computer objects only is not possible. Excluded to
+#                             avoid over-counting non-infrastructure objects.
+#                             Contact ansiblepartners@redhat.com if computer
+#                             objects managed via microsoft.ad.object must be
+#                             counted; a custom taxonomy approach is required.
+# microsoft.ad.user         — directory accounts, not infrastructure nodes;
+#                             no standard taxonomy device_type applies.
+# microsoft.ad.group        — directory groups, not infrastructure nodes.
+# microsoft.ad.ou           — container objects, not managed hosts.
+# microsoft.ad.domain /
+# microsoft.ad.domain_controller
+#                           — contact ansiblepartners@redhat.com if DCs must
+#                             be counted; they require a custom taxonomy entry.
+#
+# NOTE: Wildcard module matching (microsoft.ad.*) is intentionally NOT used.
+# Wildcard matching would include info/query modules and inflate the count.
+
+# -----------------------------------------------------------------
+# microsoft.ad.computer
+# Targets one specific computer account per task by name or identity.
+# Return values: object_guid, distinguished_name, sid (flat — not nested).
+# device_type: virtual_machine — computer accounts represent managed hosts.
+#   If your environment is primarily bare-metal, change to "bare_metal" or
+#   contact ansiblepartners@redhat.com for a custom taxonomy type.
+# -----------------------------------------------------------------
+microsoft.ad.computer:
+  query: >-
+    if ($data.object_guid // null) != null
+      and ($data.distinguished_name // null) != null
+    then {
+      name: $data.distinguished_name,
+      canonical_facts: {
+        object_guid: $data.object_guid,
+        sid: ($data.sid // null)
+      },
+      facts: {
+        device_type: "virtual_machine",
+        platform: "microsoft_ad",
+        distinguished_name: $data.distinguished_name
+      }
+    }
+    else empty end
