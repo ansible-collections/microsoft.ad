@@ -1,0 +1,193 @@
+# Copyright: (c) 2026, Ansible Project
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+DOCUMENTATION:
+  module: gpo_link
+  short_description: Manage Active Directory Group Policy Object links
+  description:
+    - Links, unlinks, enables, disables, and enforces Group Policy Objects
+      (GPOs) on Active Directory targets such as sites, domains, and
+      organizational units.
+    - This module wraps the C(New-GPLink), C(Set-GPLink), and
+      C(Remove-GPLink) PowerShell cmdlets from the C(GroupPolicy) module.
+    - Replaces the need to use M(ansible.windows.win_powershell) with inline
+      C(Set-GPLink) scripts.
+  options:
+    gpo_name:
+      description:
+        - The display name of the GPO to link.
+        - Exactly one of I(gpo_name) or I(gpo_guid) must be specified.
+      type: str
+    gpo_guid:
+      description:
+        - The GUID of the GPO to link.
+        - Exactly one of I(gpo_name) or I(gpo_guid) must be specified.
+      type: str
+    target:
+      description:
+        - The LDAP distinguished name of the site, domain, or OU to which
+          the GPO is linked.
+        - 'For example: C(OU=Servers,DC=contoso,DC=com) or
+          C(DC=contoso,DC=com).'
+      type: str
+      required: true
+    link_enabled:
+      description:
+        - Whether the GPO link is enabled.
+        - A disabled link remains associated with the target but its
+          settings are not applied.
+        - Defaults to C(true) when creating a new link.
+      type: bool
+    enforced:
+      description:
+        - Whether the GPO link is enforced.
+        - An enforced link cannot be blocked by child containers.
+        - Defaults to C(false) when creating a new link.
+      type: bool
+    order:
+      description:
+        - The link order (processing priority) of the GPO on the target.
+        - Lower numbers indicate higher priority.
+        - Valid values start at C(1).
+      type: int
+    state:
+      description:
+        - C(present) ensures the GPO is linked to the target.
+        - C(absent) ensures the GPO link is removed from the target.
+      type: str
+      choices:
+        - absent
+        - present
+      default: present
+    domain:
+      description:
+        - The domain to target for the GPO operation.
+        - If not specified, the domain of the user running the module is
+          used.
+      type: str
+    server:
+      description:
+        - The domain controller to target for the GPO operation.
+        - If not specified, the module uses the default DC discovery.
+      type: str
+  notes:
+    - This module requires the C(GroupPolicy) PowerShell module to be
+      installed on the Windows target host. This module is available as
+      part of the Remote Server Administration Tools (RSAT) feature.
+    - Unlike modules that use the C(ActiveDirectory) PowerShell module,
+      this module uses the C(GroupPolicy) module and does not extend the
+      C(microsoft.ad.ad_object) documentation fragment.
+    - Multiple GPOs can be linked to the same target by calling this
+      module multiple times with different I(gpo_name) or I(gpo_guid)
+      values.
+  extends_documentation_fragment:
+    - ansible.builtin.action_common_attributes
+  attributes:
+    check_mode:
+      support: full
+    diff_mode:
+      support: full
+    platform:
+      platforms:
+        - windows
+  seealso:
+    - module: microsoft.ad.ou
+    - module: microsoft.ad.group
+    - module: microsoft.ad.object
+  author:
+    - Steve Fulmer (@stevefulmer)
+
+EXAMPLES: |
+  - name: Link a GPO to an OU
+    microsoft.ad.gpo_link:
+      gpo_name: Default Security Policy
+      target: "OU=Servers,DC=contoso,DC=com"
+      state: present
+
+  - name: Link a GPO by GUID
+    microsoft.ad.gpo_link:
+      gpo_guid: "12345678-1234-1234-1234-123456789012"
+      target: "OU=Workstations,DC=contoso,DC=com"
+      state: present
+      link_enabled: true
+
+  - name: Enforce a GPO link
+    microsoft.ad.gpo_link:
+      gpo_name: Compliance Baseline
+      target: "DC=contoso,DC=com"
+      enforced: true
+
+  - name: Disable a GPO link without removing it
+    microsoft.ad.gpo_link:
+      gpo_name: Test Policy
+      target: "OU=Lab,DC=contoso,DC=com"
+      link_enabled: false
+
+  - name: Set GPO link order
+    microsoft.ad.gpo_link:
+      gpo_name: High Priority Policy
+      target: "OU=Servers,DC=contoso,DC=com"
+      order: 1
+
+  - name: Remove a GPO link
+    microsoft.ad.gpo_link:
+      gpo_name: Deprecated Policy
+      target: "OU=Servers,DC=contoso,DC=com"
+      state: absent
+
+  - name: Link multiple GPOs to the same OU
+    microsoft.ad.gpo_link:
+      gpo_name: "{{ item }}"
+      target: "OU=Servers,DC=contoso,DC=com"
+      state: present
+      link_enabled: true
+    loop:
+      - Security Baseline
+      - Monitoring Policy
+      - Patch Management
+
+  - name: Manage GPO link on a specific domain controller
+    microsoft.ad.gpo_link:
+      gpo_name: Regional Policy
+      target: "OU=Branch,DC=contoso,DC=com"
+      server: dc01.contoso.com
+      state: present
+      enforced: true
+
+RETURN:
+  gpo_name:
+    description:
+      - The display name of the GPO.
+    returned: always
+    type: str
+    sample: Default Security Policy
+  gpo_guid:
+    description:
+      - The GUID of the GPO.
+    returned: when the link exists
+    type: str
+    sample: 12345678-1234-1234-1234-123456789012
+  target:
+    description:
+      - The distinguished name of the target container.
+    returned: always
+    type: str
+    sample: "OU=Servers,DC=contoso,DC=com"
+  link_enabled:
+    description:
+      - Whether the GPO link is enabled.
+    returned: when state=present
+    type: bool
+    sample: true
+  enforced:
+    description:
+      - Whether the GPO link is enforced.
+    returned: when state=present
+    type: bool
+    sample: false
+  order:
+    description:
+      - The link order of the GPO on the target.
+    returned: when state=present
+    type: int
+    sample: 1
