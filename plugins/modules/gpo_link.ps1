@@ -51,16 +51,15 @@ try {
 }
 
 # Resolve GPO identity — get both name and GUID for return values
-$gpoIdentity = if ($gpoGuid) { $gpoGuid } else { $gpoName }
-
 try {
-    $gpoObject = Get-GPO @gpParams -Name $gpoIdentity -ErrorAction Stop 2>$null
-} catch {
-    try {
-        $gpoObject = Get-GPO @gpParams -Guid $gpoIdentity -ErrorAction Stop 2>$null
-    } catch {
-        $module.FailJson("GPO '$gpoIdentity' not found: $_", $_)
+    if ($gpoGuid) {
+        $gpoObject = Get-GPO @gpParams -Guid $gpoGuid -ErrorAction Stop
+    } else {
+        $gpoObject = Get-GPO @gpParams -Name $gpoName -ErrorAction Stop
     }
+} catch {
+    $identifier = if ($gpoGuid) { $gpoGuid } else { $gpoName }
+    $module.FailJson("GPO '$identifier' not found: $_", $_)
 }
 
 $resolvedName = $gpoObject.DisplayName
