@@ -1255,17 +1255,19 @@ Function Invoke-AnsibleADObject {
 
                     # If the value is empty we don't want to explicitly set it
                     # as that will be the default and can fail if empty.
-                    if ($propInfo.IsRawAttribute -and @($propValue).Count) {
-                        if (-not $newParams.ContainsKey('OtherAttributes')) {
-                            $newParams.OtherAttributes = @{}
-                        }
+                    if (@($propValue).Count) {
+                        if ($propInfo.IsRawAttribute) {
+                            if (-not $newParams.ContainsKey('OtherAttributes')) {
+                                $newParams.OtherAttributes = @{}
+                            }
 
-                        # The AD cmdlets don't like explicitly casted arrays, use
-                        # ForEach-Object to get back a vanilla object[] to set.
-                        $newParams.OtherAttributes[$propInfo.Attribute] = $propValue | ForEach-Object { "$_" }
-                    }
-                    elseif (-not $propInfo.IsRawAttribute) {
-                        $newParams[$propInfo.Attribute] = $propValue
+                            # The AD cmdlets don't like explicitly casted arrays, use
+                            # ForEach-Object to get back a vanilla object[] to set.
+                            $newParams.OtherAttributes[$propInfo.Attribute] = $propValue | ForEach-Object { "$_" }
+                        }
+                        else {
+                            $newParams[$propInfo.Attribute] = $propValue
+                        }
                     }
 
                     if ($propInfo.Option.no_log) {

@@ -265,6 +265,10 @@
       add:
       - aes128
       - aes256
+    # Tests that an explicit empty list still works
+    # https://github.com/ansible-collections/microsoft.ad/issues/229
+    allowed_to_retrieve_password:
+      set: []
   register: create_sa_no_dollar_check
   check_mode: true
 
@@ -290,6 +294,8 @@
       add:
       - aes128
       - aes256
+    allowed_to_retrieve_password:
+      set: []
   register: create_sa_no_dollar
 
 - set_fact:
