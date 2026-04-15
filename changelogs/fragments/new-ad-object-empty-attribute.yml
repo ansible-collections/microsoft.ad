@@ -1,0 +1,5 @@
+bugfixes:
+  - >-
+    Fix bug when creating a new AD object with an attribute set to an empty value. For example using
+    ``allowed_to_retrieve_password: {set: []}`` on ``microsoft.ad.service_account`` will be treated like the value was
+    not specified at all - https://github.com/ansible-collections/microsoft.ad/issues/229
