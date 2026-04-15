@@ -114,6 +114,16 @@ options:
     type: int
     env:
     - name: MICROSOFT_AD_LDAP_CONNECTION_TIMEOUT
+  domain_realm:
+    description:
+    - Sets the domain realm to use for the LDAP server lookup performed when
+      O(server) is not specified.
+    - If not specified, the default realm from the Kerberos configuration will
+      be used instead.
+    type: str
+    env:
+    - name: MICROSOFT_AD_LDAP_DOMAIN_REALM
+    version_added: '1.11.0'
   encrypt:
     description:
     - Whether encryption is required for the connection.
@@ -153,8 +163,9 @@ options:
   server:
     description:
     - The domain controller/server to connect to.
-    - If not specified the server will be derived from the current krb5.conf
-      C(default_realm) setting and with an SRV DNS lookup.
+    - If not specified the server will be found using an SRV DNS lookup for the
+      domain specified by O(domain_realm) or the Kerberos C(default_realm)
+      configuration setting.
     - See R(Server lookup,ansible_collections.microsoft.ad.docsite.guide_ldap_connection.server_lookup)
       for more information.
     - This option can be set using a Jinja2 template value.
