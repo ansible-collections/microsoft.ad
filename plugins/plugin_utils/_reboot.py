@@ -16,6 +16,7 @@ This is a straight copy from ansible.windows (with an embeded quote_pwsh)
 # See also: https://github.com/ansible/community/issues/539#issuecomment-780839686
 # Please open an issue if you have questions about this.
 
+import base64
 import datetime
 import json
 import random
@@ -455,14 +456,33 @@ def _execute_command(
     """Runs a command on the Windows host and returned the result"""
     display.vvvvv(f"{task_action}: running command: {command}")
 
-    # Need to wrap the command in our PowerShell encoded wrapper. This is done to align the command input to a
-    # common shell and to allow the psrp connection plugin to report the correct exit code without manually setting
-    # $LASTEXITCODE for just that plugin.
-    command = connection._shell._encode_script(command)
+    # Need to wrap the command in our PowerShell encoded wrapper. This is done
+    # to align the command input to a common shell and to ensure things like
+    # $LASTEXITCODE is set for a consistent experience across all connections.
+    # This is a copy of the original powershell._encode_script method for
+    # backwards compatibility with how this worked in the past.
+    pwsh_script = f"""Set-StrictMode -Version Latest
+{command}
+If (-not $?) {{
+    If (Get-Variable LASTEXITCODE -ErrorAction SilentlyContinue) {{
+        exit $LASTEXITCODE
+    }} Else {{
+        exit 1
+    }}
+}}
+"""
+    encoded_script = base64.b64encode(pwsh_script.encode("utf-16-le")).decode("ascii")
+    pwsh_command = " ".join([
+        "PowerShell",
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy", "Unrestricted",
+        "-EncodedCommand", encoded_script,
+    ])
 
     try:
         rc, stdout, stderr = connection.exec_command(
-            command, in_data=None, sudoable=False
+            pwsh_command, in_data=None, sudoable=False
         )
     except RequestException as e:
         # The psrp connection plugin should be doing this but until we can guarantee it does we just convert it here

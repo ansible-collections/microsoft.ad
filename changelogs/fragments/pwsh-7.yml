@@ -1,0 +1,11 @@
+minor_changes:
+  - >-
+    PowerShell 7 - Add initial support for running modules against PowerShell 7 interpreters. Support for PowerShell 7
+    varies across each module, see module documentation for more information.
+bugfixes:
+  - domain - Fix PowerShell 7 compatibility
+  - domain_child - Fix PowerShell 7 compatibility
+  - domain_controller - Fix PowerShell 7 compatibility
+  - >-
+    object_info - Fix PowerShell 7 compatibility when specified property does not match the same case as the property
+    on the found AD object

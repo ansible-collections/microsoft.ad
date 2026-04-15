@@ -57,24 +57,24 @@ catch {
 
 if ($state -eq "present") {
     if ($match_by -eq "any" -and $existing_kds_keys) {
-        $module.Result.key_id = [Guid]::Empty
+        $module.Result.key_id = [Guid]::Empty.Guid
     }
     elseif ($match_by -eq "key_id" -and $existing_kds_keys.KeyId -contains $key_id) {
-        $module.Result.key_id = $key_id
+        $module.Result.key_id = $key_id.Guid
     }
     else {
         $module.Result.changed = $true
         if (-not $module.CheckMode) {
             try {
                 $new_key = Add-KdsRootKey @effctive_time_cmdlet_param
-                $module.Result.key_id = $new_key
+                $module.Result.key_id = $new_key.Guid
             }
             catch {
                 $module.FailJson("Failed to create KDS root key: $_", $_)
             }
         }
         else {
-            $module.Result.key_id = [Guid]::Empty
+            $module.Result.key_id = [Guid]::Empty.Guid
         }
     }
 }
