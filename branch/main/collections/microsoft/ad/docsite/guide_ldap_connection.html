@@ -212,23 +212,27 @@
 <td><p>Server lookup through Kerberos</p></td>
 <td><p>The LDAP server hostname</p></td>
 </tr>
-<tr class="row-odd"><td><p>port</p></td>
+<tr class="row-odd"><td><p>domain_realm</p></td>
+<td><p>Default realm from Kerberos</p></td>
+<td><p>The realm to use for server SRV lookup</p></td>
+</tr>
+<tr class="row-even"><td><p>port</p></td>
 <td><p>389 or 686 if tls_mode=ldaps</p></td>
 <td><p>The LDAP port</p></td>
 </tr>
-<tr class="row-even"><td><p>tls_mode</p></td>
+<tr class="row-odd"><td><p>tls_mode</p></td>
 <td><p>LDAPS if port=686 else None</p></td>
 <td><p>TLS details - LDAP, LDAP + StartTLS, LDAPS</p></td>
 </tr>
-<tr class="row-odd"><td><p>auth_protocol</p></td>
+<tr class="row-even"><td><p>auth_protocol</p></td>
 <td><p>Negotiate</p></td>
 <td><p>Authentication protocol</p></td>
 </tr>
-<tr class="row-even"><td><p>username</p></td>
+<tr class="row-odd"><td><p>username</p></td>
 <td><p>None</p></td>
 <td><p>Attempts to use Kerberos cache if available</p></td>
 </tr>
-<tr class="row-odd"><td><p>password</p></td>
+<tr class="row-even"><td><p>password</p></td>
 <td><p>None</p></td>
 <td><p>Attempts to use Kerberos cache if available</p></td>
 </tr>
@@ -240,13 +244,13 @@
 <p>If no server option was explicitly set, the plugin will attempt to lookup the LDAP server based on the current environment configuration. This is only possible if:</p>
 <ul class="simple">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">dnspython</span></code> Python package is installed</p></li>
-<li><p>The <code class="docutils literal notranslate"><span class="pre">pyspnego[kerberos]</span></code> Python package for Kerberos is installed</p></li>
-<li><p>The underlying Kerberos library has a <code class="docutils literal notranslate"><span class="pre">default_realm</span></code> set in the <a class="reference external" href="https://web.mit.edu/kerberos/krb5-latest/doc/admin/host_config.html#default-realm">MIT krb5.conf</a></p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">domain_realm</span></code> value is explicitly set or</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">pyspnego[kerberos]</span></code> Python package for Kerberos is installed and the Kerberos library has a <code class="docutils literal notranslate"><span class="pre">default_realm</span></code> set in the <a class="reference external" href="https://web.mit.edu/kerberos/krb5-latest/doc/admin/host_config.html#default-realm">MIT krb5.conf</a></p></li>
 </ul>
 <p>If none of the above are true, the connection will fail and an explicit server must be supplied. If all the requirements are satisfied this is the server lookup workflow:</p>
 <ul class="simple">
-<li><p>The <code class="docutils literal notranslate"><span class="pre">default_realm</span></code> of the local Kerberos configuration is retrieved</p></li>
-<li><p>A DNS SRV lookup is done for the record <code class="docutils literal notranslate"><span class="pre">_ldap._tcp.dc._msdcs.{{</span> <span class="pre">default_realm</span> <span class="pre">}}</span></code></p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">domain_realm</span></code> specified in the options is used as the <code class="docutils literal notranslate"><span class="pre">{{</span> <span class="pre">realm</span> <span class="pre">}}</span></code>, otherwise the <code class="docutils literal notranslate"><span class="pre">default_realm</span></code> of the local Kerberos configuration is retrieved</p></li>
+<li><p>A DNS SRV lookup is done for the record <code class="docutils literal notranslate"><span class="pre">_ldap._tcp.dc._msdcs.{{</span> <span class="pre">realm</span> <span class="pre">}}</span></code></p></li>
 <li><p>The DNS records are sorted by priority and weight and the first is selected</p></li>
 <li><p>The hostname and port on the selected SRV record are used for the lookup</p></li>
 </ul>
