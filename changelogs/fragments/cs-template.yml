@@ -1,0 +1,4 @@
+minor_changes:
+  - >-
+    cs_template - New module to create, modify, and remove AD Certificate
+    Services certificate templates and publish them to Certificate Authorities.
