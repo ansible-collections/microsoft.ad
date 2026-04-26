@@ -88,79 +88,79 @@ if ($module.Params.domain_server) {
 # Name-Value Maps
 
 $ekuMap = @{
-    'server_authentication'     = '1.3.6.1.5.5.7.3.1'
-    'client_authentication'     = '1.3.6.1.5.5.7.3.2'
-    'code_signing'              = '1.3.6.1.5.5.7.3.3'
-    'secure_email'              = '1.3.6.1.5.5.7.3.4'
-    'ip_security_end_system'    = '1.3.6.1.5.5.7.3.5'
-    'ip_security_tunnel'        = '1.3.6.1.5.5.7.3.6'
-    'ip_security_user'          = '1.3.6.1.5.5.7.3.7'
-    'time_stamping'             = '1.3.6.1.5.5.7.3.8'
-    'ocsp_signing'              = '1.3.6.1.5.5.7.3.9'
-    'smart_card_logon'          = '1.3.6.1.4.1.311.20.2.2'
+    'server_authentication' = '1.3.6.1.5.5.7.3.1'
+    'client_authentication' = '1.3.6.1.5.5.7.3.2'
+    'code_signing' = '1.3.6.1.5.5.7.3.3'
+    'secure_email' = '1.3.6.1.5.5.7.3.4'
+    'ip_security_end_system' = '1.3.6.1.5.5.7.3.5'
+    'ip_security_tunnel' = '1.3.6.1.5.5.7.3.6'
+    'ip_security_user' = '1.3.6.1.5.5.7.3.7'
+    'time_stamping' = '1.3.6.1.5.5.7.3.8'
+    'ocsp_signing' = '1.3.6.1.5.5.7.3.9'
+    'smart_card_logon' = '1.3.6.1.4.1.311.20.2.2'
     'certificate_request_agent' = '1.3.6.1.4.1.311.20.2.1'
-    'encrypting_file_system'    = '1.3.6.1.4.1.311.10.3.4'
-    'file_recovery'             = '1.3.6.1.4.1.311.10.3.4.1'
-    'key_recovery'              = '1.3.6.1.4.1.311.10.3.11'
-    'key_recovery_agent'        = '1.3.6.1.4.1.311.21.6'
-    'document_signing'          = '1.3.6.1.4.1.311.10.3.12'
-    'remote_desktop'            = '1.3.6.1.4.1.311.54.1.2'
-    'kdc_authentication'        = '1.3.6.1.5.2.3.5'
+    'encrypting_file_system' = '1.3.6.1.4.1.311.10.3.4'
+    'file_recovery' = '1.3.6.1.4.1.311.10.3.4.1'
+    'key_recovery' = '1.3.6.1.4.1.311.10.3.11'
+    'key_recovery_agent' = '1.3.6.1.4.1.311.21.6'
+    'document_signing' = '1.3.6.1.4.1.311.10.3.12'
+    'remote_desktop' = '1.3.6.1.4.1.311.54.1.2'
+    'kdc_authentication' = '1.3.6.1.5.2.3.5'
 }
 
 $enrollmentFlagMap = @{
-    'include_symmetric_algorithms'            = 0x00000001
-    'pend_all_requests'                       = 0x00000002
-    'publish_to_kra_container'                = 0x00000004
-    'publish_to_ds'                           = 0x00000008
-    'auto_enrollment_check_user_ds_certificate' = 0x00000010
-    'auto_enrollment'                         = 0x00000020
-    'previous_approval_validate_reenrollment' = 0x00000040
+    'include_symmetric_algorithms' = 1
+    'pend_all_requests' = 2
+    'publish_to_kra_container' = 4
+    'publish_to_ds' = 8
+    'auto_enrollment_check_user_ds_certificate' = 16
+    'auto_enrollment' = 32
+    'previous_approval_validate_reenrollment' = 64
 }
 
 $privateKeyFlagMap = @{
-    'require_private_key_archival'          = 0x00000001
-    'exportable_key'                        = 0x00000010
-    'strong_key_protection_required'        = 0x00000020
-    'require_alternate_signature_algorithm' = 0x00000040
-    'require_same_key_renewal'              = 0x00000080
-    'use_legacy_provider'                   = 0x00000100
-    'ek_trust_on_use'                       = 0x00000200
-    'ek_validate_cert'                      = 0x00000400
-    'ek_validate_key'                       = 0x00000800
-    'attest_preferred'                      = 0x00001000
-    'attest_required'                       = 0x00002000
-    'attestation_without_policy'            = 0x00004000
-    'hello_logon_key'                       = 0x00200000
+    'require_private_key_archival' = 1
+    'exportable_key' = 16
+    'strong_key_protection_required' = 32
+    'require_alternate_signature_algorithm' = 64
+    'require_same_key_renewal' = 128
+    'use_legacy_provider' = 256
+    'ek_trust_on_use' = 512
+    'ek_validate_cert' = 1024
+    'ek_validate_key' = 2048
+    'attest_preferred' = 4096
+    'attest_required' = 8192
+    'attestation_without_policy' = 16384
+    'hello_logon_key' = 2097152
 }
 
 $certNameFlagMap = @{
-    'enrollee_supplies_subject'          = 0x00000001
-    'enrollee_supplies_subject_alt_name' = 0x00010000
-    'subject_alt_require_domain_dns'     = 0x00400000
-    'subject_alt_require_spn'            = 0x00800000
-    'subject_alt_require_directory_guid' = 0x01000000
-    'subject_alt_require_upn'            = 0x02000000
-    'subject_alt_require_email'          = 0x04000000
-    'subject_alt_require_dns'            = 0x08000000
-    'subject_require_dns_as_cn'          = 0x10000000
-    'subject_require_email'              = 0x20000000
-    'subject_require_common_name'        = 0x40000000
-    'subject_require_directory_path'     = 0x80000000
+    'enrollee_supplies_subject' = 1
+    'enrollee_supplies_subject_alt_name' = 65536
+    'subject_alt_require_domain_dns' = 4194304
+    'subject_alt_require_spn' = 8388608
+    'subject_alt_require_directory_guid' = 16777216
+    'subject_alt_require_upn' = 33554432
+    'subject_alt_require_email' = 67108864
+    'subject_alt_require_dns' = 134217728
+    'subject_require_dns_as_cn' = 268435456
+    'subject_require_email' = 536870912
+    'subject_require_common_name' = 1073741824
+    'subject_require_directory_path' = -2147483648
 }
 
 # pKIKeyUsage is a byte array using ASN.1 BIT STRING encoding (bits reversed
 # within each byte). Byte 0 holds the first 8 usages, byte 1 holds decipher_only.
 $keyUsageMap = @{
-    'digital_signature' = @{ Byte = 0; Bit = 0x80 }
-    'non_repudiation'   = @{ Byte = 0; Bit = 0x40 }
-    'key_encipherment'  = @{ Byte = 0; Bit = 0x20 }
-    'data_encipherment' = @{ Byte = 0; Bit = 0x10 }
-    'key_agreement'     = @{ Byte = 0; Bit = 0x08 }
-    'key_cert_sign'     = @{ Byte = 0; Bit = 0x04 }
-    'crl_sign'          = @{ Byte = 0; Bit = 0x02 }
-    'encipher_only'     = @{ Byte = 0; Bit = 0x01 }
-    'decipher_only'     = @{ Byte = 1; Bit = 0x80 }
+    'digital_signature' = @{ Byte = 0; Bit = 128 }
+    'non_repudiation' = @{ Byte = 0; Bit = 64 }
+    'key_encipherment' = @{ Byte = 0; Bit = 32 }
+    'data_encipherment' = @{ Byte = 0; Bit = 16 }
+    'key_agreement' = @{ Byte = 0; Bit = 8 }
+    'key_cert_sign' = @{ Byte = 0; Bit = 4 }
+    'crl_sign' = @{ Byte = 0; Bit = 2 }
+    'encipher_only' = @{ Byte = 0; Bit = 1 }
+    'decipher_only' = @{ Byte = 1; Bit = 128 }
 }
 
 $intProperties = @(
@@ -214,17 +214,17 @@ $overrideMap = @(
     @{
         Param = 'enrollment_flag'
         Attr = 'msPKI-Enrollment-Flag'
-        Cast = { param($v) [int](Resolve-FlagList $v $enrollmentFlagMap 'enrollment_flag') }
+        Cast = { param($v) [int](Resolve-FlagList -Values $v -FlagMap $enrollmentFlagMap -ParamName 'enrollment_flag') }
     }
     @{
         Param = 'private_key_flag'
         Attr = 'msPKI-Private-Key-Flag'
-        Cast = { param($v) [int](Resolve-FlagList $v $privateKeyFlagMap 'private_key_flag') }
+        Cast = { param($v) [int](Resolve-FlagList -Values $v -FlagMap $privateKeyFlagMap -ParamName 'private_key_flag') }
     }
     @{
         Param = 'certificate_name_flag'
         Attr = 'msPKI-Certificate-Name-Flag'
-        Cast = { param($v) [int](Resolve-FlagList $v $certNameFlagMap 'certificate_name_flag') }
+        Cast = { param($v) [int](Resolve-FlagList -Values $v -FlagMap $certNameFlagMap -ParamName 'certificate_name_flag') }
     }
     @{
         Param = 'extended_key_usages'
@@ -342,9 +342,7 @@ Function New-TemplateOID {
     do {
         $part1 = Get-Random -Minimum 10000000 -Maximum 99999999
         $part2 = Get-Random -Minimum 10000000 -Maximum 99999999
-        $hex = -join ((1..32) | ForEach-Object {
-            '{0:X}' -f (Get-Random -Minimum 0 -Maximum 16)
-        })
+        $hex = -join (1..32 | ForEach-Object { '{0:X}' -f (Get-Random -Minimum 0 -Maximum 16) })
         $templateOID = "$forestOID.$part1.$part2"
         $oidCN = "$part2.$hex"
 
