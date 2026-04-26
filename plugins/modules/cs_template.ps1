@@ -5,6 +5,8 @@
 
 #AnsibleRequires -CSharpUtil Ansible.Basic
 
+using namespace System.Management.Automation
+
 $spec = @{
     options = @{
         name = @{
@@ -40,14 +42,17 @@ $spec = @{
             type = 'int'
         }
         enrollment_flag = @{
-            type = 'int'
+            type = 'list'
+            elements = 'str'
         }
         private_key_flag = @{
-            type = 'int'
+            type = 'list'
+            elements = 'str'
             no_log = $false
         }
         certificate_name_flag = @{
-            type = 'int'
+            type = 'list'
+            elements = 'str'
         }
         schema_version = @{
             type = 'int'
@@ -69,15 +74,6 @@ $module = [Ansible.Basic.AnsibleModule]::Create($args, $spec)
 $module.Result.changed = $false
 $module.Result.distinguished_name = $null
 $module.Result.template_oid = $null
-$module.Result.display_name = $null
-$module.Result.key_size = $null
-$module.Result.schema_version = $null
-$module.Result.enrollment_flag = $null
-$module.Result.private_key_flag = $null
-$module.Result.certificate_name_flag = $null
-$module.Result.extended_key_usages = @()
-$module.Result.validity_period_days = $null
-$module.Result.renewal_period_days = $null
 
 $name = $module.Params.name
 $displayName = if ($module.Params.display_name) { $module.Params.display_name } else { $name }
@@ -89,7 +85,84 @@ if ($module.Params.domain_server) {
     $adParams.Server = $module.Params.domain_server
 }
 
-# Integer properties on the template that we clone and can override
+# Name-Value Maps
+
+$ekuMap = @{
+    'server_authentication'     = '1.3.6.1.5.5.7.3.1'
+    'client_authentication'     = '1.3.6.1.5.5.7.3.2'
+    'code_signing'              = '1.3.6.1.5.5.7.3.3'
+    'secure_email'              = '1.3.6.1.5.5.7.3.4'
+    'ip_security_end_system'    = '1.3.6.1.5.5.7.3.5'
+    'ip_security_tunnel'        = '1.3.6.1.5.5.7.3.6'
+    'ip_security_user'          = '1.3.6.1.5.5.7.3.7'
+    'time_stamping'             = '1.3.6.1.5.5.7.3.8'
+    'ocsp_signing'              = '1.3.6.1.5.5.7.3.9'
+    'smart_card_logon'          = '1.3.6.1.4.1.311.20.2.2'
+    'certificate_request_agent' = '1.3.6.1.4.1.311.20.2.1'
+    'encrypting_file_system'    = '1.3.6.1.4.1.311.10.3.4'
+    'file_recovery'             = '1.3.6.1.4.1.311.10.3.4.1'
+    'key_recovery'              = '1.3.6.1.4.1.311.10.3.11'
+    'key_recovery_agent'        = '1.3.6.1.4.1.311.21.6'
+    'document_signing'          = '1.3.6.1.4.1.311.10.3.12'
+    'remote_desktop'            = '1.3.6.1.4.1.311.54.1.2'
+    'kdc_authentication'        = '1.3.6.1.5.2.3.5'
+}
+
+$enrollmentFlagMap = @{
+    'include_symmetric_algorithms'            = 0x00000001
+    'pend_all_requests'                       = 0x00000002
+    'publish_to_kra_container'                = 0x00000004
+    'publish_to_ds'                           = 0x00000008
+    'auto_enrollment_check_user_ds_certificate' = 0x00000010
+    'auto_enrollment'                         = 0x00000020
+    'previous_approval_validate_reenrollment' = 0x00000040
+}
+
+$privateKeyFlagMap = @{
+    'require_private_key_archival'          = 0x00000001
+    'exportable_key'                        = 0x00000010
+    'strong_key_protection_required'        = 0x00000020
+    'require_alternate_signature_algorithm' = 0x00000040
+    'require_same_key_renewal'              = 0x00000080
+    'use_legacy_provider'                   = 0x00000100
+    'ek_trust_on_use'                       = 0x00000200
+    'ek_validate_cert'                      = 0x00000400
+    'ek_validate_key'                       = 0x00000800
+    'attest_preferred'                      = 0x00001000
+    'attest_required'                       = 0x00002000
+    'attestation_without_policy'            = 0x00004000
+    'hello_logon_key'                       = 0x00200000
+}
+
+$certNameFlagMap = @{
+    'enrollee_supplies_subject'          = 0x00000001
+    'enrollee_supplies_subject_alt_name' = 0x00010000
+    'subject_alt_require_domain_dns'     = 0x00400000
+    'subject_alt_require_spn'            = 0x00800000
+    'subject_alt_require_directory_guid' = 0x01000000
+    'subject_alt_require_upn'            = 0x02000000
+    'subject_alt_require_email'          = 0x04000000
+    'subject_alt_require_dns'            = 0x08000000
+    'subject_require_dns_as_cn'          = 0x10000000
+    'subject_require_email'              = 0x20000000
+    'subject_require_common_name'        = 0x40000000
+    'subject_require_directory_path'     = 0x80000000
+}
+
+# pKIKeyUsage is a byte array using ASN.1 BIT STRING encoding (bits reversed
+# within each byte). Byte 0 holds the first 8 usages, byte 1 holds decipher_only.
+$keyUsageMap = @{
+    'digital_signature' = @{ Byte = 0; Bit = 0x80 }
+    'non_repudiation'   = @{ Byte = 0; Bit = 0x40 }
+    'key_encipherment'  = @{ Byte = 0; Bit = 0x20 }
+    'data_encipherment' = @{ Byte = 0; Bit = 0x10 }
+    'key_agreement'     = @{ Byte = 0; Bit = 0x08 }
+    'key_cert_sign'     = @{ Byte = 0; Bit = 0x04 }
+    'crl_sign'          = @{ Byte = 0; Bit = 0x02 }
+    'encipher_only'     = @{ Byte = 0; Bit = 0x01 }
+    'decipher_only'     = @{ Byte = 1; Bit = 0x80 }
+}
+
 $intProperties = @(
     'flags'
     'revision'
@@ -124,36 +197,39 @@ $allTemplateProperties = $intProperties + $collectionProperties + $bytePropertie
 
 # Maps module params to LDAP attributes with type casting and comparison logic.
 # Used for both create (override cloned values) and update (idempotent set).
+# Flag params use Resolve-FlagList; EKU uses Resolve-EkuList; key_usage and
+# period bytes are handled separately in the code.
+
 $overrideMap = @(
     @{
         Param = 'key_size'
         Attr = 'msPKI-Minimal-Key-Size'
-        Cast = { param($v) [System.Int32]$v }
+        Cast = { param($v) [int]$v }
     }
     @{
         Param = 'schema_version'
         Attr = 'msPKI-Template-Schema-Version'
-        Cast = { param($v) [System.Int32]$v }
+        Cast = { param($v) [int]$v }
     }
     @{
         Param = 'enrollment_flag'
         Attr = 'msPKI-Enrollment-Flag'
-        Cast = { param($v) [System.Int32]$v }
+        Cast = { param($v) [int](Resolve-FlagList $v $enrollmentFlagMap 'enrollment_flag') }
     }
     @{
         Param = 'private_key_flag'
         Attr = 'msPKI-Private-Key-Flag'
-        Cast = { param($v) [System.Int32]$v }
+        Cast = { param($v) [int](Resolve-FlagList $v $privateKeyFlagMap 'private_key_flag') }
     }
     @{
         Param = 'certificate_name_flag'
         Attr = 'msPKI-Certificate-Name-Flag'
-        Cast = { param($v) [System.Int32]$v }
+        Cast = { param($v) [int](Resolve-FlagList $v $certNameFlagMap 'certificate_name_flag') }
     }
     @{
         Param = 'extended_key_usages'
         Attr = 'pKIExtendedKeyUsage'
-        Cast = { param($v) , [string[]]$v }
+        Cast = { param($v) , [string[]](Resolve-EkuList $v) }
     }
     @{
         Param = 'validity_period_days'
@@ -167,24 +243,65 @@ $overrideMap = @(
     }
 )
 
-Function Set-ResultFromTemplate {
-    param($Module, $ADObject)
-    $Module.Result.distinguished_name = $ADObject.DistinguishedName
-    $Module.Result.template_oid = $ADObject.'msPKI-Cert-Template-OID'
-    $Module.Result.display_name = $ADObject.DisplayName
-    $Module.Result.key_size = $ADObject.'msPKI-Minimal-Key-Size'
-    $Module.Result.schema_version = $ADObject.'msPKI-Template-Schema-Version'
-    $Module.Result.enrollment_flag = $ADObject.'msPKI-Enrollment-Flag'
-    $Module.Result.private_key_flag = $ADObject.'msPKI-Private-Key-Flag'
-    $Module.Result.certificate_name_flag = $ADObject.'msPKI-Certificate-Name-Flag'
-    $Module.Result.extended_key_usages = @($ADObject.pKIExtendedKeyUsage)
-    $Module.Result.validity_period_days = ConvertFrom-PeriodByte -Bytes $ADObject.pKIExpirationPeriod
-    $Module.Result.renewal_period_days = ConvertFrom-PeriodByte -Bytes $ADObject.pKIOverlapPeriod
+# Helper functions
+
+Function Resolve-FlagList {
+    param(
+        [object[]]$Values,
+        [hashtable]$FlagMap,
+        [string]$ParamName
+    )
+    $result = 0
+    foreach ($flag in $Values) {
+        $flagInt = 0
+        if ($FlagMap.ContainsKey([string]$flag)) {
+            $flagInt = $FlagMap[[string]$flag]
+        }
+        elseif ([LanguagePrimitives]::TryConvertTo($flag, [int], [ref]$flagInt)) {
+            # raw int or hex string parsed successfully
+        }
+        else {
+            $valid = ($FlagMap.Keys | Sort-Object) -join ", "
+            $module.FailJson("Invalid ${ParamName} value '${flag}'. Valid names: ${valid}, or an integer.")
+        }
+        $result = $result -bor $flagInt
+    }
+    $result
+}
+
+Function Resolve-EkuList {
+    param([object[]]$Values)
+    foreach ($v in $Values) {
+        $s = [string]$v
+        if ($ekuMap.ContainsKey($s)) { $ekuMap[$s] } else { $s }
+    }
+}
+
+Function Resolve-KeyUsageByte {
+    param([object[]]$Values)
+    $bytes = [byte[]]::new(2)
+    foreach ($v in $Values) {
+        $s = [string]$v
+        if (-not $keyUsageMap.ContainsKey($s)) {
+            $valid = ($keyUsageMap.Keys | Sort-Object) -join ", "
+            $module.FailJson("Invalid key_usage value '${s}'. Valid names: ${valid}.")
+        }
+        $entry = $keyUsageMap[$s]
+        $bytes[$entry.Byte] = $bytes[$entry.Byte] -bor $entry.Bit
+    }
+    , $bytes
+}
+
+Function Compare-KeyUsageByte {
+    param([byte[]]$Current, [byte[]]$Desired)
+    if ($null -eq $Current) { return $true }
+    $currentPadded = [byte[]]::new(2)
+    [Array]::Copy($Current, $currentPadded, [Math]::Min($Current.Length, 2))
+    ($currentPadded[0] -ne $Desired[0]) -or ($currentPadded[1] -ne $Desired[1])
 }
 
 # AD stores pKIExpirationPeriod / pKIOverlapPeriod as 8-byte little-endian
-# negative FILETIME intervals (100-nanosecond units). These helpers convert
-# between that encoding and a human-readable day count.
+# negative FILETIME intervals (100-nanosecond units).
 # 864000000000 = 1 day in 100ns units (24 * 60 * 60 * 10,000,000).
 Function ConvertTo-PeriodByte {
     <#
@@ -225,7 +342,9 @@ Function New-TemplateOID {
     do {
         $part1 = Get-Random -Minimum 10000000 -Maximum 99999999
         $part2 = Get-Random -Minimum 10000000 -Maximum 99999999
-        $hex = -join ((1..32) | ForEach-Object { '{0:X}' -f (Get-Random -Minimum 0 -Maximum 16) })
+        $hex = -join ((1..32) | ForEach-Object {
+            '{0:X}' -f (Get-Random -Minimum 0 -Maximum 16)
+        })
         $templateOID = "$forestOID.$part1.$part2"
         $oidCN = "$part2.$hex"
 
@@ -261,7 +380,7 @@ catch {
 
 if ($state -eq 'present') {
     if (-not $existingTemplate) {
-        # --- CREATE ---
+        # CREATE
         if (-not $sourceTemplate) {
             $module.FailJson("source_template is required when creating a new certificate template.")
         }
@@ -293,7 +412,7 @@ if ($state -eq 'present') {
             $oidPath = "CN=OID,CN=Public Key Services,CN=Services,$configNC"
             $oidAttrs = @{
                 'DisplayName' = $displayName
-                'flags' = [System.Int32]1
+                'flags' = [int]1
                 'msPKI-Cert-Template-OID' = $oid.TemplateOID
             }
             try {
@@ -304,9 +423,7 @@ if ($state -eq 'present') {
                 $module.FailJson("Failed to create OID object: $_", $_)
             }
 
-            # Clone source attributes into a clean hashtable.
-            # Get-ADObject wraps values in ADPropertyValueCollection; we must
-            # extract raw .NET types or New-ADObject rejects them.
+            # Clone source attributes, extracting raw .NET types from AD wrappers
             $templateAttrs = @{
                 'msPKI-Cert-Template-OID' = $oid.TemplateOID
             }
@@ -329,12 +446,17 @@ if ($state -eq 'present') {
                 }
             }
 
-            # Apply user overrides before creation
+            # Apply user overrides (flags, EKUs, periods, key_size, schema_version)
             foreach ($o in $overrideMap) {
                 $val = $module.Params[$o.Param]
                 if ($null -ne $val) {
                     $templateAttrs[$o.Attr] = & $o.Cast $val
                 }
+            }
+
+            # key_usage override (byte-level, outside overrideMap)
+            if ($null -ne $module.Params.key_usage) {
+                $templateAttrs['pKIKeyUsage'] = Resolve-KeyUsageByte $module.Params.key_usage
             }
 
             try {
@@ -350,37 +472,50 @@ if ($state -eq 'present') {
                 -LDAPFilter "(&(objectClass=pKICertificateTemplate)(cn=$name))" `
                 -Properties ($allTemplateProperties + @('displayName', 'msPKI-Cert-Template-OID'))
 
-            Set-ResultFromTemplate -Module $module -ADObject $existingTemplate
+            $module.Result.distinguished_name = $existingTemplate.DistinguishedName
+            $module.Result.template_oid = $oid.TemplateOID
         }
     }
     else {
-        # Update the template if the display name or any of the properties have changed
-        Set-ResultFromTemplate -Module $module -ADObject $existingTemplate
+        # UPDATE
+        $module.Result.distinguished_name = $existingTemplate.DistinguishedName
+        $module.Result.template_oid = $existingTemplate.'msPKI-Cert-Template-OID'
 
         $replaceAttrs = @{}
 
         if ($displayName -ne $existingTemplate.DisplayName -and $module.Params.display_name) {
             $replaceAttrs['displayName'] = $displayName
         }
+
         foreach ($o in $overrideMap) {
             $desired = $module.Params[$o.Param]
             if ($null -eq $desired) { continue }
 
             $current = $existingTemplate.($o.Attr)
+            $resolvedDesired = & $o.Cast $desired
             $needsUpdate = switch ($o.Param) {
                 'extended_key_usages' {
-                    [bool](Compare-Object -ReferenceObject @($current | Sort-Object) -DifferenceObject @($desired | Sort-Object))
+                    $resolvedOids = [string[]]$resolvedDesired
+                    [bool](Compare-Object -ReferenceObject @($current | Sort-Object) -DifferenceObject @($resolvedOids | Sort-Object))
                 }
                 { $_ -in 'validity_period_days', 'renewal_period_days' } {
                     $desired -ne (ConvertFrom-PeriodByte -Bytes $current)
                 }
                 default {
-                    $desired -ne $current
+                    $resolvedDesired -ne $current
                 }
             }
 
             if ($needsUpdate) {
-                $replaceAttrs[$o.Attr] = & $o.Cast $desired
+                $replaceAttrs[$o.Attr] = $resolvedDesired
+            }
+        }
+
+        # key_usage comparison (byte-level)
+        if ($null -ne $module.Params.key_usage) {
+            $desiredKU = Resolve-KeyUsageByte $module.Params.key_usage
+            if (Compare-KeyUsageByte -Current $existingTemplate.pKIKeyUsage -Desired $desiredKU) {
+                $replaceAttrs['pKIKeyUsage'] = $desiredKU
             }
         }
 
@@ -393,16 +528,8 @@ if ($state -eq 'present') {
                 catch {
                     $module.FailJson("Failed to update certificate template '$name': $_", $_)
                 }
-
-                $existingTemplate = Get-ADObject @adParams `
-                    -SearchBase $templatePath `
-                    -LDAPFilter "(&(objectClass=pKICertificateTemplate)(cn=$name))" `
-                    -Properties ($allTemplateProperties + @('displayName', 'msPKI-Cert-Template-OID'))
-
-                Set-ResultFromTemplate -Module $module -ADObject $existingTemplate
             }
         }
-
     }
 
     # Publish the template to the requested CAs
@@ -461,7 +588,8 @@ if ($state -eq 'present') {
 else {
     # Remove the template if it exists
     if ($existingTemplate) {
-        Set-ResultFromTemplate -Module $module -ADObject $existingTemplate
+        $module.Result.distinguished_name = $existingTemplate.DistinguishedName
+        $module.Result.template_oid = $existingTemplate.'msPKI-Cert-Template-OID'
         $module.Result.changed = $true
 
         if (-not $module.CheckMode) {

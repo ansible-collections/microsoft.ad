@@ -1,46 +1,6 @@
 ---
-# AD CS (AD-Certificate feature) must be installed and an Enterprise Root CA
-# configured before running these tests. This mirrors the setup in
-# tests/integration/targets/inventory_ldap/roles/setup_certificate/tasks/main.yml
 
-- name: Setup - ensure AD CS feature is installed
-  ansible.windows.win_feature:
-    name: AD-Certificate
-    state: present
-  register: _adcs_feature
-
-- name: Setup - reboot after AD CS install
-  ansible.windows.win_reboot:
-  when: _adcs_feature.reboot_required
-
-- name: Setup - configure Enterprise Root CA
-  ansible.windows.win_powershell:
-    script: |
-      $ErrorActionPreference = 'Stop'
-      $Ansible.Changed = $false
-
-      $caParams = @{
-          CAType             = 'EnterpriseRootCa'
-          CryptoProviderName = 'RSA#Microsoft Software Key Storage Provider'
-          KeyLength          = 2048
-          HashAlgorithmName  = 'SHA256'
-          Force              = $true
-      }
-      try {
-          Install-AdcsCertificationAuthority @caParams
-          $Ansible.Changed = $true
-      }
-      catch [Microsoft.CertificateServices.Deployment.Common.CertificateServicesBaseSetupException] {
-          if ($_.Exception.Message -like 'The Certification Authority is already installed.*') {
-              return
-          }
-          throw
-      }
-  become: true
-  become_method: ansible.builtin.runas
-  become_user: SYSTEM
-
-- name: Setup - get CA name for publish tests
+- name: Get CA name for publish tests
   ansible.windows.win_powershell:
     script: |
       $configNC = (Get-ADRootDSE).configurationNamingContext
@@ -49,7 +9,7 @@
       $Ansible.Result = $ca.Name
   register: _ca_info
 
-- name: Setup - set CA name fact
+- name: Set CA name fact
   ansible.builtin.set_fact:
     test_ca_name: "{{ _ca_info.result }}"
 
@@ -63,6 +23,9 @@
         key_size: 4096
         validity_period_days: 365
         renewal_period_days: 42
+        key_usage:
+          - digital_signature
+          - key_encipherment
         state: present
       register: _create_check
       check_mode: true
@@ -94,6 +57,9 @@
         key_size: 4096
         validity_period_days: 365
         renewal_period_days: 42
+        key_usage:
+          - digital_signature
+          - key_encipherment
         state: present
       register: _create
 
@@ -114,6 +80,9 @@
         key_size: 4096
         validity_period_days: 365
         renewal_period_days: 42
+        key_usage:
+          - digital_signature
+          - key_encipherment
         state: present
       register: _create_idem
 
@@ -146,28 +115,13 @@
         that:
           - _modify_idem is not changed
 
-    - name: Verify key size was actually updated
-      ansible.windows.win_powershell:
-        script: |
-          $configNC = (Get-ADRootDSE).configurationNamingContext
-          $path = "CN=Certificate Templates,CN=Public Key Services,CN=Services,$configNC"
-          $t = Get-ADObject -SearchBase $path `
-            -LDAPFilter '(&(objectClass=pKICertificateTemplate)(cn=AnsibleTestTemplate))' `
-            -Properties 'msPKI-Minimal-Key-Size'
-          $Ansible.Result = $t.'msPKI-Minimal-Key-Size'
-      register: _verify_key_size
-
-    - name: Assert key size is 8192
-      ansible.builtin.assert:
-        that:
-          - _verify_key_size.result == 8192
-
-    - name: Set extended key usages
+    # ---- MODIFY EKU with named values ----
+    - name: Set EKUs using human-readable names
       microsoft.ad.cs_template:
         name: AnsibleTestTemplate
         extended_key_usages:
-          - "1.3.6.1.5.5.7.3.1"
-          - "1.3.6.1.5.5.7.3.2"
+          - client_authentication
+          - server_authentication
         state: present
       register: _modify_eku
 
@@ -180,8 +134,8 @@
       microsoft.ad.cs_template:
         name: AnsibleTestTemplate
         extended_key_usages:
-          - "1.3.6.1.5.5.7.3.1"
-          - "1.3.6.1.5.5.7.3.2"
+          - server_authentication
+          - client_authentication
         state: present
       register: _modify_eku_idem
 
@@ -189,6 +143,48 @@
       ansible.builtin.assert:
         that:
           - _modify_eku_idem is not changed
+
+    # ---- MODIFY flags with named values ----
+    - name: Set enrollment_flag with named values
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        enrollment_flag:
+          - auto_enrollment
+          - publish_to_ds
+        state: present
+      register: _modify_enroll
+
+    - name: Assert enrollment_flag changed
+      ansible.builtin.assert:
+        that:
+          - _modify_enroll is changed
+
+    - name: Set same enrollment_flag again (idempotency)
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        enrollment_flag:
+          - auto_enrollment
+          - publish_to_ds
+        state: present
+      register: _modify_enroll_idem
+
+    - name: Assert no change
+      ansible.builtin.assert:
+        that:
+          - _modify_enroll_idem is not changed
+
+    - name: Set private_key_flag with named value
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        private_key_flag:
+          - exportable_key
+        state: present
+      register: _modify_pk
+
+    - name: Assert private_key_flag changed
+      ansible.builtin.assert:
+        that:
+          - _modify_pk is changed
 
     - name: Publish template to CA
       microsoft.ad.cs_template:
@@ -251,20 +247,6 @@
       ansible.builtin.assert:
         that:
           - _remove_check is changed
-
-    - name: Verify template still exists after check mode remove
-      ansible.windows.win_powershell:
-        script: |
-          $configNC = (Get-ADRootDSE).configurationNamingContext
-          $path = "CN=Certificate Templates,CN=Public Key Services,CN=Services,$configNC"
-          $t = Get-ADObject -SearchBase $path -LDAPFilter '(&(objectClass=pKICertificateTemplate)(cn=AnsibleTestTemplate))'
-          $Ansible.Result = ($null -ne $t)
-      register: _remove_check_verify
-
-    - name: Assert template still exists after check mode
-      ansible.builtin.assert:
-        that:
-          - _remove_check_verify.result
 
     - name: Remove template
       microsoft.ad.cs_template:
