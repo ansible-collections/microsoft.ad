@@ -1,0 +1,529 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta content="2.24.0" name="antsibull-docs" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>microsoft.ad.cs_template module – Manage AD Certificate Services certificate templates &mdash; Ansible collections  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=41de9001" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/ansible.css?v=b54c304f" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/antsibull-minimal.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/rtd-ethical-ads.css?v=289b023e" />
+
+  
+    <link rel="shortcut icon" href="../../../_static/images/Ansible-Mark-RGB_Black.png"/>
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=7f41d439"></script>
+      <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="microsoft.ad.debug_ldap_client module – Get host information for debugging LDAP connections" href="debug_ldap_client_module.html" />
+    <link rel="prev" title="microsoft.ad.computer module – Manage Active Directory computer objects" href="computer_module.html" /><!-- extra head elements for Ansible beyond RTD Sphinx Theme -->
+
+
+
+
+</head>
+
+<body class="wy-body-for-nav"><!-- extra body elements for Ansible beyond RTD Sphinx Theme -->
+
+<div class="DocSite-globalNav ansibleNav">
+  <ul>
+    <li><a href="https://www.ansible.com/blog" target="_blank">Blog</a></li>
+    <li><a href="https://forum.ansible.com/" target="_blank">Ansible community forum</a></li>
+    <li><a href="https://docs.ansible.com/" target="_blank">Documentation</a></li>
+  </ul>
+</div>
+
+<a class="DocSite-nav" href="/" style="padding-bottom: 30px;">
+
+  <img class="DocSiteNav-logo"
+    src="../../../_static/images/Ansible-Mark-RGB_White.png"
+    alt="Ansible Logo">
+  <div class="DocSiteNav-title">Ansible Collections Documentation</div>
+</a>
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Ansible collections
+          </a><!--- Based on https://github.com/rtfd/sphinx_rtd_theme/pull/438/files -->
+
+<div class="version">
+  
+    
+  
+</div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <label class="sr-only" for="q">Search docs:</label>
+    <input type="text" class="st-default-search-input" id="q" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+  
+              <p class="caption" role="heading"><span class="caption-text">Collections:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Collection Index</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Collections in the Microsoft Namespace</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Microsoft.Ad</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="index.html#description">Description</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#communication">Communication</a></li>
+<li class="toctree-l4"><a class="reference internal" href="index.html#scenario-guides">Scenario Guides</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="index.html#plugin-index">Plugin Index</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Plugin indexes:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index_filter.html">Index of all Filter Plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../index_inventory.html">Index of all Inventory Plugins</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../index_module.html">Index of all Modules</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference indexes:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../environment_variables.html">Index of all Collection Environment Variables</a></li>
+</ul>
+<!-- extra nav elements for Ansible beyond RTD Sphinx Theme -->
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Ansible collections</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Collection Index</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Collections in the Microsoft Namespace</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Microsoft.Ad</a></li>
+      <li class="breadcrumb-item active">microsoft.ad.cs_template module – Manage AD Certificate Services certificate templates</li>
+      <li class="wy-breadcrumbs-aside">
+              <!-- User defined GitHub URL -->
+              <a href="https://github.com/ansible-collections/microsoft.ad/edit/main/plugins/modules/cs_template.yml?description=%23%23%23%23%23%20SUMMARY%0A%3C!—%20Your%20description%20here%20–%3E%0A%0A%0A%23%23%23%23%23%20ISSUE%20TYPE%0A-%20Docs%20Pull%20Request%0A%0A%2Blabel:%20docsite_pr" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+
+  
+           <div itemprop="articleBody">
+             
+  <span class="target" id="ansible-collections-microsoft-ad-cs-template-module"></span><section id="microsoft-ad-cs-template-module-manage-ad-certificate-services-certificate-templates">
+<h1>microsoft.ad.cs_template module – Manage AD Certificate Services certificate templates<a class="headerlink" href="#microsoft-ad-cs-template-module-manage-ad-certificate-services-certificate-templates" title="Link to this heading"></a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This module is part of the <a class="reference external" href="https://galaxy.ansible.com/ui/repo/published/microsoft/ad/">microsoft.ad collection</a> (version 1.10.0).</p>
+<p>It is not included in <code class="docutils literal notranslate"><span class="pre">ansible-core</span></code>.
+To check whether it is installed, run <code class="code docutils literal notranslate"><span class="pre">ansible-galaxy</span> <span class="pre">collection</span> <span class="pre">list</span></code>.</p>
+<p>To install it, use: <code class="code docutils literal notranslate"><span class="pre">ansible-galaxy</span> <span class="pre">collection</span> <span class="pre">install</span> <span class="pre">microsoft.ad</span></code>.</p>
+<p>To use it in a playbook, specify: <code class="code docutils literal notranslate"><span class="pre">microsoft.ad.cs_template</span></code>.</p>
+</div>
+<p class="ansible-version-added">New in microsoft.ad 1.11.0</p>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#synopsis" id="id1">Synopsis</a></p></li>
+<li><p><a class="reference internal" href="#parameters" id="id2">Parameters</a></p></li>
+<li><p><a class="reference internal" href="#attributes" id="id3">Attributes</a></p></li>
+<li><p><a class="reference internal" href="#notes" id="id4">Notes</a></p></li>
+<li><p><a class="reference internal" href="#see-also" id="id5">See Also</a></p></li>
+<li><p><a class="reference internal" href="#examples" id="id6">Examples</a></p></li>
+<li><p><a class="reference internal" href="#return-values" id="id7">Return Values</a></p></li>
+</ul>
+</nav>
+<section id="synopsis">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Synopsis</a><a class="headerlink" href="#synopsis" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Create, modify, or remove Active Directory Certificate Services (AD CS) certificate templates.</p></li>
+<li><p>New templates are created by cloning an existing source template and overriding specific properties such as key size, extended key usages, or validity period.</p></li>
+<li><p>Templates can optionally be published to (or unpublished from) one or more Enterprise Certificate Authorities.</p></li>
+</ul>
+</section>
+<section id="parameters">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">Parameters</a><a class="headerlink" href="#parameters" title="Link to this heading"></a></h2>
+<table class="longtable ansible-option-table docutils align-default" style="width: 100%">
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Comments</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-certificate_name_flag"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-parameter-certificate-name-flag"><strong>certificate_name_flag</strong></p>
+<a class="ansibleOptionLink" href="#parameter-certificate_name_flag" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>List of certificate name flag values to set on the template.</p>
+<p>Each value can be a well-known name or a raw integer (decimal or hex).</p>
+<p>Multiple values are combined with bitwise OR.</p>
+<p>Maps to the <code class="docutils literal notranslate"><span class="pre">msPKI-Certificate-Name-Flag</span></code> LDAP attribute.</p>
+<p>Well-known names: <code class="ansible-value docutils literal notranslate"><span class="pre">enrollee_supplies_subject</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">enrollee_supplies_subject_alt_name</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">subject_alt_require_domain_dns</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">subject_alt_require_spn</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">subject_alt_require_directory_guid</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">subject_alt_require_upn</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">subject_alt_require_email</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">subject_alt_require_dns</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">subject_require_dns_as_cn</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">subject_require_email</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">subject_require_common_name</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">subject_require_directory_path</span></code>.</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-display_name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-parameter-display-name"><strong>display_name</strong></p>
+<a class="ansibleOptionLink" href="#parameter-display_name" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>The human-readable display name of the template.</p>
+<p>Defaults to the value of <code class="ansible-option docutils literal notranslate"><strong><a class="reference internal" href="#ansible-collections-microsoft-ad-cs-template-module-parameter-name"><span class="std std-ref"><span class="pre">name</span></span></a></strong></code> if not specified.</p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-domain_server"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-parameter-domain-server"><strong>domain_server</strong></p>
+<a class="ansibleOptionLink" href="#parameter-domain_server" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>The FQDN of the domain controller to target for all AD operations.</p>
+<p>When not specified, the module will use the default domain controller discovery.</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-enrollment_flag"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-parameter-enrollment-flag"><strong>enrollment_flag</strong></p>
+<a class="ansibleOptionLink" href="#parameter-enrollment_flag" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>List of enrollment flag values to set on the template.</p>
+<p>Each value can be a well-known name or a raw integer (decimal or hex).</p>
+<p>Multiple values are combined with bitwise OR.</p>
+<p>Maps to the <code class="docutils literal notranslate"><span class="pre">msPKI-Enrollment-Flag</span></code> LDAP attribute.</p>
+<p>Well-known names: <code class="ansible-value docutils literal notranslate"><span class="pre">include_symmetric_algorithms</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">pend_all_requests</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">publish_to_kra_container</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">publish_to_ds</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">auto_enrollment_check_user_ds_certificate</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">auto_enrollment</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">previous_approval_validate_reenrollment</span></code>.</p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-extended_key_usages"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-parameter-extended-key-usages"><strong>extended_key_usages</strong></p>
+<a class="ansibleOptionLink" href="#parameter-extended_key_usages" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>List of Extended Key Usage (EKU) values.</p>
+<p>Each value can be a well-known name or a raw OID string.</p>
+<p>Maps to the <code class="docutils literal notranslate"><span class="pre">pKIExtendedKeyUsage</span></code> LDAP attribute.</p>
+<p>Well-known names: <code class="ansible-value docutils literal notranslate"><span class="pre">server_authentication</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">client_authentication</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">code_signing</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">secure_email</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">ip_security_end_system</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">ip_security_tunnel</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">ip_security_user</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">time_stamping</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">ocsp_signing</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">smart_card_logon</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">certificate_request_agent</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">encrypting_file_system</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">file_recovery</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">key_recovery</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">key_recovery_agent</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">document_signing</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">remote_desktop</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">kdc_authentication</span></code>.</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-key_size"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-parameter-key-size"><strong>key_size</strong></p>
+<a class="ansibleOptionLink" href="#parameter-key_size" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">integer</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Minimum key size in bits for the certificate.</p>
+<p>Maps to the <code class="docutils literal notranslate"><span class="pre">msPKI-Minimal-Key-Size</span></code> LDAP attribute.</p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-key_usage"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-parameter-key-usage"><strong>key_usage</strong></p>
+<a class="ansibleOptionLink" href="#parameter-key_usage" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>List of key usage flags to set on the template.</p>
+<p>Maps to the <code class="docutils literal notranslate"><span class="pre">pKIKeyUsage</span></code> LDAP attribute.</p>
+<p>Valid values: <code class="ansible-value docutils literal notranslate"><span class="pre">digital_signature</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">non_repudiation</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">key_encipherment</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">data_encipherment</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">key_agreement</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">key_cert_sign</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">crl_sign</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">encipher_only</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">decipher_only</span></code>.</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-parameter-name"><strong>name</strong></p>
+<a class="ansibleOptionLink" href="#parameter-name" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span> / <span class="ansible-option-required">required</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>The CN (common name) of the certificate template.</p>
+<p>This is the unique short name used internally by AD CS (no spaces).</p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-private_key_flag"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-parameter-private-key-flag"><strong>private_key_flag</strong></p>
+<a class="ansibleOptionLink" href="#parameter-private_key_flag" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>List of private key flag values to set on the template.</p>
+<p>Each value can be a well-known name or a raw integer (decimal or hex).</p>
+<p>Multiple values are combined with bitwise OR.</p>
+<p>Maps to the <code class="docutils literal notranslate"><span class="pre">msPKI-Private-Key-Flag</span></code> LDAP attribute.</p>
+<p>Well-known names: <code class="ansible-value docutils literal notranslate"><span class="pre">require_private_key_archival</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">exportable_key</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">strong_key_protection_required</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">require_alternate_signature_algorithm</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">require_same_key_renewal</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">use_legacy_provider</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">ek_trust_on_use</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">ek_validate_cert</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">ek_validate_key</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">attest_preferred</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">attest_required</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">attestation_without_policy</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">hello_logon_key</span></code>.</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-publish_to_ca"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-parameter-publish-to-ca"><strong>publish_to_ca</strong></p>
+<a class="ansibleOptionLink" href="#parameter-publish_to_ca" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=string</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>List of Enterprise CA short names to which the template should be published.</p>
+<p>When specified, the module ensures the template is published to exactly the listed CAs and unpublished from any others.</p>
+<p>An empty list <code class="ansible-value docutils literal notranslate"><span class="pre">[]</span></code> will unpublish the template from all CAs.</p>
+<p>When omitted, publishing state is not managed.</p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-renewal_period_days"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-parameter-renewal-period-days"><strong>renewal_period_days</strong></p>
+<a class="ansibleOptionLink" href="#parameter-renewal_period_days" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">integer</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Certificate renewal overlap period in days.</p>
+<p>Maps to the <code class="docutils literal notranslate"><span class="pre">pKIOverlapPeriod</span></code> LDAP attribute.</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-schema_version"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-parameter-schema-version"><strong>schema_version</strong></p>
+<a class="ansibleOptionLink" href="#parameter-schema_version" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">integer</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Certificate template schema version.</p>
+<p><code class="ansible-value docutils literal notranslate"><span class="pre">2</span></code> requires Windows Server 2003+, <code class="ansible-value docutils literal notranslate"><span class="pre">3</span></code> requires 2008+, <code class="ansible-value docutils literal notranslate"><span class="pre">4</span></code> requires 2012+.</p>
+<p>Maps to the <code class="docutils literal notranslate"><span class="pre">msPKI-Template-Schema-Version</span></code> LDAP attribute.</p>
+<p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
+<ul class="simple">
+<li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">2</span></code></p></li>
+<li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">3</span></code></p></li>
+<li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">4</span></code></p></li>
+</ul>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-source_template"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-parameter-source-template"><strong>source_template</strong></p>
+<a class="ansibleOptionLink" href="#parameter-source_template" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>The display name of an existing template to clone when creating a new template (e.g. <code class="ansible-value docutils literal notranslate"><span class="pre">WebServer</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">User</span></code>, <code class="ansible-value docutils literal notranslate"><span class="pre">Computer</span></code>).</p>
+<p>Required when creating a template for the first time.</p>
+<p>Ignored when the template already exists (updates are applied in-place).</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-state"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-parameter-state"><strong>state</strong></p>
+<a class="ansibleOptionLink" href="#parameter-state" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Whether the template should be present or absent.</p>
+<p>When <code class="ansible-value docutils literal notranslate"><span class="pre">absent</span></code>, the template is unpublished from all CAs, the template AD object is removed.</p>
+<p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
+<ul class="simple">
+<li><p><code class="ansible-option-default-bold docutils literal notranslate"><strong><span class="pre">&quot;present&quot;</span></strong></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
+<li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;absent&quot;</span></code></p></li>
+</ul>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-validity_period_days"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-parameter-validity-period-days"><strong>validity_period_days</strong></p>
+<a class="ansibleOptionLink" href="#parameter-validity_period_days" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">integer</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Certificate validity period in days.</p>
+<p>Maps to the <code class="docutils literal notranslate"><span class="pre">pKIExpirationPeriod</span></code> LDAP attribute.</p>
+</div></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="attributes">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">Attributes</a><a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<table class="longtable ansible-option-table docutils align-default" style="width: 100%">
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>Support</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="attribute-check_mode"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-attribute-check-mode"><strong>check_mode</strong></p>
+<a class="ansibleOptionLink" href="#attribute-check_mode" title="Permalink to this attribute"></a></div></td>
+<td><div class="ansible-option-cell"><p><strong class="ansible-attribute-support-label">Support: </strong><strong class="ansible-attribute-support-full">full</strong></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Can run in check_mode and return changed status prediction without modifying target, if not supported the action will be skipped.</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="attribute-diff_mode"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-attribute-diff-mode"><strong>diff_mode</strong></p>
+<a class="ansibleOptionLink" href="#attribute-diff_mode" title="Permalink to this attribute"></a></div></td>
+<td><div class="ansible-option-cell"><p><strong class="ansible-attribute-support-label">Support: </strong><strong class="ansible-attribute-support-none">none</strong></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Will return details on what has changed (or possibly needs changing in check_mode), when in diff mode</p>
+</div></td>
+</tr>
+<tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="attribute-platform"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-attribute-platform"><strong>platform</strong></p>
+<a class="ansibleOptionLink" href="#attribute-platform" title="Permalink to this attribute"></a></div></td>
+<td><div class="ansible-option-cell"><p><strong class="ansible-attribute-support-property">Platform:</strong> <strong class="ansible-attribute-support-full">windows</strong></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>Target OS/families that can be operated against</p>
+</div></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="notes">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Notes</a><a class="headerlink" href="#notes" title="Link to this heading"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>This module must be run on a Windows target host with the ActiveDirectory PowerShell module available.</p></li>
+<li><p>Enterprise Administrator permissions are required to create or remove certificate templates in the Configuration partition.</p></li>
+<li><p>Certificate templates are stored in the AD Configuration partition and replicated forest-wide.</p></li>
+<li><p>Publishing a template requires that at least one Enterprise CA is installed in the forest, but the module does not need to run on the CA server itself.</p></li>
+</ul>
+</div>
+</section>
+<section id="see-also">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">See Also</a><a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="object_info_module.html#ansible-collections-microsoft-ad-object-info-module"><span class="std std-ref">microsoft.ad.object_info</span></a></dt><dd><p>Gather information an Active Directory object.</p>
+</dd>
+</dl>
+</div>
+</section>
+<section id="examples">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Examples</a><a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
+<div class="highlight-yaml+jinja notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create a certificate template cloned from WebServer with RSA 4096</span>
+<span class="w">  </span><span class="nt">microsoft.ad.cs_template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Web4096Secure</span>
+<span class="w">    </span><span class="nt">display_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Web Server (RSA 4096)</span>
+<span class="w">    </span><span class="nt">source_template</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Web Server</span>
+<span class="w">    </span><span class="nt">key_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4096</span>
+<span class="w">    </span><span class="nt">extended_key_usages</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">server_authentication</span>
+<span class="w">    </span><span class="nt">key_usage</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">digital_signature</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">key_encipherment</span>
+<span class="w">    </span><span class="nt">private_key_flag</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exportable_key</span>
+<span class="w">    </span><span class="nt">certificate_name_flag</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enrollee_supplies_subject</span>
+<span class="w">    </span><span class="nt">validity_period_days</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">365</span>
+<span class="w">    </span><span class="nt">renewal_period_days</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">42</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create a template with specific EKUs for server authentication</span>
+<span class="w">  </span><span class="nt">microsoft.ad.cs_template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CustomAuth</span>
+<span class="w">    </span><span class="nt">source_template</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Web Server</span>
+<span class="w">    </span><span class="nt">extended_key_usages</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">server_authentication</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;1.3.6.1.4.1.311.20.2.2&quot;</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Use raw integer flags alongside named flags</span>
+<span class="w">  </span><span class="nt">microsoft.ad.cs_template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MixedFlags</span>
+<span class="w">    </span><span class="nt">source_template</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Web Server</span>
+<span class="w">    </span><span class="nt">enrollment_flag</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auto_enrollment</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">publish_to_ds</span>
+<span class="w">    </span><span class="nt">private_key_flag</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exportable_key</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0x00000100</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Update key size on an existing template</span>
+<span class="w">  </span><span class="nt">microsoft.ad.cs_template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Web4096Secure</span>
+<span class="w">    </span><span class="nt">key_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8192</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Publish a template to a specific CA</span>
+<span class="w">  </span><span class="nt">microsoft.ad.cs_template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Web4096Secure</span>
+<span class="w">    </span><span class="nt">publish_to_ca</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">contoso-DC01-CA</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Unpublish a template from all CAs</span>
+<span class="w">  </span><span class="nt">microsoft.ad.cs_template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Web4096Secure</span>
+<span class="w">    </span><span class="nt">publish_to_ca</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[]</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Remove a certificate template</span>
+<span class="w">  </span><span class="nt">microsoft.ad.cs_template</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Web4096Secure</span>
+<span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">absent</span>
+</pre></div>
+</div>
+</section>
+<section id="return-values">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Return Values</a><a class="headerlink" href="#return-values" title="Link to this heading"></a></h2>
+<p>Common return values are documented <a class="reference external" href="https://docs.ansible.com/projects/ansible/devel/reference_appendices/common_return_values.html#common-return-values" title="(in Ansible devel)"><span class="xref std std-ref">here</span></a>, the following are the fields unique to this module:</p>
+<table class="longtable ansible-option-table docutils align-default" style="width: 100%">
+<thead>
+<tr class="row-odd"><th class="head"><p>Key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-distinguished_name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-return-distinguished-name"><strong>distinguished_name</strong></p>
+<a class="ansibleOptionLink" href="#return-distinguished_name" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>The distinguished name of the certificate template object.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> always</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;CN=Web4096Secure,CN=Certificate</span> <span class="pre">Templates,CN=Public</span> <span class="pre">Key</span> <span class="pre">Services,CN=Services,CN=Configuration,DC=contoso,DC=com&quot;</span></code></p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="return-template_oid"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-cs-template-module-return-template-oid"><strong>template_oid</strong></p>
+<a class="ansibleOptionLink" href="#return-template_oid" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>The OID of the certificate template.</p>
+<p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> always</p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;1.3.6.1.4.1.311.21.8.11489019.14294623.5588661.594850.12204198.151.6616009.14891906&quot;</span></code></p>
+</div></td>
+</tr>
+</tbody>
+</table>
+<section id="authors">
+<h3>Authors<a class="headerlink" href="#authors" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p>Ron Gershburg (&#64;rgershbu)</p></li>
+</ul>
+</section>
+<section id="collection-links">
+<h3>Collection links<a class="headerlink" href="#collection-links" title="Link to this heading"></a></h3>
+<ul class="ansible-links">
+<li><span><a aria-role="button" class="ansible-link reference external" href="https://github.com/ansible-collections/microsoft.ad/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc" rel="noopener external" target="_blank">Issue Tracker</a></span></li>
+<li><span><a aria-role="button" class="ansible-link reference external" href="https://github.com/ansible-collections/microsoft.ad" rel="noopener external" target="_blank">Repository (Sources)</a></span></li>
+<li><span><a aria-role="button" class="ansible-link reference external" href="https://github.com/ansible-collections/microsoft.ad/issues/new/choose" rel="noopener external" target="_blank">Report an issue</a></span></li>
+<li><span><a class="reference internal" href="index.html#communication-for-microsoft-ad"><span class="std std-ref">Communication</span></a></span></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          
+
+<footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="computer_module.html" class="btn btn-neutral float-left" title="microsoft.ad.computer module – Manage Active Directory computer objects" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="debug_ldap_client_module.html" class="btn btn-neutral float-right" title="microsoft.ad.debug_ldap_client module – Get host information for debugging LDAP connections" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright Ansible contributors.</p>
+  </div>
+
+  
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script><!-- extra footer elements for Ansible beyond RTD Sphinx Theme -->
+
+</body>
+</html>
