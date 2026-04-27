@@ -1,0 +1,278 @@
+---
+
+- name: Get CA name for publish tests
+  ansible.windows.win_powershell:
+    script: |
+      $configNC = (Get-ADRootDSE).configurationNamingContext
+      $enrollPath = "CN=Enrollment Services,CN=Public Key Services,CN=Services,$configNC"
+      $ca = Get-ADObject -SearchBase $enrollPath -SearchScope OneLevel -Filter * | Select-Object -First 1
+      $Ansible.Result = $ca.Name
+  register: _ca_info
+
+- name: Set CA name fact
+  ansible.builtin.set_fact:
+    test_ca_name: "{{ _ca_info.result }}"
+
+- name: Test cs_template
+  block:
+    - name: Create template by cloning Web Server - check mode
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        display_name: Ansible Test Template
+        source_template: Web Server
+        key_size: 4096
+        validity_period_days: 365
+        renewal_period_days: 42
+        key_usage:
+          - digital_signature
+          - key_encipherment
+        state: present
+      register: _create_check
+      check_mode: true
+
+    - name: Assert create check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _create_check is changed
+
+    - name: Verify template was not actually created in check mode
+      ansible.windows.win_powershell:
+        script: |
+          $configNC = (Get-ADRootDSE).configurationNamingContext
+          $path = "CN=Certificate Templates,CN=Public Key Services,CN=Services,$configNC"
+          $t = Get-ADObject -SearchBase $path -LDAPFilter '(&(objectClass=pKICertificateTemplate)(cn=AnsibleTestTemplate))'
+          $Ansible.Result = ($null -ne $t)
+      register: _check_mode_verify
+
+    - name: Assert template does not exist after check mode
+      ansible.builtin.assert:
+        that:
+          - not _check_mode_verify.result
+
+    - name: Create template by cloning Web Server
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        display_name: Ansible Test Template
+        source_template: Web Server
+        key_size: 4096
+        validity_period_days: 365
+        renewal_period_days: 42
+        key_usage:
+          - digital_signature
+          - key_encipherment
+        state: present
+      register: _create
+
+    - name: Assert template was created
+      ansible.builtin.assert:
+        that:
+          - _create is changed
+          - _create.distinguished_name is defined
+          - _create.distinguished_name | length > 0
+          - _create.template_oid is defined
+          - _create.template_oid | length > 0
+
+    - name: Create same template again (idempotency)
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        display_name: Ansible Test Template
+        source_template: Web Server
+        key_size: 4096
+        validity_period_days: 365
+        renewal_period_days: 42
+        key_usage:
+          - digital_signature
+          - key_encipherment
+        state: present
+      register: _create_idem
+
+    - name: Assert no change on idempotent run
+      ansible.builtin.assert:
+        that:
+          - _create_idem is not changed
+
+    - name: Update key size to 8192
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        key_size: 8192
+        state: present
+      register: _modify
+
+    - name: Assert modification reported changed
+      ansible.builtin.assert:
+        that:
+          - _modify is changed
+
+    - name: Update key size to 8192 again (idempotency)
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        key_size: 8192
+        state: present
+      register: _modify_idem
+
+    - name: Assert no change on idempotent modify
+      ansible.builtin.assert:
+        that:
+          - _modify_idem is not changed
+
+    # ---- MODIFY EKU with named values ----
+    - name: Set EKUs using human-readable names
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        extended_key_usages:
+          - client_authentication
+          - server_authentication
+        state: present
+      register: _modify_eku
+
+    - name: Assert EKU change
+      ansible.builtin.assert:
+        that:
+          - _modify_eku is changed
+
+    - name: Set same EKUs again (idempotency)
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        extended_key_usages:
+          - server_authentication
+          - client_authentication
+        state: present
+      register: _modify_eku_idem
+
+    - name: Assert no change on idempotent EKU
+      ansible.builtin.assert:
+        that:
+          - _modify_eku_idem is not changed
+
+    # ---- MODIFY flags with named values ----
+    - name: Set enrollment_flag with named values
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        enrollment_flag:
+          - auto_enrollment
+          - publish_to_ds
+        state: present
+      register: _modify_enroll
+
+    - name: Assert enrollment_flag changed
+      ansible.builtin.assert:
+        that:
+          - _modify_enroll is changed
+
+    - name: Set same enrollment_flag again (idempotency)
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        enrollment_flag:
+          - auto_enrollment
+          - publish_to_ds
+        state: present
+      register: _modify_enroll_idem
+
+    - name: Assert no change
+      ansible.builtin.assert:
+        that:
+          - _modify_enroll_idem is not changed
+
+    - name: Set private_key_flag with named value
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        private_key_flag:
+          - exportable_key
+        state: present
+      register: _modify_pk
+
+    - name: Assert private_key_flag changed
+      ansible.builtin.assert:
+        that:
+          - _modify_pk is changed
+
+    - name: Publish template to CA
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        publish_to_ca:
+          - "{{ test_ca_name }}"
+        state: present
+      register: _publish
+
+    - name: Assert publish reported changed
+      ansible.builtin.assert:
+        that:
+          - _publish is changed
+
+    - name: Publish template to CA again (idempotency)
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        publish_to_ca:
+          - "{{ test_ca_name }}"
+        state: present
+      register: _publish_idem
+
+    - name: Assert no change on idempotent publish
+      ansible.builtin.assert:
+        that:
+          - _publish_idem is not changed
+
+    - name: Unpublish template from all CAs
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        publish_to_ca: []
+        state: present
+      register: _unpublish
+
+    - name: Assert unpublish reported changed
+      ansible.builtin.assert:
+        that:
+          - _unpublish is changed
+
+    - name: Unpublish again (idempotency)
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        publish_to_ca: []
+        state: present
+      register: _unpublish_idem
+
+    - name: Assert no change on idempotent unpublish
+      ansible.builtin.assert:
+        that:
+          - _unpublish_idem is not changed
+
+    - name: Remove template - check mode
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        state: absent
+      register: _remove_check
+      check_mode: true
+
+    - name: Assert remove check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _remove_check is changed
+
+    - name: Remove template
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        state: absent
+      register: _remove
+
+    - name: Assert remove reported changed
+      ansible.builtin.assert:
+        that:
+          - _remove is changed
+
+    - name: Remove template again (idempotency)
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        state: absent
+      register: _remove_idem
+
+    - name: Assert no change on idempotent remove
+      ansible.builtin.assert:
+        that:
+          - _remove_idem is not changed
+
+  always:
+    - name: Cleanup - remove test template if it exists
+      microsoft.ad.cs_template:
+        name: AnsibleTestTemplate
+        state: absent
+      failed_when: false

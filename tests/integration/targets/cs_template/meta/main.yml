@@ -1,0 +1,3 @@
+dependencies:
+- name: setup_domain
+- name: setup_adcs

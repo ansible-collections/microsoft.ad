@@ -1,0 +1,42 @@
+---
+- name: Ensure AD CS feature is installed
+  ansible.windows.win_feature:
+    name: AD-Certificate
+    state: present
+  register: _adcs_feature
+
+- name: Reboot after AD CS install
+  ansible.windows.win_reboot:
+  when: _adcs_feature.reboot_required
+
+- name: Configure Enterprise Root CA
+  ansible.windows.win_powershell:
+    script: |
+      $ErrorActionPreference = 'Stop'
+      $Ansible.Changed = $false
+
+      $caParams = @{
+          CAType             = 'EnterpriseRootCa'
+          CryptoProviderName = 'RSA#Microsoft Software Key Storage Provider'
+          KeyLength          = 2048
+          HashAlgorithmName  = 'SHA256'
+          Force              = $true
+      }
+      try {
+          Install-AdcsCertificationAuthority @caParams
+          $Ansible.Changed = $true
+      }
+      catch [Microsoft.CertificateServices.Deployment.Common.CertificateServicesBaseSetupException] {
+          if ($_.Exception.Message -like 'The Certification Authority is already installed.*') {
+              return
+          }
+          throw
+      }
+  become: true
+  become_method: ansible.builtin.runas
+  become_user: SYSTEM
+  register: _adcs_ca_config
+
+- name: Reboot after CA configuration if connection was lost
+  ansible.windows.win_reboot:
+  when: _adcs_ca_config is changed
