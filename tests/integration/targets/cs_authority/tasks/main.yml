@@ -1,0 +1,309 @@
+---
+
+- name: Get current CDP and AIA baselines
+  ansible.windows.win_powershell:
+    script: |
+      $cdp = @(Get-CACrlDistributionPoint | ForEach-Object {
+          @{
+              Uri = $_.Uri
+              PublishToServer = [bool]$_.PublishToServer
+              PublishDeltaToServer = [bool]$_.PublishDeltaToServer
+              AddToCertificateCdp = [bool]$_.AddToCertificateCdp
+              AddToFreshestCrl = [bool]$_.AddToFreshestCrl
+              AddToCrlCdp = [bool]$_.AddToCrlCdp
+              AddToCrlIdp = [bool]$_.AddToCrlIdp
+          }
+      })
+      $aia = @(Get-CAAuthorityInformationAccess | ForEach-Object {
+          @{
+              Uri = $_.Uri
+              AddToCertificateAia = [bool]$_.AddToCertificateAia
+              AddToCertificateOcsp = [bool]$_.AddToCertificateOcsp
+          }
+      })
+      $Ansible.Result = @{ cdp = $cdp; aia = $aia }
+  register: _baseline
+
+- name: Save baseline facts
+  ansible.builtin.set_fact:
+    baseline_cdp: "{{ _baseline.result.cdp }}"
+    baseline_aia: "{{ _baseline.result.aia }}"
+
+- name: Test cs_authority
+  block:
+    - name: Set CDP entries - check mode
+      microsoft.ad.cs_authority:
+        cdp:
+          - uri: "http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+            add_to_certificate_cdp: true
+            add_to_freshest_crl: true
+        restart_service: false
+      register: _cdp_check
+      check_mode: true
+
+    - name: Assert CDP check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _cdp_check is changed
+
+    - name: Verify CDP was not actually modified in check mode
+      ansible.windows.win_powershell:
+        script: |
+          $current = @(Get-CACrlDistributionPoint)
+          $Ansible.Result = $current.Count
+      register: _cdp_check_verify
+
+    - name: Assert CDP count unchanged after check mode
+      ansible.builtin.assert:
+        that:
+          - _cdp_check_verify.result == (baseline_cdp | length)
+
+    # ---- CDP: set + idempotency ----
+    - name: Set CDP entries
+      microsoft.ad.cs_authority:
+        cdp:
+          - uri: "http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+            add_to_certificate_cdp: true
+            add_to_freshest_crl: true
+        restart_service: false
+      register: _cdp_set
+
+    - name: Assert CDP set reported changed
+      ansible.builtin.assert:
+        that:
+          - _cdp_set is changed
+
+    - name: Set same CDP entries again (idempotency)
+      microsoft.ad.cs_authority:
+        cdp:
+          - uri: "http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+            add_to_certificate_cdp: true
+            add_to_freshest_crl: true
+        restart_service: false
+      register: _cdp_set_idem
+
+    - name: Assert no change on idempotent CDP run
+      ansible.builtin.assert:
+        that:
+          - _cdp_set_idem is not changed
+
+    # ---- CDP: modify flags ----
+    - name: Modify CDP entry flags
+      microsoft.ad.cs_authority:
+        cdp:
+          - uri: "http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+            add_to_certificate_cdp: true
+            add_to_freshest_crl: false
+        restart_service: false
+      register: _cdp_modify
+
+    - name: Assert CDP modify reported changed
+      ansible.builtin.assert:
+        that:
+          - _cdp_modify is changed
+
+    - name: Modify CDP entry flags again (idempotency)
+      microsoft.ad.cs_authority:
+        cdp:
+          - uri: "http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+            add_to_certificate_cdp: true
+            add_to_freshest_crl: false
+        restart_service: false
+      register: _cdp_modify_idem
+
+    - name: Assert no change on idempotent CDP modify
+      ansible.builtin.assert:
+        that:
+          - _cdp_modify_idem is not changed
+
+    # ---- CDP: remove all ----
+    - name: Remove all CDP entries
+      microsoft.ad.cs_authority:
+        cdp: []
+        restart_service: false
+      register: _cdp_empty
+
+    - name: Assert CDP removal reported changed
+      ansible.builtin.assert:
+        that:
+          - _cdp_empty is changed
+
+    - name: Remove all CDP entries again (idempotency)
+      microsoft.ad.cs_authority:
+        cdp: []
+        restart_service: false
+      register: _cdp_empty_idem
+
+    - name: Assert no change on idempotent CDP removal
+      ansible.builtin.assert:
+        that:
+          - _cdp_empty_idem is not changed
+
+    # ---- AIA: check mode ----
+    - name: Set AIA entries - check mode
+      microsoft.ad.cs_authority:
+        aia:
+          - uri: "http://pki.test.local/crl/<ServerDNSName>_<CAName><CertificateName>.crt"
+            add_to_certificate_aia: true
+          - uri: "http://ocsp.test.local/ocsp"
+            add_to_certificate_ocsp: true
+        restart_service: false
+      register: _aia_check
+      check_mode: true
+
+    - name: Assert AIA check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _aia_check is changed
+
+    # ---- AIA: set + idempotency ----
+    - name: Set AIA entries
+      microsoft.ad.cs_authority:
+        aia:
+          - uri: "http://pki.test.local/crl/<ServerDNSName>_<CAName><CertificateName>.crt"
+            add_to_certificate_aia: true
+          - uri: "http://ocsp.test.local/ocsp"
+            add_to_certificate_ocsp: true
+        restart_service: false
+      register: _aia_set
+
+    - name: Assert AIA set reported changed
+      ansible.builtin.assert:
+        that:
+          - _aia_set is changed
+
+    - name: Set same AIA entries again (idempotency)
+      microsoft.ad.cs_authority:
+        aia:
+          - uri: "http://pki.test.local/crl/<ServerDNSName>_<CAName><CertificateName>.crt"
+            add_to_certificate_aia: true
+          - uri: "http://ocsp.test.local/ocsp"
+            add_to_certificate_ocsp: true
+        restart_service: false
+      register: _aia_set_idem
+
+    - name: Assert no change on idempotent AIA run
+      ansible.builtin.assert:
+        that:
+          - _aia_set_idem is not changed
+
+    # ---- AIA: modify ----
+    - name: Modify AIA to only have AIA entry (remove OCSP)
+      microsoft.ad.cs_authority:
+        aia:
+          - uri: "http://pki.test.local/crl/<ServerDNSName>_<CAName><CertificateName>.crt"
+            add_to_certificate_aia: true
+        restart_service: false
+      register: _aia_modify
+
+    - name: Assert AIA modify reported changed
+      ansible.builtin.assert:
+        that:
+          - _aia_modify is changed
+
+    # ---- Combined CDP + AIA ----
+    - name: Set both CDP and AIA together
+      microsoft.ad.cs_authority:
+        cdp:
+          - uri: "http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+            add_to_certificate_cdp: true
+        aia:
+          - uri: "http://pki.test.local/crl/<ServerDNSName>_<CAName><CertificateName>.crt"
+            add_to_certificate_aia: true
+        restart_service: false
+      register: _combined
+
+    - name: Assert combined set reported changed
+      ansible.builtin.assert:
+        that:
+          - _combined is changed
+
+    - name: Set both CDP and AIA again (idempotency)
+      microsoft.ad.cs_authority:
+        cdp:
+          - uri: "http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+            add_to_certificate_cdp: true
+        aia:
+          - uri: "http://pki.test.local/crl/<ServerDNSName>_<CAName><CertificateName>.crt"
+            add_to_certificate_aia: true
+        restart_service: false
+      register: _combined_idem
+
+    - name: Assert no change on idempotent combined run
+      ansible.builtin.assert:
+        that:
+          - _combined_idem is not changed
+
+    # ---- Isolation: CDP-only does not touch AIA ----
+    - name: Only manage CDP, leave AIA untouched
+      microsoft.ad.cs_authority:
+        cdp:
+          - uri: "http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+            add_to_certificate_cdp: true
+            add_to_freshest_crl: true
+        restart_service: false
+      register: _cdp_only
+
+    - name: Assert CDP-only run changed (flags differ)
+      ansible.builtin.assert:
+        that:
+          - _cdp_only is changed
+
+    - name: Verify AIA was not touched by CDP-only run
+      ansible.windows.win_powershell:
+        script: |
+          $aia = @(Get-CAAuthorityInformationAccess)
+          $Ansible.Result = $aia.Count
+      register: _aia_after_cdp_only
+
+    - name: Assert AIA count is still 1 (only the AIA entry from before)
+      ansible.builtin.assert:
+        that:
+          - _aia_after_cdp_only.result == 1
+
+  always:
+    - name: Restore baseline CDP entries
+      ansible.windows.win_powershell:
+        script: |
+          $ErrorActionPreference = 'Stop'
+          Get-CACrlDistributionPoint | ForEach-Object {
+              $null = Remove-CACrlDistributionPoint -Uri $_.Uri -Force
+          }
+
+          $json = '{{ baseline_cdp | to_json }}'
+          $baseline = @($json | ConvertFrom-Json)
+          foreach ($entry in $baseline) {
+              $params = @{ Uri = $entry.Uri; Force = $true }
+              if ($entry.PublishToServer) { $params.PublishToServer = $true }
+              if ($entry.PublishDeltaToServer) { $params.PublishDeltaToServer = $true }
+              if ($entry.AddToCertificateCdp) { $params.AddToCertificateCdp = $true }
+              if ($entry.AddToFreshestCrl) { $params.AddToFreshestCrl = $true }
+              if ($entry.AddToCrlCdp) { $params.AddToCrlCdp = $true }
+              if ($entry.AddToCrlIdp) { $params.AddToCrlIdp = $true }
+              $null = Add-CACrlDistributionPoint @params
+          }
+      failed_when: false
+
+    - name: Restore baseline AIA entries
+      ansible.windows.win_powershell:
+        script: |
+          $ErrorActionPreference = 'Stop'
+          Get-CAAuthorityInformationAccess | ForEach-Object {
+              $null = Remove-CAAuthorityInformationAccess -Uri $_.Uri -Force
+          }
+
+          $json = '{{ baseline_aia | to_json }}'
+          $baseline = @($json | ConvertFrom-Json)
+          foreach ($entry in $baseline) {
+              $params = @{ Uri = $entry.Uri; Force = $true }
+              if ($entry.AddToCertificateAia) { $params.AddToCertificateAia = $true }
+              if ($entry.AddToCertificateOcsp) { $params.AddToCertificateOcsp = $true }
+              $null = Add-CAAuthorityInformationAccess @params
+          }
+      failed_when: false
+
+    - name: Restart CertSvc after cleanup
+      ansible.windows.win_service:
+        name: CertSvc
+        state: restarted
+      failed_when: false
