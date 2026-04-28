@@ -1,0 +1,141 @@
+---
+- name: Test fs_trust
+  block:
+    - name: Create trust from identifier - check mode
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        identifier:
+          - https://test.example.com/saml
+        saml_endpoint:
+          - https://test.example.com/saml/acs
+        enabled: true
+      register: _create_check
+      check_mode: true
+
+    - name: Assert check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _create_check is changed
+
+    - name: Create trust from identifier
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        identifier:
+          - https://test.example.com/saml
+        saml_endpoint:
+          - https://test.example.com/saml/acs
+        enabled: true
+      register: _create
+
+    - name: Assert created
+      ansible.builtin.assert:
+        that:
+          - _create is changed
+          - _create.name == 'TestTrust'
+          - _create.enabled == true
+          - _create.identifier | length > 0
+
+    - name: Create trust from identifier again - idempotency
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        identifier:
+          - https://test.example.com/saml
+        enabled: true
+      register: _create_idem
+
+    - name: Assert no change on idempotent run
+      ansible.builtin.assert:
+        that:
+          - _create_idem is not changed
+
+    - name: Update trust - set notes - check mode
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        identifier:
+          - https://test.example.com/saml
+        notes: Test notes for integration
+      register: _update_check
+      check_mode: true
+
+    - name: Assert update check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _update_check is changed
+
+    - name: Update trust - set notes
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        identifier:
+          - https://test.example.com/saml
+        notes: Test notes for integration
+      register: _update
+
+    - name: Assert updated
+      ansible.builtin.assert:
+        that:
+          - _update is changed
+
+    - name: Update trust - set notes again - idempotency
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        identifier:
+          - https://test.example.com/saml
+        notes: Test notes for integration
+      register: _update_idem
+
+    - name: Assert no change on idempotent update
+      ansible.builtin.assert:
+        that:
+          - _update_idem is not changed
+
+    - name: Remove trust - check mode
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        state: absent
+      register: _remove_check
+      check_mode: true
+
+    - name: Assert removal check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _remove_check is changed
+
+    - name: Remove trust
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        state: absent
+      register: _remove
+
+    - name: Assert removed
+      ansible.builtin.assert:
+        that:
+          - _remove is changed
+
+    - name: Remove trust again - idempotency
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        state: absent
+      register: _remove_idem
+
+    - name: Assert no change on idempotent removal
+      ansible.builtin.assert:
+        that:
+          - _remove_idem is not changed
+
+    - name: Remove non-existent trust - no error
+      microsoft.ad.fs_trust:
+        name: TrustThatDoesNotExist
+        state: absent
+      register: _remove_missing
+
+    - name: Assert no change for missing trust
+      ansible.builtin.assert:
+        that:
+          - _remove_missing is not changed
+
+  always:
+    - name: Cleanup - remove TestTrust
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        state: absent
+      ignore_errors: true

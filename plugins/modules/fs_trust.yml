@@ -1,0 +1,199 @@
+# Copyright (c) 2026 Ansible Project
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+DOCUMENTATION:
+  module: fs_trust
+  short_description: Manage AD FS Relying Party Trusts
+  version_added: 1.11.0
+  description:
+    - Create, update, or remove AD FS Relying Party Trusts on a Windows
+      server running the AD FS role.
+    - Trusts can be created from a federation metadata URL, a local
+      metadata XML file, or by specifying identifiers and endpoints
+      manually.
+    - The module validates internet connectivity when O(metadata_url) is
+      used.
+  options:
+    name:
+      description:
+        - The display name of the relying party trust.
+        - This is the primary key used to identify the trust.
+      type: str
+      required: true
+    state:
+      description:
+        - Whether the relying party trust should be present or absent.
+      type: str
+      default: present
+      choices: [present, absent]
+    metadata_url:
+      description:
+        - URL pointing to the federation metadata document for the
+          relying party.
+        - The module tests connectivity to this URL before creating
+          the trust.
+        - Mutually exclusive with O(metadata_file) and O(identifier).
+      type: str
+    metadata_file:
+      description:
+        - Local file path to a federation metadata XML document.
+        - Mutually exclusive with O(metadata_url) and O(identifier).
+      type: str
+    identifier:
+      description:
+        - List of unique identifiers (URIs) for the relying party trust.
+        - Used for manual trust setup without a metadata document.
+        - Mutually exclusive with O(metadata_url) and O(metadata_file).
+      type: list
+      elements: str
+    saml_endpoint:
+      description:
+        - List of SAML Assertion Consumer Service endpoint URLs.
+        - Only used when creating a trust with O(identifier) for
+          manual setup.
+        - Each URL is registered as a SAML POST binding endpoint.
+      type: list
+      elements: str
+    wsfed_endpoint:
+      description:
+        - WS-Federation passive endpoint URL for the relying party.
+        - Only used when creating a trust with O(identifier) for
+          manual setup.
+      type: str
+    enabled:
+      description:
+        - Whether the relying party trust is enabled.
+      type: bool
+    monitoring_enabled:
+      description:
+        - Whether periodic monitoring of the relying party federation
+          metadata is enabled.
+        - Requires that the trust was created with O(metadata_url).
+      type: bool
+    auto_update_enabled:
+      description:
+        - Whether changes in the federation metadata are automatically
+          applied to the trust configuration.
+      type: bool
+    token_lifetime:
+      description:
+        - Token validity duration in minutes.
+      type: int
+    notes:
+      description:
+        - Freeform notes for the relying party trust.
+      type: str
+    access_control_policy_name:
+      description:
+        - Name of the access control policy to assign.
+      type: str
+    issuance_transform_rules:
+      description:
+        - Claim issuance transform rules as a rule language string.
+      type: str
+    issuance_authorization_rules:
+      description:
+        - Issuance authorization rules as a rule language string.
+      type: str
+    signature_algorithm:
+      description:
+        - Signature algorithm used for signing and verification.
+        - V(rsa_sha1) uses RSA-SHA1
+          (C(http://www.w3.org/2000/09/xmldsig#rsa-sha1)).
+        - V(rsa_sha256) uses RSA-SHA256
+          (C(http://www.w3.org/2001/04/xmldsig-more#rsa-sha256)).
+      type: str
+      choices: [rsa_sha1, rsa_sha256]
+    encrypt_claims:
+      description:
+        - Whether claims sent to the relying party should be encrypted.
+      type: bool
+
+  notes:
+    - This module must be run on a Windows server with the AD FS role
+      installed.
+    - The AD FS PowerShell module (ADFS) must be available on the target.
+    - Requires AD FS administrator permissions.
+    - Supports AD FS on Windows Server 2019 and later.
+  seealso:
+    - name: Add-AdfsRelyingPartyTrust
+      description: Microsoft documentation for the underlying cmdlet.
+      link: https://learn.microsoft.com/en-us/powershell/module/adfs/add-adfsrelyingpartytrust
+  extends_documentation_fragment:
+    - ansible.builtin.action_common_attributes
+  attributes:
+    check_mode:
+      support: full
+    diff_mode:
+      support: none
+    platform:
+      platforms:
+        - windows
+  author:
+    - Ron Gershburg (@rgershbu)
+
+EXAMPLES: |
+  - name: Create a relying party trust from a metadata URL
+    microsoft.ad.fs_trust:
+      name: MyApp
+      metadata_url: https://app.example.com/federationmetadata/2007-06/federationmetadata.xml
+      monitoring_enabled: true
+      auto_update_enabled: true
+
+  - name: Create a relying party trust from a local metadata file
+    microsoft.ad.fs_trust:
+      name: InternalApp
+      metadata_file: C:\metadata\internal_app.xml
+      enabled: true
+
+  - name: Create a trust with manual identifiers and SAML endpoint
+    microsoft.ad.fs_trust:
+      name: CustomSaaS
+      identifier:
+        - https://app.example.com/saml
+      saml_endpoint:
+        - https://app.example.com/saml/acs
+      enabled: true
+      token_lifetime: 60
+
+  - name: Create a trust with a WS-Federation endpoint
+    microsoft.ad.fs_trust:
+      name: WsFedApp
+      identifier:
+        - https://wsfed.example.com/
+      wsfed_endpoint: https://wsfed.example.com/auth
+      access_control_policy_name: Permit everyone
+
+  - name: Update monitoring on an existing trust
+    microsoft.ad.fs_trust:
+      name: MyApp
+      metadata_url: https://app.example.com/federationmetadata/2007-06/federationmetadata.xml
+      monitoring_enabled: true
+
+  - name: Remove a relying party trust
+    microsoft.ad.fs_trust:
+      name: MyApp
+      state: absent
+
+RETURN:
+  name:
+    description: The display name of the relying party trust.
+    returned: always
+    type: str
+    sample: MyApp
+  identifier:
+    description: The list of identifiers for the relying party trust.
+    returned: success and state is present
+    type: list
+    elements: str
+    sample: ["https://app.example.com"]
+  enabled:
+    description: Whether the trust is enabled.
+    returned: success and state is present
+    type: bool
+    sample: true
+  monitoring_enabled:
+    description: Whether metadata monitoring is enabled.
+    returned: success and state is present
+    type: bool
+    sample: true
