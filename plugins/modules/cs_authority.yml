@@ -1,0 +1,190 @@
+# Copyright (c) 2026 Ansible Project
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+DOCUMENTATION:
+  module: cs_authority
+  short_description: Manage CA CRL Distribution Points and Authority Information Access
+  version_added: 1.11.0
+  description:
+    - Manage CRL Distribution Point (CDP) and Authority Information Access
+      (AIA) extension entries on a Windows Certificate Authority.
+    - Uses the C(ADCSAdministration) PowerShell module cmdlets
+      C(Get-CACrlDistributionPoint), C(Add-CACrlDistributionPoint),
+      C(Remove-CACrlDistributionPoint), C(Get-CAAuthorityInformationAccess),
+      C(Add-CAAuthorityInformationAccess), and
+      C(Remove-CAAuthorityInformationAccess).
+    - When O(cdp) or O(aia) is specified, the module enforces the exact
+      desired list. Entries not in the desired list are removed, missing
+      entries are added, and entries with matching URI but different flags
+      are replaced.
+    - When O(cdp) or O(aia) is omitted, that extension type is not managed.
+    - The CertSvc service is restarted after changes when O(restart_service)
+      is V(true).
+  options:
+    cdp:
+      description:
+        - Desired list of CRL Distribution Point entries.
+        - Each entry specifies a URI and the boolean flags that control
+          how the CDP is used.
+        - When specified, the module enforces exactly this list of CDPs.
+          Existing entries not in the list are removed.
+        - An empty list V([]) removes all CDP entries.
+        - When omitted, CDP configuration is not managed.
+        - "URI strings may contain ADCS variable tokens in angle-bracket
+          format: C(<ServerDNSName>), C(<ServerShortName>),
+          C(<CAName>), C(<CertificateName>), C(<CATruncatedName>),
+          C(<CRLNameSuffix>), C(<DeltaCRLAllowed>),
+          C(<ConfigurationContainer>), C(<CDPObjectClass>),
+          C(<CAObjectClass>)."
+      type: list
+      elements: dict
+      suboptions:
+        uri:
+          description:
+            - The CDP URI.
+            - Supports HTTP, LDAP, UNC, and file path URIs.
+          type: str
+          required: true
+        publish_to_server:
+          description:
+            - Publish CRLs to this location.
+          type: bool
+          default: false
+        publish_delta_to_server:
+          description:
+            - Publish delta CRLs to this location.
+          type: bool
+          default: false
+        add_to_certificate_cdp:
+          description:
+            - Include this URI in the CDP extension of issued certificates.
+          type: bool
+          default: false
+        add_to_freshest_crl:
+          description:
+            - Include this URI in the freshest CRL extension for locating
+              delta CRLs.
+          type: bool
+          default: false
+        add_to_crl_cdp:
+          description:
+            - Include this URI in the CDP extension of issued CRLs.
+          type: bool
+          default: false
+        add_to_crl_idp:
+          description:
+            - Include this URI in the IDP (Issuing Distribution Point)
+              extension of issued CRLs.
+          type: bool
+          default: false
+    aia:
+      description:
+        - Desired list of Authority Information Access entries.
+        - Each entry specifies a URI and whether it is an AIA or OCSP
+          endpoint.
+        - When specified, the module enforces exactly this list of AIA
+          entries. Existing entries not in the list are removed.
+        - An empty list V([]) removes all AIA entries.
+        - When omitted, AIA configuration is not managed.
+      type: list
+      elements: dict
+      suboptions:
+        uri:
+          description:
+            - The AIA or OCSP URI.
+          type: str
+          required: true
+        add_to_certificate_aia:
+          description:
+            - Include this URI in the AIA extension of issued certificates.
+          type: bool
+          default: false
+        add_to_certificate_ocsp:
+          description:
+            - Include this URI in the OCSP extension of issued certificates.
+          type: bool
+          default: false
+    restart_service:
+      description:
+        - Whether to restart the CertSvc service after making changes.
+        - CDP and AIA changes typically require a service restart to take
+          effect on newly issued certificates.
+      type: bool
+      default: true
+
+  notes:
+    - This module must be run on the CA server itself.
+    - The C(ADCSAdministration) PowerShell module must be available on the
+      target host (installed with the AD CS role).
+    - Changes only affect newly issued certificates and CRLs. Previously
+      issued certificates retain their original CDP and AIA references.
+    - Administrator permissions on the CA are required.
+  seealso:
+    - module: microsoft.ad.cs_template
+  extends_documentation_fragment:
+    - ansible.builtin.action_common_attributes
+  attributes:
+    check_mode:
+      support: full
+    diff_mode:
+      support: none
+    platform:
+      platforms:
+        - windows
+  author:
+    - Ron Gershburg (@rgershbu)
+
+EXAMPLES: |
+  - name: Configure CDP with HTTP and local file publishing
+    microsoft.ad.cs_authority:
+      cdp:
+        - uri: "C:\\Windows\\System32\\CertSrv\\CertEnroll\\<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+          publish_to_server: true
+          publish_delta_to_server: true
+        - uri: "http://pki.corp.com/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+          add_to_certificate_cdp: true
+          add_to_freshest_crl: true
+
+  - name: Configure AIA with HTTP and OCSP
+    microsoft.ad.cs_authority:
+      aia:
+        - uri: "http://pki.corp.com/crl/<ServerDNSName>_<CAName><CertificateName>.crt"
+          add_to_certificate_aia: true
+        - uri: "http://ocsp.corp.com/ocsp"
+          add_to_certificate_ocsp: true
+
+  - name: Configure both CDP and AIA together
+    microsoft.ad.cs_authority:
+      cdp:
+        - uri: "C:\\Windows\\System32\\CertSrv\\CertEnroll\\<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+          publish_to_server: true
+          publish_delta_to_server: true
+        - uri: "http://pki.corp.com/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+          add_to_certificate_cdp: true
+          add_to_freshest_crl: true
+      aia:
+        - uri: "http://pki.corp.com/crl/<ServerDNSName>_<CAName><CertificateName>.crt"
+          add_to_certificate_aia: true
+        - uri: "http://ocsp.corp.com/ocsp"
+          add_to_certificate_ocsp: true
+      restart_service: true
+
+  - name: Remove all CDP entries
+    microsoft.ad.cs_authority:
+      cdp: []
+
+  - name: Configure CDP without restarting the service
+    microsoft.ad.cs_authority:
+      cdp:
+        - uri: "http://pki.corp.com/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+          add_to_certificate_cdp: true
+      restart_service: false
+
+RETURN:
+  reboot_required:
+    description:
+      - Always V(false). CDP and AIA changes do not require a reboot,
+        only a CertSvc service restart.
+    returned: always
+    type: bool
+    sample: false
