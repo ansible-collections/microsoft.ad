@@ -133,13 +133,6 @@ if ($state -eq 'present') {
         }
         else {
             $addParams.Identifier = $module.Params.identifier
-            if ($module.Params.saml_endpoint) {
-                $endpoints = @()
-                foreach ($ep in $module.Params.saml_endpoint) {
-                    $endpoints += New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $ep
-                }
-                $addParams.SamlEndpoint = $endpoints
-            }
             if ($module.Params.wsfed_endpoint) {
                 $addParams.WSFedEndpoint = [Uri]$module.Params.wsfed_endpoint
             }
@@ -161,7 +154,36 @@ if ($state -eq 'present') {
 
         if (-not $module.CheckMode) {
             try {
-                Add-AdfsRelyingPartyTrust @addParams
+                $cmd = Get-Command Add-AdfsRelyingPartyTrust
+                if ($module.Params.saml_endpoint -and $cmd.Module.PrivateData.ImplicitRemoting) {
+                    # The ADFS module is loaded via implicit remoting and
+                    # SamlEndpoint objects get deserialized crossing the
+                    # proxy boundary. Create them inside a WinPS session.
+                    $winPS = New-PSSession -UseWindowsPowerShell
+                    try {
+                        Invoke-Command -Session $winPS -ScriptBlock {
+                            param([hashtable]$Params, [string[]]$EndpointUris)
+                            $eps = foreach ($u in $EndpointUris) {
+                                New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $u
+                            }
+                            $Params['SamlEndpoint'] = @($eps)
+                            Add-AdfsRelyingPartyTrust @Params
+                        } -ArgumentList $addParams, [string[]]$module.Params.saml_endpoint
+                    }
+                    finally {
+                        $winPS | Remove-PSSession
+                    }
+                }
+                else {
+                    if ($module.Params.saml_endpoint) {
+                        $endpoints = @()
+                        foreach ($ep in $module.Params.saml_endpoint) {
+                            $endpoints += New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $ep
+                        }
+                        $addParams.SamlEndpoint = $endpoints
+                    }
+                    Add-AdfsRelyingPartyTrust @addParams
+                }
             }
             catch {
                 $module.FailJson("Failed to create relying party trust '$name': $_", $_)

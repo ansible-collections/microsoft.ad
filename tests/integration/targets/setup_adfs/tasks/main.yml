@@ -14,7 +14,7 @@
   ansible.windows.win_powershell:
     parameters:
       DomainRealm: '{{ domain_realm }}'
-      AdminPassword: '{{ ansible_password }}'
+      AdminPassword: '{{ domain_password }}'
     script: |
       [CmdletBinding()]
       param(
