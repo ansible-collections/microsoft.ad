@@ -167,9 +167,10 @@ if ($state -eq 'present') {
                         $Params['SamlEndpoint'] = @($eps)
                         Add-AdfsRelyingPartyTrust @Params
                     }
+                    [string[]]$samlUris = @($module.Params.saml_endpoint)
                     $winPS = New-PSSession -UseWindowsPowerShell
                     try {
-                        Invoke-Command -Session $winPS -ScriptBlock $addTrustWithEndpoints -ArgumentList $addParams, [string[]]$module.Params.saml_endpoint
+                        Invoke-Command -Session $winPS -ScriptBlock $addTrustWithEndpoints -ArgumentList $addParams, $samlUris
                     }
                     finally {
                         $winPS | Remove-PSSession
