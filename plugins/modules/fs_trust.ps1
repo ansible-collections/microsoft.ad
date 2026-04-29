@@ -44,6 +44,7 @@ $spec = @{
         }
         token_lifetime = @{
             type = 'int'
+            no_log = $false
         }
         notes = @{
             type = 'str'
