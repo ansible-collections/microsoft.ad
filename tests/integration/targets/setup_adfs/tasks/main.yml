@@ -82,27 +82,35 @@
 - name: Wait for AD FS service to come online
   ansible.windows.win_powershell:
     parameters:
-      Delay: 5
-      Retries: 60
+      Timeout: 5
+      Retries: 120
     script: |
       [CmdletBinding()]
       param(
-          [int]$Delay,
+          [int]$Timeout,
           [int]$Retries
       )
       $Ansible.Changed = $false
       $attempts = 0
       while ($true) {
           $attempts++
-          try {
+          $job = Start-Job -ScriptBlock {
               Get-AdfsRelyingPartyTrust -ErrorAction Stop | Out-Null
+          }
+          try {
+              if (-not (Wait-Job $job -Timeout $Timeout)) {
+                  throw 'ADFS cmdlet timed out'
+              }
+              Receive-Job $job -ErrorAction Stop
               break
           }
           catch {
               if ($attempts -eq $Retries) {
                   throw
               }
-              Start-Sleep -Seconds $Delay
+          }
+          finally {
+              Remove-Job $job -Force
           }
       }
       $attempts

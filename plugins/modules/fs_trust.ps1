@@ -52,12 +52,6 @@ $spec = @{
         access_control_policy_name = @{
             type = 'str'
         }
-        issuance_transform_rules = @{
-            type = 'str'
-        }
-        issuance_authorization_rules = @{
-            type = 'str'
-        }
         signature_algorithm = @{
             type = 'str'
             choices = @('rsa_sha1', 'rsa_sha256')
@@ -95,8 +89,6 @@ $propertyMap = @(
     @{ Param = 'token_lifetime'; Cmdlet = 'TokenLifetime' }
     @{ Param = 'notes'; Cmdlet = 'Notes' }
     @{ Param = 'access_control_policy_name'; Cmdlet = 'AccessControlPolicyName' }
-    @{ Param = 'issuance_transform_rules'; Cmdlet = 'IssuanceTransformRules' }
-    @{ Param = 'issuance_authorization_rules'; Cmdlet = 'IssuanceAuthorizationRules' }
     @{ Param = 'signature_algorithm'; Cmdlet = 'SignatureAlgorithm'; Cast = { param($v) $signatureAlgorithmMap[$v] } }
     @{ Param = 'encrypt_claims'; Cmdlet = 'EncryptClaims' }
 )

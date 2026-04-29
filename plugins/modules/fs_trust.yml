@@ -87,14 +87,6 @@ DOCUMENTATION:
       description:
         - Name of the access control policy to assign.
       type: str
-    issuance_transform_rules:
-      description:
-        - Claim issuance transform rules as a rule language string.
-      type: str
-    issuance_authorization_rules:
-      description:
-        - Issuance authorization rules as a rule language string.
-      type: str
     signature_algorithm:
       description:
         - Signature algorithm used for signing and verification.
