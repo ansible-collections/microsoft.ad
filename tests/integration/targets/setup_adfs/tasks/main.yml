@@ -1,4 +1,22 @@
 ---
+- name: Reset Administrator password to known value
+  ansible.windows.win_powershell:
+    parameters:
+      Password: '{{ domain_password }}'
+    script: |
+      [CmdletBinding()]
+      param([string]$Password)
+      $Ansible.Changed = $false
+      $secure = ConvertTo-SecureString $Password -AsPlainText -Force
+      Set-ADAccountPassword -Identity Administrator -NewPassword $secure -Reset
+      $Ansible.Changed = $true
+  when: ansible_password is not defined
+
+- name: Update connection password
+  ansible.builtin.set_fact:
+    ansible_password: '{{ domain_password }}'
+  when: ansible_password is not defined
+
 - name: Ensure AD FS feature is installed
   ansible.windows.win_feature:
     name: ADFS-Federation

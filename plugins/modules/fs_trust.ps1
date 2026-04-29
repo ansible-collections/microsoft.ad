@@ -159,16 +159,17 @@ if ($state -eq 'present') {
                     # The ADFS module is loaded via implicit remoting and
                     # SamlEndpoint objects get deserialized crossing the
                     # proxy boundary. Create them inside a WinPS session.
+                    $addTrustWithEndpoints = {
+                        param([hashtable]$Params, [string[]]$EndpointUris)
+                        $eps = foreach ($u in $EndpointUris) {
+                            New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $u
+                        }
+                        $Params['SamlEndpoint'] = @($eps)
+                        Add-AdfsRelyingPartyTrust @Params
+                    }
                     $winPS = New-PSSession -UseWindowsPowerShell
                     try {
-                        Invoke-Command -Session $winPS -ScriptBlock {
-                            param([hashtable]$Params, [string[]]$EndpointUris)
-                            $eps = foreach ($u in $EndpointUris) {
-                                New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $u
-                            }
-                            $Params['SamlEndpoint'] = @($eps)
-                            Add-AdfsRelyingPartyTrust @Params
-                        } -ArgumentList $addParams, [string[]]$module.Params.saml_endpoint
+                        Invoke-Command -Session $winPS -ScriptBlock $addTrustWithEndpoints -ArgumentList $addParams, [string[]]$module.Params.saml_endpoint
                     }
                     finally {
                         $winPS | Remove-PSSession

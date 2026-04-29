@@ -1,6 +1,11 @@
 ---
 - name: Test fs_trust
   block:
+    - name: Pre-cleanup - ensure TestTrust does not exist
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        state: absent
+
     - name: Create trust from identifier - check mode
       microsoft.ad.fs_trust:
         name: TestTrust
