@@ -75,7 +75,7 @@ $ruleMap = @(
     }
 )
 
-Function Normalize-RuleString {
+Function ConvertTo-NormalizedRuleString {
     <#
     .SYNOPSIS
     Normalizes a claim rule string for comparison. AD FS reformats
@@ -107,8 +107,8 @@ foreach ($rule in $ruleMap) {
         $joined = ($paramValue.value -join "`n").Trim()
 
         if ($paramValue.update -eq 'append') {
-            $currentNorm = Normalize-RuleString $current
-            $joinedNorm = Normalize-RuleString $joined
+            $currentNorm = ConvertTo-NormalizedRuleString $current
+            $joinedNorm = ConvertTo-NormalizedRuleString $joined
             if ($currentNorm.Contains($joinedNorm)) {
                 $desired = $current
             }
@@ -128,7 +128,7 @@ foreach ($rule in $ruleMap) {
     $module.Diff.before[$rule.Param] = $current
     $module.Diff.after[$rule.Param] = $desired
 
-    if ((Normalize-RuleString $current) -ne (Normalize-RuleString $desired)) {
+    if ((ConvertTo-NormalizedRuleString $current) -ne (ConvertTo-NormalizedRuleString $desired)) {
         $updateParams[$rule.CmdletParam] = $desired
     }
 
