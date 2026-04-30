@@ -1,0 +1,190 @@
+# Copyright (c) 2026 Ansible Project
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+DOCUMENTATION:
+  module: fs_claim_rule
+  short_description: Manage AD FS claim rules on a Relying Party Trust
+  version_added: 1.11.0
+  description:
+    - Set, append, or clear Issuance Transform Rules and Issuance
+      Authorization Rules on an existing AD FS Relying Party Trust.
+    - The Relying Party Trust must already exist; use
+      M(microsoft.ad.fs_trust) to create it.
+  options:
+    name:
+      description:
+        - The display name of the Relying Party Trust to manage rules on.
+      type: str
+      required: true
+    transform_rules:
+      description:
+        - Issuance Transform Rules to apply to the trust.
+        - These rules define how incoming identity claims are mapped or
+          transformed before being sent to the relying party.
+      type: dict
+      suboptions:
+        value:
+          description:
+            - List of claim rule strings in the AD FS claim rule
+              language.
+            - Each item is one rule block. Multiple items are joined
+              with newlines before being applied.
+          type: list
+          elements: str
+          required: true
+        update:
+          description:
+            - How to apply the rules.
+            - V(set) replaces all existing transform rules with the
+              provided value.
+            - V(append) adds the provided rules after any existing
+              transform rules.
+          type: str
+          default: set
+          choices: [set, append]
+    authorization_rules:
+      description:
+        - Issuance Authorization Rules to apply to the trust.
+        - These rules define who is authorized to receive a token
+          for the relying party.
+      type: dict
+      suboptions:
+        value:
+          description:
+            - List of claim rule strings in the AD FS claim rule
+              language.
+            - Each item is one rule block. Multiple items are joined
+              with newlines before being applied.
+          type: list
+          elements: str
+          required: true
+        update:
+          description:
+            - How to apply the rules.
+            - V(set) replaces all existing authorization rules with
+              the provided value.
+            - V(append) adds the provided rules after any existing
+              authorization rules.
+          type: str
+          default: set
+          choices: [set, append]
+    state:
+      description:
+        - When V(present), the specified rules are set or appended.
+        - When V(absent), all issuance transform and authorization
+          rules are cleared from the trust.
+      type: str
+      default: present
+      choices: [present, absent]
+
+  notes:
+    - This module must be run on a Windows host with the AD FS role
+      installed.
+    - The AD FS PowerShell module (ADFS) must be available on the
+      target.
+    - The Relying Party Trust must already exist.
+    - AD FS validates claim rule syntax strictly. Syntax errors from
+      the server are surfaced in the module failure message.
+  seealso:
+    - module: microsoft.ad.fs_trust
+    - name: Set-AdfsRelyingPartyTrust
+      description: Microsoft documentation for the underlying cmdlet.
+      link: https://learn.microsoft.com/en-us/powershell/module/adfs/set-adfsrelyingpartytrust
+  extends_documentation_fragment:
+    - ansible.builtin.action_common_attributes
+  attributes:
+    check_mode:
+      support: full
+    diff_mode:
+      support: full
+    platform:
+      platforms:
+        - windows
+  author:
+    - Ron Gershburg (@rgershbu)
+
+EXAMPLES: |
+  - name: Set issuance transform rules (overwrites existing)
+    microsoft.ad.fs_claim_rule:
+      name: MyApp
+      transform_rules:
+        value:
+          - |
+            @RuleName = "Send Email as NameID"
+            c:[Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/windowsaccountname",
+               Issuer == "AD AUTHORITY"]
+            => issue(store = "Active Directory",
+                     types = ("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"),
+                     query = ";mail;{0}", param = c.Value);
+
+  - name: Set multiple transform rules at once
+    microsoft.ad.fs_claim_rule:
+      name: MyApp
+      transform_rules:
+        value:
+          - |
+            @RuleName = "Pass Through UPN"
+            c:[Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"]
+            => issue(claim = c);
+          - |
+            @RuleName = "Pass Through Email"
+            c:[Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"]
+            => issue(claim = c);
+
+  - name: Append a rule to existing transform rules
+    microsoft.ad.fs_claim_rule:
+      name: MyApp
+      transform_rules:
+        update: append
+        value:
+          - |
+            @RuleName = "Send Group Membership"
+            c:[Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/groupsid",
+               Value =~ "^S-1-5-21-"]
+            => issue(claim = c);
+
+  - name: Set authorization rules
+    microsoft.ad.fs_claim_rule:
+      name: MyApp
+      authorization_rules:
+        value:
+          - |
+            @RuleTemplate = "AllowAllAuthzRule"
+            => issue(Type = "http://schemas.microsoft.com/authorization/claims/permit",
+                     Value = "true");
+
+  - name: Set both transform and authorization rules
+    microsoft.ad.fs_claim_rule:
+      name: MyApp
+      transform_rules:
+        value:
+          - |
+            @RuleName = "Pass Through UPN"
+            c:[Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"]
+            => issue(claim = c);
+      authorization_rules:
+        value:
+          - |
+            @RuleTemplate = "AllowAllAuthzRule"
+            => issue(Type = "http://schemas.microsoft.com/authorization/claims/permit",
+                     Value = "true");
+
+  - name: Clear all claim rules from a trust
+    microsoft.ad.fs_claim_rule:
+      name: MyApp
+      state: absent
+
+RETURN:
+  transform_rules:
+    description:
+      - The issuance transform rules on the trust after the module runs.
+    returned: always
+    type: str
+    sample: '@RuleName = "Send Email" ...'
+  authorization_rules:
+    description:
+      - The issuance authorization rules on the trust after the module
+        runs.
+    returned: always
+    type: str
+    sample: '@RuleTemplate = "AllowAllAuthzRule" ...'
