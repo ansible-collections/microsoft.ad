@@ -1,0 +1,246 @@
+---
+
+# TODO: Replace win_powershell trust setup/cleanup with microsoft.ad.fs_trust
+# once PR #235 is merged.
+#
+# - name: Pre-cleanup - ensure test trust does not exist
+#   microsoft.ad.fs_trust:
+#     name: AnsibleTestClaimRule
+#     state: absent
+#
+# - name: Create test relying party trust
+#   microsoft.ad.fs_trust:
+#     name: AnsibleTestClaimRule
+#     identifier:
+#       - https://ansible-test-claim-rule.example.com
+#     enabled: true
+
+- name: Pre-cleanup - ensure test trust does not exist
+  ansible.windows.win_powershell:
+    script: |
+      $name = 'AnsibleTestClaimRule'
+      $existing = Get-AdfsRelyingPartyTrust -Name $name -ErrorAction SilentlyContinue
+      if ($existing) {
+          Remove-AdfsRelyingPartyTrust -TargetName $name -Confirm:$false
+      }
+      $Ansible.Changed = [bool]$existing
+
+- name: Create test relying party trust
+  ansible.windows.win_powershell:
+    script: |
+      $name = 'AnsibleTestClaimRule'
+      Add-AdfsRelyingPartyTrust -Name $name -Identifier 'https://ansible-test-claim-rule.example.com'
+      $Ansible.Changed = $true
+
+- name: Test fs_claim_rule
+  block:
+    - name: Set transform rules - check mode
+      microsoft.ad.fs_claim_rule:
+        name: AnsibleTestClaimRule
+        transform_rules:
+          value:
+            - |
+              @RuleName = "PassThroughUPN"
+              c:[Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"]
+              => issue(claim = c);
+      register: _set_check
+      check_mode: true
+
+    - name: Assert check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _set_check is changed
+
+    - name: Verify rules were not actually set in check mode
+      ansible.windows.win_powershell:
+        script: |
+          $trust = Get-AdfsRelyingPartyTrust -Name 'AnsibleTestClaimRule'
+          $rules = $trust.IssuanceTransformRules
+          if ($null -eq $rules) { $rules = '' }
+          $Ansible.Result = $rules.Trim()
+      register: _check_verify
+
+    - name: Assert rules are still empty after check mode
+      ansible.builtin.assert:
+        that:
+          - _check_verify.result == ''
+
+    - name: Set transform rules
+      microsoft.ad.fs_claim_rule:
+        name: AnsibleTestClaimRule
+        transform_rules:
+          value:
+            - |
+              @RuleName = "PassThroughUPN"
+              c:[Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"]
+              => issue(claim = c);
+      register: _set
+
+    - name: Assert rules were set
+      ansible.builtin.assert:
+        that:
+          - _set is changed
+          - _set.transform_rules is defined
+          - _set.transform_rules | length > 0
+
+    - name: Set same transform rules again (idempotency)
+      microsoft.ad.fs_claim_rule:
+        name: AnsibleTestClaimRule
+        transform_rules:
+          value:
+            - |
+              @RuleName = "PassThroughUPN"
+              c:[Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"]
+              => issue(claim = c);
+      register: _set_idem
+
+    - name: Assert no change on idempotent run
+      ansible.builtin.assert:
+        that:
+          - _set_idem is not changed
+
+    - name: Set multiple transform rules as a list
+      microsoft.ad.fs_claim_rule:
+        name: AnsibleTestClaimRule
+        transform_rules:
+          value:
+            - |
+              @RuleName = "PassThroughUPN"
+              c:[Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"]
+              => issue(claim = c);
+            - |
+              @RuleName = "PassThroughEmail"
+              c:[Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"]
+              => issue(claim = c);
+      register: _set_multi
+
+    - name: Assert multiple rules were set
+      ansible.builtin.assert:
+        that:
+          - _set_multi is changed
+          - '"PassThroughUPN" in _set_multi.transform_rules'
+          - '"PassThroughEmail" in _set_multi.transform_rules'
+
+    - name: Append a transform rule
+      microsoft.ad.fs_claim_rule:
+        name: AnsibleTestClaimRule
+        transform_rules:
+          update: append
+          value:
+            - |
+              @RuleName = "PassThroughGroups"
+              c:[Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/groupsid"]
+              => issue(claim = c);
+      register: _append
+
+    - name: Assert append reported changed
+      ansible.builtin.assert:
+        that:
+          - _append is changed
+          - '"PassThroughUPN" in _append.transform_rules'
+          - '"PassThroughEmail" in _append.transform_rules'
+          - '"PassThroughGroups" in _append.transform_rules'
+
+    - name: Append same rule again (idempotency)
+      microsoft.ad.fs_claim_rule:
+        name: AnsibleTestClaimRule
+        transform_rules:
+          update: append
+          value:
+            - |
+              @RuleName = "PassThroughGroups"
+              c:[Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/groupsid"]
+              => issue(claim = c);
+      register: _append_idem
+
+    - name: Assert no change on idempotent append
+      ansible.builtin.assert:
+        that:
+          - _append_idem is not changed
+
+    - name: Set authorization rules
+      microsoft.ad.fs_claim_rule:
+        name: AnsibleTestClaimRule
+        authorization_rules:
+          value:
+            - |
+              @RuleTemplate = "AllowAllAuthzRule"
+              => issue(Type = "http://schemas.microsoft.com/authorization/claims/permit",
+                       Value = "true");
+      register: _set_authz
+
+    - name: Assert authorization rules were set
+      ansible.builtin.assert:
+        that:
+          - _set_authz is changed
+          - _set_authz.authorization_rules is defined
+          - _set_authz.authorization_rules | length > 0
+
+    - name: Set same authorization rules again (idempotency)
+      microsoft.ad.fs_claim_rule:
+        name: AnsibleTestClaimRule
+        authorization_rules:
+          value:
+            - |
+              @RuleTemplate = "AllowAllAuthzRule"
+              => issue(Type = "http://schemas.microsoft.com/authorization/claims/permit",
+                       Value = "true");
+      register: _set_authz_idem
+
+    - name: Assert no change on idempotent authorization rules
+      ansible.builtin.assert:
+        that:
+          - _set_authz_idem is not changed
+
+    - name: Clear all rules - check mode
+      microsoft.ad.fs_claim_rule:
+        name: AnsibleTestClaimRule
+        state: absent
+      register: _clear_check
+      check_mode: true
+
+    - name: Assert clear check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _clear_check is changed
+
+    - name: Clear all rules
+      microsoft.ad.fs_claim_rule:
+        name: AnsibleTestClaimRule
+        state: absent
+      register: _clear
+
+    - name: Assert clear reported changed
+      ansible.builtin.assert:
+        that:
+          - _clear is changed
+
+    - name: Clear all rules again (idempotency)
+      microsoft.ad.fs_claim_rule:
+        name: AnsibleTestClaimRule
+        state: absent
+      register: _clear_idem
+
+    - name: Assert no change on idempotent clear
+      ansible.builtin.assert:
+        that:
+          - _clear_idem is not changed
+
+  always:
+    # TODO: Replace with microsoft.ad.fs_trust once PR #235 is merged.
+    #
+    # - name: Cleanup - remove test relying party trust
+    #   microsoft.ad.fs_trust:
+    #     name: AnsibleTestClaimRule
+    #     state: absent
+    #   failed_when: false
+
+    - name: Cleanup - remove test relying party trust
+      ansible.windows.win_powershell:
+        script: |
+          $name = 'AnsibleTestClaimRule'
+          $existing = Get-AdfsRelyingPartyTrust -Name $name -ErrorAction SilentlyContinue
+          if ($existing) {
+              Remove-AdfsRelyingPartyTrust -TargetName $name -Confirm:$false
+          }
+      failed_when: false
