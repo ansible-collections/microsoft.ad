@@ -72,11 +72,13 @@ $getProperties = @($propertyMap | ForEach-Object { $_.CmdletParam })
 try {
     $existing = Get-ADReplicationSite @adParams -Identity $name -Properties $getProperties
 }
-catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-    $existing = $null
-}
 catch {
-    $module.FailJson("Failed to get replication site '$name': $_", $_)
+    if ($_.Exception.GetType().Name -eq 'ADIdentityNotFoundException') {
+        $existing = $null
+    }
+    else {
+        $module.FailJson("Failed to get replication site '$name': $_", $_)
+    }
 }
 
 Function Get-SiteState {
