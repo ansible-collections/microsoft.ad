@@ -1,0 +1,438 @@
+---
+
+- name: Test site_subnet module
+  block:
+    # =================================================================
+    #  SETUP - create test sites using native PowerShell
+    #  After rebase of site module (PR #237), replace with:
+    #
+    #  - name: Create test site
+    #    microsoft.ad.site:
+    #      name: AnsibleSubnetTestSite
+    #      description: Site for subnet integration tests
+    #      state: present
+    #
+    #  - name: Create second test site
+    #    microsoft.ad.site:
+    #      name: AnsibleSubnetTestSite2
+    #      description: Second site for subnet reassignment tests
+    #      state: present
+    # =================================================================
+    - name: Create test site via PowerShell
+      ansible.windows.win_powershell:
+        script: |
+          try {
+              Get-ADReplicationSite -Identity 'AnsibleSubnetTestSite'
+          }
+          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+              New-ADReplicationSite -Name 'AnsibleSubnetTestSite' -Description 'Site for subnet integration tests'
+              $Ansible.Changed = $true
+          }
+
+    - name: Create second test site via PowerShell
+      ansible.windows.win_powershell:
+        script: |
+          try {
+              Get-ADReplicationSite -Identity 'AnsibleSubnetTestSite2'
+          }
+          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+              New-ADReplicationSite -Name 'AnsibleSubnetTestSite2' -Description 'Second site for subnet reassignment tests'
+              $Ansible.Changed = $true
+          }
+
+    - name: Create subnet - check mode
+      microsoft.ad.site_subnet:
+        name: 10.20.0.0/16
+        site: AnsibleSubnetTestSite
+        description: Ansible integration test subnet
+        location: "Test Lab"
+        state: present
+      register: _create_check
+      check_mode: true
+
+    - name: Assert create check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _create_check is changed
+
+    - name: Verify subnet was not actually created in check mode
+      ansible.windows.win_powershell:
+        script: |
+          try {
+              Get-ADReplicationSubnet -Identity '10.20.0.0/16'
+              $Ansible.Result = $true
+          }
+          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+              $Ansible.Result = $false
+          }
+      register: _check_mode_verify
+
+    - name: Assert subnet does not exist after check mode
+      ansible.builtin.assert:
+        that:
+          - not _check_mode_verify.result
+
+    - name: Create subnet
+      microsoft.ad.site_subnet:
+        name: 10.20.0.0/16
+        site: AnsibleSubnetTestSite
+        description: Ansible integration test subnet
+        location: "Test Lab"
+        state: present
+      register: _create
+
+    - name: Assert subnet was created
+      ansible.builtin.assert:
+        that:
+          - _create is changed
+          - _create.distinguished_name is defined
+          - _create.distinguished_name | length > 0
+          - _create.name == '10.20.0.0/16'
+          - _create.site == 'AnsibleSubnetTestSite'
+          - _create.description == 'Ansible integration test subnet'
+          - _create.location == 'Test Lab'
+
+    - name: Create same subnet again (idempotency)
+      microsoft.ad.site_subnet:
+        name: 10.20.0.0/16
+        site: AnsibleSubnetTestSite
+        description: Ansible integration test subnet
+        location: "Test Lab"
+        state: present
+      register: _create_idem
+
+    - name: Assert no change on idempotent run
+      ansible.builtin.assert:
+        that:
+          - _create_idem is not changed
+
+    - name: Update subnet description
+      microsoft.ad.site_subnet:
+        name: 10.20.0.0/16
+        description: Updated description
+        state: present
+      register: _update_desc
+
+    - name: Assert description change
+      ansible.builtin.assert:
+        that:
+          - _update_desc is changed
+
+    - name: Update subnet description again (idempotency)
+      microsoft.ad.site_subnet:
+        name: 10.20.0.0/16
+        description: Updated description
+        state: present
+      register: _update_desc_idem
+
+    - name: Assert no change on idempotent description update
+      ansible.builtin.assert:
+        that:
+          - _update_desc_idem is not changed
+
+    - name: Update subnet location
+      microsoft.ad.site_subnet:
+        name: 10.20.0.0/16
+        location: "New York, US"
+        state: present
+      register: _update_loc
+
+    - name: Assert location change
+      ansible.builtin.assert:
+        that:
+          - _update_loc is changed
+
+    - name: Update subnet location again (idempotency)
+      microsoft.ad.site_subnet:
+        name: 10.20.0.0/16
+        location: "New York, US"
+        state: present
+      register: _update_loc_idem
+
+    - name: Assert no change on idempotent location update
+      ansible.builtin.assert:
+        that:
+          - _update_loc_idem is not changed
+
+    - name: Reassign subnet to a different site
+      microsoft.ad.site_subnet:
+        name: 10.20.0.0/16
+        site: AnsibleSubnetTestSite2
+        state: present
+      register: _update_site
+
+    - name: Assert site reassignment changed
+      ansible.builtin.assert:
+        that:
+          - _update_site is changed
+          - _update_site.site == 'AnsibleSubnetTestSite2'
+
+    - name: Reassign subnet to same site again (idempotency)
+      microsoft.ad.site_subnet:
+        name: 10.20.0.0/16
+        site: AnsibleSubnetTestSite2
+        state: present
+      register: _update_site_idem
+
+    - name: Assert no change on idempotent site reassignment
+      ansible.builtin.assert:
+        that:
+          - _update_site_idem is not changed
+
+    - name: Update multiple properties simultaneously
+      microsoft.ad.site_subnet:
+        name: 10.20.0.0/16
+        site: AnsibleSubnetTestSite
+        description: Multi-update test
+        location: "London, UK"
+        state: present
+      register: _update_multi
+
+    - name: Assert multiple changes
+      ansible.builtin.assert:
+        that:
+          - _update_multi is changed
+
+    - name: Update multiple properties again (idempotency)
+      microsoft.ad.site_subnet:
+        name: 10.20.0.0/16
+        site: AnsibleSubnetTestSite
+        description: Multi-update test
+        location: "London, UK"
+        state: present
+      register: _update_multi_idem
+
+    - name: Assert no change on idempotent multi-update
+      ansible.builtin.assert:
+        that:
+          - _update_multi_idem is not changed
+
+    - name: Create new subnet with diff
+      microsoft.ad.site_subnet:
+        name: 172.16.0.0/12
+        site: AnsibleSubnetTestSite
+        description: Diff test
+        state: present
+      register: _diff_create
+      diff: true
+
+    - name: Assert diff after has expected keys on create
+      ansible.builtin.assert:
+        that:
+          - _diff_create is changed
+          - _diff_create.diff.before == {}
+          - _diff_create.diff.after.name == '172.16.0.0/12'
+          - _diff_create.diff.after.description == 'Diff test'
+
+    - name: Update subnet with diff
+      microsoft.ad.site_subnet:
+        name: 172.16.0.0/12
+        description: Diff updated
+        state: present
+      register: _diff_update
+      diff: true
+
+    - name: Assert diff shows before and after
+      ansible.builtin.assert:
+        that:
+          - _diff_update is changed
+          - _diff_update.diff.before.description == 'Diff test'
+          - _diff_update.diff.after.description == 'Diff updated'
+
+    - name: Remove subnet with diff
+      microsoft.ad.site_subnet:
+        name: 172.16.0.0/12
+        state: absent
+      register: _diff_remove
+      diff: true
+
+    - name: Assert diff shows before populated and after empty
+      ansible.builtin.assert:
+        that:
+          - _diff_remove is changed
+          - _diff_remove.diff.before.name == '172.16.0.0/12'
+          - _diff_remove.diff.after == {}
+
+    - name: Create subnet without site
+      microsoft.ad.site_subnet:
+        name: 192.168.100.0/24
+        description: No site subnet
+        state: present
+      register: _create_nosite
+
+    - name: Assert created without site
+      ansible.builtin.assert:
+        that:
+          - _create_nosite is changed
+          - _create_nosite.name == '192.168.100.0/24'
+
+    - name: Create subnet without site again (idempotency)
+      microsoft.ad.site_subnet:
+        name: 192.168.100.0/24
+        description: No site subnet
+        state: present
+      register: _create_nosite_idem
+
+    - name: Assert no change
+      ansible.builtin.assert:
+        that:
+          - _create_nosite_idem is not changed
+
+    - name: Remove subnet - check mode
+      microsoft.ad.site_subnet:
+        name: 10.20.0.0/16
+        state: absent
+      register: _remove_check
+      check_mode: true
+
+    - name: Assert remove check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _remove_check is changed
+
+    - name: Verify subnet still exists after remove check mode
+      ansible.windows.win_powershell:
+        script: |
+          try {
+              Get-ADReplicationSubnet -Identity '10.20.0.0/16'
+              $Ansible.Result = $true
+          }
+          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+              $Ansible.Result = $false
+          }
+      register: _remove_check_verify
+
+    - name: Assert subnet still exists after remove check mode
+      ansible.builtin.assert:
+        that:
+          - _remove_check_verify.result
+
+    - name: Remove subnet
+      microsoft.ad.site_subnet:
+        name: 10.20.0.0/16
+        state: absent
+      register: _remove
+
+    - name: Assert remove reported changed
+      ansible.builtin.assert:
+        that:
+          - _remove is changed
+
+    - name: Remove subnet again (idempotency)
+      microsoft.ad.site_subnet:
+        name: 10.20.0.0/16
+        state: absent
+      register: _remove_idem
+
+    - name: Assert no change on idempotent remove
+      ansible.builtin.assert:
+        that:
+          - _remove_idem is not changed
+
+    - name: Get DC FQDN
+      ansible.windows.win_powershell:
+        script: |
+          $Ansible.Result = (Get-ADDomainController).HostName
+      register: _dc_fqdn
+
+    - name: Create subnet via domain_server
+      microsoft.ad.site_subnet:
+        name: 10.30.0.0/16
+        site: AnsibleSubnetTestSite
+        description: domain_server test
+        domain_server: "{{ _dc_fqdn.result }}"
+        state: present
+      register: _ds_create
+
+    - name: Assert created via domain_server
+      ansible.builtin.assert:
+        that:
+          - _ds_create is changed
+
+    - name: Create subnet via domain_server again (idempotency)
+      microsoft.ad.site_subnet:
+        name: 10.30.0.0/16
+        site: AnsibleSubnetTestSite
+        description: domain_server test
+        domain_server: "{{ _dc_fqdn.result }}"
+        state: present
+      register: _ds_create_idem
+
+    - name: Assert no change
+      ansible.builtin.assert:
+        that:
+          - _ds_create_idem is not changed
+
+    - name: Update subnet via domain_server
+      microsoft.ad.site_subnet:
+        name: 10.30.0.0/16
+        description: domain_server updated
+        domain_server: "{{ _dc_fqdn.result }}"
+        state: present
+      register: _ds_update
+
+    - name: Assert updated via domain_server
+      ansible.builtin.assert:
+        that:
+          - _ds_update is changed
+
+    - name: Remove subnet via domain_server
+      microsoft.ad.site_subnet:
+        name: 10.30.0.0/16
+        domain_server: "{{ _dc_fqdn.result }}"
+        state: absent
+      register: _ds_remove
+
+    - name: Assert removed via domain_server
+      ansible.builtin.assert:
+        that:
+          - _ds_remove is changed
+
+    - name: Remove subnet via domain_server again (idempotency)
+      microsoft.ad.site_subnet:
+        name: 10.30.0.0/16
+        domain_server: "{{ _dc_fqdn.result }}"
+        state: absent
+      register: _ds_remove_idem
+
+    - name: Assert no change
+      ansible.builtin.assert:
+        that:
+          - _ds_remove_idem is not changed
+
+  always:
+    #  CLEANUP - remove all test subnets then test sites
+    - name: Cleanup - remove test subnets
+      microsoft.ad.site_subnet:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - 10.20.0.0/16
+        - 10.30.0.0/16
+        - 172.16.0.0/12
+        - 192.168.100.0/24
+      failed_when: false
+
+    # After rebase of site module (PR #237), replace with:
+    #
+    # - name: Cleanup - remove test sites
+    #   microsoft.ad.site:
+    #     name: "{{ item }}"
+    #     state: absent
+    #   loop:
+    #     - AnsibleSubnetTestSite
+    #     - AnsibleSubnetTestSite2
+    #   failed_when: false
+    - name: Cleanup - remove test sites via PowerShell
+      ansible.windows.win_powershell:
+        script: |
+          try {
+              Remove-ADReplicationSite -Identity '{{ item }}' -Confirm:$false
+          }
+          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+              # Already gone
+          }
+      loop:
+        - AnsibleSubnetTestSite
+        - AnsibleSubnetTestSite2
+      failed_when: false

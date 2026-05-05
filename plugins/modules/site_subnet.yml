@@ -1,0 +1,134 @@
+# Copyright (c) 2026 Ansible Project
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+DOCUMENTATION:
+  module: site_subnet
+  short_description: Manage Active Directory replication subnets
+  version_added: 1.11.0
+  description:
+    - Create, modify, or remove Active Directory replication subnets.
+    - Subnets determine which replication site a computer belongs to
+      by mapping IP address ranges to sites, which in turn controls
+      domain controller discovery and replication topology.
+  options:
+    name:
+      description:
+        - The subnet name in CIDR notation (network/bits).
+        - "Examples: V(10.0.0.0/24), V(172.16.0.0/16),
+          V(2001:db8::/32)."
+      type: str
+      required: true
+    site:
+      description:
+        - The name of the AD replication site to associate with the
+          subnet.
+        - This controls which site computers in this subnet are
+          assigned to.
+      type: str
+    description:
+      description:
+        - A description for the subnet object.
+      type: str
+    location:
+      description:
+        - A string describing the physical location of the subnet.
+      type: str
+    state:
+      description:
+        - Whether the subnet should be present or absent.
+      type: str
+      default: present
+      choices: [present, absent]
+    domain_server:
+      description:
+        - The FQDN of the domain controller to target for all AD
+          operations.
+        - When not specified, the module will use the default domain
+          controller discovery.
+      type: str
+
+  notes:
+    - This module must be run on a Windows target host with the
+      ActiveDirectory PowerShell module available.
+    - Replication subnets are stored in the AD Configuration partition
+      and replicated forest-wide.
+    - Subnet names must use valid CIDR notation. Both IPv4 and IPv6
+      subnets are supported.
+  seealso:
+    - module: microsoft.ad.object_info
+  extends_documentation_fragment:
+    - ansible.builtin.action_common_attributes
+  attributes:
+    check_mode:
+      support: full
+    diff_mode:
+      support: full
+    platform:
+      platforms:
+        - windows
+  author:
+    - Ron Gershburg (@rgershbu)
+
+EXAMPLES: |
+  - name: Create a subnet associated with a site
+    microsoft.ad.site_subnet:
+      name: 10.10.0.0/16
+      site: London-Branch
+      location: "London, UK"
+      description: London branch office subnet
+      state: present
+
+  - name: Create a subnet without a site association
+    microsoft.ad.site_subnet:
+      name: 192.168.1.0/24
+      description: Lab network
+      state: present
+
+  - name: Change the site association for a subnet
+    microsoft.ad.site_subnet:
+      name: 10.10.0.0/16
+      site: NYC-HQ
+      state: present
+
+  - name: Update the location of a subnet
+    microsoft.ad.site_subnet:
+      name: 10.10.0.0/16
+      location: "New York, US"
+      state: present
+
+  - name: Remove a subnet
+    microsoft.ad.site_subnet:
+      name: 10.10.0.0/16
+      state: absent
+
+RETURN:
+  distinguished_name:
+    description:
+      - The distinguished name of the subnet object.
+    returned: always
+    type: str
+    sample: "CN=10.10.0.0/16,CN=Subnets,CN=Sites,CN=Configuration,DC=contoso,DC=com"
+  name:
+    description:
+      - The subnet name in CIDR notation.
+    returned: always
+    type: str
+    sample: "10.10.0.0/16"
+  site:
+    description:
+      - The name of the associated replication site.
+    returned: always
+    type: str
+    sample: "London-Branch"
+  description:
+    description:
+      - The description of the subnet.
+    returned: always
+    type: str
+    sample: "London branch office subnet"
+  location:
+    description:
+      - The physical location of the subnet.
+    returned: always
+    type: str
+    sample: "London, UK"
