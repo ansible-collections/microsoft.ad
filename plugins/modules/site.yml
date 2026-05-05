@@ -1,0 +1,134 @@
+# Copyright (c) 2026 Ansible Project
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+DOCUMENTATION:
+  module: site
+  short_description: Manage Active Directory replication sites
+  version_added: 1.11.0
+  description:
+    - Create, modify, or remove Active Directory replication sites.
+    - Sites are used to control replication traffic and help clients
+      discover nearby network resources such as domain controllers.
+  options:
+    name:
+      description:
+        - The name of the replication site.
+      type: str
+      required: true
+    state:
+      description:
+        - Whether the site should be present or absent.
+      type: str
+      default: present
+      choices: [present, absent]
+    description:
+      description:
+        - A description for the site.
+      type: str
+    managed_by:
+      description:
+        - The distinguished name of the principal that manages the site.
+      type: str
+    protected_from_accidental_deletion:
+      description:
+        - Whether the site is protected from accidental deletion.
+        - When V(true), a deny ACE is placed on the object that prevents
+          it from being deleted without first removing the protection.
+      type: bool
+    automatic_inter_site_topology_generation_enabled:
+      description:
+        - Whether the KCC inter-site topology generator (ISTG) creates
+          connections for inter-site replication automatically.
+        - Set to V(false) to manage inter-site connections manually while
+          retaining automatic intra-site connections.
+      type: bool
+    automatic_topology_generation_enabled:
+      description:
+        - Whether the KCC generates intra-site replication connections
+          automatically.
+        - Set to V(false) to manage intra-site connections manually.
+      type: bool
+    universal_group_caching_enabled:
+      description:
+        - Whether Universal Group Membership Caching (UGMC) is enabled
+          for the site.
+        - Useful in branch-office sites without a Global Catalog server
+          to reduce authentication latency.
+      type: bool
+    domain_server:
+      description:
+        - The FQDN of the domain controller to target for all AD operations.
+        - When not specified, the module will use the default domain
+          controller discovery.
+      type: str
+
+  notes:
+    - This module must be run on a Windows target host with the
+      ActiveDirectory PowerShell module available.
+    - Replication sites are stored in the AD Configuration partition
+      and replicated forest-wide.
+  seealso:
+    - module: microsoft.ad.object_info
+  extends_documentation_fragment:
+    - ansible.builtin.action_common_attributes
+  attributes:
+    check_mode:
+      support: full
+    diff_mode:
+      support: full
+    platform:
+      platforms:
+        - windows
+  author:
+    - Ron Gershburg (@rgershbu)
+
+EXAMPLES: |
+  - name: Create a replication site for the London branch office
+    microsoft.ad.site:
+      name: London-Branch
+      description: London branch office site
+      state: present
+
+  - name: Create a site with deletion protection
+    microsoft.ad.site:
+      name: NYC-HQ
+      description: New York City headquarters
+      protected_from_accidental_deletion: true
+      state: present
+
+  - name: Enable Universal Group Caching on a branch site
+    microsoft.ad.site:
+      name: London-Branch
+      universal_group_caching_enabled: true
+      state: present
+
+  - name: Disable automatic inter-site topology generation
+    microsoft.ad.site:
+      name: London-Branch
+      automatic_inter_site_topology_generation_enabled: false
+      state: present
+
+  - name: Remove a replication site
+    microsoft.ad.site:
+      name: London-Branch
+      state: absent
+
+RETURN:
+  distinguished_name:
+    description:
+      - The distinguished name of the site object.
+    returned: always
+    type: str
+    sample: "CN=London-Branch,CN=Sites,CN=Configuration,DC=contoso,DC=com"
+  name:
+    description:
+      - The name of the site.
+    returned: always
+    type: str
+    sample: "London-Branch"
+  description:
+    description:
+      - The description of the site.
+    returned: always
+    type: str
+    sample: "London branch office site"

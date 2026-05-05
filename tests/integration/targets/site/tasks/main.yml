@@ -1,0 +1,280 @@
+---
+
+- name: Test site module
+  block:
+    - name: Create site - check mode
+      microsoft.ad.site:
+        name: AnsibleTestSite
+        description: Ansible integration test site
+        state: present
+      register: _create_check
+      check_mode: true
+
+    - name: Assert create check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _create_check is changed
+
+    - name: Verify site was not actually created in check mode
+      ansible.windows.win_powershell:
+        script: |
+          try {
+              $s = Get-ADReplicationSite -Identity 'AnsibleTestSite'
+              $Ansible.Result = $true
+          }
+          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+              $Ansible.Result = $false
+          }
+      register: _check_mode_verify
+
+    - name: Assert site does not exist after check mode
+      ansible.builtin.assert:
+        that:
+          - not _check_mode_verify.result
+
+    - name: Create site
+      microsoft.ad.site:
+        name: AnsibleTestSite
+        description: Ansible integration test site
+        state: present
+      register: _create
+
+    - name: Assert site was created
+      ansible.builtin.assert:
+        that:
+          - _create is changed
+          - _create.distinguished_name is defined
+          - _create.distinguished_name | length > 0
+          - _create.name == 'AnsibleTestSite'
+          - _create.description == 'Ansible integration test site'
+
+    - name: Create same site again (idempotency)
+      microsoft.ad.site:
+        name: AnsibleTestSite
+        description: Ansible integration test site
+        state: present
+      register: _create_idem
+
+    - name: Assert no change on idempotent run
+      ansible.builtin.assert:
+        that:
+          - _create_idem is not changed
+
+    - name: Update site description
+      microsoft.ad.site:
+        name: AnsibleTestSite
+        description: Updated description
+        state: present
+      register: _update_desc
+
+    - name: Assert description change
+      ansible.builtin.assert:
+        that:
+          - _update_desc is changed
+          - _update_desc.description == 'Updated description'
+
+    - name: Update site description again (idempotency)
+      microsoft.ad.site:
+        name: AnsibleTestSite
+        description: Updated description
+        state: present
+      register: _update_desc_idem
+
+    - name: Assert no change on idempotent description update
+      ansible.builtin.assert:
+        that:
+          - _update_desc_idem is not changed
+
+    - name: Enable deletion protection
+      microsoft.ad.site:
+        name: AnsibleTestSite
+        protected_from_accidental_deletion: true
+        state: present
+      register: _update_protect
+
+    - name: Assert protection change
+      ansible.builtin.assert:
+        that:
+          - _update_protect is changed
+
+    - name: Enable deletion protection again (idempotency)
+      microsoft.ad.site:
+        name: AnsibleTestSite
+        protected_from_accidental_deletion: true
+        state: present
+      register: _update_protect_idem
+
+    - name: Assert no change on idempotent protection update
+      ansible.builtin.assert:
+        that:
+          - _update_protect_idem is not changed
+
+    - name: Disable deletion protection for cleanup
+      microsoft.ad.site:
+        name: AnsibleTestSite
+        protected_from_accidental_deletion: false
+        state: present
+
+    - name: Enable universal group caching
+      microsoft.ad.site:
+        name: AnsibleTestSite
+        universal_group_caching_enabled: true
+        state: present
+      register: _update_ugc
+
+    - name: Assert UGC change
+      ansible.builtin.assert:
+        that:
+          - _update_ugc is changed
+
+    - name: Enable universal group caching again (idempotency)
+      microsoft.ad.site:
+        name: AnsibleTestSite
+        universal_group_caching_enabled: true
+        state: present
+      register: _update_ugc_idem
+
+    - name: Assert no change on idempotent UGC update
+      ansible.builtin.assert:
+        that:
+          - _update_ugc_idem is not changed
+
+    - name: Remove site - check mode
+      microsoft.ad.site:
+        name: AnsibleTestSite
+        state: absent
+      register: _remove_check
+      check_mode: true
+
+    - name: Assert remove check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _remove_check is changed
+
+    - name: Verify site still exists after remove check mode
+      ansible.windows.win_powershell:
+        script: |
+          try {
+              $s = Get-ADReplicationSite -Identity 'AnsibleTestSite'
+              $Ansible.Result = $true
+          }
+          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+              $Ansible.Result = $false
+          }
+      register: _remove_check_verify
+
+    - name: Assert site still exists after remove check mode
+      ansible.builtin.assert:
+        that:
+          - _remove_check_verify.result
+
+    - name: Remove site
+      microsoft.ad.site:
+        name: AnsibleTestSite
+        state: absent
+      register: _remove
+
+    - name: Assert remove reported changed
+      ansible.builtin.assert:
+        that:
+          - _remove is changed
+
+    - name: Remove site again (idempotency)
+      microsoft.ad.site:
+        name: AnsibleTestSite
+        state: absent
+      register: _remove_idem
+
+    - name: Assert no change on idempotent remove
+      ansible.builtin.assert:
+        that:
+          - _remove_idem is not changed
+
+    - name: Get DC FQDN
+      ansible.windows.win_powershell:
+        script: |
+          $Ansible.Result = (Get-ADDomainController).HostName
+      register: _dc_fqdn
+
+    - name: Create site via domain_server
+      microsoft.ad.site:
+        name: AnsibleTestSiteDS
+        description: domain_server test
+        domain_server: "{{ _dc_fqdn.result }}"
+        state: present
+      register: _ds_create
+
+    - name: Assert created via domain_server
+      ansible.builtin.assert:
+        that:
+          - _ds_create is changed
+
+    - name: Create site via domain_server again (idempotency)
+      microsoft.ad.site:
+        name: AnsibleTestSiteDS
+        description: domain_server test
+        domain_server: "{{ _dc_fqdn.result }}"
+        state: present
+      register: _ds_create_idem
+
+    - name: Assert no change
+      ansible.builtin.assert:
+        that:
+          - _ds_create_idem is not changed
+
+    - name: Update site via domain_server
+      microsoft.ad.site:
+        name: AnsibleTestSiteDS
+        description: domain_server updated
+        domain_server: "{{ _dc_fqdn.result }}"
+        state: present
+      register: _ds_update
+
+    - name: Assert updated via domain_server
+      ansible.builtin.assert:
+        that:
+          - _ds_update is changed
+
+    - name: Remove site via domain_server
+      microsoft.ad.site:
+        name: AnsibleTestSiteDS
+        domain_server: "{{ _dc_fqdn.result }}"
+        state: absent
+      register: _ds_remove
+
+    - name: Assert removed via domain_server
+      ansible.builtin.assert:
+        that:
+          - _ds_remove is changed
+
+    - name: Remove site via domain_server again (idempotency)
+      microsoft.ad.site:
+        name: AnsibleTestSiteDS
+        domain_server: "{{ _dc_fqdn.result }}"
+        state: absent
+      register: _ds_remove_idem
+
+    - name: Assert no change
+      ansible.builtin.assert:
+        that:
+          - _ds_remove_idem is not changed
+
+  always:
+    - name: Cleanup - disable deletion protection if set
+      microsoft.ad.site:
+        name: "{{ item }}"
+        protected_from_accidental_deletion: false
+        state: present
+      loop:
+        - AnsibleTestSite
+        - AnsibleTestSiteDS
+      ignore_errors: true
+
+    - name: Cleanup - remove test sites
+      microsoft.ad.site:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - AnsibleTestSite
+        - AnsibleTestSiteDS
+      failed_when: false
