@@ -45,8 +45,7 @@
           - _create is changed
           - _create.distinguished_name is defined
           - _create.distinguished_name | length > 0
-          - _create.name == 'AnsibleTestSite'
-          - _create.description == 'Ansible integration test site'
+          - _create.object_guid is defined
 
     - name: Create same site again (idempotency)
       microsoft.ad.site:
@@ -71,7 +70,6 @@
       ansible.builtin.assert:
         that:
           - _update_desc is changed
-          - _update_desc.description == 'Updated description'
 
     - name: Update site description again (idempotency)
       microsoft.ad.site:
@@ -88,7 +86,7 @@
     - name: Enable deletion protection
       microsoft.ad.site:
         name: AnsibleTestSite
-        protected_from_accidental_deletion: true
+        protect_from_deletion: true
         state: present
       register: _update_protect
 
@@ -100,7 +98,7 @@
     - name: Enable deletion protection again (idempotency)
       microsoft.ad.site:
         name: AnsibleTestSite
-        protected_from_accidental_deletion: true
+        protect_from_deletion: true
         state: present
       register: _update_protect_idem
 
@@ -112,7 +110,7 @@
     - name: Disable deletion protection for cleanup
       microsoft.ad.site:
         name: AnsibleTestSite
-        protected_from_accidental_deletion: false
+        protect_from_deletion: false
         state: present
 
     - name: Enable universal group caching
@@ -260,16 +258,6 @@
           - _ds_remove_idem is not changed
 
   always:
-    - name: Cleanup - disable deletion protection if set
-      microsoft.ad.site:
-        name: "{{ item }}"
-        protected_from_accidental_deletion: false
-        state: present
-      loop:
-        - AnsibleTestSite
-        - AnsibleTestSiteDS
-      ignore_errors: true
-
     - name: Cleanup - remove test sites
       microsoft.ad.site:
         name: "{{ item }}"
@@ -277,4 +265,4 @@
       loop:
         - AnsibleTestSite
         - AnsibleTestSiteDS
-      failed_when: false
+      ignore_errors: true

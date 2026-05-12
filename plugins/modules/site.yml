@@ -10,31 +10,17 @@ DOCUMENTATION:
     - Sites are used to control replication traffic and help clients
       discover nearby network resources such as domain controllers.
   options:
-    name:
-      description:
-        - The name of the replication site.
-      type: str
-      required: true
-    state:
-      description:
-        - Whether the site should be present or absent.
-      type: str
-      default: present
-      choices: [present, absent]
-    description:
-      description:
-        - A description for the site.
-      type: str
     managed_by:
       description:
-        - The distinguished name of the principal that manages the site.
-      type: str
-    protected_from_accidental_deletion:
-      description:
-        - Whether the site is protected from accidental deletion.
-        - When V(true), a deny ACE is placed on the object that prevents
-          it from being deleted without first removing the protection.
-      type: bool
+        - The user or group that manages the object.
+        - The value can be in the form of a C(distinguishedName), C(objectGUID),
+          C(objectSid), C(sAMAccountName), or C(userPrincipalName) string or a
+          dictionary with the I(name) and optional I(server) key.
+        - This is the value set on the C(managedBy) LDAP attribute.
+        - See
+          R(DN Lookup Attributes,ansible_collections.microsoft.ad.docsite.guide_attributes.dn_lookup_attributes)
+          for more information on how DN lookups work.
+      type: raw
     automatic_inter_site_topology_generation_enabled:
       description:
         - Whether the KCC inter-site topology generator (ISTG) creates
@@ -55,21 +41,14 @@ DOCUMENTATION:
         - Useful in branch-office sites without a Global Catalog server
           to reduce authentication latency.
       type: bool
-    domain_server:
-      description:
-        - The FQDN of the domain controller to target for all AD operations.
-        - When not specified, the module will use the default domain
-          controller discovery.
-      type: str
-
   notes:
+    - The I(path) option for sites defaults to the
+      C(CN=Sites,CN=Configuration,...) container. Sites cannot be moved to
+      a different container.
     - This module must be run on a Windows target host with the
-      ActiveDirectory PowerShell module available.
-    - Replication sites are stored in the AD Configuration partition
-      and replicated forest-wide.
-  seealso:
-    - module: microsoft.ad.object_info
+      C(ActiveDirectory) module installed.
   extends_documentation_fragment:
+    - microsoft.ad.ad_object
     - ansible.builtin.action_common_attributes
   attributes:
     check_mode:
@@ -79,6 +58,8 @@ DOCUMENTATION:
     platform:
       platforms:
         - windows
+  seealso:
+    - module: microsoft.ad.object_info
   author:
     - Ron Gershburg (@rgershbu)
 
@@ -93,7 +74,7 @@ EXAMPLES: |
     microsoft.ad.site:
       name: NYC-HQ
       description: New York City headquarters
-      protected_from_accidental_deletion: true
+      protect_from_deletion: true
       state: present
 
   - name: Enable Universal Group Caching on a branch site
@@ -108,27 +89,31 @@ EXAMPLES: |
       automatic_inter_site_topology_generation_enabled: false
       state: present
 
+  - name: Set managedBy using an identity from another DC
+    microsoft.ad.site:
+      name: London-Branch
+      managed_by:
+        name: manager-user
+        server: OtherDC
+
   - name: Remove a replication site
     microsoft.ad.site:
       name: London-Branch
       state: absent
 
 RETURN:
+  object_guid:
+    description:
+      - The C(objectGUID) of the AD object that was created, removed, or edited.
+      - If a new object was created in check mode, a GUID of 0s will be
+        returned.
+    returned: always
+    type: str
+    sample: d84a141f-2b99-4f08-9da0-ed2d26864ba1
   distinguished_name:
     description:
-      - The distinguished name of the site object.
+      - The C(distinguishedName) of the AD object that was created, removed, or
+        edited.
     returned: always
     type: str
-    sample: "CN=London-Branch,CN=Sites,CN=Configuration,DC=contoso,DC=com"
-  name:
-    description:
-      - The name of the site.
-    returned: always
-    type: str
-    sample: "London-Branch"
-  description:
-    description:
-      - The description of the site.
-    returned: always
-    type: str
-    sample: "London branch office site"
+    sample: CN=London-Branch,CN=Sites,CN=Configuration,DC=contoso,DC=com
