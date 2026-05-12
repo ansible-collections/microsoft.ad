@@ -11,8 +11,6 @@ DOCUMENTATION:
     - Trusts can be created from a federation metadata URL, a local
       metadata XML file, or by specifying identifiers and endpoints
       manually.
-    - The module validates internet connectivity when O(metadata_url) is
-      used.
   options:
     name:
       description:
@@ -168,11 +166,6 @@ EXAMPLES: |
       state: absent
 
 RETURN:
-  name:
-    description: The display name of the relying party trust.
-    returned: always
-    type: str
-    sample: MyApp
   identifier:
     description: The list of identifiers for the relying party trust.
     returned: success and state is present

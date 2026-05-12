@@ -71,7 +71,6 @@ $spec = @{
 
 $module = [Ansible.Basic.AnsibleModule]::Create($args, $spec)
 $module.Result.changed = $false
-$module.Result.name = $module.Params.name
 $module.Result.identifier = @()
 $module.Result.enabled = $null
 $module.Result.monitoring_enabled = $null
