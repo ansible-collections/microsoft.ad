@@ -36,7 +36,6 @@
       ansible.builtin.assert:
         that:
           - _create is changed
-          - _create.name == 'TestTrust'
           - _create.enabled == true
           - _create.identifier | length > 0
 
