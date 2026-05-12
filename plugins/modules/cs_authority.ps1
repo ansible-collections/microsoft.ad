@@ -47,7 +47,6 @@ $spec = @{
 
 $module = [Ansible.Basic.AnsibleModule]::Create($args, $spec)
 $module.Result.changed = $false
-$module.Result.reboot_required = $false
 
 # Maps Ansible snake_case param names to cmdlet PascalCase switch names.
 # Used for key generation, splat building, and flag extraction.

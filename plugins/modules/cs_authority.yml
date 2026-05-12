@@ -138,34 +138,34 @@ EXAMPLES: |
   - name: Configure CDP with HTTP and local file publishing
     microsoft.ad.cs_authority:
       cdp:
-        - uri: "C:\\Windows\\System32\\CertSrv\\CertEnroll\\<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+        - uri: 'C:\Windows\System32\CertSrv\CertEnroll\<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl'
           publish_to_server: true
           publish_delta_to_server: true
-        - uri: "http://pki.corp.com/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+        - uri: 'http://pki.corp.com/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl'
           add_to_certificate_cdp: true
           add_to_freshest_crl: true
 
   - name: Configure AIA with HTTP and OCSP
     microsoft.ad.cs_authority:
       aia:
-        - uri: "http://pki.corp.com/crl/<ServerDNSName>_<CAName><CertificateName>.crt"
+        - uri: 'http://pki.corp.com/crl/<ServerDNSName>_<CAName><CertificateName>.crt'
           add_to_certificate_aia: true
-        - uri: "http://ocsp.corp.com/ocsp"
+        - uri: 'http://ocsp.corp.com/ocsp'
           add_to_certificate_ocsp: true
 
   - name: Configure both CDP and AIA together
     microsoft.ad.cs_authority:
       cdp:
-        - uri: "C:\\Windows\\System32\\CertSrv\\CertEnroll\\<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+        - uri: 'C:\Windows\System32\CertSrv\CertEnroll\<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl'
           publish_to_server: true
           publish_delta_to_server: true
-        - uri: "http://pki.corp.com/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+        - uri: 'http://pki.corp.com/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl'
           add_to_certificate_cdp: true
           add_to_freshest_crl: true
       aia:
-        - uri: "http://pki.corp.com/crl/<ServerDNSName>_<CAName><CertificateName>.crt"
+        - uri: 'http://pki.corp.com/crl/<ServerDNSName>_<CAName><CertificateName>.crt'
           add_to_certificate_aia: true
-        - uri: "http://ocsp.corp.com/ocsp"
+        - uri: 'http://ocsp.corp.com/ocsp'
           add_to_certificate_ocsp: true
       restart_service: true
 
@@ -176,15 +176,8 @@ EXAMPLES: |
   - name: Configure CDP without restarting the service
     microsoft.ad.cs_authority:
       cdp:
-        - uri: "http://pki.corp.com/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+        - uri: 'http://pki.corp.com/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl'
           add_to_certificate_cdp: true
       restart_service: false
 
-RETURN:
-  reboot_required:
-    description:
-      - Always V(false). CDP and AIA changes do not require a reboot,
-        only a CertSvc service restart.
-    returned: always
-    type: bool
-    sample: false
+RETURN: {}

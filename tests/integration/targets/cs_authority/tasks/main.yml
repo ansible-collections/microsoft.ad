@@ -34,7 +34,7 @@
     - name: Set CDP entries - check mode
       microsoft.ad.cs_authority:
         cdp:
-          - uri: "http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+          - uri: 'http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl'
             add_to_certificate_cdp: true
             add_to_freshest_crl: true
         restart_service: false
@@ -62,7 +62,7 @@
     - name: Set CDP entries
       microsoft.ad.cs_authority:
         cdp:
-          - uri: "http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+          - uri: 'http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl'
             add_to_certificate_cdp: true
             add_to_freshest_crl: true
         restart_service: false
@@ -76,7 +76,7 @@
     - name: Set same CDP entries again (idempotency)
       microsoft.ad.cs_authority:
         cdp:
-          - uri: "http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+          - uri: 'http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl'
             add_to_certificate_cdp: true
             add_to_freshest_crl: true
         restart_service: false
@@ -91,7 +91,7 @@
     - name: Modify CDP entry flags
       microsoft.ad.cs_authority:
         cdp:
-          - uri: "http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+          - uri: 'http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl'
             add_to_certificate_cdp: true
             add_to_freshest_crl: false
         restart_service: false
@@ -105,7 +105,7 @@
     - name: Modify CDP entry flags again (idempotency)
       microsoft.ad.cs_authority:
         cdp:
-          - uri: "http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+          - uri: 'http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl'
             add_to_certificate_cdp: true
             add_to_freshest_crl: false
         restart_service: false
@@ -143,9 +143,9 @@
     - name: Set AIA entries - check mode
       microsoft.ad.cs_authority:
         aia:
-          - uri: "http://pki.test.local/crl/<ServerDNSName>_<CAName><CertificateName>.crt"
+          - uri: 'http://pki.test.local/crl/<ServerDNSName>_<CAName><CertificateName>.crt'
             add_to_certificate_aia: true
-          - uri: "http://ocsp.test.local/ocsp"
+          - uri: 'http://ocsp.test.local/ocsp'
             add_to_certificate_ocsp: true
         restart_service: false
       register: _aia_check
@@ -160,9 +160,9 @@
     - name: Set AIA entries
       microsoft.ad.cs_authority:
         aia:
-          - uri: "http://pki.test.local/crl/<ServerDNSName>_<CAName><CertificateName>.crt"
+          - uri: 'http://pki.test.local/crl/<ServerDNSName>_<CAName><CertificateName>.crt'
             add_to_certificate_aia: true
-          - uri: "http://ocsp.test.local/ocsp"
+          - uri: 'http://ocsp.test.local/ocsp'
             add_to_certificate_ocsp: true
         restart_service: false
       register: _aia_set
@@ -175,9 +175,9 @@
     - name: Set same AIA entries again (idempotency)
       microsoft.ad.cs_authority:
         aia:
-          - uri: "http://pki.test.local/crl/<ServerDNSName>_<CAName><CertificateName>.crt"
+          - uri: 'http://pki.test.local/crl/<ServerDNSName>_<CAName><CertificateName>.crt'
             add_to_certificate_aia: true
-          - uri: "http://ocsp.test.local/ocsp"
+          - uri: 'http://ocsp.test.local/ocsp'
             add_to_certificate_ocsp: true
         restart_service: false
       register: _aia_set_idem
@@ -191,7 +191,7 @@
     - name: Modify AIA to only have AIA entry (remove OCSP)
       microsoft.ad.cs_authority:
         aia:
-          - uri: "http://pki.test.local/crl/<ServerDNSName>_<CAName><CertificateName>.crt"
+          - uri: 'http://pki.test.local/crl/<ServerDNSName>_<CAName><CertificateName>.crt'
             add_to_certificate_aia: true
         restart_service: false
       register: _aia_modify
@@ -205,10 +205,10 @@
     - name: Set both CDP and AIA together
       microsoft.ad.cs_authority:
         cdp:
-          - uri: "http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+          - uri: 'http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl'
             add_to_certificate_cdp: true
         aia:
-          - uri: "http://pki.test.local/crl/<ServerDNSName>_<CAName><CertificateName>.crt"
+          - uri: 'http://pki.test.local/crl/<ServerDNSName>_<CAName><CertificateName>.crt'
             add_to_certificate_aia: true
         restart_service: false
       register: _combined
@@ -221,10 +221,10 @@
     - name: Set both CDP and AIA again (idempotency)
       microsoft.ad.cs_authority:
         cdp:
-          - uri: "http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+          - uri: 'http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl'
             add_to_certificate_cdp: true
         aia:
-          - uri: "http://pki.test.local/crl/<ServerDNSName>_<CAName><CertificateName>.crt"
+          - uri: 'http://pki.test.local/crl/<ServerDNSName>_<CAName><CertificateName>.crt'
             add_to_certificate_aia: true
         restart_service: false
       register: _combined_idem
@@ -238,7 +238,7 @@
     - name: Only manage CDP, leave AIA untouched
       microsoft.ad.cs_authority:
         cdp:
-          - uri: "http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl"
+          - uri: 'http://pki.test.local/crl/<CAName><CRLNameSuffix><DeltaCRLAllowed>.crl'
             add_to_certificate_cdp: true
             add_to_freshest_crl: true
         restart_service: false
