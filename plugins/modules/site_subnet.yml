@@ -11,13 +11,6 @@ DOCUMENTATION:
       by mapping IP address ranges to sites, which in turn controls
       domain controller discovery and replication topology.
   options:
-    name:
-      description:
-        - The subnet name in CIDR notation (network/bits).
-        - "Examples: V(10.0.0.0/24), V(172.16.0.0/16),
-          V(2001:db8::/32)."
-      type: str
-      required: true
     site:
       description:
         - The name of the AD replication site to associate with the
@@ -25,38 +18,20 @@ DOCUMENTATION:
         - This controls which site computers in this subnet are
           assigned to.
       type: str
-    description:
-      description:
-        - A description for the subnet object.
-      type: str
     location:
       description:
         - A string describing the physical location of the subnet.
       type: str
-    state:
-      description:
-        - Whether the subnet should be present or absent.
-      type: str
-      default: present
-      choices: [present, absent]
-    domain_server:
-      description:
-        - The FQDN of the domain controller to target for all AD
-          operations.
-        - When not specified, the module will use the default domain
-          controller discovery.
-      type: str
-
   notes:
-    - This module must be run on a Windows target host with the
-      ActiveDirectory PowerShell module available.
-    - Replication subnets are stored in the AD Configuration partition
-      and replicated forest-wide.
+    - The I(path) option for subnets defaults to the
+      C(CN=Subnets,CN=Sites,CN=Configuration,...) container. Subnets
+      cannot be moved to a different container.
     - Subnet names must use valid CIDR notation. Both IPv4 and IPv6
       subnets are supported.
-  seealso:
-    - module: microsoft.ad.object_info
+    - This module must be run on a Windows target host with the
+      C(ActiveDirectory) module installed.
   extends_documentation_fragment:
+    - microsoft.ad.ad_object
     - ansible.builtin.action_common_attributes
   attributes:
     check_mode:
@@ -66,6 +41,8 @@ DOCUMENTATION:
     platform:
       platforms:
         - windows
+  seealso:
+    - module: microsoft.ad.object_info
   author:
     - Ron Gershburg (@rgershbu)
 
@@ -102,33 +79,18 @@ EXAMPLES: |
       state: absent
 
 RETURN:
+  object_guid:
+    description:
+      - The C(objectGUID) of the AD object that was created, removed, or edited.
+      - If a new object was created in check mode, a GUID of 0s will be
+        returned.
+    returned: always
+    type: str
+    sample: d84a141f-2b99-4f08-9da0-ed2d26864ba1
   distinguished_name:
     description:
-      - The distinguished name of the subnet object.
+      - The C(distinguishedName) of the AD object that was created, removed, or
+        edited.
     returned: always
     type: str
-    sample: "CN=10.10.0.0/16,CN=Subnets,CN=Sites,CN=Configuration,DC=contoso,DC=com"
-  name:
-    description:
-      - The subnet name in CIDR notation.
-    returned: always
-    type: str
-    sample: "10.10.0.0/16"
-  site:
-    description:
-      - The name of the associated replication site.
-    returned: always
-    type: str
-    sample: "London-Branch"
-  description:
-    description:
-      - The description of the subnet.
-    returned: always
-    type: str
-    sample: "London branch office subnet"
-  location:
-    description:
-      - The physical location of the subnet.
-    returned: always
-    type: str
-    sample: "London, UK"
+    sample: CN=10.10.0.0/16,CN=Subnets,CN=Sites,CN=Configuration,DC=contoso,DC=com
