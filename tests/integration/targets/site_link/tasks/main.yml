@@ -2,57 +2,14 @@
 
 - name: Test site_link
   block:
-    # =================================================================
-    #  SETUP - create test sites using native PowerShell
-    #  After rebase of site module (PR #237), replace with:
-    #
-    #  - name: Create test site 1
-    #    microsoft.ad.site:
-    #      name: AnsibleSLSite1
-    #      state: present
-    #
-    #  - name: Create test site 2
-    #    microsoft.ad.site:
-    #      name: AnsibleSLSite2
-    #      state: present
-    #
-    #  - name: Create test site 3
-    #    microsoft.ad.site:
-    #      name: AnsibleSLSite3
-    #      state: present
-    # =================================================================
-    - name: Create test site 1 via PowerShell
-      ansible.windows.win_powershell:
-        script: |
-          try {
-              Get-ADReplicationSite -Identity 'AnsibleSLSite1'
-          }
-          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-              New-ADReplicationSite -Name 'AnsibleSLSite1'
-              $Ansible.Changed = $true
-          }
-
-    - name: Create test site 2 via PowerShell
-      ansible.windows.win_powershell:
-        script: |
-          try {
-              Get-ADReplicationSite -Identity 'AnsibleSLSite2'
-          }
-          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-              New-ADReplicationSite -Name 'AnsibleSLSite2'
-              $Ansible.Changed = $true
-          }
-
-    - name: Create test site 3 via PowerShell
-      ansible.windows.win_powershell:
-        script: |
-          try {
-              Get-ADReplicationSite -Identity 'AnsibleSLSite3'
-          }
-          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-              New-ADReplicationSite -Name 'AnsibleSLSite3'
-              $Ansible.Changed = $true
-          }
+    - name: Create test sites
+      microsoft.ad.site:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - AnsibleSLSite1
+        - AnsibleSLSite2
+        - AnsibleSLSite3
 
     - name: Create site link - check mode
       microsoft.ad.site_link:
@@ -316,26 +273,10 @@
         state: absent
       failed_when: false
 
-    # After rebase of site module (PR #237), replace with:
-    #
-    # - name: Cleanup - remove test sites
-    #   microsoft.ad.site:
-    #     name: "{{ item }}"
-    #     state: absent
-    #   loop:
-    #     - AnsibleSLSite1
-    #     - AnsibleSLSite2
-    #     - AnsibleSLSite3
-    #   failed_when: false
-    - name: Cleanup - remove test sites via PowerShell
-      ansible.windows.win_powershell:
-        script: |
-          try {
-              Remove-ADReplicationSite -Identity '{{ item }}' -Confirm:$false
-          }
-          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-              # Already gone
-          }
+    - name: Cleanup - remove test sites
+      microsoft.ad.site:
+        name: "{{ item }}"
+        state: absent
       loop:
         - AnsibleSLSite1
         - AnsibleSLSite2
