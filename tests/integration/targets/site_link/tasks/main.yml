@@ -1,0 +1,343 @@
+---
+
+- name: Test site_link
+  block:
+    # =================================================================
+    #  SETUP - create test sites using native PowerShell
+    #  After rebase of site module (PR #237), replace with:
+    #
+    #  - name: Create test site 1
+    #    microsoft.ad.site:
+    #      name: AnsibleSLSite1
+    #      state: present
+    #
+    #  - name: Create test site 2
+    #    microsoft.ad.site:
+    #      name: AnsibleSLSite2
+    #      state: present
+    #
+    #  - name: Create test site 3
+    #    microsoft.ad.site:
+    #      name: AnsibleSLSite3
+    #      state: present
+    # =================================================================
+    - name: Create test site 1 via PowerShell
+      ansible.windows.win_powershell:
+        script: |
+          try {
+              Get-ADReplicationSite -Identity 'AnsibleSLSite1'
+          }
+          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+              New-ADReplicationSite -Name 'AnsibleSLSite1'
+              $Ansible.Changed = $true
+          }
+
+    - name: Create test site 2 via PowerShell
+      ansible.windows.win_powershell:
+        script: |
+          try {
+              Get-ADReplicationSite -Identity 'AnsibleSLSite2'
+          }
+          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+              New-ADReplicationSite -Name 'AnsibleSLSite2'
+              $Ansible.Changed = $true
+          }
+
+    - name: Create test site 3 via PowerShell
+      ansible.windows.win_powershell:
+        script: |
+          try {
+              Get-ADReplicationSite -Identity 'AnsibleSLSite3'
+          }
+          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+              New-ADReplicationSite -Name 'AnsibleSLSite3'
+              $Ansible.Changed = $true
+          }
+
+    - name: Create site link - check mode
+      microsoft.ad.site_link:
+        name: AnsibleTestSiteLink
+        sites_included:
+          - AnsibleSLSite1
+          - AnsibleSLSite2
+        cost: 100
+        replication_frequency: 15
+        state: present
+      register: _create_check
+      check_mode: true
+
+    - name: Verify site link was not created in check mode
+      ansible.windows.win_powershell:
+        script: |
+          try {
+              Get-ADReplicationSiteLink -Identity 'AnsibleTestSiteLink' -ErrorAction Stop
+              $Ansible.Result = $true
+          }
+          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+              $Ansible.Result = $false
+          }
+      register: _create_check_actual
+
+    - name: Assert create check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _create_check is changed
+          - _create_check.object_guid == '00000000-0000-0000-0000-000000000000'
+          - not _create_check_actual.result
+
+    - name: Create site link
+      microsoft.ad.site_link:
+        name: AnsibleTestSiteLink
+        sites_included:
+          - AnsibleSLSite1
+          - AnsibleSLSite2
+        cost: 100
+        replication_frequency: 15
+        state: present
+      register: _create
+
+    - name: Set object identity fact
+      ansible.builtin.set_fact:
+        object_identity: '{{ _create.object_guid }}'
+
+    - name: Get result of create site link
+      ansible.windows.win_powershell:
+        script: |
+          $link = Get-ADReplicationSiteLink -Identity 'AnsibleTestSiteLink' -Properties Cost, ReplicationFrequencyInMinutes, SitesIncluded
+          @{
+              Cost = $link.Cost
+              ReplicationFrequencyInMinutes = $link.ReplicationFrequencyInMinutes
+              SiteCount = $link.SitesIncluded.Count
+              ObjectGUID = $link.ObjectGUID.ToString()
+          } | ConvertTo-Json
+      register: _create_actual
+
+    - name: Assert site link was created
+      ansible.builtin.assert:
+        that:
+          - _create is changed
+          - _create.object_guid != '00000000-0000-0000-0000-000000000000'
+          - _create.distinguished_name is defined
+          - (_create_actual.output[0] | from_json).Cost == 100
+          - (_create_actual.output[0] | from_json).ReplicationFrequencyInMinutes == 15
+          - (_create_actual.output[0] | from_json).SiteCount == 2
+
+    - name: Create same site link again (idempotency)
+      microsoft.ad.site_link:
+        name: AnsibleTestSiteLink
+        sites_included:
+          - AnsibleSLSite1
+          - AnsibleSLSite2
+        cost: 100
+        replication_frequency: 15
+        state: present
+      register: _create_idem
+
+    - name: Assert no change on idempotent create
+      ansible.builtin.assert:
+        that:
+          - _create_idem is not changed
+
+    - name: Update cost - check mode
+      microsoft.ad.site_link:
+        name: AnsibleTestSiteLink
+        cost: 200
+      register: _update_cost_check
+      check_mode: true
+
+    - name: Verify cost was not changed in check mode
+      ansible.windows.win_powershell:
+        script: |
+          (Get-ADReplicationSiteLink -Identity 'AnsibleTestSiteLink' -Properties Cost).Cost
+      register: _update_cost_check_actual
+
+    - name: Assert update cost check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _update_cost_check is changed
+          - _update_cost_check_actual.output[0] == 100
+
+    - name: Update cost
+      microsoft.ad.site_link:
+        name: AnsibleTestSiteLink
+        cost: 200
+      register: _update_cost
+
+    - name: Get result of update cost
+      ansible.windows.win_powershell:
+        script: |
+          (Get-ADReplicationSiteLink -Identity 'AnsibleTestSiteLink' -Properties Cost).Cost
+      register: _update_cost_actual
+
+    - name: Assert cost was updated
+      ansible.builtin.assert:
+        that:
+          - _update_cost is changed
+          - _update_cost_actual.output[0] == 200
+
+    - name: Update cost again (idempotency)
+      microsoft.ad.site_link:
+        name: AnsibleTestSiteLink
+        cost: 200
+      register: _update_cost_idem
+
+    - name: Assert no change on idempotent cost update
+      ansible.builtin.assert:
+        that:
+          - _update_cost_idem is not changed
+
+    - name: Update replication frequency
+      microsoft.ad.site_link:
+        name: AnsibleTestSiteLink
+        replication_frequency: 30
+      register: _update_freq
+
+    - name: Get result of update replication frequency
+      ansible.windows.win_powershell:
+        script: |
+          (Get-ADReplicationSiteLink -Identity 'AnsibleTestSiteLink' -Properties ReplicationFrequencyInMinutes).ReplicationFrequencyInMinutes
+      register: _update_freq_actual
+
+    - name: Assert replication frequency was updated
+      ansible.builtin.assert:
+        that:
+          - _update_freq is changed
+          - _update_freq_actual.output[0] == 30
+
+    - name: Update replication frequency again (idempotency)
+      microsoft.ad.site_link:
+        name: AnsibleTestSiteLink
+        replication_frequency: 30
+      register: _update_freq_idem
+
+    - name: Assert no change on idempotent frequency update
+      ansible.builtin.assert:
+        that:
+          - _update_freq_idem is not changed
+
+    - name: Update sites included
+      microsoft.ad.site_link:
+        name: AnsibleTestSiteLink
+        sites_included:
+          - AnsibleSLSite1
+          - AnsibleSLSite3
+      register: _update_sites
+
+    - name: Get result of update sites included
+      ansible.windows.win_powershell:
+        script: |
+          $sites = (Get-ADReplicationSiteLink -Identity 'AnsibleTestSiteLink' -Properties SitesIncluded).SitesIncluded
+          @($sites | ForEach-Object { $_ -replace '^CN=([^,]+),.*$', '$1' } | Sort-Object) | ConvertTo-Json
+      register: _update_sites_actual
+
+    - name: Assert sites included was updated
+      ansible.builtin.assert:
+        that:
+          - _update_sites is changed
+          - (_update_sites_actual.output[0] | from_json) == ['AnsibleSLSite1', 'AnsibleSLSite3']
+
+    - name: Update sites included again (idempotency)
+      microsoft.ad.site_link:
+        name: AnsibleTestSiteLink
+        sites_included:
+          - AnsibleSLSite1
+          - AnsibleSLSite3
+      register: _update_sites_idem
+
+    - name: Assert no change on idempotent sites update
+      ansible.builtin.assert:
+        that:
+          - _update_sites_idem is not changed
+
+    - name: Remove site link - check mode
+      microsoft.ad.site_link:
+        name: AnsibleTestSiteLink
+        state: absent
+      register: _remove_check
+      check_mode: true
+
+    - name: Verify site link still exists after check mode remove
+      ansible.windows.win_powershell:
+        script: |
+          try {
+              Get-ADReplicationSiteLink -Identity 'AnsibleTestSiteLink' -ErrorAction Stop | Out-Null
+              $true
+          }
+          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+              $false
+          }
+      register: _remove_check_actual
+
+    - name: Assert remove check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _remove_check is changed
+          - _remove_check_actual.output[0] == true
+
+    - name: Remove site link
+      microsoft.ad.site_link:
+        name: AnsibleTestSiteLink
+        state: absent
+      register: _remove
+
+    - name: Verify site link was removed
+      ansible.windows.win_powershell:
+        script: |
+          try {
+              Get-ADReplicationSiteLink -Identity 'AnsibleTestSiteLink' -ErrorAction Stop | Out-Null
+              $true
+          }
+          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+              $false
+          }
+      register: _remove_actual
+
+    - name: Assert site link was removed
+      ansible.builtin.assert:
+        that:
+          - _remove is changed
+          - _remove_actual.output[0] == false
+
+    - name: Remove site link again (idempotency)
+      microsoft.ad.site_link:
+        name: AnsibleTestSiteLink
+        state: absent
+      register: _remove_idem
+
+    - name: Assert no change on idempotent remove
+      ansible.builtin.assert:
+        that:
+          - _remove_idem is not changed
+
+  always:
+    - name: Cleanup - remove test site link
+      microsoft.ad.site_link:
+        name: AnsibleTestSiteLink
+        state: absent
+      failed_when: false
+
+    # After rebase of site module (PR #237), replace with:
+    #
+    # - name: Cleanup - remove test sites
+    #   microsoft.ad.site:
+    #     name: "{{ item }}"
+    #     state: absent
+    #   loop:
+    #     - AnsibleSLSite1
+    #     - AnsibleSLSite2
+    #     - AnsibleSLSite3
+    #   failed_when: false
+    - name: Cleanup - remove test sites via PowerShell
+      ansible.windows.win_powershell:
+        script: |
+          try {
+              Remove-ADReplicationSite -Identity '{{ item }}' -Confirm:$false
+          }
+          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+              # Already gone
+          }
+      loop:
+        - AnsibleSLSite1
+        - AnsibleSLSite2
+        - AnsibleSLSite3
+      failed_when: false
