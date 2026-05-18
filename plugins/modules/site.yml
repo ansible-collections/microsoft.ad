@@ -1,0 +1,119 @@
+# Copyright (c) 2026 Ansible Project
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+DOCUMENTATION:
+  module: site
+  short_description: Manage Active Directory replication sites
+  version_added: 1.11.0
+  description:
+    - Create, modify, or remove Active Directory replication sites.
+    - Sites are used to control replication traffic and help clients
+      discover nearby network resources such as domain controllers.
+  options:
+    managed_by:
+      description:
+        - The user or group that manages the object.
+        - The value can be in the form of a C(distinguishedName), C(objectGUID),
+          C(objectSid), C(sAMAccountName), or C(userPrincipalName) string or a
+          dictionary with the I(name) and optional I(server) key.
+        - This is the value set on the C(managedBy) LDAP attribute.
+        - See
+          R(DN Lookup Attributes,ansible_collections.microsoft.ad.docsite.guide_attributes.dn_lookup_attributes)
+          for more information on how DN lookups work.
+      type: raw
+    automatic_inter_site_topology_generation_enabled:
+      description:
+        - Whether the KCC inter-site topology generator (ISTG) creates
+          connections for inter-site replication automatically.
+        - Set to V(false) to manage inter-site connections manually while
+          retaining automatic intra-site connections.
+      type: bool
+    automatic_topology_generation_enabled:
+      description:
+        - Whether the KCC generates intra-site replication connections
+          automatically.
+        - Set to V(false) to manage intra-site connections manually.
+      type: bool
+    universal_group_caching_enabled:
+      description:
+        - Whether Universal Group Membership Caching (UGMC) is enabled
+          for the site.
+        - Useful in branch-office sites without a Global Catalog server
+          to reduce authentication latency.
+      type: bool
+  notes:
+    - The I(path) option for sites defaults to the
+      C(CN=Sites,CN=Configuration,...) container. Sites cannot be moved to
+      a different container.
+    - This module must be run on a Windows target host with the
+      C(ActiveDirectory) module installed.
+  extends_documentation_fragment:
+    - microsoft.ad.ad_object
+    - ansible.builtin.action_common_attributes
+  attributes:
+    check_mode:
+      support: full
+    diff_mode:
+      support: full
+    platform:
+      platforms:
+        - windows
+  seealso:
+    - module: microsoft.ad.object_info
+  author:
+    - Ron Gershburg (@rgershbu)
+
+EXAMPLES: |
+  - name: Create a replication site for the London branch office
+    microsoft.ad.site:
+      name: London-Branch
+      description: London branch office site
+      state: present
+
+  - name: Create a site with deletion protection
+    microsoft.ad.site:
+      name: NYC-HQ
+      description: New York City headquarters
+      protect_from_deletion: true
+      state: present
+
+  - name: Enable Universal Group Caching on a branch site
+    microsoft.ad.site:
+      name: London-Branch
+      universal_group_caching_enabled: true
+      state: present
+
+  - name: Disable automatic inter-site topology generation
+    microsoft.ad.site:
+      name: London-Branch
+      automatic_inter_site_topology_generation_enabled: false
+      state: present
+
+  - name: Set managedBy using an identity from another DC
+    microsoft.ad.site:
+      name: London-Branch
+      managed_by:
+        name: manager-user
+        server: OtherDC
+
+  - name: Remove a replication site
+    microsoft.ad.site:
+      name: London-Branch
+      state: absent
+
+RETURN:
+  object_guid:
+    description:
+      - The C(objectGUID) of the AD object that was created, removed, or edited.
+      - If a new object was created in check mode, a GUID of 0s will be
+        returned.
+    returned: always
+    type: str
+    sample: d84a141f-2b99-4f08-9da0-ed2d26864ba1
+  distinguished_name:
+    description:
+      - The C(distinguishedName) of the AD object that was created, removed, or
+        edited.
+    returned: always
+    type: str
+    sample: CN=London-Branch,CN=Sites,CN=Configuration,DC=contoso,DC=com
