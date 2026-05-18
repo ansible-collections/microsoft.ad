@@ -7,7 +7,7 @@
 <meta content="2.24.0" name="antsibull-docs" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>microsoft.ad.site module – Manage Active Directory replication sites &mdash; Ansible collections  documentation</title>
+  <title>microsoft.ad.site_subnet module – Manage Active Directory replication subnets &mdash; Ansible collections  documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=41de9001" />
       <link rel="stylesheet" type="text/css" href="../../../_static/css/ansible.css?v=b54c304f" />
       <link rel="stylesheet" type="text/css" href="../../../_static/antsibull-minimal.css" />
@@ -22,8 +22,8 @@
       <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="microsoft.ad.site_subnet module – Manage Active Directory replication subnets" href="site_subnet_module.html" />
-    <link rel="prev" title="microsoft.ad.service_account module – Manage Active Directory service account objects" href="service_account_module.html" /><!-- extra head elements for Ansible beyond RTD Sphinx Theme -->
+    <link rel="next" title="microsoft.ad.user module – Manage Active Directory users" href="user_module.html" />
+    <link rel="prev" title="microsoft.ad.site module – Manage Active Directory replication sites" href="site_module.html" /><!-- extra head elements for Ansible beyond RTD Sphinx Theme -->
 
 
 
@@ -118,10 +118,10 @@
           <li class="breadcrumb-item"><a href="../../index.html">Collection Index</a></li>
           <li class="breadcrumb-item"><a href="../index.html">Collections in the Microsoft Namespace</a></li>
           <li class="breadcrumb-item"><a href="index.html">Microsoft.Ad</a></li>
-      <li class="breadcrumb-item active">microsoft.ad.site module – Manage Active Directory replication sites</li>
+      <li class="breadcrumb-item active">microsoft.ad.site_subnet module – Manage Active Directory replication subnets</li>
       <li class="wy-breadcrumbs-aside">
               <!-- User defined GitHub URL -->
-              <a href="https://github.com/ansible-collections/microsoft.ad/edit/main/plugins/modules/site.yml?description=%23%23%23%23%23%20SUMMARY%0A%3C!—%20Your%20description%20here%20–%3E%0A%0A%0A%23%23%23%23%23%20ISSUE%20TYPE%0A-%20Docs%20Pull%20Request%0A%0A%2Blabel:%20docsite_pr" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/ansible-collections/microsoft.ad/edit/main/plugins/modules/site_subnet.yml?description=%23%23%23%23%23%20SUMMARY%0A%3C!—%20Your%20description%20here%20–%3E%0A%0A%0A%23%23%23%23%23%20ISSUE%20TYPE%0A-%20Docs%20Pull%20Request%0A%0A%2Blabel:%20docsite_pr" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -131,8 +131,8 @@
   
            <div itemprop="articleBody">
              
-  <span class="target" id="ansible-collections-microsoft-ad-site-module"></span><section id="microsoft-ad-site-module-manage-active-directory-replication-sites">
-<h1>microsoft.ad.site module – Manage Active Directory replication sites<a class="headerlink" href="#microsoft-ad-site-module-manage-active-directory-replication-sites" title="Link to this heading"></a></h1>
+  <span class="target" id="ansible-collections-microsoft-ad-site-subnet-module"></span><section id="microsoft-ad-site-subnet-module-manage-active-directory-replication-subnets">
+<h1>microsoft.ad.site_subnet module – Manage Active Directory replication subnets<a class="headerlink" href="#microsoft-ad-site-subnet-module-manage-active-directory-replication-subnets" title="Link to this heading"></a></h1>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This module is part of the <a class="reference external" href="https://galaxy.ansible.com/ui/repo/published/microsoft/ad/">microsoft.ad collection</a> (version 1.10.0).</p>
@@ -140,8 +140,8 @@
 To check whether it is installed, run <code class="code docutils literal notranslate"><span class="pre">ansible-galaxy</span> <span class="pre">collection</span> <span class="pre">list</span></code>.</p>
 <p>To install it, use: <code class="code docutils literal notranslate"><span class="pre">ansible-galaxy</span> <span class="pre">collection</span> <span class="pre">install</span> <span class="pre">microsoft.ad</span></code>.
 You need further requirements to be able to use this module,
-see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-module-requirements"><span class="std std-ref">Requirements</span></a> for details.</p>
-<p>To use it in a playbook, specify: <code class="code docutils literal notranslate"><span class="pre">microsoft.ad.site</span></code>.</p>
+see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-subnet-module-requirements"><span class="std std-ref">Requirements</span></a> for details.</p>
+<p>To use it in a playbook, specify: <code class="code docutils literal notranslate"><span class="pre">microsoft.ad.site_subnet</span></code>.</p>
 </div>
 <p class="ansible-version-added">New in microsoft.ad 1.11.0</p>
 <nav class="contents local" id="contents">
@@ -159,12 +159,12 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 <section id="synopsis">
 <h2><a class="toc-backref" href="#id1" role="doc-backlink">Synopsis</a><a class="headerlink" href="#synopsis" title="Link to this heading"></a></h2>
 <ul class="simple">
-<li><p>Create, modify, or remove Active Directory replication sites.</p></li>
-<li><p>Sites are used to control replication traffic and help clients discover nearby network resources such as domain controllers.</p></li>
+<li><p>Create, modify, or remove Active Directory replication subnets.</p></li>
+<li><p>Subnets determine which replication site a computer belongs to by mapping IP address ranges to sites, which in turn controls domain controller discovery and replication topology.</p></li>
 </ul>
 </section>
 <section id="requirements">
-<span id="ansible-collections-microsoft-ad-site-module-requirements"></span><h2><a class="toc-backref" href="#id2" role="doc-backlink">Requirements</a><a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
+<span id="ansible-collections-microsoft-ad-site-subnet-module-requirements"></span><h2><a class="toc-backref" href="#id2" role="doc-backlink">Requirements</a><a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
 <p>The below requirements are needed on the host that executes this module.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ActiveDirectory</span></code> PowerShell module</p></li>
@@ -181,7 +181,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </thead>
 <tbody>
 <tr class="row-even"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-attributes"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-attributes"><strong>attributes</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-attributes"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-attributes"><strong>attributes</strong></p>
 <a class="ansibleOptionLink" href="#parameter-attributes" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">dictionary</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The attributes to either add, remove, or set on the AD object.</p>
@@ -198,7 +198,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-attributes/add"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-attributes-add"><strong>add</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-attributes/add"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-attributes-add"><strong>add</strong></p>
 <a class="ansibleOptionLink" href="#parameter-attributes/add" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">dictionary</span></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>A dictionary of all the attributes and their value(s) to add to the AD object being managed if they are not already present.</p>
@@ -207,7 +207,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-attributes/remove"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-attributes-remove"><strong>remove</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-attributes/remove"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-attributes-remove"><strong>remove</strong></p>
 <a class="ansibleOptionLink" href="#parameter-attributes/remove" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">dictionary</span></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>A dictionary of all the attributes and their value(s) to remove from the AD object being managed if they are present.</p>
@@ -216,7 +216,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-attributes/set"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-attributes-set"><strong>set</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-attributes/set"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-attributes-set"><strong>set</strong></p>
 <a class="ansibleOptionLink" href="#parameter-attributes/set" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">dictionary</span></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>A dictionary of all attributes and their value(s) to set on the AD object being managed.</p>
@@ -227,33 +227,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-automatic_inter_site_topology_generation_enabled"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-automatic-inter-site-topology-generation-enabled"><strong>automatic_inter_site_topology_generation_enabled</strong></p>
-<a class="ansibleOptionLink" href="#parameter-automatic_inter_site_topology_generation_enabled" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
-</div></td>
-<td><div class="ansible-option-cell"><p>Whether the KCC inter-site topology generator (ISTG) creates connections for inter-site replication automatically.</p>
-<p>Set to <code class="ansible-value docutils literal notranslate"><span class="pre">false</span></code> to manage inter-site connections manually while retaining automatic intra-site connections.</p>
-<p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
-<ul class="simple">
-<li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">false</span></code></p></li>
-<li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">true</span></code></p></li>
-</ul>
-</div></td>
-</tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-automatic_topology_generation_enabled"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-automatic-topology-generation-enabled"><strong>automatic_topology_generation_enabled</strong></p>
-<a class="ansibleOptionLink" href="#parameter-automatic_topology_generation_enabled" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
-</div></td>
-<td><div class="ansible-option-cell"><p>Whether the KCC generates intra-site replication connections automatically.</p>
-<p>Set to <code class="ansible-value docutils literal notranslate"><span class="pre">false</span></code> to manage intra-site connections manually.</p>
-<p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
-<ul class="simple">
-<li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">false</span></code></p></li>
-<li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">true</span></code></p></li>
-</ul>
-</div></td>
-</tr>
-<tr class="row-even"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-description"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-description"><strong>description</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-description"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-description"><strong>description</strong></p>
 <a class="ansibleOptionLink" href="#parameter-description" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The description of the AD object to set.</p>
@@ -261,7 +235,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-display_name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-display-name"><strong>display_name</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-display_name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-display-name"><strong>display_name</strong></p>
 <a class="ansibleOptionLink" href="#parameter-display_name" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The display name of the AD object to set.</p>
@@ -269,7 +243,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-domain_credentials"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-domain-credentials"><strong>domain_credentials</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-domain_credentials"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-domain-credentials"><strong>domain_credentials</strong></p>
 <a class="ansibleOptionLink" href="#parameter-domain_credentials" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">list</span> / <span class="ansible-option-elements">elements=dictionary</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>Specifies the credentials that should be used when using the server specified by <em>name</em>.</p>
@@ -280,7 +254,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-domain_credentials/name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-domain-credentials-name"><strong>name</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-domain_credentials/name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-domain-credentials-name"><strong>name</strong></p>
 <a class="ansibleOptionLink" href="#parameter-domain_credentials/name" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The name of the server these credentials are for.</p>
@@ -289,21 +263,21 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-domain_credentials/password"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-domain-credentials-password"><strong>password</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-domain_credentials/password"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-domain-credentials-password"><strong>password</strong></p>
 <a class="ansibleOptionLink" href="#parameter-domain_credentials/password" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span> / <span class="ansible-option-required">required</span></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The password to use when connecting to the server specified by <em>name</em>.</p>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-indent"></div><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-domain_credentials/username"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-domain-credentials-username"><strong>username</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-domain_credentials/username"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-domain-credentials-username"><strong>username</strong></p>
 <a class="ansibleOptionLink" href="#parameter-domain_credentials/username" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span> / <span class="ansible-option-required">required</span></p>
 </div></td>
 <td><div class="ansible-option-indent-desc"></div><div class="ansible-option-cell"><p>The username to use when connecting to the server specified by <em>name</em>.</p>
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-domain_password"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-domain-password"><strong>domain_password</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-domain_password"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-domain-password"><strong>domain_password</strong></p>
 <a class="ansibleOptionLink" href="#parameter-domain_password" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The password for <em>domain_username</em>.</p>
@@ -312,7 +286,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-domain_server"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-domain-server"><strong>domain_server</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-domain_server"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-domain-server"><strong>domain_server</strong></p>
 <a class="ansibleOptionLink" href="#parameter-domain_server" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>Specified the Active Directory Domain Services instance to connect to.</p>
@@ -323,7 +297,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-domain_username"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-domain-username"><strong>domain_username</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-domain_username"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-domain-username"><strong>domain_username</strong></p>
 <a class="ansibleOptionLink" href="#parameter-domain_username" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The username to use when interacting with AD.</p>
@@ -334,7 +308,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-identity"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-identity"><strong>identity</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-identity"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-identity"><strong>identity</strong></p>
 <a class="ansibleOptionLink" href="#parameter-identity" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The identity of the AD object used to find the AD object to manage.</p>
@@ -345,17 +319,14 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-managed_by"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-managed-by"><strong>managed_by</strong></p>
-<a class="ansibleOptionLink" href="#parameter-managed_by" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">any</span></p>
+<div class="ansibleOptionAnchor" id="parameter-location"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-location"><strong>location</strong></p>
+<a class="ansibleOptionLink" href="#parameter-location" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
-<td><div class="ansible-option-cell"><p>The user or group that manages the object.</p>
-<p>The value can be in the form of a <code class="docutils literal notranslate"><span class="pre">distinguishedName</span></code>, <code class="docutils literal notranslate"><span class="pre">objectGUID</span></code>, <code class="docutils literal notranslate"><span class="pre">objectSid</span></code>, <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code>, or <code class="docutils literal notranslate"><span class="pre">userPrincipalName</span></code> string or a dictionary with the <em>name</em> and optional <em>server</em> key.</p>
-<p>This is the value set on the <code class="docutils literal notranslate"><span class="pre">managedBy</span></code> LDAP attribute.</p>
-<p>See <a class="reference internal" href="docsite/guide_attributes.html#ansible-collections-microsoft-ad-docsite-guide-attributes-dn-lookup-attributes"><span class="std std-ref">DN Lookup Attributes</span></a> for more information on how DN lookups work.</p>
+<td><div class="ansible-option-cell"><p>A string describing the physical location of the subnet.</p>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-name"><strong>name</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-name"><strong>name</strong></p>
 <a class="ansibleOptionLink" href="#parameter-name" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The <code class="docutils literal notranslate"><span class="pre">name</span></code> of the AD object to manage, this is not the <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> of the object but the LDAP <code class="docutils literal notranslate"><span class="pre">cn</span></code> or <code class="docutils literal notranslate"><span class="pre">name</span></code> entry of the object in the path specified. Use <em>identity</em> to select an object to manage by its <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code>.</p>
@@ -364,7 +335,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-path"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-path"><strong>path</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-path"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-path"><strong>path</strong></p>
 <a class="ansibleOptionLink" href="#parameter-path" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The path of the OU or the container where the new object should exist in.</p>
@@ -375,7 +346,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-protect_from_deletion"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-protect-from-deletion"><strong>protect_from_deletion</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-protect_from_deletion"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-protect-from-deletion"><strong>protect_from_deletion</strong></p>
 <a class="ansibleOptionLink" href="#parameter-protect_from_deletion" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>Marks the object as protected from accidental deletion.</p>
@@ -389,7 +360,15 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-state"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-state"><strong>state</strong></p>
+<div class="ansibleOptionAnchor" id="parameter-site"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-site"><strong>site</strong></p>
+<a class="ansibleOptionLink" href="#parameter-site" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
+</div></td>
+<td><div class="ansible-option-cell"><p>The name of the AD replication site to associate with the subnet.</p>
+<p>This controls which site computers in this subnet are assigned to.</p>
+</div></td>
+</tr>
+<tr class="row-odd"><td><div class="ansible-option-cell">
+<div class="ansibleOptionAnchor" id="parameter-state"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-parameter-state"><strong>state</strong></p>
 <a class="ansibleOptionLink" href="#parameter-state" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>Set to <code class="docutils literal notranslate"><span class="pre">present</span></code> to ensure the AD object exists.</p>
@@ -400,19 +379,6 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 <ul class="simple">
 <li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">&quot;absent&quot;</span></code></p></li>
 <li><p><code class="ansible-option-default-bold docutils literal notranslate"><strong><span class="pre">&quot;present&quot;</span></strong></code> <span class="ansible-option-choices-default-mark">← (default)</span></p></li>
-</ul>
-</div></td>
-</tr>
-<tr class="row-odd"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="parameter-universal_group_caching_enabled"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-parameter-universal-group-caching-enabled"><strong>universal_group_caching_enabled</strong></p>
-<a class="ansibleOptionLink" href="#parameter-universal_group_caching_enabled" title="Permalink to this option"></a><p class="ansible-option-type-line"><span class="ansible-option-type">boolean</span></p>
-</div></td>
-<td><div class="ansible-option-cell"><p>Whether Universal Group Membership Caching (UGMC) is enabled for the site.</p>
-<p>Useful in branch-office sites without a Global Catalog server to reduce authentication latency.</p>
-<p class="ansible-option-line"><strong class="ansible-option-choices">Choices:</strong></p>
-<ul class="simple">
-<li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">false</span></code></p></li>
-<li><p><code class="ansible-option-choices-entry docutils literal notranslate"><span class="pre">true</span></code></p></li>
 </ul>
 </div></td>
 </tr>
@@ -430,7 +396,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </thead>
 <tbody>
 <tr class="row-even"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="attribute-check_mode"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-attribute-check-mode"><strong>check_mode</strong></p>
+<div class="ansibleOptionAnchor" id="attribute-check_mode"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-attribute-check-mode"><strong>check_mode</strong></p>
 <a class="ansibleOptionLink" href="#attribute-check_mode" title="Permalink to this attribute"></a></div></td>
 <td><div class="ansible-option-cell"><p><strong class="ansible-attribute-support-label">Support: </strong><strong class="ansible-attribute-support-full">full</strong></p>
 </div></td>
@@ -438,7 +404,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="attribute-diff_mode"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-attribute-diff-mode"><strong>diff_mode</strong></p>
+<div class="ansibleOptionAnchor" id="attribute-diff_mode"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-attribute-diff-mode"><strong>diff_mode</strong></p>
 <a class="ansibleOptionLink" href="#attribute-diff_mode" title="Permalink to this attribute"></a></div></td>
 <td><div class="ansible-option-cell"><p><strong class="ansible-attribute-support-label">Support: </strong><strong class="ansible-attribute-support-full">full</strong></p>
 </div></td>
@@ -446,7 +412,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </div></td>
 </tr>
 <tr class="row-even"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="attribute-platform"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-attribute-platform"><strong>platform</strong></p>
+<div class="ansibleOptionAnchor" id="attribute-platform"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-attribute-platform"><strong>platform</strong></p>
 <a class="ansibleOptionLink" href="#attribute-platform" title="Permalink to this attribute"></a></div></td>
 <td><div class="ansible-option-cell"><p><strong class="ansible-attribute-support-property">Platform:</strong> <strong class="ansible-attribute-support-full">windows</strong></p>
 </div></td>
@@ -461,7 +427,8 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
-<li><p>The <em>path</em> option for sites defaults to the <code class="docutils literal notranslate"><span class="pre">CN=Sites,CN=Configuration,...</span></code> container. Sites cannot be moved to a different container.</p></li>
+<li><p>The <em>path</em> option for subnets defaults to the <code class="docutils literal notranslate"><span class="pre">CN=Subnets,CN=Sites,CN=Configuration,...</span></code> container. Subnets cannot be moved to a different container.</p></li>
+<li><p>Subnet names must use valid CIDR notation. Both IPv4 and IPv6 subnets are supported.</p></li>
 <li><p>This module must be run on a Windows target host with the <code class="docutils literal notranslate"><span class="pre">ActiveDirectory</span></code> module installed.</p></li>
 <li><p>Some LDAP attributes can have only a single value set while others can have multiple. Some attributes are also read only and cannot be changed. It is recommended to look at the schema metadata for an attribute where <code class="docutils literal notranslate"><span class="pre">System-Only</span></code> are read only values and <code class="docutils literal notranslate"><span class="pre">Is-Single-Value</span></code> are attributes with only 1 value.</p></li>
 <li><p>Attempting to set multiple values to a <code class="docutils literal notranslate"><span class="pre">Is-Single-Value</span></code> attribute results in undefined behaviour.</p></li>
@@ -481,41 +448,35 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </section>
 <section id="examples">
 <h2><a class="toc-backref" href="#id7" role="doc-backlink">Examples</a><a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
-<div class="highlight-yaml+jinja notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create a replication site for the London branch office</span>
-<span class="w">  </span><span class="nt">microsoft.ad.site</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">London-Branch</span>
-<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">London branch office site</span>
+<div class="highlight-yaml+jinja notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create a subnet associated with a site</span>
+<span class="w">  </span><span class="nt">microsoft.ad.site_subnet</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.10.0.0/16</span>
+<span class="w">    </span><span class="nt">site</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">London-Branch</span>
+<span class="w">    </span><span class="nt">location</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;London,</span><span class="nv"> </span><span class="s">UK&quot;</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">London branch office subnet</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
 
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create a site with deletion protection</span>
-<span class="w">  </span><span class="nt">microsoft.ad.site</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NYC-HQ</span>
-<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">New York City headquarters</span>
-<span class="w">    </span><span class="nt">protect_from_deletion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create a subnet without a site association</span>
+<span class="w">  </span><span class="nt">microsoft.ad.site_subnet</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">192.168.1.0/24</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Lab network</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
 
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Enable Universal Group Caching on a branch site</span>
-<span class="w">  </span><span class="nt">microsoft.ad.site</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">London-Branch</span>
-<span class="w">    </span><span class="nt">universal_group_caching_enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Change the site association for a subnet</span>
+<span class="w">  </span><span class="nt">microsoft.ad.site_subnet</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.10.0.0/16</span>
+<span class="w">    </span><span class="nt">site</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">NYC-HQ</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
 
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Disable automatic inter-site topology generation</span>
-<span class="w">  </span><span class="nt">microsoft.ad.site</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">London-Branch</span>
-<span class="w">    </span><span class="nt">automatic_inter_site_topology_generation_enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Update the location of a subnet</span>
+<span class="w">  </span><span class="nt">microsoft.ad.site_subnet</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.10.0.0/16</span>
+<span class="w">    </span><span class="nt">location</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;New</span><span class="nv"> </span><span class="s">York,</span><span class="nv"> </span><span class="s">US&quot;</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
 
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set managedBy using an identity from another DC</span>
-<span class="w">  </span><span class="nt">microsoft.ad.site</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">London-Branch</span>
-<span class="w">    </span><span class="nt">managed_by</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">manager-user</span>
-<span class="w">      </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OtherDC</span>
-
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Remove a replication site</span>
-<span class="w">  </span><span class="nt">microsoft.ad.site</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">London-Branch</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Remove a subnet</span>
+<span class="w">  </span><span class="nt">microsoft.ad.site_subnet</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10.10.0.0/16</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">absent</span>
 </pre></div>
 </div>
@@ -531,16 +492,16 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
 </thead>
 <tbody>
 <tr class="row-even"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="return-distinguished_name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-return-distinguished-name"><strong>distinguished_name</strong></p>
+<div class="ansibleOptionAnchor" id="return-distinguished_name"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-return-distinguished-name"><strong>distinguished_name</strong></p>
 <a class="ansibleOptionLink" href="#return-distinguished_name" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The <code class="docutils literal notranslate"><span class="pre">distinguishedName</span></code> of the AD object that was created, removed, or edited.</p>
 <p class="ansible-option-line"><strong class="ansible-option-returned-bold">Returned:</strong> always</p>
-<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;CN=London-Branch,CN=Sites,CN=Configuration,DC=contoso,DC=com&quot;</span></code></p>
+<p class="ansible-option-line ansible-option-sample"><strong class="ansible-option-sample-bold">Sample:</strong> <code class="ansible-option-sample docutils literal notranslate"><span class="pre">&quot;CN=10.10.0.0/16,CN=Subnets,CN=Sites,CN=Configuration,DC=contoso,DC=com&quot;</span></code></p>
 </div></td>
 </tr>
 <tr class="row-odd"><td><div class="ansible-option-cell">
-<div class="ansibleOptionAnchor" id="return-object_guid"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-module-return-object-guid"><strong>object_guid</strong></p>
+<div class="ansibleOptionAnchor" id="return-object_guid"></div><p class="ansible-option-title" id="ansible-collections-microsoft-ad-site-subnet-module-return-object-guid"><strong>object_guid</strong></p>
 <a class="ansibleOptionLink" href="#return-object_guid" title="Permalink to this return value"></a><p class="ansible-option-type-line"><span class="ansible-option-type">string</span></p>
 </div></td>
 <td><div class="ansible-option-cell"><p>The <code class="docutils literal notranslate"><span class="pre">objectGUID</span></code> of the AD object that was created, removed, or edited.</p>
@@ -575,8 +536,8 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-site-m
           
 
 <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="service_account_module.html" class="btn btn-neutral float-left" title="microsoft.ad.service_account module – Manage Active Directory service account objects" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="site_subnet_module.html" class="btn btn-neutral float-right" title="microsoft.ad.site_subnet module – Manage Active Directory replication subnets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="site_module.html" class="btn btn-neutral float-left" title="microsoft.ad.site module – Manage Active Directory replication sites" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="user_module.html" class="btn btn-neutral float-right" title="microsoft.ad.user module – Manage Active Directory users" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
