@@ -1,36 +1,16 @@
 ---
 
-# TODO: Replace win_powershell trust setup/cleanup with microsoft.ad.fs_trust
-# once PR #235 is merged.
-#
-# - name: Pre-cleanup - ensure test trust does not exist
-#   microsoft.ad.fs_trust:
-#     name: AnsibleTestClaimRule
-#     state: absent
-#
-# - name: Create test relying party trust
-#   microsoft.ad.fs_trust:
-#     name: AnsibleTestClaimRule
-#     identifier:
-#       - https://ansible-test-claim-rule.example.com
-#     enabled: true
-
 - name: Pre-cleanup - ensure test trust does not exist
-  ansible.windows.win_powershell:
-    script: |
-      $name = 'AnsibleTestClaimRule'
-      $existing = Get-AdfsRelyingPartyTrust -Name $name -ErrorAction SilentlyContinue
-      if ($existing) {
-          Remove-AdfsRelyingPartyTrust -TargetName $name -Confirm:$false
-      }
-      $Ansible.Changed = [bool]$existing
+  microsoft.ad.fs_trust:
+    name: AnsibleTestClaimRule
+    state: absent
 
 - name: Create test relying party trust
-  ansible.windows.win_powershell:
-    script: |
-      $name = 'AnsibleTestClaimRule'
-      Add-AdfsRelyingPartyTrust -Name $name -Identifier 'https://ansible-test-claim-rule.example.com'
-      $Ansible.Changed = $true
+  microsoft.ad.fs_trust:
+    name: AnsibleTestClaimRule
+    identifier:
+      - https://ansible-test-claim-rule.example.com
+    enabled: true
 
 - name: Test fs_claim_rule
   block:
@@ -227,20 +207,8 @@
           - _clear_idem is not changed
 
   always:
-    # TODO: Replace with microsoft.ad.fs_trust once PR #235 is merged.
-    #
-    # - name: Cleanup - remove test relying party trust
-    #   microsoft.ad.fs_trust:
-    #     name: AnsibleTestClaimRule
-    #     state: absent
-    #   failed_when: false
-
     - name: Cleanup - remove test relying party trust
-      ansible.windows.win_powershell:
-        script: |
-          $name = 'AnsibleTestClaimRule'
-          $existing = Get-AdfsRelyingPartyTrust -Name $name -ErrorAction SilentlyContinue
-          if ($existing) {
-              Remove-AdfsRelyingPartyTrust -TargetName $name -Confirm:$false
-          }
-      failed_when: false
+      microsoft.ad.fs_trust:
+        name: AnsibleTestClaimRule
+        state: absent
+      ignore_errors: true
