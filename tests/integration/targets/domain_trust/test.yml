@@ -1,0 +1,46 @@
+---
+- name: Ensure time is in sync
+  hosts: windows
+  gather_facts: false
+  tasks:
+    - name: Get current host datetime
+      command: date +%s
+      changed_when: false
+      delegate_to: localhost
+      run_once: true
+      register: local_time
+
+    - name: Set datetime on Windows
+      ansible.windows.win_powershell:
+        parameters:
+          SecondsSinceEpoch: '{{ local_time.stdout | trim }}'
+        script: |
+          param($SecondsSinceEpoch)
+          $utc = [System.DateTimeKind]::Utc
+          $epoch = New-Object -TypeName System.DateTime -ArgumentList 1970, 1, 1, 0, 0, 0, 0, $utc
+          $date = $epoch.AddSeconds($SecondsSinceEpoch)
+          Set-Date -Date $date
+
+- name: Run domain_trust tests from DC1
+  hosts: DC1
+  gather_facts: false
+
+  vars:
+    trust_target_domain: '{{ hostvars["DC2"].domain_name }}'
+    trust_password: TrustP@ss1
+    local_domain: '{{ hostvars["DC1"].domain_name }}'
+
+  tasks:
+    - name: Run domain_trust tests
+      ansible.builtin.include_tasks: tasks/test_full.yml
+
+- name: Clean up DC2 side of trust
+  hosts: DC2
+  gather_facts: false
+
+  tasks:
+    - name: Remove trust from DC2 side
+      microsoft.ad.domain_trust:
+        name: '{{ hostvars["DC1"].domain_name }}'
+        state: absent
+      failed_when: false

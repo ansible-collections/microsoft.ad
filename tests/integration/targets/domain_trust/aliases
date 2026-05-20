@@ -1,0 +1,2 @@
+windows
+unsupported  # can never run in CI, see README.md

@@ -1,0 +1,262 @@
+---
+- name: Full lifecycle domain_trust tests
+  block:
+    - name: Create forest trust - check mode
+      microsoft.ad.domain_trust:
+        name: '{{ trust_target_domain }}'
+        direction: bidirectional
+        type: forest
+        trust_password: '{{ trust_password }}'
+        state: present
+      register: _create_check
+      check_mode: true
+      diff: true
+
+    - name: Assert check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _create_check is changed
+          - _create_check.diff.before == {}
+          - _create_check.diff.after.direction == 'BiDirectional'
+
+    - name: Verify trust was not created in check mode
+      ansible.windows.win_powershell:
+        script: |
+          try {
+              $t = Get-ADTrust -Identity '{{ trust_target_domain }}'
+              $Ansible.Result = $true
+          }
+          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+              $Ansible.Result = $false
+          }
+      register: _check_verify
+
+    - name: Assert not created
+      ansible.builtin.assert:
+        that:
+          - not _check_verify.result
+
+    - name: Create local side of forest trust on DC1
+      microsoft.ad.domain_trust:
+        name: '{{ trust_target_domain }}'
+        direction: bidirectional
+        type: forest
+        trust_password: '{{ trust_password }}'
+        state: present
+      register: _create
+
+    - name: Assert DC1 side was created
+      ansible.builtin.assert:
+        that:
+          - _create is changed
+          - _create.distinguished_name is defined
+          - _create.distinguished_name | length > 0
+
+    - name: Create local side of forest trust on DC2
+      microsoft.ad.domain_trust:
+        name: '{{ local_domain }}'
+        direction: bidirectional
+        type: forest
+        trust_password: '{{ trust_password }}'
+        state: present
+      delegate_to: DC2
+
+    - name: Verify trust via Get-ADTrust
+      ansible.windows.win_powershell:
+        script: |
+          $t = Get-ADTrust -Identity '{{ trust_target_domain }}'
+          $Ansible.Result = @{
+              direction = [string]$t.Direction
+              forest_transitive = [bool]$t.ForestTransitive
+              selective_auth = $t.SelectiveAuthentication
+          }
+      register: _create_verify
+
+    - name: Assert trust properties match
+      ansible.builtin.assert:
+        that:
+          - _create_verify.result.direction == 'BiDirectional'
+          - _create_verify.result.forest_transitive == true
+          - _create_verify.result.selective_auth == false
+
+    - name: Create same trust again (idempotency)
+      microsoft.ad.domain_trust:
+        name: '{{ trust_target_domain }}'
+        direction: bidirectional
+        type: forest
+        trust_password: '{{ trust_password }}'
+        state: present
+      register: _create_idem
+
+    - name: Assert no change on idempotent run
+      ansible.builtin.assert:
+        that:
+          - _create_idem is not changed
+
+    - name: Enable selective authentication - check mode
+      microsoft.ad.domain_trust:
+        name: '{{ trust_target_domain }}'
+        direction: bidirectional
+        type: forest
+        trust_password: '{{ trust_password }}'
+        selective_authentication: true
+        state: present
+      register: _sel_check
+      check_mode: true
+      diff: true
+
+    - name: Assert check mode reports changed with diff
+      ansible.builtin.assert:
+        that:
+          - _sel_check is changed
+          - _sel_check.diff.before.selective_authentication == false
+          - _sel_check.diff.after.selective_authentication == true
+
+    - name: Enable selective authentication
+      microsoft.ad.domain_trust:
+        name: '{{ trust_target_domain }}'
+        direction: bidirectional
+        type: forest
+        trust_password: '{{ trust_password }}'
+        selective_authentication: true
+        state: present
+      register: _sel_on
+
+    - name: Assert selective auth enabled
+      ansible.builtin.assert:
+        that:
+          - _sel_on is changed
+
+    - name: Verify selective auth via Get-ADTrust
+      ansible.windows.win_powershell:
+        script: |
+          $t = Get-ADTrust -Identity '{{ trust_target_domain }}'
+          $Ansible.Result = $t.SelectiveAuthentication
+      register: _sel_on_verify
+
+    - name: Assert selective auth is true
+      ansible.builtin.assert:
+        that:
+          - _sel_on_verify.result == true
+
+    - name: Enable selective authentication again (idempotency)
+      microsoft.ad.domain_trust:
+        name: '{{ trust_target_domain }}'
+        direction: bidirectional
+        type: forest
+        trust_password: '{{ trust_password }}'
+        selective_authentication: true
+        state: present
+      register: _sel_idem
+
+    - name: Assert no change on idempotent selective auth
+      ansible.builtin.assert:
+        that:
+          - _sel_idem is not changed
+
+    - name: Disable selective authentication
+      microsoft.ad.domain_trust:
+        name: '{{ trust_target_domain }}'
+        direction: bidirectional
+        type: forest
+        trust_password: '{{ trust_password }}'
+        selective_authentication: false
+        state: present
+      register: _sel_off
+
+    - name: Assert selective auth disabled
+      ansible.builtin.assert:
+        that:
+          - _sel_off is changed
+
+    - name: Wrong direction on existing trust
+      microsoft.ad.domain_trust:
+        name: '{{ trust_target_domain }}'
+        direction: outbound
+        type: forest
+        trust_password: '{{ trust_password }}'
+        state: present
+      register: _err_dir
+      ignore_errors: true
+
+    - name: Assert direction mismatch error
+      ansible.builtin.assert:
+        that:
+          - _err_dir is failed
+          - "'Direction cannot be changed in-place' in _err_dir.msg"
+
+    - name: Wrong type on existing trust
+      microsoft.ad.domain_trust:
+        name: '{{ trust_target_domain }}'
+        direction: bidirectional
+        type: external
+        trust_password: '{{ trust_password }}'
+        state: present
+      register: _err_type
+      ignore_errors: true
+
+    - name: Assert type mismatch error
+      ansible.builtin.assert:
+        that:
+          - _err_type is failed
+          - "'Type cannot be changed in-place' in _err_type.msg"
+
+    - name: Remove trust - check mode
+      microsoft.ad.domain_trust:
+        name: '{{ trust_target_domain }}'
+        state: absent
+      register: _remove_check
+      check_mode: true
+      diff: true
+
+    - name: Assert check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _remove_check is changed
+          - _remove_check.diff.after == {}
+
+    - name: Verify trust still exists after check mode
+      ansible.windows.win_powershell:
+        script: |
+          try {
+              $t = Get-ADTrust -Identity '{{ trust_target_domain }}'
+              $Ansible.Result = $true
+          }
+          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+              $Ansible.Result = $false
+          }
+      register: _remove_check_verify
+
+    - name: Assert trust still exists
+      ansible.builtin.assert:
+        that:
+          - _remove_check_verify.result
+
+    - name: Remove trust
+      microsoft.ad.domain_trust:
+        name: '{{ trust_target_domain }}'
+        state: absent
+      register: _remove
+
+    - name: Assert trust was removed
+      ansible.builtin.assert:
+        that:
+          - _remove is changed
+
+    - name: Remove trust again (idempotency)
+      microsoft.ad.domain_trust:
+        name: '{{ trust_target_domain }}'
+        state: absent
+      register: _remove_idem
+
+    - name: Assert no change on idempotent remove
+      ansible.builtin.assert:
+        that:
+          - _remove_idem is not changed
+
+  always:
+    - name: Cleanup - ensure trust is removed
+      microsoft.ad.domain_trust:
+        name: '{{ trust_target_domain }}'
+        state: absent
+      failed_when: false
