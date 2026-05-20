@@ -60,7 +60,6 @@ DOCUMENTATION:
         - Required when O(state=present) and the trust does not yet
           exist.
       type: str
-      no_log: true
     selective_authentication:
       description:
         - Whether selective authentication is enabled on the trust.
