@@ -6,11 +6,6 @@
 #AnsibleRequires -CSharpUtil Ansible.Basic
 #AnsibleRequires -PowerShell ..module_utils._ADObject
 
-$transportMap = @{
-    [int]0 = 'IP'
-    [int]1 = 'SMTP'
-}
-
 $setParams = @{
     PropertyInfo = @(
         [PSCustomObject]@{
@@ -62,6 +57,10 @@ $setParams = @{
             Set = {
                 param($Module, $ADParams, $SetParams, $ADObject)
 
+                $transportMap = @{
+                    0 = 'IP'
+                    1 = 'SMTP'
+                }
                 $current = $transportMap[[int]$ADObject.InterSiteTransportProtocol]
                 $desired = $Module.Params.intersite_transport_protocol
 
