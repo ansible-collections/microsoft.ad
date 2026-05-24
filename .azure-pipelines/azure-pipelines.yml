@@ -157,15 +157,15 @@ stages:
               test: sanity
             - name: Units
               test: units
-  - stage: Windows_1_WinPS
-    displayName: Windows 1 WinPS
+  - stage: Windows_WinPS
+    displayName: Windows WinPS
     dependsOn:
       - Dependencies
     jobs:
       - template: templates/matrix.yml
         parameters:
           nameFormat: Server {0}
-          testFormat: devel/windows/{0}/5.1/1
+          testFormat: devel/windows/{0}/5.1
           targets:
             - name: Server 2019 WinRM HTTP
               test: 2019/winrm/http
@@ -177,15 +177,18 @@ stages:
               test: 2022/ssh/key
             - name: Server 2025 SSH Key
               test: 2025/ssh/key
-  - stage: Windows_1_Pwsh_7_6
-    displayName: Windows 1 Pwsh 7.6
+          groups:
+            - 1
+            - 2
+  - stage: Windows_Pwsh_7_6
+    displayName: Windows Pwsh 7.6
     dependsOn:
       - Dependencies
     jobs:
       - template: templates/matrix.yml
         parameters:
           nameFormat: Server {0}
-          testFormat: devel/windows/{0}/7.6/1
+          testFormat: devel/windows/{0}/7.6
           targets:
             - name: 2025 WinRM HTTP
               test: 2025/winrm/http
@@ -193,6 +196,9 @@ stages:
               test: 2025/psrp/http
             - name: 2025 SSH Key
               test: 2025/ssh/key
+          groups:
+            - 1
+            - 2
   - stage: Summary
     condition: succeededOrFailed()
     dependsOn:
@@ -203,7 +209,7 @@ stages:
       - Ansible_2_18
       - Ansible_2_17
       - Ansible_2_16
-      - Windows_1_WinPS
-      - Windows_1_Pwsh_7_6
+      - Windows_WinPS
+      - Windows_Pwsh_7_6
     jobs:
       - template: templates/coverage.yml
