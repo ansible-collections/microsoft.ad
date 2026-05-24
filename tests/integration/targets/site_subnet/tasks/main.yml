@@ -2,43 +2,13 @@
 
 - name: Test site_subnet module
   block:
-    # =================================================================
-    #  SETUP - create test sites using native PowerShell
-    #  After rebase of site module (PR #237), replace with:
-    #
-    #  - name: Create test site
-    #    microsoft.ad.site:
-    #      name: AnsibleSubnetTestSite
-    #      description: Site for subnet integration tests
-    #      state: present
-    #
-    #  - name: Create second test site
-    #    microsoft.ad.site:
-    #      name: AnsibleSubnetTestSite2
-    #      description: Second site for subnet reassignment tests
-    #      state: present
-    # =================================================================
-    - name: Create test site via PowerShell
-      ansible.windows.win_powershell:
-        script: |
-          try {
-              Get-ADReplicationSite -Identity 'AnsibleSubnetTestSite'
-          }
-          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-              New-ADReplicationSite -Name 'AnsibleSubnetTestSite' -Description 'Site for subnet integration tests'
-              $Ansible.Changed = $true
-          }
-
-    - name: Create second test site via PowerShell
-      ansible.windows.win_powershell:
-        script: |
-          try {
-              Get-ADReplicationSite -Identity 'AnsibleSubnetTestSite2'
-          }
-          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-              New-ADReplicationSite -Name 'AnsibleSubnetTestSite2' -Description 'Second site for subnet reassignment tests'
-              $Ansible.Changed = $true
-          }
+    - name: Create test sites
+      microsoft.ad.site:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - AnsibleSubnetTestSite
+        - AnsibleSubnetTestSite2
 
     - name: Create subnet - check mode
       microsoft.ad.site_subnet:
@@ -408,25 +378,10 @@
         - 192.168.100.0/24
       failed_when: false
 
-    # After rebase of site module (PR #237), replace with:
-    #
-    # - name: Cleanup - remove test sites
-    #   microsoft.ad.site:
-    #     name: "{{ item }}"
-    #     state: absent
-    #   loop:
-    #     - AnsibleSubnetTestSite
-    #     - AnsibleSubnetTestSite2
-    #   failed_when: false
-    - name: Cleanup - remove test sites via PowerShell
-      ansible.windows.win_powershell:
-        script: |
-          try {
-              Remove-ADReplicationSite -Identity '{{ item }}' -Confirm:$false
-          }
-          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
-              # Already gone
-          }
+    - name: Cleanup - remove test sites
+      microsoft.ad.site:
+        name: "{{ item }}"
+        state: absent
       loop:
         - AnsibleSubnetTestSite
         - AnsibleSubnetTestSite2
