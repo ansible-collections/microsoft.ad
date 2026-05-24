@@ -32,6 +32,9 @@
           }
           throw
       }
+  vars:
+    # The module can only be natively loaded in WinPS.
+    ansible_pwsh_interpreter: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
   become: true
   become_method: ansible.builtin.runas
   become_user: SYSTEM
