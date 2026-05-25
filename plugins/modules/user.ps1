@@ -456,7 +456,7 @@ $setParams = @{
                 if ($ADObject) {
                     try {
                         Set-ADObject -Identity $member -Add @{
-                            member = $ADObject.DistinguishedName
+                            member = $Module.Result.distinguished_name
                         } @lookupParams @commonParams
                     }
                     catch [Microsoft.ActiveDirectory.Management.ADException] {
@@ -482,7 +482,7 @@ $setParams = @{
                 if ($ADObject) {
                     try {
                         Set-ADObject -Identity $member -Remove @{
-                            member = $ADObject.DistinguishedName
+                            member = $Module.Result.distinguished_name
                         } @lookupParams @commonParams
                     }
                     catch [Microsoft.ActiveDirectory.Management.ADException] {
