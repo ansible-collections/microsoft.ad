@@ -159,7 +159,6 @@
         that:
           - _guid_update is changed
 
-    # ---- REMOVE ----
     - name: Remove GPO link - check mode
       microsoft.ad.gpo:
         name: AnsibleTestGPO
