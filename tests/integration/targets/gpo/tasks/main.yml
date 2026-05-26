@@ -1,0 +1,228 @@
+---
+
+- name: Create test GPO for link tests
+  ansible.windows.win_powershell:
+    script: |
+      Import-Module GroupPolicy
+      $existing = Get-GPO -Name 'AnsibleTestGPO' -ErrorAction SilentlyContinue
+      if (-not $existing) {
+          $gpo = New-GPO -Name 'AnsibleTestGPO' -Comment 'Integration test GPO'
+          $Ansible.Result = $gpo.Id.ToString()
+      }
+      else {
+          $Ansible.Result = $existing.Id.ToString()
+      }
+  register: _test_gpo
+
+- name: Set test GPO GUID fact
+  ansible.builtin.set_fact:
+    test_gpo_guid: "{{ _test_gpo.result }}"
+
+- name: Get domain DN for target
+  ansible.windows.win_powershell:
+    script: |
+      $Ansible.Result = (Get-ADDomain).DistinguishedName
+  register: _domain_dn
+
+- name: Set domain DN fact
+  ansible.builtin.set_fact:
+    test_target: "{{ _domain_dn.result }}"
+
+- name: Test gpo module
+  block:
+    - name: Create GPO link - check mode
+      microsoft.ad.gpo:
+        name: AnsibleTestGPO
+        target: "{{ test_target }}"
+        state: present
+      register: _create_check
+      check_mode: true
+
+    - name: Assert create check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _create_check is changed
+
+    - name: Verify link was not actually created in check mode
+      ansible.windows.win_powershell:
+        script: |
+          Import-Module GroupPolicy
+          $links = (Get-GPInheritance -Target '{{ test_target }}').GpoLinks
+          $found = $links | Where-Object { $_.GpoId -eq '{{ test_gpo_guid }}' }
+          $Ansible.Result = ($null -ne $found)
+      register: _check_mode_verify
+
+    - name: Assert link does not exist after check mode
+      ansible.builtin.assert:
+        that:
+          - not _check_mode_verify.result
+
+    - name: Create GPO link
+      microsoft.ad.gpo:
+        name: AnsibleTestGPO
+        target: "{{ test_target }}"
+        state: present
+      register: _create
+
+    - name: Assert link was created
+      ansible.builtin.assert:
+        that:
+          - _create is changed
+
+    - name: Create GPO link again (idempotency)
+      microsoft.ad.gpo:
+        name: AnsibleTestGPO
+        target: "{{ test_target }}"
+        state: present
+      register: _create_idem
+
+    - name: Assert no change on idempotent run
+      ansible.builtin.assert:
+        that:
+          - _create_idem is not changed
+
+    - name: Disable GPO link
+      microsoft.ad.gpo:
+        name: AnsibleTestGPO
+        target: "{{ test_target }}"
+        enabled: false
+        state: present
+      register: _disable
+
+    - name: Assert disable reported changed
+      ansible.builtin.assert:
+        that:
+          - _disable is changed
+
+    - name: Disable GPO link again (idempotency)
+      microsoft.ad.gpo:
+        name: AnsibleTestGPO
+        target: "{{ test_target }}"
+        enabled: false
+        state: present
+      register: _disable_idem
+
+    - name: Assert no change on idempotent disable
+      ansible.builtin.assert:
+        that:
+          - _disable_idem is not changed
+
+    - name: Re-enable GPO link
+      microsoft.ad.gpo:
+        name: AnsibleTestGPO
+        target: "{{ test_target }}"
+        enabled: true
+        state: present
+      register: _enable
+
+    - name: Assert re-enable reported changed
+      ansible.builtin.assert:
+        that:
+          - _enable is changed
+
+    - name: Enforce GPO link
+      microsoft.ad.gpo:
+        name: AnsibleTestGPO
+        target: "{{ test_target }}"
+        enforced: true
+        state: present
+      register: _enforce
+
+    - name: Assert enforce reported changed
+      ansible.builtin.assert:
+        that:
+          - _enforce is changed
+
+    - name: Enforce GPO link again (idempotency)
+      microsoft.ad.gpo:
+        name: AnsibleTestGPO
+        target: "{{ test_target }}"
+        enforced: true
+        state: present
+      register: _enforce_idem
+
+    - name: Assert no change on idempotent enforce
+      ansible.builtin.assert:
+        that:
+          - _enforce_idem is not changed
+
+    - name: Update link using GUID
+      microsoft.ad.gpo:
+        guid: "{{ test_gpo_guid }}"
+        target: "{{ test_target }}"
+        enforced: false
+        state: present
+      register: _guid_update
+
+    - name: Assert GUID update reported changed
+      ansible.builtin.assert:
+        that:
+          - _guid_update is changed
+
+    # ---- REMOVE ----
+    - name: Remove GPO link - check mode
+      microsoft.ad.gpo:
+        name: AnsibleTestGPO
+        target: "{{ test_target }}"
+        state: absent
+      register: _remove_check
+      check_mode: true
+
+    - name: Assert remove check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _remove_check is changed
+
+    - name: Verify link still exists after remove check mode
+      ansible.windows.win_powershell:
+        script: |
+          Import-Module GroupPolicy
+          $links = (Get-GPInheritance -Target '{{ test_target }}').GpoLinks
+          $found = $links | Where-Object { $_.GpoId -eq '{{ test_gpo_guid }}' }
+          $Ansible.Result = ($null -ne $found)
+      register: _remove_check_verify
+
+    - name: Assert link still exists after remove check mode
+      ansible.builtin.assert:
+        that:
+          - _remove_check_verify.result
+
+    - name: Remove GPO link
+      microsoft.ad.gpo:
+        name: AnsibleTestGPO
+        target: "{{ test_target }}"
+        state: absent
+      register: _remove
+
+    - name: Assert remove reported changed
+      ansible.builtin.assert:
+        that:
+          - _remove is changed
+
+    - name: Remove GPO link again (idempotency)
+      microsoft.ad.gpo:
+        name: AnsibleTestGPO
+        target: "{{ test_target }}"
+        state: absent
+      register: _remove_idem
+
+    - name: Assert no change on idempotent remove
+      ansible.builtin.assert:
+        that:
+          - _remove_idem is not changed
+
+  always:
+    - name: Cleanup - remove GPO link if it exists
+      microsoft.ad.gpo:
+        name: AnsibleTestGPO
+        target: "{{ test_target }}"
+        state: absent
+
+    - name: Cleanup - remove test GPO
+      ansible.windows.win_powershell:
+        script: |
+          Import-Module GroupPolicy
+          $gpo = Get-GPO -Name 'AnsibleTestGPO' -ErrorAction SilentlyContinue
+          if ($gpo) {
+              Remove-GPO -Guid $gpo.Id -Confirm:$false
+          }

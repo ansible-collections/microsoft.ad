@@ -1,0 +1,125 @@
+# Copyright (c) 2026 Ansible Project
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+DOCUMENTATION:
+  module: gpo
+  short_description: Manage Group Policy Object links
+  version_added: 1.12.0
+  description:
+    - Create, modify, or remove a Group Policy Object (GPO) link on a
+      target container such as an OU, domain, or site.
+    - Uses the GroupPolicy PowerShell module cmdlets C(New-GPLink),
+      C(Set-GPLink), C(Remove-GPLink), and C(Get-GPInheritance).
+  options:
+    name:
+      description:
+        - The display name of the GPO to link.
+        - Mutually exclusive with O(guid).
+        - One of O(name) or O(guid) must be provided.
+      type: str
+    guid:
+      description:
+        - The GUID of the GPO to link.
+        - Mutually exclusive with O(name).
+        - One of O(name) or O(guid) must be provided.
+      type: str
+    target:
+      description:
+        - The distinguished name of the container (OU, domain, or site) to
+          which the GPO should be linked.
+        - 'Example: V(OU=Servers,DC=contoso,DC=com).'
+      type: str
+      required: true
+    state:
+      description:
+        - Whether the GPO link should be present or absent on the target.
+      type: str
+      default: present
+      choices: [present, absent]
+    enabled:
+      description:
+        - Whether the GPO link is enabled.
+        - When not specified during creation, the link defaults to enabled.
+      type: bool
+    enforced:
+      description:
+        - Whether the GPO link is enforced (No Override).
+        - When not specified during creation, the link defaults to not
+          enforced.
+      type: bool
+    order:
+      description:
+        - The link order (1-based) for the GPO on the target container.
+        - Lower numbers have higher precedence.
+      type: int
+    domain_server:
+      description:
+        - The FQDN of the domain controller to target for all operations.
+        - When not specified, the module uses the default domain controller
+          discovery.
+      type: str
+
+  notes:
+    - This module must be run on a Windows host with the C(GroupPolicy)
+      PowerShell module installed (available on domain controllers or via
+      RSAT).
+    - The GPO identified by O(name) or O(guid) must already exist. This
+      module does not create or delete GPOs, only their links.
+  seealso:
+    - module: microsoft.ad.ou
+    - module: microsoft.ad.object_info
+  extends_documentation_fragment:
+    - ansible.builtin.action_common_attributes
+  attributes:
+    check_mode:
+      support: full
+    diff_mode:
+      support: full
+    platform:
+      platforms:
+        - windows
+  author:
+    - Ron Gershburg (@rgershbu)
+
+EXAMPLES: |
+  - name: Link a GPO to an OU
+    microsoft.ad.gpo:
+      name: Security_Hardening_Policy
+      target: 'OU=Servers,DC=contoso,DC=com'
+      state: present
+
+  - name: Link a GPO by GUID and enforce it
+    microsoft.ad.gpo:
+      guid: 5990264b-7000-482d-a2f0-c43eb26aa956
+      target: 'OU=Workstations,DC=contoso,DC=com'
+      enforced: true
+      state: present
+
+  - name: Disable a GPO link without removing it
+    microsoft.ad.gpo:
+      name: Optional_Policy
+      target: 'OU=Staging,DC=contoso,DC=com'
+      enabled: false
+      state: present
+
+  - name: Set link order for a GPO
+    microsoft.ad.gpo:
+      name: Security_Hardening_Policy
+      target: 'OU=Servers,DC=contoso,DC=com'
+      order: 1
+      state: present
+
+  - name: Remove a GPO link from an OU
+    microsoft.ad.gpo:
+      name: Old_Policy
+      target: 'OU=Servers,DC=contoso,DC=com'
+      state: absent
+
+  - name: Link a GPO using a specific domain controller
+    microsoft.ad.gpo:
+      name: Security_Hardening_Policy
+      target: 'OU=Servers,DC=contoso,DC=com'
+      domain_server: dc01.contoso.com
+      state: present
+
+RETURN: {}
