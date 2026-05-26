@@ -84,7 +84,8 @@ catch {
     $module.FailJson("Failed to read GP links on target '$target': $_", $_)
 }
 
-$existingLink = $inheritance.GpoLinks | Where-Object { $_.GpoId -eq $gpo.Id }
+$gpoId = $gpo.Id.ToString()
+$existingLink = $inheritance.GpoLinks | Where-Object { $_.GpoId.ToString() -eq $gpoId }
 
 if ($state -eq 'present') {
     if ($existingLink) {
