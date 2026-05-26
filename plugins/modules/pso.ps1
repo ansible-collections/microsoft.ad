@@ -15,7 +15,7 @@ $setParams = @{
         }
         [PSCustomObject]@{
             Name = 'min_password_length'
-            Option = @{ type = 'int' }
+            Option = @{ type = 'int'; no_log = $false }
             Attribute = 'MinPasswordLength'
         }
         [PSCustomObject]@{
