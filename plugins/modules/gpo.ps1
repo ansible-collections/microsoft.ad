@@ -63,7 +63,6 @@ catch {
     $module.FailJson("Failed to import GroupPolicy module: $_", $_)
 }
 
-# Resolve the GPO to get both Name and GUID
 try {
     if ($guid) {
         $gpo = Get-GPO @gpParams -Guid $guid -ErrorAction Stop
@@ -76,7 +75,6 @@ catch {
     $module.FailJson("Failed to find GPO: $_", $_)
 }
 
-# Read current link state on the target
 try {
     $inheritance = Get-GPInheritance @gpParams -Target $target -ErrorAction Stop
 }
@@ -84,25 +82,33 @@ catch {
     $module.FailJson("Failed to read GP links on target '$target': $_", $_)
 }
 
-$gpoId = $gpo.Id.ToString()
-$existingLink = @($inheritance.GpoLinks) | Where-Object { $null -ne $_.GpoId -and $_.GpoId.ToString() -eq $gpoId }
+$gpoIdHex = ("$($gpo.Id)" -replace '[^a-fA-F0-9]', '').ToLower()
+$existingLink = $null
+foreach ($link in @($inheritance.GpoLinks)) {
+    if ($null -eq $link -or $null -eq $link.GpoId) { continue }
+    $linkIdHex = ("$($link.GpoId)" -replace '[^a-fA-F0-9]', '').ToLower()
+    if ($linkIdHex -eq $gpoIdHex) {
+        $existingLink = $link
+        break
+    }
+}
 
 if ($state -eq 'present') {
     if ($existingLink) {
         $module.Diff.before = @{
-            enabled = $existingLink.Enabled
-            enforced = $existingLink.Enforced
+            enabled = [bool]$existingLink.Enabled
+            enforced = [bool]$existingLink.Enforced
             order = $existingLink.Order
         }
 
         $setParams = @{}
         $desiredAfter = @{
-            enabled = $existingLink.Enabled
-            enforced = $existingLink.Enforced
+            enabled = [bool]$existingLink.Enabled
+            enforced = [bool]$existingLink.Enforced
             order = $existingLink.Order
         }
 
-        if ($null -ne $module.Params.enabled -and $module.Params.enabled -ne $existingLink.Enabled) {
+        if ($null -ne $module.Params.enabled -and $module.Params.enabled -ne [bool]$existingLink.Enabled) {
             if ($module.Params.enabled) {
                 $setParams.LinkEnabled = 'Yes'
             }
@@ -111,7 +117,7 @@ if ($state -eq 'present') {
             }
             $desiredAfter.enabled = $module.Params.enabled
         }
-        if ($null -ne $module.Params.enforced -and $module.Params.enforced -ne $existingLink.Enforced) {
+        if ($null -ne $module.Params.enforced -and $module.Params.enforced -ne [bool]$existingLink.Enforced) {
             if ($module.Params.enforced) {
                 $setParams.Enforced = 'Yes'
             }
@@ -131,7 +137,7 @@ if ($state -eq 'present') {
             $module.Result.changed = $true
             try {
                 Set-GPLink @gpParams -Guid $gpo.Id -Target $target @setParams `
-                    -WhatIf:$module.CheckMode -Confirm:$false -ErrorAction Stop
+                    -WhatIf:$module.CheckMode -Confirm:$false -ErrorAction Stop | Out-Null
             }
             catch {
                 $module.FailJson("Failed to update GPO link: $_", $_)
@@ -139,9 +145,6 @@ if ($state -eq 'present') {
         }
     }
     else {
-        # Create link
-        $module.Result.changed = $true
-
         $newParams = @{}
         if ($null -ne $module.Params.enabled) {
             if ($module.Params.enabled) {
@@ -163,34 +166,43 @@ if ($state -eq 'present') {
             $newParams.Order = $module.Params.order
         }
 
+        $created = $false
         try {
             New-GPLink @gpParams -Guid $gpo.Id -Target $target @newParams `
-                -WhatIf:$module.CheckMode -Confirm:$false -ErrorAction Stop
+                -WhatIf:$module.CheckMode -Confirm:$false -ErrorAction Stop | Out-Null
+            $created = $true
         }
         catch {
-            $module.FailJson("Failed to create GPO link: $_", $_)
+            if ("$_" -match 'already linked') {
+                $created = $false
+            }
+            else {
+                $module.FailJson("Failed to create GPO link: $_", $_)
+            }
         }
 
-        $module.Diff.after = @{
-            enabled = if ($null -ne $module.Params.enabled) { $module.Params.enabled } else { $true }
-            enforced = if ($null -ne $module.Params.enforced) { $module.Params.enforced } else { $false }
-            order = if ($null -ne $module.Params.order) { $module.Params.order } else { $null }
+        if ($created) {
+            $module.Result.changed = $true
+            $module.Diff.after = @{
+                enabled = if ($null -ne $module.Params.enabled) { $module.Params.enabled } else { $true }
+                enforced = if ($null -ne $module.Params.enforced) { $module.Params.enforced } else { $false }
+                order = if ($null -ne $module.Params.order) { $module.Params.order } else { $null }
+            }
         }
     }
 }
 else {
-    # state = absent
     if ($existingLink) {
         $module.Diff.before = @{
-            enabled = $existingLink.Enabled
-            enforced = $existingLink.Enforced
+            enabled = [bool]$existingLink.Enabled
+            enforced = [bool]$existingLink.Enforced
             order = $existingLink.Order
         }
         $module.Result.changed = $true
 
         try {
             Remove-GPLink @gpParams -Guid $gpo.Id -Target $target `
-                -WhatIf:$module.CheckMode -Confirm:$false -ErrorAction Stop
+                -WhatIf:$module.CheckMode -Confirm:$false -ErrorAction Stop | Out-Null
         }
         catch {
             $module.FailJson("Failed to remove GPO link: $_", $_)
