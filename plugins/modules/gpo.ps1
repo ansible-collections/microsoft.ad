@@ -56,13 +56,18 @@ if ($module.Params.domain_server) {
     $gpParams.Server = $module.Params.domain_server
 }
 
+$importParams = @{ Name = 'GroupPolicy'; ErrorAction = 'Stop' }
+if ($PSVersionTable.PSVersion -ge [version]'6.0') {
+    $importParams.SkipEditionCheck = $true
+}
 try {
-    Import-Module GroupPolicy -ErrorAction Stop
+    Import-Module @importParams
 }
 catch {
     $module.FailJson("Failed to import GroupPolicy module: $_", $_)
 }
 
+# Resolve the GPO to get both Name and GUID
 try {
     if ($guid) {
         $gpo = Get-GPO @gpParams -Guid $guid -ErrorAction Stop
@@ -166,28 +171,20 @@ if ($state -eq 'present') {
             $newParams.Order = $module.Params.order
         }
 
-        $created = $false
+        $module.Result.changed = $true
+
         try {
             New-GPLink @gpParams -Guid $gpo.Id -Target $target @newParams `
                 -WhatIf:$module.CheckMode -Confirm:$false -ErrorAction Stop | Out-Null
-            $created = $true
         }
         catch {
-            if ("$_" -match 'already linked') {
-                $created = $false
-            }
-            else {
-                $module.FailJson("Failed to create GPO link: $_", $_)
-            }
+            $module.FailJson("Failed to create GPO link: $_", $_)
         }
 
-        if ($created) {
-            $module.Result.changed = $true
-            $module.Diff.after = @{
-                enabled = if ($null -ne $module.Params.enabled) { $module.Params.enabled } else { $true }
-                enforced = if ($null -ne $module.Params.enforced) { $module.Params.enforced } else { $false }
-                order = if ($null -ne $module.Params.order) { $module.Params.order } else { $null }
-            }
+        $module.Diff.after = @{
+            enabled = if ($null -ne $module.Params.enabled) { $module.Params.enabled } else { $true }
+            enforced = if ($null -ne $module.Params.enforced) { $module.Params.enforced } else { $false }
+            order = if ($null -ne $module.Params.order) { $module.Params.order } else { $null }
         }
     }
 }
