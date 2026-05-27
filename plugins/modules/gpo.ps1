@@ -85,7 +85,7 @@ catch {
 }
 
 $gpoId = $gpo.Id.ToString()
-$existingLink = @($inheritance.GpoLinks) | Where-Object { $null -ne $_ -and $_.GpoId.ToString() -eq $gpoId }
+$existingLink = @($inheritance.GpoLinks) | Where-Object { $null -ne $_.GpoId -and $_.GpoId.ToString() -eq $gpoId }
 
 if ($state -eq 'present') {
     if ($existingLink) {
