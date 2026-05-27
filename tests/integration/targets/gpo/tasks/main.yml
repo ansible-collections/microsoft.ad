@@ -46,9 +46,11 @@
     - name: Verify link was not actually created in check mode
       ansible.windows.win_powershell:
         script: |
-          Import-Module GroupPolicy
+          $importParams = @{ Name = 'GroupPolicy'; ErrorAction = 'Stop' }
+          if ($PSVersionTable.PSVersion -ge [version]'6.0') { $importParams.SkipEditionCheck = $true }
+          Import-Module @importParams
           $links = (Get-GPInheritance -Target '{{ test_target }}').GpoLinks
-          $found = $links | Where-Object { $_.GpoId -eq '{{ test_gpo_guid }}' }
+          $found = $links | Where-Object { "$($_.GpoId)" -eq '{{ test_gpo_guid }}' }
           $Ansible.Result = ($null -ne $found)
       register: _check_mode_verify
 
@@ -175,9 +177,11 @@
     - name: Verify link still exists after remove check mode
       ansible.windows.win_powershell:
         script: |
-          Import-Module GroupPolicy
+          $importParams = @{ Name = 'GroupPolicy'; ErrorAction = 'Stop' }
+          if ($PSVersionTable.PSVersion -ge [version]'6.0') { $importParams.SkipEditionCheck = $true }
+          Import-Module @importParams
           $links = (Get-GPInheritance -Target '{{ test_target }}').GpoLinks
-          $found = $links | Where-Object { $_.GpoId -eq '{{ test_gpo_guid }}' }
+          $found = $links | Where-Object { "$($_.GpoId)" -eq '{{ test_gpo_guid }}' }
           $Ansible.Result = ($null -ne $found)
       register: _remove_check_verify
 
