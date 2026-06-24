@@ -1507,6 +1507,7 @@ Function Invoke-AnsibleADObject {
 
             # Won't be set in check mode
             if ($finalADObject) {
+                $adObject = $finalADObject
                 $objectDN = $finalADObject.DistinguishedName
             }
             else {
