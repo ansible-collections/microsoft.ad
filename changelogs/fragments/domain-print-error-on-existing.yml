@@ -1,0 +1,4 @@
+bugfixes:
+  - >-
+    domain - Ensure that the `microsoft.ad.domain` module errors when a forest already exists.
+    This prevents the module from attempting to create a new forest if an existing forest is detected and prints an error message indicating that.
