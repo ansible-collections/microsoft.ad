@@ -1,0 +1,197 @@
+---
+
+- name: Test pso module
+  block:
+    - name: Create shadow test group for PSO assignment
+      microsoft.ad.group:
+        name: AnsibleTestPSOGroup
+        scope: global
+        category: security
+        state: present
+
+    - name: Create PSO - check mode
+      microsoft.ad.pso:
+        name: AnsibleTestPSO
+        description: Ansible integration test PSO
+        precedence: 100
+        min_password_length: 20
+        complexity_enabled: true
+        lockout_threshold: 5
+        subjects:
+          - AnsibleTestPSOGroup
+        state: present
+      register: _create_check
+      check_mode: true
+
+    - name: Assert create check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _create_check is changed
+
+    - name: Verify PSO was not actually created in check mode
+      ansible.windows.win_powershell:
+        script: |
+          try {
+              $null = Get-ADFineGrainedPasswordPolicy -Identity 'AnsibleTestPSO'
+              $Ansible.Result = $true
+          }
+          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+              $Ansible.Result = $false
+          }
+      register: _check_mode_verify
+
+    - name: Assert PSO does not exist after check mode
+      ansible.builtin.assert:
+        that:
+          - not _check_mode_verify.result
+
+    - name: Create PSO
+      microsoft.ad.pso:
+        name: AnsibleTestPSO
+        description: Ansible integration test PSO
+        precedence: 100
+        min_password_length: 20
+        complexity_enabled: true
+        lockout_threshold: 5
+        subjects:
+          - AnsibleTestPSOGroup
+        state: present
+      register: _create
+
+    - name: Assert PSO was created
+      ansible.builtin.assert:
+        that:
+          - _create is changed
+          - _create.distinguished_name is defined
+          - _create.distinguished_name | length > 0
+          - _create.object_guid is defined
+          - _create.object_guid | length > 0
+          - _create.object_guid != '00000000-0000-0000-0000-000000000000'
+
+    - name: Create same PSO again (idempotency)
+      microsoft.ad.pso:
+        name: AnsibleTestPSO
+        description: Ansible integration test PSO
+        precedence: 100
+        min_password_length: 20
+        complexity_enabled: true
+        lockout_threshold: 5
+        subjects:
+          - AnsibleTestPSOGroup
+        state: present
+      register: _create_idem
+
+    - name: Assert no change on idempotent run
+      ansible.builtin.assert:
+        that:
+          - _create_idem is not changed
+
+    - name: Update PSO lockout threshold
+      microsoft.ad.pso:
+        name: AnsibleTestPSO
+        lockout_threshold: 10
+        state: present
+      register: _update_lockout
+
+    - name: Assert lockout threshold change
+      ansible.builtin.assert:
+        that:
+          - _update_lockout is changed
+
+    - name: Update PSO lockout threshold again (idempotency)
+      microsoft.ad.pso:
+        name: AnsibleTestPSO
+        lockout_threshold: 10
+        state: present
+      register: _update_lockout_idem
+
+    - name: Assert no change on idempotent lockout update
+      ansible.builtin.assert:
+        that:
+          - _update_lockout_idem is not changed
+
+    - name: Update PSO min password length
+      microsoft.ad.pso:
+        name: AnsibleTestPSO
+        min_password_length: 24
+        state: present
+      register: _update_min_length
+
+    - name: Assert min password length change
+      ansible.builtin.assert:
+        that:
+          - _update_min_length is changed
+
+    - name: Update PSO min password length again (idempotency)
+      microsoft.ad.pso:
+        name: AnsibleTestPSO
+        min_password_length: 24
+        state: present
+      register: _update_min_length_idem
+
+    - name: Assert no change on idempotent min length update
+      ansible.builtin.assert:
+        that:
+          - _update_min_length_idem is not changed
+
+    - name: Remove PSO - check mode
+      microsoft.ad.pso:
+        name: AnsibleTestPSO
+        state: absent
+      register: _remove_check
+      check_mode: true
+
+    - name: Assert remove check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _remove_check is changed
+
+    - name: Verify PSO still exists after remove check mode
+      ansible.windows.win_powershell:
+        script: |
+          try {
+              $null = Get-ADFineGrainedPasswordPolicy -Identity 'AnsibleTestPSO'
+              $Ansible.Result = $true
+          }
+          catch [Microsoft.ActiveDirectory.Management.ADIdentityNotFoundException] {
+              $Ansible.Result = $false
+          }
+      register: _remove_check_verify
+
+    - name: Assert PSO still exists after remove check mode
+      ansible.builtin.assert:
+        that:
+          - _remove_check_verify.result
+
+    - name: Remove PSO
+      microsoft.ad.pso:
+        name: AnsibleTestPSO
+        state: absent
+      register: _remove
+
+    - name: Assert remove reported changed
+      ansible.builtin.assert:
+        that:
+          - _remove is changed
+
+    - name: Remove PSO again (idempotency)
+      microsoft.ad.pso:
+        name: AnsibleTestPSO
+        state: absent
+      register: _remove_idem
+
+    - name: Assert no change on idempotent remove
+      ansible.builtin.assert:
+        that:
+          - _remove_idem is not changed
+
+  always:
+    - name: Cleanup - remove test PSO
+      microsoft.ad.pso:
+        name: AnsibleTestPSO
+        state: absent
+
+    - name: Cleanup - remove test group
+      microsoft.ad.group:
+        name: AnsibleTestPSOGroup
+        state: absent
