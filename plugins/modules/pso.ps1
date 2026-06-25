@@ -88,15 +88,7 @@ $setParams = @{
             $desiredSubjects = @($Module.Params.subjects)
             $desiredSorted = @($desiredSubjects | Sort-Object)
 
-            $psoIdentity = if ($Module.Result.distinguished_name) {
-                $Module.Result.distinguished_name
-            }
-            elseif ($ADObject) {
-                $ADObject.DistinguishedName
-            }
-            else {
-                $Module.Params.name
-            }
+            $psoIdentity = $Module.Result.distinguished_name
 
             $currentDNs = @()
             if ($ADObject -and $null -ne $ADObject.AppliesTo) {
@@ -164,10 +156,6 @@ $setParams = @{
             }
         }
 
-        # DN is derivable from I(name) and the fixed Password Settings Container path.
-        if ($Module.Result.ContainsKey('distinguished_name')) {
-            $Module.Result.Remove('distinguished_name') | Out-Null
-        }
     }
 }
 Invoke-AnsibleADObject @setParams

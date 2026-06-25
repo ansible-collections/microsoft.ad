@@ -96,3 +96,10 @@ RETURN:
     returned: always
     type: str
     sample: d84a141f-2b99-4f08-9da0-ed2d26864ba1
+  distinguished_name:
+    description:
+      - The C(distinguishedName) of the AD object that was created, removed, or
+        edited.
+    returned: always
+    type: str
+    sample: CN=IT-Admins-PSO,CN=Password Settings Container,CN=System,DC=example,DC=com

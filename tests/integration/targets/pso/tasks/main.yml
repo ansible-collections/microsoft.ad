@@ -62,6 +62,8 @@
       ansible.builtin.assert:
         that:
           - _create is changed
+          - _create.distinguished_name is defined
+          - _create.distinguished_name | length > 0
           - _create.object_guid is defined
           - _create.object_guid | length > 0
           - _create.object_guid != '00000000-0000-0000-0000-000000000000'
