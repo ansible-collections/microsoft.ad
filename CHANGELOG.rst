@@ -4,6 +4,19 @@ Ansible Microsoft Active Directory Release Notes
 
 .. contents:: Topics
 
+v1.11.1
+=======
+
+Release Summary
+---------------
+
+Release summary for v1.11.1
+
+Bugfixes
+--------
+
+- user - Ensure any post actions like editing the user's groups are performed on the correct distinguished name. This fixes the error when changing the user's groups when the user was moved in the same module invocation.
+
 v1.11.0
 =======
 
