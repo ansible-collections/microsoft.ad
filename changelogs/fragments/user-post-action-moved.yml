@@ -1,4 +1,0 @@
-bugfixes:
-  - >-
-    user - Ensure any post actions like editing the user's groups are performed on the correct distinguished name. This
-    fixes the error when changing the user's groups when the user was moved in the same module invocation.

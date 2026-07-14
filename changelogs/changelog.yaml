@@ -120,6 +120,17 @@ releases:
       name: site_subnet
       namespace: ''
     release_date: '2026-05-25'
+  1.11.1:
+    changes:
+      bugfixes:
+      - user - Ensure any post actions like editing the user's groups are performed
+        on the correct distinguished name. This fixes the error when changing the
+        user's groups when the user was moved in the same module invocation.
+      release_summary: Release summary for v1.11.1
+    fragments:
+    - release-summary.yml
+    - user-post-action-moved.yml
+    release_date: '2026-07-14'
   1.2.0:
     changes:
       bugfixes:
