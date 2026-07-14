@@ -4,6 +4,25 @@ Ansible Microsoft Active Directory Release Notes
 
 .. contents:: Topics
 
+v1.12.0
+=======
+
+Release Summary
+---------------
+
+Release summary for v1.12.0, this is identical to v1.11.1 except with proper changelog entries for the new modules accidentally marked in the v1.11.1 release.
+
+Bugfixes
+--------
+
+- domain - Ensure that the `microsoft.ad.domain` module errors when a forest already exists. This prevents the module from attempting to create a new forest if an existing forest is detected and prints an error message indicating that.
+
+New Modules
+-----------
+
+- gpo - Manage Group Policy Object links
+- pso - Manage Active Directory Password Settings Objects
+
 v1.11.1
 =======
 
