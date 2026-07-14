@@ -131,6 +131,26 @@ releases:
     - release-summary.yml
     - user-post-action-moved.yml
     release_date: '2026-07-14'
+  1.12.0:
+    changes:
+      bugfixes:
+      - domain - Ensure that the `microsoft.ad.domain` module errors when a forest
+        already exists. This prevents the module from attempting to create a new forest
+        if an existing forest is detected and prints an error message indicating that.
+      release_summary: Release summary for v1.12.0, this is identical to v1.11.1 except
+        with proper changelog entries for the new modules accidentally marked in the
+        v1.11.1 release.
+    fragments:
+    - domain-print-error-on-existing.yml
+    - release-summary.yml
+    modules:
+    - description: Manage Group Policy Object links
+      name: gpo
+      namespace: ''
+    - description: Manage Active Directory Password Settings Objects
+      name: pso
+      namespace: ''
+    release_date: '2026-07-14'
   1.2.0:
     changes:
       bugfixes:
