@@ -172,10 +172,10 @@ if ($state -eq 'present') {
                         $endpoints = @()
                         for ($i = 0; $i -lt $module.Params.saml_endpoint.Count; $i++) {
                             $endpointParams = @{
-                                Binding   = 'POST'
-                                Protocol  = 'SAMLAssertionConsumer'
-                                Uri       = $module.Params.saml_endpoint[$i]
-                                Index     = $i
+                                Binding = 'POST'
+                                Protocol = 'SAMLAssertionConsumer'
+                                Uri = $module.Params.saml_endpoint[$i]
+                                Index = $i
                                 IsDefault = ($i -eq 0)
                             }
                             $endpoints += New-AdfsSamlEndpoint @endpointParams
@@ -274,10 +274,10 @@ if ($state -eq 'present') {
                             $endpoints = @()
                             for ($i = 0; $i -lt $module.Params.saml_endpoint.Count; $i++) {
                                 $endpointParams = @{
-                                    Binding   = 'POST'
-                                    Protocol  = 'SAMLAssertionConsumer'
-                                    Uri       = $module.Params.saml_endpoint[$i]
-                                    Index     = $i
+                                    Binding = 'POST'
+                                    Protocol = 'SAMLAssertionConsumer'
+                                    Uri = $module.Params.saml_endpoint[$i]
+                                    Index = $i
                                     IsDefault = ($i -eq 0)
                                 }
                                 $endpoints += New-AdfsSamlEndpoint @endpointParams
