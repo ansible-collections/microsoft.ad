@@ -171,7 +171,14 @@ if ($state -eq 'present') {
                     if ($module.Params.saml_endpoint) {
                         $endpoints = @()
                         for ($i = 0; $i -lt $module.Params.saml_endpoint.Count; $i++) {
-                            $endpoints += New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $module.Params.saml_endpoint[$i] -Index $i -IsDefault:($i -eq 0)
+                            $endpointParams = @{
+                                Binding   = 'POST'
+                                Protocol  = 'SAMLAssertionConsumer'
+                                Uri       = $module.Params.saml_endpoint[$i]
+                                Index     = $i
+                                IsDefault = ($i -eq 0)
+                            }
+                            $endpoints += New-AdfsSamlEndpoint @endpointParams
                         }
                         $addParams.SamlEndpoint = $endpoints
                     }
@@ -266,7 +273,14 @@ if ($state -eq 'present') {
                         else {
                             $endpoints = @()
                             for ($i = 0; $i -lt $module.Params.saml_endpoint.Count; $i++) {
-                                $endpoints += New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $module.Params.saml_endpoint[$i] -Index $i -IsDefault:($i -eq 0)
+                                $endpointParams = @{
+                                    Binding   = 'POST'
+                                    Protocol  = 'SAMLAssertionConsumer'
+                                    Uri       = $module.Params.saml_endpoint[$i]
+                                    Index     = $i
+                                    IsDefault = ($i -eq 0)
+                                }
+                                $endpoints += New-AdfsSamlEndpoint @endpointParams
                             }
                             Set-AdfsRelyingPartyTrust -TargetName $name -SamlEndpoint $endpoints
                         }
