@@ -152,8 +152,8 @@ if ($state -eq 'present') {
                     # proxy boundary. Create them inside a WinPS session.
                     $addTrustWithEndpoints = {
                         param([hashtable]$Params, [string[]]$EndpointUris)
-                        $eps = foreach ($u in $EndpointUris) {
-                            New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $u
+                        $eps = for ($i = 0; $i -lt $EndpointUris.Count; $i++) {
+                            New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $EndpointUris[$i] -Index $i -IsDefault:($i -eq 0)
                         }
                         $Params['SamlEndpoint'] = @($eps)
                         Add-AdfsRelyingPartyTrust @Params
@@ -170,8 +170,8 @@ if ($state -eq 'present') {
                 else {
                     if ($module.Params.saml_endpoint) {
                         $endpoints = @()
-                        foreach ($ep in $module.Params.saml_endpoint) {
-                            $endpoints += New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $ep
+                        for ($i = 0; $i -lt $module.Params.saml_endpoint.Count; $i++) {
+                            $endpoints += New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $module.Params.saml_endpoint[$i] -Index $i -IsDefault:($i -eq 0)
                         }
                         $addParams.SamlEndpoint = $endpoints
                     }
@@ -213,6 +213,67 @@ if ($state -eq 'present') {
                 }
                 catch {
                     $module.FailJson("Failed to update relying party trust '$name': $_", $_)
+                }
+            }
+        }
+
+        # Update SAML endpoints if different from what's currently configured.
+        # Set-AdfsRelyingPartyTrust -SamlEndpoint replaces the entire endpoint
+        # collection, so saml_endpoint in the playbook must always contain the
+        # full desired set, not just the endpoint(s) being added.
+        if ($module.Params.saml_endpoint) {
+            $currentUris = @($existing.SamlEndpoints | ForEach-Object { $_.Location.ToString() })
+            $desiredUris = @($module.Params.saml_endpoint)
+
+            $currentSorted = @($currentUris | Sort-Object)
+            $desiredSorted = @($desiredUris | Sort-Object)
+
+            $samlEndpointChanged = $currentSorted.Count -ne $desiredSorted.Count
+            if (-not $samlEndpointChanged) {
+                for ($i = 0; $i -lt $currentSorted.Count; $i++) {
+                    if ($currentSorted[$i] -ne $desiredSorted[$i]) {
+                        $samlEndpointChanged = $true
+                        break
+                    }
+                }
+            }
+
+            if ($samlEndpointChanged) {
+                $module.Result.changed = $true
+
+                if (-not $module.CheckMode) {
+                    try {
+                        $cmd = Get-Command Add-AdfsRelyingPartyTrust
+                        if ($cmd.Module.PrivateData.ImplicitRemoting) {
+                            # Same cross-proxy issue as on create: build the
+                            # SamlEndpoint objects inside a WinPS session.
+                            $setTrustEndpoints = {
+                                param([string]$Name, [string[]]$EndpointUris)
+                                $eps = for ($i = 0; $i -lt $EndpointUris.Count; $i++) {
+                                    New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $EndpointUris[$i] -Index $i -IsDefault:($i -eq 0)
+                                }
+                                Set-AdfsRelyingPartyTrust -TargetName $Name -SamlEndpoint @($eps)
+                            }
+                            [string[]]$samlUris = @($module.Params.saml_endpoint)
+                            $winPS = New-PSSession -UseWindowsPowerShell
+                            try {
+                                Invoke-Command -Session $winPS -ScriptBlock $setTrustEndpoints -ArgumentList $name, $samlUris
+                            }
+                            finally {
+                                $winPS | Remove-PSSession
+                            }
+                        }
+                        else {
+                            $endpoints = @()
+                            for ($i = 0; $i -lt $module.Params.saml_endpoint.Count; $i++) {
+                                $endpoints += New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $module.Params.saml_endpoint[$i] -Index $i -IsDefault:($i -eq 0)
+                            }
+                            Set-AdfsRelyingPartyTrust -TargetName $name -SamlEndpoint $endpoints
+                        }
+                    }
+                    catch {
+                        $module.FailJson("Failed to update SAML endpoints for relying party trust '$name': $_", $_)
+                    }
                 }
             }
         }
