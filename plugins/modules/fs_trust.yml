@@ -50,6 +50,7 @@ DOCUMENTATION:
         - Only used when creating a trust with O(identifier) for
           manual setup.
         - Each URL is registered as a SAML POST binding endpoint.
+        - The first URL in the list will be marked as IsDefault.
       type: list
       elements: str
     wsfed_endpoint:
