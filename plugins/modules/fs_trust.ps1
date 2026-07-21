@@ -232,13 +232,11 @@ if ($state -eq 'present') {
             $currentUris = @($existing.SamlEndpoints | ForEach-Object { $_.Location.ToString() })
             $desiredUris = @($module.Params.saml_endpoint)
 
-            $currentSorted = @($currentUris | Sort-Object)
-            $desiredSorted = @($desiredUris | Sort-Object)
-
-            $samlEndpointChanged = $currentSorted.Count -ne $desiredSorted.Count
+            # Compare in original order determines which endpoint gets Index 0 / IsDefault
+            $samlEndpointChanged = $currentUris.Count -ne $desiredUris.Count
             if (-not $samlEndpointChanged) {
-                for ($i = 0; $i -lt $currentSorted.Count; $i++) {
-                    if ($currentSorted[$i] -ne $desiredSorted[$i]) {
+                for ($i = 0; $i -lt $currentUris.Count; $i++) {
+                    if ($currentUris[$i] -ne $desiredUris[$i]) {
                         $samlEndpointChanged = $true
                         break
                     }
