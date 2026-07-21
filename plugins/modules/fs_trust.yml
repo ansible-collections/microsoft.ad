@@ -47,10 +47,14 @@ DOCUMENTATION:
     saml_endpoint:
       description:
         - List of SAML Assertion Consumer Service endpoint URLs.
-        - Only used when creating a trust with O(identifier) for
-          manual setup.
         - Each URL is registered as a SAML POST binding endpoint.
-        - The first URL in the list will be marked as IsDefault.
+        - The first URL in the list will be marked as IsDefault,
+          and list order determines each endpoint's index.
+        - When trust already exists, this list replaces the entire set of
+          configured SAML endpoints. It must always contain the full
+          desired set, not just the endpoint(s) being added or changed.
+        - When creating a new trust, only used together with O(identifier)
+          for manual setup.
       type: list
       elements: str
     wsfed_endpoint:
