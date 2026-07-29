@@ -74,6 +74,8 @@ microsoft.ad.computer:
         sid: ($data.sid // null)
       },
       facts: {
+        infra_type: "private_cloud",
+        infra_bucket: "compute",
         device_type: "virtual_machine",
         platform: "microsoft_ad",
         distinguished_name: $data.distinguished_name
