@@ -207,8 +207,8 @@
       ansible.builtin.assert:
         that:
           - _remove_endpoint is changed
-          - (_endpoints_after_remove.stdout | from_json) | length == 1
-          - "'https://test.example.com/saml/acs-second' not in (_endpoints_after_remove.stdout | from_json | map(attribute='Location') | list)"
+          - (_endpoints_after_remove.stdout | from_json) is mapping
+          - (_endpoints_after_remove.stdout | from_json).Location == 'https://test.example.com/saml/acs'
 
     - name: Remove second SAML endpoint on update again - idempotency
       microsoft.ad.fs_trust:
