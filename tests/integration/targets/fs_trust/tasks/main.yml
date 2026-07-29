@@ -6,6 +6,11 @@
         name: TestTrust
         state: absent
 
+    - name: Pre-cleanup - ensure TestTrustMultiAcs does not exist
+      microsoft.ad.fs_trust:
+        name: TestTrustMultiAcs
+        state: absent
+
     - name: Create trust from identifier - check mode
       microsoft.ad.fs_trust:
         name: TestTrust
@@ -17,10 +22,23 @@
       register: _create_check
       check_mode: true
 
-    - name: Assert check mode reports changed
+    - name: Create trust with multiple SAML endpoints - check mode
+      microsoft.ad.fs_trust:
+        name: TestTrustMultiAcs
+        identifier:
+          - https://test.example.com/saml-multi
+        saml_endpoint:
+          - https://test.example.com/saml-multi/acs-a
+          - https://test.example.com/saml-multi/acs-b
+        enabled: true
+      register: _create_multi_check
+      check_mode: true
+
+    - name: Assert both check mode reports changed
       ansible.builtin.assert:
         that:
           - _create_check is changed
+          - _create_multi_check is changed
 
     - name: Create trust from identifier
       microsoft.ad.fs_trust:
@@ -51,6 +69,214 @@
       ansible.builtin.assert:
         that:
           - _create_idem is not changed
+
+    - name: Create trust with multiple SAML endpoints
+      microsoft.ad.fs_trust:
+        name: TestTrustMultiAcs
+        identifier:
+          - https://test.example.com/saml-multi
+        saml_endpoint:
+          - https://test.example.com/saml-multi/acs-a
+          - https://test.example.com/saml-multi/acs-b
+        enabled: true
+      register: _create_multi
+
+    - name: Get SAML endpoints for TestTrustMultiAcs
+      ansible.windows.win_shell: |
+        (Get-AdfsRelyingPartyTrust -Name "TestTrustMultiAcs").SamlEndpoints |
+          Select-Object Index, IsDefault, Location | ConvertTo-Json -Compress
+      register: _multi_endpoints
+
+    - name: Assert multi-endpoint create
+      ansible.builtin.assert:
+        that:
+          - _create_multi is changed
+          - (_multi_endpoints.stdout | from_json) | length == 2
+          - (_multi_endpoints.stdout | from_json | selectattr('IsDefault') | list) | length == 1
+          - (_multi_endpoints.stdout | from_json | selectattr('IsDefault') | first).Location == 'https://test.example.com/saml-multi/acs-a'
+
+    - name: Create trust with multiple SAML endpoints again - idempotency
+      microsoft.ad.fs_trust:
+        name: TestTrustMultiAcs
+        identifier:
+          - https://test.example.com/saml-multi
+        saml_endpoint:
+          - https://test.example.com/saml-multi/acs-a
+          - https://test.example.com/saml-multi/acs-b
+        enabled: true
+      register: _create_multi_idem
+
+    - name: Assert no change on multi-endpoint idempotent create
+      ansible.builtin.assert:
+        that:
+          - _create_multi_idem is not changed
+
+    - name: Add a second SAML endpoint on update - check mode
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        identifier:
+          - https://test.example.com/saml
+        saml_endpoint:
+          - https://test.example.com/saml/acs
+          - https://test.example.com/saml/acs-second
+      register: _add_endpoint_check
+      check_mode: true
+
+    - name: Assert add-endpoint check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _add_endpoint_check is changed
+
+    - name: Add a second SAML endpoint on update
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        identifier:
+          - https://test.example.com/saml
+        saml_endpoint:
+          - https://test.example.com/saml/acs
+          - https://test.example.com/saml/acs-second
+      register: _add_endpoint
+
+    - name: Get SAML endpoints for TestTrust after add
+      ansible.windows.win_shell: |
+        (Get-AdfsRelyingPartyTrust -Name "TestTrust").SamlEndpoints |
+          Select-Object Index, IsDefault, Location | ConvertTo-Json -Compress
+      register: _endpoints_after_add
+
+    - name: Assert endpoint was added
+      ansible.builtin.assert:
+        that:
+          - _add_endpoint is changed
+          - (_endpoints_after_add.stdout | from_json) | length == 2
+          - "'https://test.example.com/saml/acs-second' in (_endpoints_after_add.stdout | from_json | map(attribute='Location') | list)"
+
+    - name: Add a second SAML endpoint on update again - idempotency
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        identifier:
+          - https://test.example.com/saml
+        saml_endpoint:
+          - https://test.example.com/saml/acs
+          - https://test.example.com/saml/acs-second
+      register: _add_endpoint_idem
+
+    - name: Assert no change on idempotent add-endpoint run
+      ansible.builtin.assert:
+        that:
+          - _add_endpoint_idem is not changed
+
+    - name: Remove second SAML endpoint on update - check mode
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        identifier:
+          - https://test.example.com/saml
+        saml_endpoint:
+          - https://test.example.com/saml/acs
+      register: _remove_endpoint_check
+      check_mode: true
+
+    - name: Assert remove-endpoint check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _remove_endpoint_check is changed
+
+    - name: Remove second SAML endpoint on update
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        identifier:
+          - https://test.example.com/saml
+        saml_endpoint:
+          - https://test.example.com/saml/acs
+      register: _remove_endpoint
+
+    - name: Get SAML endpoints for TestTrust after removal
+      ansible.windows.win_shell: |
+        (Get-AdfsRelyingPartyTrust -Name "TestTrust").SamlEndpoints |
+          Select-Object Index, IsDefault, Location | ConvertTo-Json -Compress
+      register: _endpoints_after_remove
+
+    - name: Assert endpoint was removed
+      ansible.builtin.assert:
+        that:
+          - _remove_endpoint is changed
+          - (_endpoints_after_remove.stdout | from_json) | length == 1
+          - "'https://test.example.com/saml/acs-second' not in (_endpoints_after_remove.stdout | from_json | map(attribute='Location') | list)"
+
+    - name: Remove second SAML endpoint on update again - idempotency
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        identifier:
+          - https://test.example.com/saml
+        saml_endpoint:
+          - https://test.example.com/saml/acs
+      register: _remove_endpoint_idem
+
+    - name: Assert no change on idempotent remove-endpoint run
+      ansible.builtin.assert:
+        that:
+          - _remove_endpoint_idem is not changed
+
+    - name: Re-add a second SAML endpoint for reorder testing
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        identifier:
+          - https://test.example.com/saml
+        saml_endpoint:
+          - https://test.example.com/saml/acs
+          - https://test.example.com/saml/acs-second
+
+    - name: Reorder SAML endpoints so acs-second becomes default - check mode
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        identifier:
+          - https://test.example.com/saml
+        saml_endpoint:
+          - https://test.example.com/saml/acs-second
+          - https://test.example.com/saml/acs
+      register: _reorder_check
+      check_mode: true
+
+    - name: Assert reorder check mode reports changed
+      ansible.builtin.assert:
+        that:
+          - _reorder_check is changed
+
+    - name: Reorder SAML endpoints so acs-second becomes default
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        identifier:
+          - https://test.example.com/saml
+        saml_endpoint:
+          - https://test.example.com/saml/acs-second
+          - https://test.example.com/saml/acs
+      register: _reorder
+
+    - name: Get SAML endpoints for TestTrust after reorder
+      ansible.windows.win_shell: |
+        (Get-AdfsRelyingPartyTrust -Name "TestTrust").SamlEndpoints |
+          Select-Object Index, IsDefault, Location | ConvertTo-Json -Compress
+      register: _endpoints_after_reorder
+
+    - name: Assert default endpoint flipped after reorder
+      ansible.builtin.assert:
+        that:
+          - _reorder is changed
+          - (_endpoints_after_reorder.stdout | from_json | selectattr('IsDefault') | first).Location == 'https://test.example.com/saml/acs-second'
+
+    - name: Reorder SAML endpoints again with same order - idempotency
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        identifier:
+          - https://test.example.com/saml
+        saml_endpoint:
+          - https://test.example.com/saml/acs-second
+          - https://test.example.com/saml/acs
+      register: _reorder_idem
+
+    - name: Assert no change on idempotent reorder run
+      ansible.builtin.assert:
+        that:
+          - _reorder_idem is not changed
 
     - name: Update trust - set notes - check mode
       microsoft.ad.fs_trust:
@@ -99,10 +325,18 @@
       register: _remove_check
       check_mode: true
 
+    - name: Remove multi trust - check mode
+      microsoft.ad.fs_trust:
+        name: TestTrustMultiAcs
+        state: absent
+      register: _remove_multi_check
+      check_mode: true
+
     - name: Assert removal check mode reports changed
       ansible.builtin.assert:
         that:
           - _remove_check is changed
+          - _remove_multi_check is changed
 
     - name: Remove trust
       microsoft.ad.fs_trust:
@@ -110,10 +344,17 @@
         state: absent
       register: _remove
 
+    - name: Remove multi trust
+      microsoft.ad.fs_trust:
+        name: TestTrustMultiAcs
+        state: absent
+      register: _remove_multi
+
     - name: Assert removed
       ansible.builtin.assert:
         that:
           - _remove is changed
+          - _remove_multi is changed
 
     - name: Remove trust again - idempotency
       microsoft.ad.fs_trust:
@@ -121,10 +362,17 @@
         state: absent
       register: _remove_idem
 
+    - name: Remove multi trust again - idempotency
+      microsoft.ad.fs_trust:
+        name: TestTrustMultiAcs
+        state: absent
+      register: _remove_multi_idem
+
     - name: Assert no change on idempotent removal
       ansible.builtin.assert:
         that:
           - _remove_idem is not changed
+          - _remove_multi_idem is not changed
 
     - name: Remove non-existent trust - no error
       microsoft.ad.fs_trust:
@@ -142,4 +390,8 @@
       microsoft.ad.fs_trust:
         name: TestTrust
         state: absent
-      ignore_errors: true
+
+    - name: Cleanup - remove TestTrustMultiAcs
+      microsoft.ad.fs_trust:
+        name: TestTrustMultiAcs
+        state: absent
