@@ -82,10 +82,12 @@
       register: _create_multi
 
     - name: Get SAML endpoints for TestTrustMultiAcs
-      ansible.windows.win_shell: |
-        (Get-AdfsRelyingPartyTrust -Name "TestTrustMultiAcs").SamlEndpoints |
-          Select-Object Index, IsDefault, Location | ConvertTo-Json -Compress
+      ansible.windows.win_shell:
+        cmd: |
+          (Get-AdfsRelyingPartyTrust -Name "TestTrustMultiAcs").SamlEndpoints |
+            Select-Object Index, IsDefault, Location | ConvertTo-Json -Compress
       register: _multi_endpoints
+      changed_when: false
 
     - name: Assert multi-endpoint create
       ansible.builtin.assert:
@@ -138,10 +140,12 @@
       register: _add_endpoint
 
     - name: Get SAML endpoints for TestTrust after add
-      ansible.windows.win_shell: |
-        (Get-AdfsRelyingPartyTrust -Name "TestTrust").SamlEndpoints |
-          Select-Object Index, IsDefault, Location | ConvertTo-Json -Compress
+      ansible.windows.win_shell:
+        cmd: |
+          (Get-AdfsRelyingPartyTrust -Name "TestTrust").SamlEndpoints |
+            Select-Object Index, IsDefault, Location | ConvertTo-Json -Compress
       register: _endpoints_after_add
+      changed_when: false
 
     - name: Assert endpoint was added
       ansible.builtin.assert:
@@ -190,10 +194,14 @@
       register: _remove_endpoint
 
     - name: Get SAML endpoints for TestTrust after removal
-      ansible.windows.win_shell: |
-        (Get-AdfsRelyingPartyTrust -Name "TestTrust").SamlEndpoints |
-          Select-Object Index, IsDefault, Location | ConvertTo-Json -Compress
+      ansible.windows.win_shell:
+        cmd: |
+          @(
+            (Get-AdfsRelyingPartyTrust -Name "TestTrust").SamlEndpoints |
+              Select-Object Index, IsDefault, Location
+          ) | ConvertTo-Json -Compress
       register: _endpoints_after_remove
+      changed_when: false
 
     - name: Assert endpoint was removed
       ansible.builtin.assert:
@@ -252,10 +260,12 @@
       register: _reorder
 
     - name: Get SAML endpoints for TestTrust after reorder
-      ansible.windows.win_shell: |
-        (Get-AdfsRelyingPartyTrust -Name "TestTrust").SamlEndpoints |
-          Select-Object Index, IsDefault, Location | ConvertTo-Json -Compress
+      ansible.windows.win_shell:
+        cmd: |
+          (Get-AdfsRelyingPartyTrust -Name "TestTrust").SamlEndpoints |
+            Select-Object Index, IsDefault, Location | ConvertTo-Json -Compress
       register: _endpoints_after_reorder
+      changed_when: false
 
     - name: Assert default endpoint flipped after reorder
       ansible.builtin.assert:
