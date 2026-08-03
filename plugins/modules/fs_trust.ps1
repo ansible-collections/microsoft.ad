@@ -322,7 +322,7 @@ if ($state -eq 'present') {
             # }
 
             $desiredEndpoints = @(
-                ForEach ($i = 0; $i -lt $module.Params.saml_endpoint.Count; $i++) {
+                for ($i = 0; $i -lt $module.Params.saml_endpoint.Count; $i++) {
                     [PSCustomObject]@{
                         Uri = $module.Params.saml_endpoint[$i]
                         Binding = 'POST'
