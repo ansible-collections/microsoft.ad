@@ -44,6 +44,7 @@ $spec = @{
         }
         token_lifetime = @{
             type = 'int'
+            no_log = $false  # Needed for linter: no-log-needed: Argument 'token_lifetime' in argument_spec could be a secret, though doesn't have `no_log` set
         }
         notes = @{
             type = 'str'
@@ -288,14 +289,16 @@ if ($state -eq 'present') {
                     IsDefault = ($i -eq 0)
                 }
             }
-            $currentEndpoints = @(ForEach ($ep in $existing.SamlEndpoints) {
-                [PSCustomObject]@{
-                    Uri = $ep.Location.ToString()
-                    Binding = $ep.Binding.ToString()
-                    Protocol = $ep.Protocol.ToString()
-                    IsDefault = $ep.IsDefault
+            $currentEndpoints = @(
+                ForEach ($ep in $existing.SamlEndpoints) {
+                    [PSCustomObject]@{
+                        Uri = $ep.Location.ToString()
+                        Binding = $ep.Binding.ToString()
+                        Protocol = $ep.Protocol.ToString()
+                        IsDefault = $ep.IsDefault
+                    }
                 }
-            })
+            )
 
             # Compare in original order: order determines which endpoint gets
             # Index 0 / IsDefault. Compare Uri, Binding, Protocol, and
