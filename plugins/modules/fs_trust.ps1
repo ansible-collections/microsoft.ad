@@ -92,7 +92,7 @@ $signatureAlgorithmMap = @{
 # Reverse map so we can report signature_algorithm back in the friendly
 # short form rather than the raw XML-DSig URI.
 $signatureAlgorithmReverseMap = @{}
-foreach ($kvp in $signatureAlgorithmMap.GetEnumerator()) {
+ForEach ($kvp in $signatureAlgorithmMap.GetEnumerator()) {
     $signatureAlgorithmReverseMap[$kvp.Value] = $kvp.Name
 }
 
@@ -127,7 +127,7 @@ function Test-AdfsValueChanged {
 # objects can't cross the proxy boundary, so in that case the endpoint
 # creation AND the Add/Set call must happen together inside the same
 # Windows PowerShell session.
-function Set-AdfsTrustSamlEndpoints {
+function Invoke-AdfsTrustSamlEndpoint {
     param(
         [ValidateSet('Add', 'Set')]
         [string]$Operation,
@@ -212,7 +212,7 @@ if ($state -eq 'present') {
             $addParams.Enabled = $module.Params.enabled
         }
 
-        foreach ($prop in $propertyMap) {
+        ForEach ($prop in $propertyMap) {
             # Identifier/WSFedEndpoint are already handled above for the
             # non-metadata creation path; avoid clobbering/duplicating them.
             if ($prop.Param -in @('identifier', 'wsfed_endpoint')) { continue }
@@ -229,7 +229,7 @@ if ($state -eq 'present') {
         if (-not $module.CheckMode) {
             try {
                 if ($module.Params.saml_endpoint) {
-                    Set-AdfsTrustSamlEndpoints -Operation Add -Name $name -EndpointUris @($module.Params.saml_endpoint) -AddParams $addParams
+                    Invoke-AdfsTrustSamlEndpoint -Operation Add -Name $name -EndpointUris @($module.Params.saml_endpoint) -AddParams $addParams
                 }
                 else {
                     Add-AdfsRelyingPartyTrust @addParams -ErrorAction Stop
@@ -251,7 +251,7 @@ if ($state -eq 'present') {
         # UPDATE
         $updateParams = @{}
 
-        foreach ($prop in $propertyMap) {
+        ForEach ($prop in $propertyMap) {
             $desired = $module.Params[$prop.Param]
             if ($null -eq $desired) { continue }
 
@@ -288,12 +288,12 @@ if ($state -eq 'present') {
                     IsDefault = ($i -eq 0)
                 }
             }
-            $currentEndpoints = @($existing.SamlEndpoints | ForEach-Object {
+            $currentEndpoints = @(ForEach ($ep in $existing.SamlEndpoints) {
                 [PSCustomObject]@{
-                    Uri = $_.Location.ToString()
-                    Binding = $_.Binding.ToString()
-                    Protocol = $_.Protocol.ToString()
-                    IsDefault = $_.IsDefault
+                    Uri = $ep.Location.ToString()
+                    Binding = $ep.Binding.ToString()
+                    Protocol = $ep.Protocol.ToString()
+                    IsDefault = $ep.IsDefault
                 }
             })
 
@@ -318,7 +318,7 @@ if ($state -eq 'present') {
 
                 if (-not $module.CheckMode) {
                     try {
-                        Set-AdfsTrustSamlEndpoints -Operation Set -Name $name -EndpointUris @($module.Params.saml_endpoint) -AddParams $null
+                        Invoke-AdfsTrustSamlEndpoint -Operation Set -Name $name -EndpointUris @($module.Params.saml_endpoint) -AddParams $null
                     }
                     catch {
                         $module.FailJson("Failed to update SAML endpoints for relying party trust '$name': $($_.Exception.Message)", $_)
