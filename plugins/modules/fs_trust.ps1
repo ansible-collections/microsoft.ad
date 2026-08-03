@@ -143,6 +143,11 @@ function Invoke-AdfsTrustSamlEndpoint {
     if ($useRemoting) {
         $scriptBlock = {
             param([string]$Operation, [string]$Name, [string[]]$EndpointUris, [hashtable]$AddParams)
+            # $eps = [System.Collections.Generic.List[object]]::new()
+            # for ($i = 0; $i -lt $EndpointUris.Count; $i++) {
+            #     $eps.Add((New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $EndpointUris[$i] -Index $i -IsDefault:($i -eq 0)))
+            # }
+
             $eps = for ($i = 0; $i -lt $EndpointUris.Count; $i++) {
                 New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $EndpointUris[$i] -Index $i -IsDefault:($i -eq 0)
             }
@@ -164,6 +169,11 @@ function Invoke-AdfsTrustSamlEndpoint {
         }
     }
     else {
+        # $endpoints = [System.Collections.Generic.List[object]]::new()
+        # for ($i = 0; $i -lt $EndpointUris.Count; $i++) {
+        #     $endpoints.Add((New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $EndpointUris[$i] -Index $i -IsDefault:($i -eq 0)))
+        # }
+
         $endpoints = for ($i = 0; $i -lt $EndpointUris.Count; $i++) {
             New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $EndpointUris[$i] -Index $i -IsDefault:($i -eq 0)
         }
@@ -194,6 +204,10 @@ if ($state -eq 'present') {
         }
 
         if ($module.Params.metadata_url) {
+            # No separate reachability pre-check here: Add-AdfsRelyingPartyTrust
+            # will itself fail with a clear error if the URL can't be reached,
+            # so a second, possibly differently-authenticated request is just
+            # an extra point of failure without adding real safety.
             $addParams.MetadataUrl = [Uri]$module.Params.metadata_url
         }
         elseif ($module.Params.metadata_file) {
@@ -281,14 +295,43 @@ if ($state -eq 'present') {
         # collection, so saml_endpoint in the playbook must always contain the
         # full desired set, not just the endpoint(s) being added.
         if ($module.Params.saml_endpoint) {
-            $desiredEndpoints = for ($i = 0; $i -lt $module.Params.saml_endpoint.Count; $i++) {
-                [PSCustomObject]@{
-                    Uri = $module.Params.saml_endpoint[$i]
-                    Binding = 'POST'
-                    Protocol = 'SAMLAssertionConsumer'
-                    IsDefault = ($i -eq 0)
+            # Build both lists with .Add() rather than capturing loop/pipeline
+            # output into a variable. Capturing a for/foreach/pipeline result
+            # directly unwraps a single-item result into a bare object
+            # instead of a 1-element array, which broke .Count comparisons
+            # (and therefore idempotency) whenever exactly one SAML endpoint
+            # was configured.
+            # $desiredEndpoints = [System.Collections.Generic.List[object]]::new()
+            # for ($i = 0; $i -lt $module.Params.saml_endpoint.Count; $i++) {
+            #     $desiredEndpoints.Add([PSCustomObject]@{
+            #         Uri = $module.Params.saml_endpoint[$i]
+            #         Binding = 'POST'
+            #         Protocol = 'SAMLAssertionConsumer'
+            #         IsDefault = ($i -eq 0)
+            #    })
+            # }
+
+            # $currentEndpoints = [System.Collections.Generic.List[object]]::new()
+            # ForEach ($endpoint in @($existing.SamlEndpoints)) {
+            #     $currentEndpoints.Add([PSCustomObject]@{
+            #         Uri = $endpoint.Location.ToString()
+            #         Binding = $endpoint.Binding.ToString()
+            #         Protocol = $endpoint.Protocol.ToString()
+            #         IsDefault = $endpoint.IsDefault
+            #     })
+            # }
+
+            $desiredEndpoints = @(
+                ForEach ($i = 0; $i -lt $module.Params.saml_endpoint.Count; $i++) {
+                    [PSCustomObject]@{
+                        Uri = $module.Params.saml_endpoint[$i]
+                        Binding = 'POST'
+                        Protocol = 'SAMLAssertionConsumer'
+                        IsDefault = ($i -eq 0)
+                    }
                 }
-            }
+            )
+
             $currentEndpoints = @(
                 ForEach ($ep in $existing.SamlEndpoints) {
                     [PSCustomObject]@{
