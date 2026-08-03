@@ -44,7 +44,6 @@ $spec = @{
         }
         token_lifetime = @{
             type = 'int'
-            no_log = $false
         }
         notes = @{
             type = 'str'
@@ -74,6 +73,15 @@ $module.Result.changed = $false
 $module.Result.identifier = @()
 $module.Result.enabled = $null
 $module.Result.monitoring_enabled = $null
+$module.Result.auto_update_enabled = $null
+$module.Result.token_lifetime = $null
+$module.Result.notes = $null
+$module.Result.access_control_policy_name = $null
+$module.Result.signature_algorithm = $null
+$module.Result.encrypt_claims = $null
+$module.Result.wsfed_endpoint = $null
+$module.Result.saml_endpoints = @()
+
 $name = $module.Params.name
 $state = $module.Params.state
 
@@ -81,8 +89,20 @@ $signatureAlgorithmMap = @{
     'rsa_sha1' = 'http://www.w3.org/2000/09/xmldsig#rsa-sha1'
     'rsa_sha256' = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256'
 }
+# Reverse map so we can report signature_algorithm back in the friendly
+# short form rather than the raw XML-DSig URI.
+$signatureAlgorithmReverseMap = @{}
+foreach ($kvp in $signatureAlgorithmMap.GetEnumerator()) {
+    $signatureAlgorithmReverseMap[$kvp.Value] = $kvp.Name
+}
 
+# Properties that can be set both at creation time (via Add-AdfsRelyingPartyTrust)
+# and updated afterwards (via Set-AdfsRelyingPartyTrust). Identifier and
+# WSFedEndpoint are included here too so drift on those is detected/corrected
+# on update, not just applied at creation.
 $propertyMap = @(
+    @{ Param = 'identifier'; Cmdlet = 'Identifier' }
+    @{ Param = 'wsfed_endpoint'; Cmdlet = 'WSFedEndpoint'; Cast = { param($v) [Uri]$v } }
     @{ Param = 'monitoring_enabled'; Cmdlet = 'MonitoringEnabled' }
     @{ Param = 'auto_update_enabled'; Cmdlet = 'AutoUpdateEnabled' }
     @{ Param = 'token_lifetime'; Cmdlet = 'TokenLifetime' }
@@ -92,11 +112,76 @@ $propertyMap = @(
     @{ Param = 'encrypt_claims'; Cmdlet = 'EncryptClaims' }
 )
 
+# Generic "is this different" check used for both scalars and arrays (e.g.
+# Identifier). Compare-Object handles both cleanly when each side is
+# wrapped in @(); plain -ne on two arrays does an unintended element-wise
+# comparison rather than a whole-collection comparison.
+function Test-AdfsValueChanged {
+    param($Current, $Desired)
+    return [bool](Compare-Object -ReferenceObject @($Current) -DifferenceObject @($Desired))
+}
+
+# Builds the desired SAML endpoint collection and applies it via either
+# Add-AdfsRelyingPartyTrust (creation) or Set-AdfsRelyingPartyTrust (update).
+# When the ADFS module is loaded via implicit remoting, New-AdfsSamlEndpoint
+# objects can't cross the proxy boundary, so in that case the endpoint
+# creation AND the Add/Set call must happen together inside the same
+# Windows PowerShell session.
+function Set-AdfsTrustSamlEndpoints {
+    param(
+        [ValidateSet('Add', 'Set')]
+        [string]$Operation,
+        [string]$Name,
+        [string[]]$EndpointUris,
+        [hashtable]$AddParams
+    )
+
+    $cmd = Get-Command Add-AdfsRelyingPartyTrust -ErrorAction Stop
+    $useRemoting = [bool]($cmd.Module.PrivateData.ImplicitRemoting)
+
+    if ($useRemoting) {
+        $scriptBlock = {
+            param([string]$Operation, [string]$Name, [string[]]$EndpointUris, [hashtable]$AddParams)
+            $eps = for ($i = 0; $i -lt $EndpointUris.Count; $i++) {
+                New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $EndpointUris[$i] -Index $i -IsDefault:($i -eq 0)
+            }
+            if ($Operation -eq 'Add') {
+                $AddParams['SamlEndpoint'] = @($eps)
+                Add-AdfsRelyingPartyTrust @AddParams
+            }
+            else {
+                Set-AdfsRelyingPartyTrust -TargetName $Name -SamlEndpoint @($eps) -Confirm:$false
+            }
+        }
+
+        $winPS = New-PSSession -UseWindowsPowerShell -ErrorAction Stop
+        try {
+            Invoke-Command -Session $winPS -ScriptBlock $scriptBlock -ArgumentList $Operation, $Name, $EndpointUris, $AddParams -ErrorAction Stop
+        }
+        finally {
+            $winPS | Remove-PSSession -ErrorAction SilentlyContinue
+        }
+    }
+    else {
+        $endpoints = for ($i = 0; $i -lt $EndpointUris.Count; $i++) {
+            New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $EndpointUris[$i] -Index $i -IsDefault:($i -eq 0)
+        }
+
+        if ($Operation -eq 'Add') {
+            $AddParams['SamlEndpoint'] = @($endpoints)
+            Add-AdfsRelyingPartyTrust @AddParams -ErrorAction Stop
+        }
+        else {
+            Set-AdfsRelyingPartyTrust -TargetName $Name -SamlEndpoint @($endpoints) -Confirm:$false -ErrorAction Stop
+        }
+    }
+}
+
 try {
     $existing = Get-AdfsRelyingPartyTrust -Name $name -ErrorAction Stop
 }
 catch {
-    $module.FailJson("Failed to retrieve relying party trust '$name': $_", $_)
+    $module.FailJson("Failed to retrieve relying party trust '$name': $($_.Exception.Message)", $_)
 }
 
 if ($state -eq 'present') {
@@ -108,12 +193,6 @@ if ($state -eq 'present') {
         }
 
         if ($module.Params.metadata_url) {
-            try {
-                $null = Invoke-WebRequest -Uri $module.Params.metadata_url -UseBasicParsing -ErrorAction Stop
-            }
-            catch {
-                $module.FailJson("Cannot reach metadata URL '$($module.Params.metadata_url)': $_", $_)
-            }
             $addParams.MetadataUrl = [Uri]$module.Params.metadata_url
         }
         elseif ($module.Params.metadata_file) {
@@ -134,6 +213,10 @@ if ($state -eq 'present') {
         }
 
         foreach ($prop in $propertyMap) {
+            # Identifier/WSFedEndpoint are already handled above for the
+            # non-metadata creation path; avoid clobbering/duplicating them.
+            if ($prop.Param -in @('identifier', 'wsfed_endpoint')) { continue }
+
             $val = $module.Params[$prop.Param]
             if ($null -ne $val) {
                 if ($prop.Cast) { $val = & $prop.Cast $val }
@@ -145,55 +228,22 @@ if ($state -eq 'present') {
 
         if (-not $module.CheckMode) {
             try {
-                $cmd = Get-Command Add-AdfsRelyingPartyTrust
-                if ($module.Params.saml_endpoint -and $cmd.Module.PrivateData.ImplicitRemoting) {
-                    # The ADFS module is loaded via implicit remoting and
-                    # SamlEndpoint objects get deserialized crossing the
-                    # proxy boundary. Create them inside a WinPS session.
-                    $addTrustWithEndpoints = {
-                        param([hashtable]$Params, [string[]]$EndpointUris)
-                        $eps = for ($i = 0; $i -lt $EndpointUris.Count; $i++) {
-                            New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $EndpointUris[$i] -Index $i -IsDefault:($i -eq 0)
-                        }
-                        $Params['SamlEndpoint'] = @($eps)
-                        Add-AdfsRelyingPartyTrust @Params
-                    }
-                    [string[]]$samlUris = @($module.Params.saml_endpoint)
-                    $winPS = New-PSSession -UseWindowsPowerShell
-                    try {
-                        Invoke-Command -Session $winPS -ScriptBlock $addTrustWithEndpoints -ArgumentList $addParams, $samlUris
-                    }
-                    finally {
-                        $winPS | Remove-PSSession
-                    }
+                if ($module.Params.saml_endpoint) {
+                    Set-AdfsTrustSamlEndpoints -Operation Add -Name $name -EndpointUris @($module.Params.saml_endpoint) -AddParams $addParams
                 }
                 else {
-                    if ($module.Params.saml_endpoint) {
-                        $endpoints = @()
-                        for ($i = 0; $i -lt $module.Params.saml_endpoint.Count; $i++) {
-                            $endpointParams = @{
-                                Binding = 'POST'
-                                Protocol = 'SAMLAssertionConsumer'
-                                Uri = $module.Params.saml_endpoint[$i]
-                                Index = $i
-                                IsDefault = ($i -eq 0)
-                            }
-                            $endpoints += New-AdfsSamlEndpoint @endpointParams
-                        }
-                        $addParams.SamlEndpoint = $endpoints
-                    }
-                    Add-AdfsRelyingPartyTrust @addParams
+                    Add-AdfsRelyingPartyTrust @addParams -ErrorAction Stop
                 }
             }
             catch {
-                $module.FailJson("Failed to create relying party trust '$name': $_", $_)
+                $module.FailJson("Failed to create relying party trust '$name': $($_.Exception.Message)", $_)
             }
 
             try {
-                $existing = Get-AdfsRelyingPartyTrust -Name $name
+                $existing = Get-AdfsRelyingPartyTrust -Name $name -ErrorAction Stop
             }
             catch {
-                $module.FailJson("Failed to retrieve newly created trust '$name': $_", $_)
+                $module.FailJson("Failed to retrieve newly created trust '$name': $($_.Exception.Message)", $_)
             }
         }
     }
@@ -207,7 +257,8 @@ if ($state -eq 'present') {
 
             if ($prop.Cast) { $desired = & $prop.Cast $desired }
             $current = $existing.($prop.Cmdlet)
-            if ($desired -ne $current) {
+
+            if (Test-AdfsValueChanged -Current $current -Desired $desired) {
                 $updateParams[$prop.Cmdlet] = $desired
             }
         }
@@ -216,10 +267,10 @@ if ($state -eq 'present') {
             $module.Result.changed = $true
             if (-not $module.CheckMode) {
                 try {
-                    Set-AdfsRelyingPartyTrust -TargetName $name @updateParams
+                    Set-AdfsRelyingPartyTrust -TargetName $name -Confirm:$false @updateParams -ErrorAction Stop
                 }
                 catch {
-                    $module.FailJson("Failed to update relying party trust '$name': $_", $_)
+                    $module.FailJson("Failed to update relying party trust '$name': $($_.Exception.Message)", $_)
                 }
             }
         }
@@ -229,14 +280,33 @@ if ($state -eq 'present') {
         # collection, so saml_endpoint in the playbook must always contain the
         # full desired set, not just the endpoint(s) being added.
         if ($module.Params.saml_endpoint) {
-            $currentUris = @($existing.SamlEndpoints | ForEach-Object { $_.Location.ToString() })
-            $desiredUris = @($module.Params.saml_endpoint)
+            $desiredEndpoints = for ($i = 0; $i -lt $module.Params.saml_endpoint.Count; $i++) {
+                [PSCustomObject]@{
+                    Uri = $module.Params.saml_endpoint[$i]
+                    Binding = 'POST'
+                    Protocol = 'SAMLAssertionConsumer'
+                    IsDefault = ($i -eq 0)
+                }
+            }
+            $currentEndpoints = @($existing.SamlEndpoints | ForEach-Object {
+                [PSCustomObject]@{
+                    Uri = $_.Location.ToString()
+                    Binding = $_.Binding.ToString()
+                    Protocol = $_.Protocol.ToString()
+                    IsDefault = $_.IsDefault
+                }
+            })
 
-            # Compare in original order determines which endpoint gets Index 0 / IsDefault
-            $samlEndpointChanged = $currentUris.Count -ne $desiredUris.Count
+            # Compare in original order: order determines which endpoint gets
+            # Index 0 / IsDefault. Compare Uri, Binding, Protocol, and
+            # IsDefault so a change to any of those is detected, not just a
+            # changed Location.
+            $samlEndpointChanged = $currentEndpoints.Count -ne $desiredEndpoints.Count
             if (-not $samlEndpointChanged) {
-                for ($i = 0; $i -lt $currentUris.Count; $i++) {
-                    if ($currentUris[$i] -ne $desiredUris[$i]) {
+                for ($i = 0; $i -lt $currentEndpoints.Count; $i++) {
+                    $c = $currentEndpoints[$i]
+                    $d = $desiredEndpoints[$i]
+                    if ($c.Uri -ne $d.Uri -or $c.Binding -ne $d.Binding -or $c.Protocol -ne $d.Protocol -or $c.IsDefault -ne $d.IsDefault) {
                         $samlEndpointChanged = $true
                         break
                     }
@@ -248,43 +318,10 @@ if ($state -eq 'present') {
 
                 if (-not $module.CheckMode) {
                     try {
-                        $cmd = Get-Command Add-AdfsRelyingPartyTrust
-                        if ($cmd.Module.PrivateData.ImplicitRemoting) {
-                            # Same cross-proxy issue as on create: build the
-                            # SamlEndpoint objects inside a WinPS session.
-                            $setTrustEndpoints = {
-                                param([string]$Name, [string[]]$EndpointUris)
-                                $eps = for ($i = 0; $i -lt $EndpointUris.Count; $i++) {
-                                    New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $EndpointUris[$i] -Index $i -IsDefault:($i -eq 0)
-                                }
-                                Set-AdfsRelyingPartyTrust -TargetName $Name -SamlEndpoint @($eps)
-                            }
-                            [string[]]$samlUris = @($module.Params.saml_endpoint)
-                            $winPS = New-PSSession -UseWindowsPowerShell
-                            try {
-                                Invoke-Command -Session $winPS -ScriptBlock $setTrustEndpoints -ArgumentList $name, $samlUris
-                            }
-                            finally {
-                                $winPS | Remove-PSSession
-                            }
-                        }
-                        else {
-                            $endpoints = @()
-                            for ($i = 0; $i -lt $module.Params.saml_endpoint.Count; $i++) {
-                                $endpointParams = @{
-                                    Binding = 'POST'
-                                    Protocol = 'SAMLAssertionConsumer'
-                                    Uri = $module.Params.saml_endpoint[$i]
-                                    Index = $i
-                                    IsDefault = ($i -eq 0)
-                                }
-                                $endpoints += New-AdfsSamlEndpoint @endpointParams
-                            }
-                            Set-AdfsRelyingPartyTrust -TargetName $name -SamlEndpoint $endpoints
-                        }
+                        Set-AdfsTrustSamlEndpoints -Operation Set -Name $name -EndpointUris @($module.Params.saml_endpoint) -AddParams $null
                     }
                     catch {
-                        $module.FailJson("Failed to update SAML endpoints for relying party trust '$name': $_", $_)
+                        $module.FailJson("Failed to update SAML endpoints for relying party trust '$name': $($_.Exception.Message)", $_)
                     }
                 }
             }
@@ -295,24 +332,24 @@ if ($state -eq 'present') {
             if (-not $module.CheckMode) {
                 try {
                     if ($module.Params.enabled) {
-                        Enable-AdfsRelyingPartyTrust -TargetName $name
+                        Enable-AdfsRelyingPartyTrust -TargetName $name -Confirm:$false -ErrorAction Stop
                     }
                     else {
-                        Disable-AdfsRelyingPartyTrust -TargetName $name
+                        Disable-AdfsRelyingPartyTrust -TargetName $name -Confirm:$false -ErrorAction Stop
                     }
                 }
                 catch {
-                    $module.FailJson("Failed to set enabled state for relying party trust '$name': $_", $_)
+                    $module.FailJson("Failed to set enabled state for relying party trust '$name': $($_.Exception.Message)", $_)
                 }
             }
         }
 
         if ($module.Result.changed -and -not $module.CheckMode) {
             try {
-                $existing = Get-AdfsRelyingPartyTrust -Name $name
+                $existing = Get-AdfsRelyingPartyTrust -Name $name -ErrorAction Stop
             }
             catch {
-                $module.FailJson("Failed to retrieve updated trust '$name': $_", $_)
+                $module.FailJson("Failed to retrieve updated trust '$name': $($_.Exception.Message)", $_)
             }
         }
     }
@@ -321,6 +358,23 @@ if ($state -eq 'present') {
         $module.Result.identifier = @($existing.Identifier)
         $module.Result.enabled = $existing.Enabled
         $module.Result.monitoring_enabled = $existing.MonitoringEnabled
+        $module.Result.auto_update_enabled = $existing.AutoUpdateEnabled
+        $module.Result.token_lifetime = $existing.TokenLifetime
+        $module.Result.notes = $existing.Notes
+        $module.Result.access_control_policy_name = $existing.AccessControlPolicyName
+        $module.Result.encrypt_claims = $existing.EncryptClaims
+        $module.Result.saml_endpoints = @($existing.SamlEndpoints | ForEach-Object { $_.Location.ToString() })
+
+        if ($existing.SignatureAlgorithm -and $signatureAlgorithmReverseMap.ContainsKey($existing.SignatureAlgorithm)) {
+            $module.Result.signature_algorithm = $signatureAlgorithmReverseMap[$existing.SignatureAlgorithm]
+        }
+        else {
+            $module.Result.signature_algorithm = $existing.SignatureAlgorithm
+        }
+
+        if ($existing.WSFedEndpoint) {
+            $module.Result.wsfed_endpoint = $existing.WSFedEndpoint.ToString()
+        }
     }
 }
 else {
@@ -330,10 +384,10 @@ else {
 
         if (-not $module.CheckMode) {
             try {
-                Remove-AdfsRelyingPartyTrust -TargetName $name -Confirm:$false
+                Remove-AdfsRelyingPartyTrust -TargetName $name -Confirm:$false -ErrorAction Stop
             }
             catch {
-                $module.FailJson("Failed to remove relying party trust '$name': $_", $_)
+                $module.FailJson("Failed to remove relying party trust '$name': $($_.Exception.Message)", $_)
             }
         }
     }
