@@ -119,7 +119,10 @@ $propertyMap = @(
 # comparison rather than a whole-collection comparison.
 function Test-AdfsValueChanged {
     param($Current, $Desired)
-    return [bool](Compare-Object -ReferenceObject @($Current) -DifferenceObject @($Desired))
+    # Handle null/empty inputs for Compare-Object
+    $currentArray = if ($null -eq $Current) { @() } else { @($Current) }
+    $desiredArray = if ($null -eq $Desired) { @() } else { @($Desired) }
+    return [bool](Compare-Object -ReferenceObject $currentArray -DifferenceObject $desiredArray)
 }
 
 # Builds the desired SAML endpoint collection and applies it via either
