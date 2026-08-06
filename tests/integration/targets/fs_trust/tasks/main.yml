@@ -56,6 +56,7 @@
           - _create is changed
           - _create.enabled == true
           - _create.identifier | length > 0
+          - _create.signature_algorithm == "rsa_sha256"
 
     - name: Create trust from identifier again - idempotency
       microsoft.ad.fs_trust:
@@ -69,6 +70,23 @@
       ansible.builtin.assert:
         that:
           - _create_idem is not changed
+
+    - name: Change trust secure hash algorithm to SHA1
+      microsoft.ad.fs_trust:
+        name: TestTrust
+        identifier:
+          - https://test.example.com/saml
+        saml_endpoint:
+          - https://test.example.com/saml/acs
+        enabled: true
+        signature_algorithm: rsa_sha1
+      register: _adjustment
+
+    - name: Assert that SHA has been adjusted
+      ansible.builtin.assert:
+        that:
+          - _adjustment is changed
+          - _adjustment.signature_algorithm == "rsa_sha1"
 
     - name: Create trust with multiple SAML endpoints
       microsoft.ad.fs_trust:
