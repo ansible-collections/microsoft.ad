@@ -114,15 +114,28 @@ $propertyMap = @(
 )
 
 # Generic "is this different" check used for both scalars and arrays (e.g.
-# Identifier). Compare-Object handles both cleanly when each side is
-# wrapped in @(); plain -ne on two arrays does an unintended element-wise
-# comparison rather than a whole-collection comparison.
+# Identifier). Treats both sides as unordered sets of values - this matches
+# ADFS semantics for multi-valued properties like Identifier, and is a no-op
+# simplification for scalars. Avoids Compare-Object entirely: passing it a
+# genuinely empty array as -ReferenceObject/-DifferenceObject throws
+# "Cannot bind argument to parameter 'ReferenceObject' because it is null"
+# due to a PowerShell parameter-binding quirk, not because the value is
+# actually null.
 function Test-AdfsValueChanged {
     param($Current, $Desired)
-    # Handle null/empty inputs for Compare-Object
-    $currentArray = if ($null -eq $Current) { @() } else { @($Current) }
-    $desiredArray = if ($null -eq $Desired) { @() } else { @($Desired) }
-    return [bool](Compare-Object -ReferenceObject $currentArray -DifferenceObject $desiredArray)
+
+    $currentArray = @($Current | Where-Object { $null -ne $_ } | ForEach-Object { [string]$_ })
+    $desiredArray = @($Desired | Where-Object { $null -ne $_ } | ForEach-Object { [string]$_ })
+
+    if ($currentArray.Count -ne $desiredArray.Count) {
+        return $true
+    }
+    if ($currentArray.Count -eq 0) {
+        return $false
+    }
+
+    $currentSet = [System.Collections.Generic.HashSet[string]]::new([string[]]$currentArray)
+    return -not $currentSet.SetEquals([string[]]$desiredArray)
 }
 
 # Builds the desired SAML endpoint collection and applies it via either
