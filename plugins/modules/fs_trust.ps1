@@ -159,10 +159,6 @@ function Invoke-AdfsTrustSamlEndpoint {
     if ($useRemoting) {
         $scriptBlock = {
             param([string]$Operation, [string]$Name, [string[]]$EndpointUris, [hashtable]$AddParams)
-            # $eps = [System.Collections.Generic.List[object]]::new()
-            # for ($i = 0; $i -lt $EndpointUris.Count; $i++) {
-            #     $eps.Add((New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $EndpointUris[$i] -Index $i -IsDefault:($i -eq 0)))
-            # }
 
             $eps = for ($i = 0; $i -lt $EndpointUris.Count; $i++) {
                 New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $EndpointUris[$i] -Index $i -IsDefault:($i -eq 0)
@@ -185,11 +181,6 @@ function Invoke-AdfsTrustSamlEndpoint {
         }
     }
     else {
-        # $endpoints = [System.Collections.Generic.List[object]]::new()
-        # for ($i = 0; $i -lt $EndpointUris.Count; $i++) {
-        #     $endpoints.Add((New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $EndpointUris[$i] -Index $i -IsDefault:($i -eq 0)))
-        # }
-
         $endpoints = for ($i = 0; $i -lt $EndpointUris.Count; $i++) {
             New-AdfsSamlEndpoint -Binding POST -Protocol SAMLAssertionConsumer -Uri $EndpointUris[$i] -Index $i -IsDefault:($i -eq 0)
         }
@@ -204,8 +195,76 @@ function Invoke-AdfsTrustSamlEndpoint {
     }
 }
 
+# Retrieves a relying party trust and flattens it into a plain PSCustomObject
+# before it can cross the WinCompat remoting boundary. Under implicit
+# remoting (PowerShell 7+ consuming the ADFS module via WinPS Compatibility),
+# nested complex properties - most notably SamlEndpoints - do not survive
+# CliXml round-tripping intact: PowerShell's remoting serializer falls back
+# to capturing only ToString() once a type exceeds its default serialization
+# depth, silently turning e.g. each SamlEndpoint object into the bare string
+# "Microsoft.IdentityServer.Management.Resources.SamlEndpoint" with none of
+# its real properties (Location, Binding, Protocol, IsDefault) intact. Doing
+# the property extraction *inside* the native Windows PowerShell session -
+# before anything crosses the proxy - avoids this entirely, mirroring how
+# Invoke-AdfsTrustSamlEndpoint already does writes inside the same session
+# boundary.
+function Get-AdfsRelyingPartyTrustDetail {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $cmd = Get-Command Get-AdfsRelyingPartyTrust -ErrorAction Stop
+    $useRemoting = [bool]($cmd.Module.PrivateData.ImplicitRemoting)
+
+    $scriptBlock = {
+        param([string]$Name)
+
+        $rp = Get-AdfsRelyingPartyTrust -Name $Name -ErrorAction Stop
+        if (-not $rp) {
+            return $null
+        }
+
+        $samlEndpoints = @($rp.SamlEndpoints | ForEach-Object {
+            [PSCustomObject]@{
+                Uri       = $_.Location.ToString()
+                Binding   = $_.Binding.ToString()
+                Protocol  = $_.Protocol.ToString()
+                IsDefault = $_.IsDefault
+            }
+        })
+
+        [PSCustomObject]@{
+            Identifier               = @($rp.Identifier)
+            WSFedEndpoint            = if ($rp.WSFedEndpoint) { $rp.WSFedEndpoint.ToString() } else { $null }
+            Enabled                  = $rp.Enabled
+            MonitoringEnabled        = $rp.MonitoringEnabled
+            AutoUpdateEnabled        = $rp.AutoUpdateEnabled
+            TokenLifetime            = $rp.TokenLifetime
+            Notes                    = $rp.Notes
+            AccessControlPolicyName  = $rp.AccessControlPolicyName
+            SignatureAlgorithm       = $rp.SignatureAlgorithm
+            EncryptClaims            = $rp.EncryptClaims
+            SamlEndpoints            = $samlEndpoints
+        }
+    }
+
+    if ($useRemoting) {
+        $winPS = New-PSSession -UseWindowsPowerShell -ErrorAction Stop
+        try {
+            return Invoke-Command -Session $winPS -ScriptBlock $scriptBlock -ArgumentList $Name -ErrorAction Stop
+        }
+        finally {
+            $winPS | Remove-PSSession -ErrorAction SilentlyContinue
+        }
+    }
+    else {
+        return & $scriptBlock $Name
+    }
+}
+
 try {
-    $existing = Get-AdfsRelyingPartyTrust -Name $name -ErrorAction Stop
+    $existing = Get-AdfsRelyingPartyTrustDetail -Name $name
 }
 catch {
     $module.FailJson("Failed to retrieve relying party trust '$name': $($_.Exception.Message)", $_)
@@ -271,7 +330,7 @@ if ($state -eq 'present') {
             }
 
             try {
-                $existing = Get-AdfsRelyingPartyTrust -Name $name -ErrorAction Stop
+                $existing = Get-AdfsRelyingPartyTrustDetail -Name $name
             }
             catch {
                 $module.FailJson("Failed to retrieve newly created trust '$name': $($_.Exception.Message)", $_)
@@ -311,32 +370,6 @@ if ($state -eq 'present') {
         # collection, so saml_endpoint in the playbook must always contain the
         # full desired set, not just the endpoint(s) being added.
         if ($module.Params.saml_endpoint) {
-            # Build both lists with .Add() rather than capturing loop/pipeline
-            # output into a variable. Capturing a for/foreach/pipeline result
-            # directly unwraps a single-item result into a bare object
-            # instead of a 1-element array, which broke .Count comparisons
-            # (and therefore idempotency) whenever exactly one SAML endpoint
-            # was configured.
-            # $desiredEndpoints = [System.Collections.Generic.List[object]]::new()
-            # for ($i = 0; $i -lt $module.Params.saml_endpoint.Count; $i++) {
-            #     $desiredEndpoints.Add([PSCustomObject]@{
-            #         Uri = $module.Params.saml_endpoint[$i]
-            #         Binding = 'POST'
-            #         Protocol = 'SAMLAssertionConsumer'
-            #         IsDefault = ($i -eq 0)
-            #    })
-            # }
-
-            # $currentEndpoints = [System.Collections.Generic.List[object]]::new()
-            # ForEach ($endpoint in @($existing.SamlEndpoints)) {
-            #     $currentEndpoints.Add([PSCustomObject]@{
-            #         Uri = $endpoint.Location.ToString()
-            #         Binding = $endpoint.Binding.ToString()
-            #         Protocol = $endpoint.Protocol.ToString()
-            #         IsDefault = $endpoint.IsDefault
-            #     })
-            # }
-
             $desiredEndpoints = @(
                 for ($i = 0; $i -lt $module.Params.saml_endpoint.Count; $i++) {
                     [PSCustomObject]@{
@@ -348,16 +381,7 @@ if ($state -eq 'present') {
                 }
             )
 
-            $currentEndpoints = @(
-                ForEach ($ep in $existing.SamlEndpoints) {
-                    [PSCustomObject]@{
-                        Uri = $ep.Location
-                        Binding = $ep.Binding.ToString()
-                        Protocol = $ep.Protocol.ToString()
-                        IsDefault = $ep.IsDefault
-                    }
-                }
-            )
+            $currentEndpoints = @($existing.SamlEndpoints)
 
             # Compare in original order: order determines which endpoint gets
             # Index 0 / IsDefault. Compare Uri, Binding, Protocol, and
@@ -408,7 +432,7 @@ if ($state -eq 'present') {
 
         if ($module.Result.changed -and -not $module.CheckMode) {
             try {
-                $existing = Get-AdfsRelyingPartyTrust -Name $name -ErrorAction Stop
+                $existing = Get-AdfsRelyingPartyTrustDetail -Name $name
             }
             catch {
                 $module.FailJson("Failed to retrieve updated trust '$name': $($_.Exception.Message)", $_)
@@ -425,7 +449,7 @@ if ($state -eq 'present') {
         $module.Result.notes = $existing.Notes
         $module.Result.access_control_policy_name = $existing.AccessControlPolicyName
         $module.Result.encrypt_claims = $existing.EncryptClaims
-        $module.Result.saml_endpoints = @($existing.SamlEndpoints | ForEach-Object { $_ })
+        $module.Result.saml_endpoints = @($existing.SamlEndpoints | ForEach-Object { $_.Uri })
 
         if ($existing.SignatureAlgorithm -and $signatureAlgorithmReverseMap.ContainsKey($existing.SignatureAlgorithm)) {
             $module.Result.signature_algorithm = $signatureAlgorithmReverseMap[$existing.SignatureAlgorithm]
@@ -435,7 +459,7 @@ if ($state -eq 'present') {
         }
 
         if ($existing.WSFedEndpoint) {
-            $module.Result.wsfed_endpoint = $existing.WSFedEndpoint.ToString()
+            $module.Result.wsfed_endpoint = $existing.WSFedEndpoint
         }
     }
 }
