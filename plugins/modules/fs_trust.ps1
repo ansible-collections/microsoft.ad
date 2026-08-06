@@ -71,7 +71,6 @@ $spec = @{
 
 $module = [Ansible.Basic.AnsibleModule]::Create($args, $spec)
 
-
 $module.Result.changed = $false
 $module.Result.identifier = @()
 $module.Result.enabled = $null
@@ -89,13 +88,14 @@ $name = $module.Params.name
 $state = $module.Params.state
 
 $signatureAlgorithmMap = @{
-    'rsa_sha1' = 'http://www.w3.org/2000/09/xmldsig#rsa-sha1'
+    'rsa_sha1'   = 'http://www.w3.org/2000/09/xmldsig#rsa-sha1'
     'rsa_sha256' = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256'
 }
 
 # Reverse map so we can report signature_algorithm back in the friendly
 # short form rather than the raw XML-DSig URI.
 $signatureAlgorithmReverseMap = @{}
+
 ForEach ($kvp in $signatureAlgorithmMap.GetEnumerator()) {
     $signatureAlgorithmReverseMap[$kvp.Value] = $kvp.Name
 }
@@ -138,10 +138,48 @@ function Test-AdfsValueChanged {
         return $false
     }
 
-    $currentSet = [System.Collections.Generic.HashSet[string]]::new([string[]]$currentArray)
-    return -not $currentSet.SetEquals([string[]]$desiredArray)
+    for ($i = 0; $i -lt $currentArray.Count; $i++) {
+        if ($currentArray[$i] -ne $desiredArray[$i]) {
+            return $true
+        }
+    }
+
+    return $false
 }
 
+# Compare SAML endpoints in their original order.
+# Endpoint order matters because Index 0 is the default endpoint.
+function Test-AdfsSamlEndpointsChanged {
+    param(
+        [Parameter(Mandatory)]
+        [array]$Current,
+
+        [Parameter(Mandatory)]
+        [array]$Desired
+    )
+
+    if ($Current.Count -ne $Desired.Count) {
+        return $true
+    }
+
+    for ($i = 0; $i -lt $Current.Count; $i++) {
+        $currentEndpoint = $Current[$i]
+        $desiredEndpoint = $Desired[$i]
+
+        if (
+            ([string]$currentEndpoint.Uri) -ne ([string]$desiredEndpoint.Uri) -or
+            ([string]$currentEndpoint.Binding) -ne ([string]$desiredEndpoint.Binding) -or
+            ([string]$currentEndpoint.Protocol) -ne ([string]$desiredEndpoint.Protocol) -or
+            ([bool]$currentEndpoint.IsDefault) -ne ([bool]$desiredEndpoint.IsDefault)
+        ) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+# Build the desired SAML endpoint collection.
 function New-DesiredAdfsSamlEndpoints {
     param(
         [Parameter(Mandatory)]
@@ -160,6 +198,10 @@ function New-DesiredAdfsSamlEndpoints {
     )
 }
 
+# Create a desired-state object from the current ADFS state.
+#
+# The desired state is used as the projected result in check mode.
+# After a real update/create, it is replaced with the actual ADFS state.
 function New-AdfsDesiredState {
     param(
         [Parameter(Mandatory)]
@@ -190,6 +232,7 @@ function New-AdfsDesiredState {
     }
 }
 
+# Convert a desired/current state object into the Ansible module result.
 function Set-AdfsModuleResult {
     param(
         [Parameter(Mandatory)]
@@ -204,6 +247,7 @@ function Set-AdfsModuleResult {
     $module.Result.notes = $State.Notes
     $module.Result.access_control_policy_name = $State.AccessControlPolicyName
     $module.Result.encrypt_claims = $State.EncryptClaims
+
     $module.Result.saml_endpoints = @(
         $State.SamlEndpoints | ForEach-Object {
             $_.Uri
@@ -226,10 +270,10 @@ function Set-AdfsModuleResult {
 
 # Builds the desired SAML endpoint collection and applies it via either
 # Add-AdfsRelyingPartyTrust (creation) or Set-AdfsRelyingPartyTrust (update).
+#
 # When the ADFS module is loaded via implicit remoting, New-AdfsSamlEndpoint
-# objects can't cross the proxy boundary, so in that case the endpoint
-# creation AND the Add/Set call must happen together inside the same
-# Windows PowerShell session.
+# objects cannot cross the proxy boundary. In that case endpoint creation and
+# the Add/Set call must happen inside the same Windows PowerShell session.
 function Invoke-AdfsTrustSamlEndpoint {
     param(
         [ValidateSet('Add', 'Set')]
@@ -260,6 +304,7 @@ function Invoke-AdfsTrustSamlEndpoint {
 
             if ($Operation -eq 'Add') {
                 $AddParams['SamlEndpoint'] = @($eps)
+
                 Add-AdfsRelyingPartyTrust @AddParams
             }
             else {
@@ -285,6 +330,7 @@ function Invoke-AdfsTrustSamlEndpoint {
 
         if ($Operation -eq 'Add') {
             $AddParams['SamlEndpoint'] = @($endpoints)
+
             Add-AdfsRelyingPartyTrust @AddParams -ErrorAction Stop
         }
         else {
@@ -301,11 +347,7 @@ function Invoke-AdfsTrustSamlEndpoint {
 # to capturing only ToString() once a type exceeds its default serialization
 # depth, silently turning e.g. each SamlEndpoint object into the bare string
 # "Microsoft.IdentityServer.Management.Resources.SamlEndpoint" with none of
-# its real properties (Location, Binding, Protocol, IsDefault) intact. Doing
-# the property extraction *inside* the native Windows PowerShell session -
-# before anything crosses the proxy - avoids this entirely, mirroring how
-# Invoke-AdfsTrustSamlEndpoint already does writes inside the same session
-# boundary.
+# its real properties (Location, Binding, Protocol, IsDefault) intact.
 function Get-AdfsRelyingPartyTrustDetail {
     param(
         [Parameter(Mandatory)]
@@ -377,9 +419,13 @@ catch {
     $module.FailJson("Failed to retrieve relying party trust '$name': $($_.Exception.Message)", $_)
 }
 
-# $desiredState represents the state the module wants ADFS to have.
-# In check mode this is returned directly.
-# In normal mode it is replaced with the actual state after changes.
+# $desiredState is the single representation of the state the module wants.
+#
+# In check mode:
+#   current state -> projected desired state -> result
+#
+# In normal mode:
+#   current state -> projected desired state -> apply -> actual state -> result
 $desiredState = $null
 
 if ($existing) {
@@ -396,10 +442,6 @@ if ($state -eq 'present') {
         }
 
         if ($module.Params.metadata_url) {
-            # No separate reachability pre-check here: Add-AdfsRelyingPartyTrust
-            # will itself fail with a clear error if the URL can't be reached,
-            # so a second, possibly differently-authenticated request is just
-            # an extra point of failure without adding real safety.
             $addParams.MetadataUrl = [Uri]$module.Params.metadata_url
         }
         elseif ($module.Params.metadata_file) {
@@ -422,8 +464,7 @@ if ($state -eq 'present') {
         }
 
         ForEach ($prop in $propertyMap) {
-            # Identifier/WSFedEndpoint are already handled above for the
-            # non-metadata creation path; avoid clobbering/duplicating them.
+            # These are already handled above for creation.
             if ($prop.Param -in @('identifier', 'wsfed_endpoint')) {
                 continue
             }
@@ -441,7 +482,7 @@ if ($state -eq 'present') {
             $addParams[$prop.Cmdlet] = $val
         }
 
-        # Build the desired state for the object that would be created.
+        # Build the projected desired state.
         $desiredState = [PSCustomObject]@{
             Identifier = @($module.Params.identifier)
             Enabled = $module.Params.enabled
@@ -483,87 +524,70 @@ if ($state -eq 'present') {
                 $module.FailJson("Failed to retrieve newly created trust '$name': $($_.Exception.Message)", $_)
             }
 
-            # Actual state is authoritative after creation.
+            # Actual ADFS state is authoritative after creation.
             $desiredState = New-AdfsDesiredState -Current $existing
         }
     }
     else {
         # UPDATE
 
-        $updateParams = @()
+        # Always start from the current ADFS state.
+        $desiredState = New-AdfsDesiredState -Current $existing
 
+        $updateParams = @{}
+        $samlEndpointChanged = $false
+        $enabledChanged = $false
+
+        # Scalar properties
         ForEach ($prop in $propertyMap) {
-            $desired = $module.Params[$prop.Param]
+            $requested = $module.Params[$prop.Param]
 
-            if ($null -eq $desired) {
+            if ($null -eq $requested) {
                 continue
             }
 
-            $desiredAdfsValue = $desired
+            $desiredValue = $requested
 
             if ($prop.Cast) {
-                $desiredAdfsValue = & $prop.Cast $desiredAdfsValue
+                $desiredValue = & $prop.Cast $desiredValue
             }
 
-            $current = $existing.($prop.Cmdlet)
+            $currentValue = $existing.($prop.Cmdlet)
 
-            if (Test-AdfsValueChanged -Current $current -Desired $desired) {
-                $updateParams += @{
-                    Cmdlet = $prop.Cmdlet
-                    Value  = $desiredAdfsValue
-                }
+            if (Test-AdfsValueChanged -Current $currentValue -Desired $desiredValue) {
+                $updateParams[$prop.Cmdlet] = $desiredValue
 
-                # Project the requested value into the desired state.
-                $desiredState.($prop.Cmdlet) = $desiredAdfsValue
+                # Project the requested value into desired state.
+                $desiredState.($prop.Cmdlet) = $desiredValue
             }
         }
-
-        # SAML endpoint desired state.
-        $samlEndpointChanged = $false
+        # SAML endpoints
 
         if ($module.Params.saml_endpoint) {
             $desiredSamlEndpoints = New-DesiredAdfsSamlEndpoints -EndpointUris @($module.Params.saml_endpoint)
 
             $currentSamlEndpoints = @($existing.SamlEndpoints)
 
-            # Compare in original order: order determines which endpoint gets
-            # Index 0 / IsDefault. Compare Uri, Binding, Protocol, and
-            # IsDefault so a change to any of those is detected, not just a
-            # changed Location.
-            $samlEndpointChanged = $currentSamlEndpoints.Count -ne $desiredSamlEndpoints.Count
-
-            if (-not $samlEndpointChanged) {
-                for ($i = 0; $i -lt $currentSamlEndpoints.Count; $i++) {
-                    $currentEndpoint = $currentSamlEndpoints[$i]
-                    $desiredEndpoint = $desiredSamlEndpoints[$i]
-
-                    if (
-                        $currentEndpoint.Uri -ne $desiredEndpoint.Uri -or
-                        $currentEndpoint.Binding -ne $desiredEndpoint.Binding -or
-                        $currentEndpoint.Protocol -ne $desiredEndpoint.Protocol -or
-                        $currentEndpoint.IsDefault -ne $desiredEndpoint.IsDefault
-                    ) {
-                        $samlEndpointChanged = $true
-                        break
-                    }
-                }
-            }
+            $samlEndpointChanged = Test-AdfsSamlEndpointsChanged -Current $currentSamlEndpoints -Desired $desiredSamlEndpoints
 
             if ($samlEndpointChanged) {
+                # Project requested SAML endpoint state.
                 $desiredState.SamlEndpoints = $desiredSamlEndpoints
             }
         }
 
-        # Enabled desired state.
-        $enabledChanged = (
+        # Enabled state
+        if (
             $null -ne $module.Params.enabled -and
             $module.Params.enabled -ne $existing.Enabled
-        )
+        ) {
+            $enabledChanged = $true
 
-        if ($enabledChanged) {
+            # Project requested enabled state.
             $desiredState.Enabled = $module.Params.enabled
         }
 
+        # Determine whether anything changed.
         if (
             $updateParams.Count -gt 0 -or
             $samlEndpointChanged -or
@@ -572,20 +596,18 @@ if ($state -eq 'present') {
             $module.Result.changed = $true
         }
 
-        if (-not $module.CheckMode -and $module.Result.changed) {
+        # Apply changes unless check mode is active.
+        if (
+            -not $module.CheckMode -and
+            $module.Result.changed
+        ) {
             try {
-                # Apply normal property updates.
+                # Apply scalar properties.
                 if ($updateParams.Count -gt 0) {
-                    $setParams = @{}
-
-                    foreach ($update in $updateParams) {
-                        $setParams[$update.Cmdlet] = $update.Value
-                    }
-
-                    Set-AdfsRelyingPartyTrust -TargetName $name -Confirm:$false @setParams -ErrorAction Stop
+                    Set-AdfsRelyingPartyTrust -TargetName $name -Confirm:$false @updateParams -ErrorAction Stop
                 }
 
-                # Apply SAML endpoint changes.
+                # Apply SAML endpoints.
                 if ($samlEndpointChanged) {
                     Invoke-AdfsTrustSamlEndpoint -Operation Set -Name $name -EndpointUris @($module.Params.saml_endpoint) -AddParams $null
                 }
@@ -607,6 +629,7 @@ if ($state -eq 'present') {
                 )
             }
 
+            # Re-read the actual state after applying the changes.
             try {
                 $existing = Get-AdfsRelyingPartyTrustDetail -Name $name
             }
@@ -617,11 +640,16 @@ if ($state -eq 'present') {
                 )
             }
 
-            # Actual state is authoritative after a real update.
+            # Actual ADFS state is authoritative after a real update.
             $desiredState = New-AdfsDesiredState -Current $existing
         }
     }
 
+    # Return either:
+    #
+    #   - projected desired state in check mode
+    #   - actual ADFS state after a real operation
+    #
     if ($desiredState) {
         Set-AdfsModuleResult -State $desiredState
     }
