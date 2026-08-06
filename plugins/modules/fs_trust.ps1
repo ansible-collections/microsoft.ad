@@ -351,7 +351,7 @@ if ($state -eq 'present') {
             $currentEndpoints = @(
                 ForEach ($ep in $existing.SamlEndpoints) {
                     [PSCustomObject]@{
-                        Uri = $ep.Location.OriginalString
+                        Uri = $ep.Location
                         Binding = $ep.Binding.ToString()
                         Protocol = $ep.Protocol.ToString()
                         IsDefault = $ep.IsDefault
@@ -425,8 +425,7 @@ if ($state -eq 'present') {
         $module.Result.notes = $existing.Notes
         $module.Result.access_control_policy_name = $existing.AccessControlPolicyName
         $module.Result.encrypt_claims = $existing.EncryptClaims
-        #$module.Result.saml_endpoints = @($existing.SamlEndpoints | ForEach-Object { $_.Location.OriginalString })
-        $module.Result.saml_endpoints = @($existing.SamlEndpoints)
+        $module.Result.saml_endpoints = @($existing.SamlEndpoints | ForEach-Object { $_ })
 
         if ($existing.SignatureAlgorithm -and $signatureAlgorithmReverseMap.ContainsKey($existing.SignatureAlgorithm)) {
             $module.Result.signature_algorithm = $signatureAlgorithmReverseMap[$existing.SignatureAlgorithm]
