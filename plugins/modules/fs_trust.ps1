@@ -88,7 +88,7 @@ $name = $module.Params.name
 $state = $module.Params.state
 
 $signatureAlgorithmMap = @{
-    'rsa_sha1'   = 'http://www.w3.org/2000/09/xmldsig#rsa-sha1'
+    'rsa_sha1' = 'http://www.w3.org/2000/09/xmldsig#rsa-sha1'
     'rsa_sha256' = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256'
 }
 
@@ -180,7 +180,7 @@ function Test-AdfsSamlEndpointsChanged {
 }
 
 # Build the desired SAML endpoint collection.
-function New-DesiredAdfsSamlEndpoints {
+function New-DesiredAdfsSamlEndpoint {
     param(
         [Parameter(Mandatory)]
         [string[]]$EndpointUris
@@ -258,8 +258,7 @@ function Set-AdfsModuleResult {
         $State.SignatureAlgorithm -and
         $signatureAlgorithmReverseMap.ContainsKey($State.SignatureAlgorithm)
     ) {
-        $module.Result.signature_algorithm =
-            $signatureAlgorithmReverseMap[$State.SignatureAlgorithm]
+        $module.Result.signature_algorithm = $signatureAlgorithmReverseMap[$State.SignatureAlgorithm]
     }
     else {
         $module.Result.signature_algorithm = $State.SignatureAlgorithm
@@ -498,8 +497,7 @@ if ($state -eq 'present') {
         }
 
         if ($module.Params.saml_endpoint) {
-            $desiredState.SamlEndpoints =
-                New-DesiredAdfsSamlEndpoints -EndpointUris @($module.Params.saml_endpoint)
+            $desiredState.SamlEndpoints = New-DesiredAdfsSamlEndpoint -EndpointUris @($module.Params.saml_endpoint)
         }
 
         $module.Result.changed = $true
@@ -564,7 +562,7 @@ if ($state -eq 'present') {
         # SAML endpoints
 
         if ($module.Params.saml_endpoint) {
-            $desiredSamlEndpoints = New-DesiredAdfsSamlEndpoints -EndpointUris @($module.Params.saml_endpoint)
+            $desiredSamlEndpoints = New-DesiredAdfsSamlEndpoint -EndpointUris @($module.Params.saml_endpoint)
 
             $currentSamlEndpoints = @($existing.SamlEndpoints)
 
