@@ -670,6 +670,10 @@ Function Get-AnsibleADObject {
 
     .PARAMETER GetCommand
     The Get-AD* cmdlet to use to get the AD object. Defaults to Get-ADObject.
+
+    .PARAMETER IdentityPassThru
+    Use the -Identity as the -Identity value for the GetCommand command. This
+    skips the preparse logic and is useful for when the -Identity is a DN/GUID.
     #>
     [OutputType([Microsoft.ActiveDirectory.Management.ADObject])]
     [CmdletBinding()]
@@ -691,7 +695,11 @@ Function Get-AnsibleADObject {
 
         [Parameter()]
         [System.Management.Automation.CommandInfo]
-        $GetCommand = $null
+        $GetCommand = $null,
+
+        [Parameter()]
+        [switch]
+        $IdentityPassThru
     )
 
     $getParams = @{}
@@ -705,14 +713,34 @@ Function Get-AnsibleADObject {
         $getParams.Credential = $Credential
     }
 
+    if ($GetCommand) {
+        $null = $getParams.Remove('GetCommand')
+    }
+    else {
+        $GetCommand = Get-Command -Name Get-ADObject -Module ActiveDirectory
+    }
+
+    # Not all LDAP objects support userPrincipalName or sAMAccount, we only try
+    # and filter by that if we know it is supported.
+    $tryUPN = $GetCommand.Name -in @(
+        'Get-ADComputer'
+        'Get-ADObject'
+        'Get-ADUser'
+        'Get-ADServiceAccount'
+    )
+    $trySAM = $tryUPN -or $GetCommand.Name -in @('Get-ADGroup')
+
     # The -Identity parameter is used where possible as LDAPFilter is limited
     # to just the defaultNamingContext as defined by -SearchBase.
     $objectGuid = [Guid]::Empty
     $tryDollarFallback = $false
-    if ([System.Guid]::TryParse($Identity, [ref]$objectGuid)) {
+    if ($IdentityPassThru -and $false) {
+        $getParams.Identity = $Identity
+    }
+    elseif ([System.Guid]::TryParse($Identity, [ref]$objectGuid)) {
         $getParams.Identity = $objectGuid
     }
-    elseif ($Identity -match '^.*\@.*\..*$') {
+    elseif ($tryUPN -and $Identity -match '^.*\@.*\..*$') {
         $getParams.LDAPFilter = "(userPrincipalName=$($Matches[0]))"
     }
     else {
@@ -727,7 +755,7 @@ Function Get-AnsibleADObject {
             $getParams.LDAPFilter = "(objectSid=$value)"
         }
         catch [System.ArgumentException] {
-            if ($Identity -match '^(?:[^:*?""<>|\/\\]+\\)?(?<username>[^;:""<>|?,=\*\+\\\(\)]+)$') {
+            if ($trySAM -and $Identity -match '^(?:[^:*?""<>|\/\\]+\\)?(?<username>[^;:""<>|?,=\*\+\\\(\)]+)$') {
                 $tryDollarFallback = -not $Matches.username.EndsWith('$')
                 $getParams.LDAPFilter = "(sAMAccountName=$($Matches.username))"
             }
@@ -738,12 +766,6 @@ Function Get-AnsibleADObject {
         }
     }
 
-    if ($GetCommand) {
-        $null = $getParams.Remove('GetCommand')
-    }
-    else {
-        $GetCommand = Get-Command -Name Get-ADObject -Module ActiveDirectory
-    }
     try {
         $obj = & $GetCommand @getParams | Select-Object -First 1
     }
@@ -1101,7 +1123,11 @@ Function Invoke-AnsibleADObject {
         $namePrefix = 'OU'
     }
 
-    $identity = if ($module.Params.identity) {
+    $getParams = @{
+        GetCommand = $getCommand
+        Properties = $requestedAttributes
+    }
+    $getParams.Identity = if ($module.Params.identity) {
         $module.Params.identity
     }
     else {
@@ -1110,13 +1136,13 @@ Function Invoke-AnsibleADObject {
             $ouPath = $module.Params.path
         }
         "$namePrefix=$($Module.Params.name -replace ',', '\,'),$ouPath"
+
+        # To avoid any ambiguity we tell the underlying lookup this is a DN
+        # and to use it directly as the -Identity parameter value.
+        # https://github.com/ansible-collections/microsoft.ad/issues/198
+        $getParams.IdentityPassThru = $true
     }
 
-    $getParams = @{
-        GetCommand = $getCommand
-        Identity = $identity
-        Properties = $requestedAttributes
-    }
     $adObject = Get-AnsibleADObject @getParams @adParams
     if ($adObject) {
         $module.Result.object_guid = $adObject.ObjectGUID

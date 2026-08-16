@@ -648,3 +648,76 @@
       name: MyOU
       state: absent
       identity: '{{ ou_info.object_guid }}'
+
+# Various identity/name lookup tests for object CN that looks like a UPN but
+# object does not support userPrincipalName.
+# https://github.com/ansible-collections/microsoft.ad/issues/198
+- block:
+  - name: create group with upn like name
+    group:
+      name: MyGroup@domain
+      state: present
+      scope: global
+    register: group_like_upn
+
+  - name: get result of create group with upn like name
+    object_info:
+      identity: '{{ group_like_upn.object_guid }}'
+      properties:
+      - objectSid
+      - sAMAccountName
+    register: group_like_upn_actual
+
+  - name: assert create group with upn like name
+    assert:
+      that:
+      - group_like_upn is changed
+      - group_like_upn_actual.objects | length == 1
+      - group_like_upn_actual.objects[0].DistinguishedName == group_like_upn.distinguished_name
+      - group_like_upn_actual.objects[0].ObjectGUID == group_like_upn.object_guid
+      - group_like_upn_actual.objects[0].objectSid.Sid == group_like_upn.sid
+      - group_like_upn_actual.objects[0].sAMAccountName == 'MyGroup@domain'
+
+  - name: create group with upn like name - idempotent
+    group:
+      name: MyGroup@domain
+      state: present
+      scope: global
+    register: group_like_upn_again
+
+  - name: assert create group with upn like name - idempotent
+    assert:
+      that:
+      - not group_like_upn_again is changed
+
+  - name: verify group can be found by identity option that looks like a UPN
+    group:
+      identity: MyGroup@domain
+      state: present
+      scope: global
+    register: group_like_upn_identity
+
+  - name: assert verify group can be found by identity option
+    assert:
+      that:
+      - not group_like_upn_identity is changed
+      - group_like_upn_identity.object_guid == group_like_upn.object_guid
+
+  always:
+  - name: remove temp group
+    group:
+      name: MyGroup@domain
+      identity: '{{ group_like_upn.object_guid | default(omit) }}'
+      state: absent
+    register: remove_group_like_upn
+
+- name: get result of remove temp group
+  object_info:
+    identity: '{{ group_like_upn.object_guid }}'
+  register: remove_group_like_upn_actual
+
+- name: assert remove temp group
+  assert:
+    that:
+    - remove_group_like_upn is changed
+    - remove_group_like_upn_actual.objects == []
