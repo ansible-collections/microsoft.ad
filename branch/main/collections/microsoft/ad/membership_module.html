@@ -391,15 +391,15 @@ To check whether it is installed, run <code class="code docutils literal notrans
 <span class="w">    </span><span class="nt">hostname</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mydomainclient</span>
 <span class="w">    </span><span class="nt">domain_admin_user</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">testguy@ansible.vagrant</span>
 <span class="w">    </span><span class="nt">domain_admin_password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">password123!</span>
-<span class="w">    </span><span class="nt">domain_ou_path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;OU=Windows,OU=Servers,DC=ansible,DC=vagrant&quot;</span>
+<span class="w">    </span><span class="nt">domain_ou_path</span><span class="p">:</span><span class="w"> </span><span class="s">"OU=Windows,OU=Servers,DC=ansible,DC=vagrant"</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">domain</span>
 <span class="w">    </span><span class="nt">reboot</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">join host to workgroup with manual reboot in later task</span>
 <span class="w">  </span><span class="nt">microsoft.ad.membership</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">workgroup_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mywg</span>
-<span class="w">    </span><span class="nt">domain_admin_user</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;</span><span class="cp">{{</span> <span class="nv">win_domain_admin_user</span> <span class="cp">}}</span><span class="s">&#39;</span>
-<span class="w">    </span><span class="nt">domain_admin_password</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;</span><span class="cp">{{</span> <span class="nv">win_domain_admin_password</span> <span class="cp">}}</span><span class="s">&#39;</span>
+<span class="w">    </span><span class="nt">domain_admin_user</span><span class="p">:</span><span class="w"> </span><span class="s">'</span><span class="cp">{{</span> <span class="nv">win_domain_admin_user</span> <span class="cp">}}</span><span class="s">'</span>
+<span class="w">    </span><span class="nt">domain_admin_password</span><span class="p">:</span><span class="w"> </span><span class="s">'</span><span class="cp">{{</span> <span class="nv">win_domain_admin_password</span> <span class="cp">}}</span><span class="s">'</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">workgroup</span>
 <span class="w">  </span><span class="nt">register</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">workgroup_res</span>
 

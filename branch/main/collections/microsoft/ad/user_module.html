@@ -850,7 +850,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bob</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">absent</span>
 
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ensure user has only these spn&#39;s defined</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ensure user has only these spn's defined</span>
 <span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">liz.kenyon</span>
 <span class="w">    </span><span class="nt">spn</span><span class="p">:</span>
@@ -865,7 +865,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <span class="w">      </span><span class="nt">add</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MSSQLSvc/us99db-svr95:2433</span>
 
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ensure user is created with delegates and spn&#39;s defined</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Ensure user is created with delegates and spn's defined</span>
 <span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">shmemmmy</span>
 <span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">The3rubberducki33!</span>
@@ -886,23 +886,23 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 
 <span class="c1"># The name option is the name of the AD object as seen in dsa.msc and not the</span>
 <span class="c1"># sAMAccountName. For example, this will change the sAMAccountName of the user</span>
-<span class="c1"># CN=existing_user,CN=Users,DC=domain,DC=com to &#39;new_sam_name&#39;.</span>
+<span class="c1"># CN=existing_user,CN=Users,DC=domain,DC=com to 'new_sam_name'.</span>
 <span class="c1"># E.g. This will change</span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Change the user&#39;s sAMAccountName</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Change the user's sAMAccountName</span>
 <span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">existing_user</span>
 <span class="w">    </span><span class="nt">sam_account_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">new_sam_name</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
 
-<span class="c1"># This will rename the AD object that is specified by identity to &#39;new_name&#39;.</span>
-<span class="c1"># The identity value can be the object&#39;s GUID, SecurityIdentifier, or</span>
+<span class="c1"># This will rename the AD object that is specified by identity to 'new_name'.</span>
+<span class="c1"># The identity value can be the object's GUID, SecurityIdentifier, or</span>
 <span class="c1"># sAMAccountName. It is important to use the identity value when renaming or</span>
 <span class="c1"># moving a user object to ensure the object is moved/renamed rather than a new</span>
 <span class="c1"># one being created.</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Rename user LDAP name</span>
 <span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">new_name</span>
-<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;</span><span class="cp">{{</span> <span class="nv">user_obj.object_guid</span> <span class="cp">}}</span><span class="s">&#39;</span>
+<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="s">'</span><span class="cp">{{</span> <span class="nv">user_obj.object_guid</span> <span class="cp">}}</span><span class="s">'</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
 
 <span class="c1"># Like changing the name example above, the identity option is needed to ensure</span>
@@ -912,7 +912,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-user-m
 <span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user</span>
 <span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OU=Admins,DC=domain,DC=com</span>
-<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;</span><span class="cp">{{</span> <span class="nv">user_obj.sid</span> <span class="cp">}}</span><span class="s">&#39;</span>
+<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="s">'</span><span class="cp">{{</span> <span class="nv">user_obj.sid</span> <span class="cp">}}</span><span class="s">'</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
 </pre></div>
 </div>

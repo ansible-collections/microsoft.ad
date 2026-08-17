@@ -158,8 +158,8 @@
         <span class="nv">$schema</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-ADRootDSE</span> <span class="n">-Properties</span> <span class="n">subschemaSubentry</span><span class="p">).</span><span class="n">subschemaSubentry</span>
         <span class="nv">$getParams</span> <span class="p">=</span> <span class="p">@{</span>
             <span class="n">SearchBase</span> <span class="p">=</span> <span class="nv">$schema</span>
-            <span class="n">LDAPFilter</span> <span class="p">=</span> <span class="s1">&#39;(objectClass=*)&#39;</span>
-            <span class="n">Properties</span> <span class="p">=</span> <span class="s1">&#39;attributeTypes&#39;</span>
+            <span class="n">LDAPFilter</span> <span class="p">=</span> <span class="s1">'(objectClass=*)'</span>
+            <span class="n">Properties</span> <span class="p">=</span> <span class="s1">'attributeTypes'</span>
         <span class="p">}</span>
         <span class="nv">$attributes</span> <span class="p">=</span> <span class="p">(</span><span class="nb">Get-ADObject</span> <span class="nv">@getParams</span><span class="p">).</span><span class="n">attributeTypes</span>
         <span class="nv">$queried</span> <span class="p">=</span> <span class="nv">$false</span>
@@ -169,7 +169,7 @@
         <span class="k">foreach</span> <span class="p">(</span><span class="nv">$n</span> <span class="k">in</span> <span class="nv">$Name</span><span class="p">)</span> <span class="p">{</span>
             <span class="nv">$queried</span> <span class="p">=</span> <span class="nv">$true</span>
             <span class="nv">$attributes</span> <span class="p">|</span> <span class="nb">Where-Object</span> <span class="p">{</span>
-                <span class="nv">$_</span> <span class="o">-like</span> <span class="s2">&quot;*Name &#39;$n&#39;*&quot;</span>
+                <span class="nv">$_</span> <span class="o">-like</span> <span class="s2">"*Name '$n'*"</span>
             <span class="p">}</span>
         <span class="p">}</span>
     <span class="p">}</span>
@@ -189,14 +189,14 @@
 </pre></div>
 </div>
 <p>The output is in the format:</p>
-<div class="highlight-YAML+Jinja notranslate"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">( $ATTRIBUTE_OID NAME &#39;$ATTRIBUTE_NAME&#39; SYNTAX &#39;$TYPE_OID&#39; [SINGLE-VALUE|NO-USER-MODIFICATION] )</span>
+<div class="highlight-YAML+Jinja notranslate"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">( $ATTRIBUTE_OID NAME '$ATTRIBUTE_NAME' SYNTAX '$TYPE_OID' [SINGLE-VALUE|NO-USER-MODIFICATION] )</span>
 </pre></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">$TYPE_OID</span></code> specifies the value type that can be used for this attribute. search the OID online for more information. The <code class="docutils literal notranslate"><span class="pre">SINGLE-VALUE</span></code> specifies if the attribute can only store 1 value. The <code class="docutils literal notranslate"><span class="pre">NO-USER-MODIFICATION</span></code> specifies if the attribute is read only and cannot be set.</p>
 <p>The last example outputs:</p>
-<div class="highlight-YAML+Jinja notranslate"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">( 1.2.840.113556.1.4.221 NAME &#39;sAMAccountName&#39; SYNTAX &#39;1.3.6.1.4.1.1466.115.121.1.15&#39; SINGLE-VALUE )</span>
-<span class="l l-Scalar l-Scalar-Plain">( 2.5.4.10 NAME &#39;o&#39; SYNTAX &#39;1.3.6.1.4.1.1466.115.121.1.15&#39; )</span>
-<span class="l l-Scalar l-Scalar-Plain">( 1.2.840.113556.1.4.2 NAME &#39;objectGUID&#39; SYNTAX &#39;1.3.6.1.4.1.1466.115.121.1.40&#39; SINGLE-VALUE NO-USER-MODIFICATION )</span>
+<div class="highlight-YAML+Jinja notranslate"><div class="highlight"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">( 1.2.840.113556.1.4.221 NAME 'sAMAccountName' SYNTAX '1.3.6.1.4.1.1466.115.121.1.15' SINGLE-VALUE )</span>
+<span class="l l-Scalar l-Scalar-Plain">( 2.5.4.10 NAME 'o' SYNTAX '1.3.6.1.4.1.1466.115.121.1.15' )</span>
+<span class="l l-Scalar l-Scalar-Plain">( 1.2.840.113556.1.4.2 NAME 'objectGUID' SYNTAX '1.3.6.1.4.1.1466.115.121.1.40' SINGLE-VALUE NO-USER-MODIFICATION )</span>
 </pre></div>
 </div>
 <p>This shows the <code class="docutils literal notranslate"><span class="pre">sAMAccountName</span></code> is a string that can only have 1 value. The <code class="docutils literal notranslate"><span class="pre">o</span></code> attribute is also a string but can store multiple values. The <code class="docutils literal notranslate"><span class="pre">objectGUID</span></code> is a byte array value that can only have 1 value and is also read only.</p>
@@ -305,7 +305,7 @@ The common types are:</p>
 <span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">int</span>
 <span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1234</span>
 
-<span class="w">        </span><span class="c1"># extensionName: [&#39;Value 1&#39;, &#39;Value 2&#39;]</span>
+<span class="w">        </span><span class="c1"># extensionName: ['Value 1', 'Value 2']</span>
 <span class="w">        </span><span class="nt">extensionName</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">raw</span>
 <span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Value 1</span>
@@ -337,7 +337,7 @@ The common types are:</p>
 <p>The value specified here is the bytes encoded as a base64 string.</p>
 <p>The <a class="reference external" href="https://docs.ansible.com/projects/ansible/devel/collections/ansible/builtin/b64encode_filter.html#ansible-collections-ansible-builtin-b64encode-filter" title="(in Ansible devel)"><span class="xref std std-ref">ansible.builtin.b64encode filter</span></a> can be used to encode strings on the fly, and the <a class="reference external" href="https://docs.ansible.com/projects/ansible/devel/collections/ansible/builtin/file_lookup.html#ansible-collections-ansible-builtin-file-lookup" title="(in Ansible devel)"><span class="xref std std-ref">ansible.builtin.file lookup</span></a> could be used to read data from a file.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">vars</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">sig_data</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">lookup(&#39;ansible.builtin.file&#39;,</span><span class="nv"> </span><span class="s">&#39;/path/to/my/sig&#39;)</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">    </span><span class="nt">sig_data</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">lookup('ansible.builtin.file',</span><span class="nv"> </span><span class="s">'/path/to/my/sig')</span><span class="nv"> </span><span class="s">}}"</span>
 <span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyUser</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
@@ -346,7 +346,7 @@ The common types are:</p>
 <span class="w">        </span><span class="c1"># Attribute with single value</span>
 <span class="w">        </span><span class="nt">dsaSignature</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bytes</span>
-<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">sig_data</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">ansible.builtin.b64encode</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">sig_data</span><span class="nv"> </span><span class="s">|</span><span class="nv"> </span><span class="s">ansible.builtin.b64encode</span><span class="nv"> </span><span class="s">}}"</span>
 </pre></div>
 </div>
 </section>
@@ -360,19 +360,19 @@ The common types are:</p>
 <span class="w">      </span><span class="nt">set</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">dateAttributeSingleValue</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">date_time</span>
-<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2019-09-07T15:50:00+00:00&#39;</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">'2019-09-07T15:50:00+00:00'</span>
 <span class="w">        </span><span class="nt">dateAttributeMultipleValue</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">date_time</span>
-<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2019-09-07T15:50:00Z&#39;</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">'2019-09-07T15:50:00Z'</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">date_time</span>
-<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2019-09-07T11:50:00-04:00&#39;</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">'2019-09-07T11:50:00-04:00'</span>
 </pre></div>
 </div>
 <p>Internally the datetime is converted to the UTC time and converted to the number of 100 nanosecond increments since 1601-01-01. This PowerShell snippet shows what is happening internally to get the integer value:</p>
-<div class="highlight-PowerShell notranslate"><div class="highlight"><pre><span></span><span class="nv">$dt</span> <span class="p">=</span> <span class="s1">&#39;2019-09-07T15:50:00Z&#39;</span>
+<div class="highlight-PowerShell notranslate"><div class="highlight"><pre><span></span><span class="nv">$dt</span> <span class="p">=</span> <span class="s1">'2019-09-07T15:50:00Z'</span>
 <span class="nv">$dtVal</span> <span class="p">=</span> <span class="no">[DateTimeOffset]</span><span class="p">::</span><span class="n">ParseExact</span><span class="p">(</span>
     <span class="nv">$dt</span><span class="p">,</span>
-    <span class="no">[string[]]</span><span class="p">@(</span><span class="s2">&quot;yyyy-MM-dd&#39;T&#39;HH:mm:ss.FFFFFFFK&quot;</span><span class="p">),</span>
+    <span class="no">[string[]]</span><span class="p">@(</span><span class="s2">"yyyy-MM-dd'T'HH:mm:ss.FFFFFFFK"</span><span class="p">),</span>
     <span class="no">[System.Globalization.CultureInfo]</span><span class="p">::</span><span class="n">InvariantCulture</span><span class="p">,</span>
     <span class="no">[System.Globalization.DateTimeStyles]</span><span class="p">::</span><span class="n">AssumeUniversal</span><span class="p">)</span>
 <span class="nv">$dtVal</span><span class="p">.</span><span class="n">UtcDateTime</span><span class="p">.</span><span class="n">ToFileTimeUtc</span><span class="p">()</span>
@@ -397,9 +397,9 @@ The common types are:</p>
 </pre></div>
 </div>
 <p>SDDL strings can be quite complex so building them manually is ill-advised. It is recommended to build a test object in the <code class="docutils literal notranslate"><span class="pre">Active</span> <span class="pre">Directory</span> <span class="pre">Users</span> <span class="pre">and</span> <span class="pre">Computers</span></code> snap-in (or <code class="docutils literal notranslate"><span class="pre">dsa.msc</span></code>) and set the security as needed in the <code class="docutils literal notranslate"><span class="pre">Security</span></code> tab. From there the SDDL string can be retrieved by doing the following:</p>
-<div class="highlight-PowerShell notranslate"><div class="highlight"><pre><span></span><span class="nv">$dn</span> <span class="p">=</span> <span class="s1">&#39;CN=ObjectName,DC=domain,DC=test&#39;</span>
+<div class="highlight-PowerShell notranslate"><div class="highlight"><pre><span></span><span class="nv">$dn</span> <span class="p">=</span> <span class="s1">'CN=ObjectName,DC=domain,DC=test'</span>
 <span class="nv">$obj</span> <span class="p">=</span> <span class="nb">Get-ADObject</span> <span class="n">-Identity</span> <span class="nv">$dn</span> <span class="n">-Properties</span> <span class="n">nTSecurityDescriptor</span>
-<span class="nv">$obj</span><span class="p">.</span><span class="n">nTSecurityDescriptor</span><span class="p">.</span><span class="n">GetSecurityDescriptorSddlForm</span><span class="p">(</span><span class="s1">&#39;All&#39;</span><span class="p">)</span>
+<span class="nv">$obj</span><span class="p">.</span><span class="n">nTSecurityDescriptor</span><span class="p">.</span><span class="n">GetSecurityDescriptorSddlForm</span><span class="p">(</span><span class="s1">'All'</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>

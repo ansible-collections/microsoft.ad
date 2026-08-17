@@ -452,7 +452,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-object
 <h2><a class="toc-backref" href="#id7" role="doc-backlink">Examples</a><a class="headerlink" href="#examples" title="Link to this heading"></a></h2>
 <div class="highlight-yaml+jinja notranslate"><div class="highlight"><pre><span></span><span class="c1"># Use this to get all valid types in a domain environment</span>
 <span class="c1"># (Get-ADObject -SearchBase (Get-ADRootDSE).subschemaSubentry -Filter * -Properties objectClasses).objectClasses |</span>
-<span class="c1">#     Select-String -Pattern &quot;Name\s+&#39;(\w+)&#39;&quot; |</span>
+<span class="c1">#     Select-String -Pattern "Name\s+'(\w+)'" |</span>
 <span class="c1">#     ForEach-Object { $_.Matches.Groups[1].Value } |</span>
 <span class="c1">#     Sort-Object</span>
 
@@ -465,14 +465,14 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-object
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Rename a contact object</span>
 <span class="w">  </span><span class="nt">microsoft.ad.object</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;</span><span class="cp">{{</span> <span class="nv">contact_obj.object_guid</span> <span class="cp">}}</span><span class="s">&#39;</span>
+<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="s">'</span><span class="cp">{{</span> <span class="nv">contact_obj.object_guid</span> <span class="cp">}}</span><span class="s">'</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RenamedContact</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">contact</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Move a contact object</span>
 <span class="w">  </span><span class="nt">microsoft.ad.object</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;</span><span class="cp">{{</span> <span class="nv">contact_object.object_guid</span> <span class="cp">}}</span><span class="s">&#39;</span>
+<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="s">'</span><span class="cp">{{</span> <span class="nv">contact_object.object_guid</span> <span class="cp">}}</span><span class="s">'</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyContact</span>
 <span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">OU=Contacts,DC=domain,DC=test</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">contact</span>
@@ -491,7 +491,7 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-object
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Remove a contact by identity</span>
 <span class="w">  </span><span class="nt">microsoft.ad.object</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;</span><span class="cp">{{</span> <span class="nv">contact_obj.object_guid</span> <span class="cp">}}</span><span class="s">&#39;</span>
+<span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="s">'</span><span class="cp">{{</span> <span class="nv">contact_obj.object_guid</span> <span class="cp">}}</span><span class="s">'</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">absent</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create container object with custom attributes</span>

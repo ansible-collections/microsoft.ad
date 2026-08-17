@@ -170,7 +170,7 @@
 <h3>Empty string or null<a class="headerlink" href="#empty-string-or-null" title="Link to this heading"></a></h3>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">attributes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">comment</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">objectSid</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
+<span class="w">  </span><span class="nt">objectSid</span><span class="p">:</span><span class="w"> </span><span class="s">''</span>
 <span class="w">  </span><span class="nt">ms-Mcs-AdmPwd</span><span class="p">:</span>
 </pre></div>
 </div>
@@ -363,7 +363,7 @@
 <span class="w">  </span><span class="nt">comment</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">comment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">this</span>
 <span class="w">    </span><span class="c1"># Can refer to previously set attributes above</span>
-<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">computer_name ~ &quot; - &quot; ~ sid ~ &quot; - &quot; ~ objectGuid ~ &quot; - &quot; ~ this</span>
+<span class="w">    </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">computer_name ~ " - " ~ sid ~ " - " ~ objectGuid ~ " - " ~ this</span>
 
 <span class="c1"># Can also be used as a template and refer to the vars retrieved above</span>
 <span class="nt">compose</span><span class="p">:</span>
@@ -400,7 +400,7 @@
 
 <span class="nt">attributes</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">ms-Mcs-AdmPwd</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">ansible_user</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&quot;Administrator&quot;&#39;</span>
+<span class="w">    </span><span class="nt">ansible_user</span><span class="p">:</span><span class="w"> </span><span class="s">'"Administrator"'</span>
 <span class="w">    </span><span class="nt">ansible_password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">this</span>
 </pre></div>
 </div>
@@ -478,9 +478,9 @@
 <span class="nt">this_example</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">encrypted_value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MIIETgYJKoZI...</span>
 <span class="w">  </span><span class="nt">flags</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span>
-<span class="w">  </span><span class="nt">info</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;&#39;</span>
+<span class="w">  </span><span class="nt">info</span><span class="p">:</span><span class="w"> </span><span class="s">''</span>
 <span class="w">  </span><span class="nt">update_timestamp</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">133281382308674404</span>
-<span class="w">  </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{&quot;n&quot;:&quot;Administrator&quot;,&quot;t&quot;:&quot;1d982b607ae7b64&quot;,&quot;p&quot;:&quot;6jr&amp;}yK++{0Q}&amp;&quot;}&#39;</span>
+<span class="w">  </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">'{"n":"Administrator","t":"1d982b607ae7b64","p":"6jr&amp;}yK++{0Q}&amp;"}'</span>
 </pre></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">raw</span></code> value contains the raw base64 encoded value as stored in AD. The <code class="docutils literal notranslate"><span class="pre">this</span></code> value contains a dictionary with the following keys:</p>

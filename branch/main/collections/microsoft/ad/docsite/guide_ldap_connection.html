@@ -147,7 +147,7 @@
 <span id="ansible-collections-microsoft-ad-docsite-guide-ldap-connection-requirements"></span><h2><a class="toc-backref" href="#id1" role="doc-backlink">Requirements</a><a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
 <p>The LDAP connection code requires the <a class="reference external" href="https://pypi.org/project/sansldap/">sansldap</a> and <a class="reference external" href="https://pypi.org/project/pyspnego/">pyspnego</a> libraries. They can be installed using <code class="docutils literal notranslate"><span class="pre">pip</span></code> with:</p>
 <div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span><span class="s1">&#39;pyspnego &gt;= 0.8.0&#39;</span>
+<span class="w">    </span><span class="s1">'pyspnego &gt;= 0.8.0'</span>
 <span class="go">    sansldap</span>
 </pre></div>
 </div>
@@ -178,7 +178,7 @@
 <div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python3<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>--user<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>dnspython<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>dpapi-ng<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span><span class="s1">&#39;pyspnego[kerberos] &gt;= 0.8.0&#39;</span>
+<span class="w">    </span><span class="s1">'pyspnego[kerberos] &gt;= 0.8.0'</span>
 </pre></div>
 </div>
 <p>The Kerberos authentication components require the Kerberos system libraries to be present. For RPM based systems, these are:</p>
@@ -326,7 +326,7 @@
 <h3>Kerberos<a class="headerlink" href="#kerberos" title="Link to this heading"></a></h3>
 <p>Kerberos authentication is a modern authentication protocol supported by Microsoft AD servers and is the preferred protocol for authentication. It is only available if the <code class="docutils literal notranslate"><span class="pre">pyspnego[kerberos]</span></code> extras package is installed and the host has been configured properly. Typically this configuration is done through the <a class="reference external" href="https://web.mit.edu/kerberos/krb5-latest/doc/admin/conf_files/krb5_conf.html">/etc/krb5.conf</a> file on the system. This guide will not go into configuring the host’s Kerberos settings as it is environment specific.</p>
 <p>A good way to ensure the host has been configured to use Kerberos correctly is to ensure the following commands work:</p>
-<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import krb5&quot;</span>
+<div class="highlight-shell-session notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python<span class="w"> </span>-c<span class="w"> </span><span class="s2">"import krb5"</span>
 <span class="gp">$ </span>kinit<span class="w"> </span>username@DOMAIN.REALM
 <span class="gp">$ </span>kvno<span class="w"> </span>ldap/dc.domain.realm
 </pre></div>
@@ -353,7 +353,7 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">socket</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ssl</span>
 
-<span class="n">hostname</span> <span class="o">=</span> <span class="s1">&#39;dc.domain.com&#39;</span>
+<span class="n">hostname</span> <span class="o">=</span> <span class="s1">'dc.domain.com'</span>
 <span class="n">port</span> <span class="o">=</span> <span class="mi">636</span>
 <span class="n">context</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">create_default_context</span><span class="p">()</span>
 

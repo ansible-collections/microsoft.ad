@@ -360,11 +360,11 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-object
 <div class="highlight-yaml+jinja notranslate"><div class="highlight"><pre><span></span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Get all properties for the specified account using its DistinguishedName</span>
 <span class="w">  </span><span class="nt">microsoft.ad.object_info</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">identity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=Username,CN=Users,DC=domain,DC=com</span>
-<span class="w">    </span><span class="nt">properties</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;*&#39;</span>
+<span class="w">    </span><span class="nt">properties</span><span class="p">:</span><span class="w"> </span><span class="s">'*'</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Get the SID for all user accounts as a filter</span>
 <span class="w">  </span><span class="nt">microsoft.ad.object_info</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">filter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ObjectClass -eq &#39;user&#39; -and objectCategory -eq &#39;Person&#39;</span>
+<span class="w">    </span><span class="nt">filter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ObjectClass -eq 'user' -and objectCategory -eq 'Person'</span>
 <span class="w">    </span><span class="nt">properties</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">objectSid</span>
 
@@ -376,8 +376,8 @@ see <a class="reference internal" href="#ansible-collections-microsoft-ad-object
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Search all computer accounts in a specific path that were added after February 1st</span>
 <span class="w">  </span><span class="nt">microsoft.ad.object_info</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">filter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">objectClass -eq &#39;computer&#39; -and whenCreated -gt &#39;20200201000000.0Z&#39;</span>
-<span class="w">    </span><span class="nt">properties</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;*&#39;</span>
+<span class="w">    </span><span class="nt">filter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">objectClass -eq 'computer' -and whenCreated -gt '20200201000000.0Z'</span>
+<span class="w">    </span><span class="nt">properties</span><span class="p">:</span><span class="w"> </span><span class="s">'*'</span>
 <span class="w">    </span><span class="nt">search_scope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">one_level</span>
 <span class="w">    </span><span class="nt">search_base</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CN=Computers,DC=domain,DC=com</span>
 </pre></div>

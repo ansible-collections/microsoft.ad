@@ -158,8 +158,8 @@
 <span class="w">  </span><span class="nt">become_method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">runas</span>
 <span class="w">  </span><span class="nt">become_flags</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">logon_type=new_credentials logon_flags=netcredentials_only</span>
 <span class="w">  </span><span class="nt">vars</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">ansible_become_user</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{</span><span class="nv"> </span><span class="s">ansible_user</span><span class="nv"> </span><span class="s">}}&#39;</span>
-<span class="w">    </span><span class="nt">ansible_become_pass</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{</span><span class="nv"> </span><span class="s">ansible_password</span><span class="nv"> </span><span class="s">}}&#39;</span>
+<span class="w">    </span><span class="nt">ansible_become_user</span><span class="p">:</span><span class="w"> </span><span class="s">'{{</span><span class="nv"> </span><span class="s">ansible_user</span><span class="nv"> </span><span class="s">}}'</span>
+<span class="w">    </span><span class="nt">ansible_become_pass</span><span class="p">:</span><span class="w"> </span><span class="s">'{{</span><span class="nv"> </span><span class="s">ansible_password</span><span class="nv"> </span><span class="s">}}'</span>
 </pre></div>
 </div>
 <p>The <code class="docutils literal notranslate"><span class="pre">runas</span></code> method is used on Windows and the <code class="docutils literal notranslate"><span class="pre">become_flags</span></code> will specify that the credentials should be used for network authentication only. The <code class="docutils literal notranslate"><span class="pre">ansible_become_user</span></code> and <code class="docutils literal notranslate"><span class="pre">ansible_become_pass</span></code> variables specify the username and password to use for authentication. It is important that both of these variables are set to a valid username and password or else the authentication will fail.</p>
@@ -181,15 +181,15 @@
 <span class="w">  </span><span class="nt">microsoft.ad.user</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyUser</span>
 <span class="w">    </span><span class="nt">state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
-<span class="w">    </span><span class="nt">domain_username</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{</span><span class="nv"> </span><span class="s">ansible_user</span><span class="nv"> </span><span class="s">}}&#39;</span>
-<span class="w">    </span><span class="nt">domain_password</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{</span><span class="nv"> </span><span class="s">ansible_password</span><span class="nv"> </span><span class="s">}}&#39;</span>
+<span class="w">    </span><span class="nt">domain_username</span><span class="p">:</span><span class="w"> </span><span class="s">'{{</span><span class="nv"> </span><span class="s">ansible_user</span><span class="nv"> </span><span class="s">}}'</span>
+<span class="w">    </span><span class="nt">domain_password</span><span class="p">:</span><span class="w"> </span><span class="s">'{{</span><span class="nv"> </span><span class="s">ansible_password</span><span class="nv"> </span><span class="s">}}'</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Use domain_credentials</span>
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">name</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">MyUser</span>
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">state</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">present</span>
 <span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">domain_credentials</span><span class="p p-Indicator">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{</span><span class="nv"> </span><span class="s">ansible_user</span><span class="nv"> </span><span class="s">}}&#39;</span>
-<span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;{{</span><span class="nv"> </span><span class="s">ansible_password</span><span class="nv"> </span><span class="s">}}&#39;</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">'{{</span><span class="nv"> </span><span class="s">ansible_user</span><span class="nv"> </span><span class="s">}}'</span>
+<span class="w">      </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="s">'{{</span><span class="nv"> </span><span class="s">ansible_password</span><span class="nv"> </span><span class="s">}}'</span>
 </pre></div>
 </div>
 <div class="admonition note">

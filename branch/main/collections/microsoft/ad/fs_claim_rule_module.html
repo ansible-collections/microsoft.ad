@@ -321,12 +321,12 @@ To check whether it is installed, run <code class="code docutils literal notrans
 <span class="w">    </span><span class="nt">transform_rules</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">value</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<span class="w">          </span><span class="no">@RuleName = &quot;Send Email as NameID&quot;</span>
-<span class="w">          </span><span class="no">c:[Type == &quot;http://schemas.microsoft.com/ws/2008/06/identity/claims/windowsaccountname&quot;,</span>
-<span class="w">             </span><span class="no">Issuer == &quot;AD AUTHORITY&quot;]</span>
-<span class="w">          </span><span class="no">=&gt; issue(store = &quot;Active Directory&quot;,</span>
-<span class="w">                   </span><span class="no">types = (&quot;http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier&quot;),</span>
-<span class="w">                   </span><span class="no">query = &quot;;mail;{0}&quot;, param = c.Value);</span>
+<span class="w">          </span><span class="no">@RuleName = "Send Email as NameID"</span>
+<span class="w">          </span><span class="no">c:[Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/windowsaccountname",</span>
+<span class="w">             </span><span class="no">Issuer == "AD AUTHORITY"]</span>
+<span class="w">          </span><span class="no">=&gt; issue(store = "Active Directory",</span>
+<span class="w">                   </span><span class="no">types = ("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"),</span>
+<span class="w">                   </span><span class="no">query = ";mail;{0}", param = c.Value);</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set multiple transform rules at once</span>
 <span class="w">  </span><span class="nt">microsoft.ad.fs_claim_rule</span><span class="p">:</span>
@@ -334,12 +334,12 @@ To check whether it is installed, run <code class="code docutils literal notrans
 <span class="w">    </span><span class="nt">transform_rules</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">value</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<span class="w">          </span><span class="no">@RuleName = &quot;Pass Through UPN&quot;</span>
-<span class="w">          </span><span class="no">c:[Type == &quot;http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn&quot;]</span>
+<span class="w">          </span><span class="no">@RuleName = "Pass Through UPN"</span>
+<span class="w">          </span><span class="no">c:[Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"]</span>
 <span class="w">          </span><span class="no">=&gt; issue(claim = c);</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<span class="w">          </span><span class="no">@RuleName = &quot;Pass Through Email&quot;</span>
-<span class="w">          </span><span class="no">c:[Type == &quot;http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress&quot;]</span>
+<span class="w">          </span><span class="no">@RuleName = "Pass Through Email"</span>
+<span class="w">          </span><span class="no">c:[Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"]</span>
 <span class="w">          </span><span class="no">=&gt; issue(claim = c);</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Append a rule to existing transform rules</span>
@@ -349,9 +349,9 @@ To check whether it is installed, run <code class="code docutils literal notrans
 <span class="w">      </span><span class="nt">update</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">append</span>
 <span class="w">      </span><span class="nt">value</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<span class="w">          </span><span class="no">@RuleName = &quot;Send Group Membership&quot;</span>
-<span class="w">          </span><span class="no">c:[Type == &quot;http://schemas.microsoft.com/ws/2008/06/identity/claims/groupsid&quot;,</span>
-<span class="w">             </span><span class="no">Value =~ &quot;^S-1-5-21-&quot;]</span>
+<span class="w">          </span><span class="no">@RuleName = "Send Group Membership"</span>
+<span class="w">          </span><span class="no">c:[Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/groupsid",</span>
+<span class="w">             </span><span class="no">Value =~ "^S-1-5-21-"]</span>
 <span class="w">          </span><span class="no">=&gt; issue(claim = c);</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set authorization rules</span>
@@ -360,9 +360,9 @@ To check whether it is installed, run <code class="code docutils literal notrans
 <span class="w">    </span><span class="nt">authorization_rules</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">value</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<span class="w">          </span><span class="no">@RuleTemplate = &quot;AllowAllAuthzRule&quot;</span>
-<span class="w">          </span><span class="no">=&gt; issue(Type = &quot;http://schemas.microsoft.com/authorization/claims/permit&quot;,</span>
-<span class="w">                   </span><span class="no">Value = &quot;true&quot;);</span>
+<span class="w">          </span><span class="no">@RuleTemplate = "AllowAllAuthzRule"</span>
+<span class="w">          </span><span class="no">=&gt; issue(Type = "http://schemas.microsoft.com/authorization/claims/permit",</span>
+<span class="w">                   </span><span class="no">Value = "true");</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Set both transform and authorization rules</span>
 <span class="w">  </span><span class="nt">microsoft.ad.fs_claim_rule</span><span class="p">:</span>
@@ -370,15 +370,15 @@ To check whether it is installed, run <code class="code docutils literal notrans
 <span class="w">    </span><span class="nt">transform_rules</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">value</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<span class="w">          </span><span class="no">@RuleName = &quot;Pass Through UPN&quot;</span>
-<span class="w">          </span><span class="no">c:[Type == &quot;http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn&quot;]</span>
+<span class="w">          </span><span class="no">@RuleName = "Pass Through UPN"</span>
+<span class="w">          </span><span class="no">c:[Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn"]</span>
 <span class="w">          </span><span class="no">=&gt; issue(claim = c);</span>
 <span class="w">    </span><span class="nt">authorization_rules</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">value</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<span class="w">          </span><span class="no">@RuleTemplate = &quot;AllowAllAuthzRule&quot;</span>
-<span class="w">          </span><span class="no">=&gt; issue(Type = &quot;http://schemas.microsoft.com/authorization/claims/permit&quot;,</span>
-<span class="w">                   </span><span class="no">Value = &quot;true&quot;);</span>
+<span class="w">          </span><span class="no">@RuleTemplate = "AllowAllAuthzRule"</span>
+<span class="w">          </span><span class="no">=&gt; issue(Type = "http://schemas.microsoft.com/authorization/claims/permit",</span>
+<span class="w">                   </span><span class="no">Value = "true");</span>
 
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Clear all claim rules from a trust</span>
 <span class="w">  </span><span class="nt">microsoft.ad.fs_claim_rule</span><span class="p">:</span>
