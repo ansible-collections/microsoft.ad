@@ -734,7 +734,7 @@ Function Get-AnsibleADObject {
     # to just the defaultNamingContext as defined by -SearchBase.
     $objectGuid = [Guid]::Empty
     $tryDollarFallback = $false
-    if ($IdentityPassThru -and $false) {
+    if ($IdentityPassThru) {
         $getParams.Identity = $Identity
     }
     elseif ([System.Guid]::TryParse($Identity, [ref]$objectGuid)) {
