@@ -151,6 +151,17 @@ releases:
       name: pso
       namespace: ''
     release_date: '2026-07-14'
+  1.12.1:
+    changes:
+      bugfixes:
+      - group - Treat the ``name`` value as part of the object's distinguished name
+        to avoid any false matches for a ``userPrincipalName`` or ``sAMAccountName``
+        pattern - https://github.com/ansible-collections/microsoft.ad/issues/198
+      release_summary: Release summary for v1.12.1
+    fragments:
+    - group-identity-lookup.yml
+    - release-summary.yml
+    release_date: '2026-08-26'
   1.2.0:
     changes:
       bugfixes:

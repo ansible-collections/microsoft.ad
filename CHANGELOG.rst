@@ -4,6 +4,19 @@ Ansible Microsoft Active Directory Release Notes
 
 .. contents:: Topics
 
+v1.12.1
+=======
+
+Release Summary
+---------------
+
+Release summary for v1.12.1
+
+Bugfixes
+--------
+
+- group - Treat the ``name`` value as part of the object's distinguished name to avoid any false matches for a ``userPrincipalName`` or ``sAMAccountName`` pattern - https://github.com/ansible-collections/microsoft.ad/issues/198
+
 v1.12.0
 =======
 
