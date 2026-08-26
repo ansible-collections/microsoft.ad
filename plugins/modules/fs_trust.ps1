@@ -130,21 +130,10 @@ function Test-AdfsValueChanged {
     $currentArray = @($Current | Where-Object { $null -ne $_ } | ForEach-Object { [string]$_ })
     $desiredArray = @($Desired | Where-Object { $null -ne $_ } | ForEach-Object { [string]$_ })
 
-    if ($currentArray.Count -ne $desiredArray.Count) {
-        return $true
-    }
+    $currentSet = [System.Collections.Generic.HashSet[string]]::new([string[]]$currentArray)
+    $desiredSet = [System.Collections.Generic.HashSet[string]]::new([string[]]$desiredArray)
 
-    if ($currentArray.Count -eq 0) {
-        return $false
-    }
-
-    for ($i = 0; $i -lt $currentArray.Count; $i++) {
-        if ($currentArray[$i] -ne $desiredArray[$i]) {
-            return $true
-        }
-    }
-
-    return $false
+    return -not $currentSet.SetEquals($desiredSet)
 }
 
 # Compare SAML endpoints in their original order.
@@ -415,7 +404,7 @@ try {
     $existing = Get-AdfsRelyingPartyTrustDetail -Name $name
 }
 catch {
-    $module.FailJson("Failed to retrieve relying party trust '$name': $($_.Exception.Message)", $_)
+    $module.FailJson("Failed to retrieve relying party trust '$name': $_", $_)
 }
 
 # $desiredState is the single representation of the state the module wants.
@@ -512,14 +501,14 @@ if ($state -eq 'present') {
                 }
             }
             catch {
-                $module.FailJson("Failed to create relying party trust '$name': $($_.Exception.Message)", $_)
+                $module.FailJson("Failed to create relying party trust '$name': $_", $_)
             }
 
             try {
                 $existing = Get-AdfsRelyingPartyTrustDetail -Name $name
             }
             catch {
-                $module.FailJson("Failed to retrieve newly created trust '$name': $($_.Exception.Message)", $_)
+                $module.FailJson("Failed to retrieve newly created trust '$name': $_", $_)
             }
 
             # Actual ADFS state is authoritative after creation.
@@ -621,10 +610,7 @@ if ($state -eq 'present') {
                 }
             }
             catch {
-                $module.FailJson(
-                    "Failed to update relying party trust '$name': $($_.Exception.Message)",
-                    $_
-                )
+                $module.FailJson("Failed to update relying party trust '$name': $_", $_)
             }
 
             # Re-read the actual state after applying the changes.
@@ -632,10 +618,7 @@ if ($state -eq 'present') {
                 $existing = Get-AdfsRelyingPartyTrustDetail -Name $name
             }
             catch {
-                $module.FailJson(
-                    "Failed to retrieve updated trust '$name': $($_.Exception.Message)",
-                    $_
-                )
+                $module.FailJson("Failed to retrieve updated trust '$name': $_", $_)
             }
 
             # Actual ADFS state is authoritative after a real update.
@@ -663,7 +646,7 @@ else {
                 Remove-AdfsRelyingPartyTrust -TargetName $name -Confirm:$false -ErrorAction Stop
             }
             catch {
-                $module.FailJson("Failed to remove relying party trust '$name': $($_.Exception.Message)", $_)
+                $module.FailJson("Failed to remove relying party trust '$name': $_", $_)
             }
         }
     }
