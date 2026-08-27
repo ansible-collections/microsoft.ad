@@ -1,0 +1,7 @@
+deprecated_features:
+  - >-
+    The ``microsoft.ad.gpo`` module has been renamed to ``microsoft.ad.gpo_link``. The old module name is still
+    available for backwards compatibility but this alias will be removed in a future release. As even the documentation
+    for the old module had ``microsoft.ad.gpo_link`` in the examples and this module was only just released, the
+    deprecation period for this alias will be shorter than normal. Please update your playbooks to use the new module
+    name as soon as possible.

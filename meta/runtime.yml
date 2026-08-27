@@ -8,3 +8,11 @@ action_groups:
     - ou
     - service_account
     - user
+plugin_routing:
+  modules:
+    gpo:
+      redirect: microsoft.ad.gpo_link
+      deprecation:
+        warning_text: >-
+          Use microsoft.ad.gpo_link instead. This deprecation is for the alias microsoft.ad.gpo and
+          will be removed a future release or when a module for managing GPOs is created.
