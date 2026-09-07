@@ -2,7 +2,7 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 DOCUMENTATION:
-  module: gpo
+  module: gpo_link
   short_description: Manage Group Policy Object links
   version_added: 1.12.0
   description:
@@ -83,40 +83,40 @@ DOCUMENTATION:
 
 EXAMPLES: |
   - name: Link a GPO to an OU
-    microsoft.ad.gpo:
+    microsoft.ad.gpo_link:
       name: Security_Hardening_Policy
       target: 'OU=Servers,DC=contoso,DC=com'
       state: present
 
   - name: Link a GPO by GUID and enforce it
-    microsoft.ad.gpo:
+    microsoft.ad.gpo_link:
       guid: 5990264b-7000-482d-a2f0-c43eb26aa956
       target: 'OU=Workstations,DC=contoso,DC=com'
       enforced: true
       state: present
 
   - name: Disable a GPO link without removing it
-    microsoft.ad.gpo:
+    microsoft.ad.gpo_link:
       name: Optional_Policy
       target: 'OU=Staging,DC=contoso,DC=com'
       enabled: false
       state: present
 
   - name: Set link order for a GPO
-    microsoft.ad.gpo:
+    microsoft.ad.gpo_link:
       name: Security_Hardening_Policy
       target: 'OU=Servers,DC=contoso,DC=com'
       order: 1
       state: present
 
   - name: Remove a GPO link from an OU
-    microsoft.ad.gpo:
+    microsoft.ad.gpo_link:
       name: Old_Policy
       target: 'OU=Servers,DC=contoso,DC=com'
       state: absent
 
   - name: Link a GPO using a specific domain controller
-    microsoft.ad.gpo:
+    microsoft.ad.gpo_link:
       name: Security_Hardening_Policy
       target: 'OU=Servers,DC=contoso,DC=com'
       domain_server: dc01.contoso.com

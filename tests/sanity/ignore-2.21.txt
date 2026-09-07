@@ -1,0 +1,1 @@
+meta/runtime.yml runtime-metadata # deprecation requires removal_version but we are purposefully setting a short deprecation here

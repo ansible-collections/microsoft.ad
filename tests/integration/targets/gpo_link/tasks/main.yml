@@ -31,7 +31,7 @@
 - name: Test gpo module
   block:
     - name: Create GPO link - check mode
-      microsoft.ad.gpo:
+      microsoft.ad.gpo_link:
         name: AnsibleTestGPO
         target: "{{ test_target }}"
         state: present
@@ -60,7 +60,7 @@
           - not _check_mode_verify.result
 
     - name: Create GPO link
-      microsoft.ad.gpo:
+      microsoft.ad.gpo_link:
         name: AnsibleTestGPO
         target: "{{ test_target }}"
         state: present
@@ -72,7 +72,7 @@
           - _create is changed
 
     - name: Create GPO link again (idempotency)
-      microsoft.ad.gpo:
+      microsoft.ad.gpo_link:
         name: AnsibleTestGPO
         target: "{{ test_target }}"
         state: present
@@ -84,7 +84,7 @@
           - _create_idem is not changed
 
     - name: Disable GPO link
-      microsoft.ad.gpo:
+      microsoft.ad.gpo_link:
         name: AnsibleTestGPO
         target: "{{ test_target }}"
         enabled: false
@@ -97,7 +97,7 @@
           - _disable is changed
 
     - name: Disable GPO link again (idempotency)
-      microsoft.ad.gpo:
+      microsoft.ad.gpo_link:
         name: AnsibleTestGPO
         target: "{{ test_target }}"
         enabled: false
@@ -110,7 +110,7 @@
           - _disable_idem is not changed
 
     - name: Re-enable GPO link
-      microsoft.ad.gpo:
+      microsoft.ad.gpo_link:
         name: AnsibleTestGPO
         target: "{{ test_target }}"
         enabled: true
@@ -123,7 +123,7 @@
           - _enable is changed
 
     - name: Enforce GPO link
-      microsoft.ad.gpo:
+      microsoft.ad.gpo_link:
         name: AnsibleTestGPO
         target: "{{ test_target }}"
         enforced: true
@@ -136,7 +136,7 @@
           - _enforce is changed
 
     - name: Enforce GPO link again (idempotency)
-      microsoft.ad.gpo:
+      microsoft.ad.gpo_link:
         name: AnsibleTestGPO
         target: "{{ test_target }}"
         enforced: true
@@ -149,7 +149,7 @@
           - _enforce_idem is not changed
 
     - name: Update link using GUID
-      microsoft.ad.gpo:
+      microsoft.ad.gpo_link:
         guid: "{{ test_gpo_guid }}"
         target: "{{ test_target }}"
         enforced: false
@@ -162,7 +162,7 @@
           - _guid_update is changed
 
     - name: Remove GPO link - check mode
-      microsoft.ad.gpo:
+      microsoft.ad.gpo_link:
         name: AnsibleTestGPO
         target: "{{ test_target }}"
         state: absent
@@ -191,7 +191,7 @@
           - _remove_check_verify.result
 
     - name: Remove GPO link
-      microsoft.ad.gpo:
+      microsoft.ad.gpo_link:
         name: AnsibleTestGPO
         target: "{{ test_target }}"
         state: absent
@@ -203,7 +203,7 @@
           - _remove is changed
 
     - name: Remove GPO link again (idempotency)
-      microsoft.ad.gpo:
+      microsoft.ad.gpo_link:
         name: AnsibleTestGPO
         target: "{{ test_target }}"
         state: absent
@@ -216,7 +216,7 @@
 
   always:
     - name: Cleanup - remove GPO link if it exists
-      microsoft.ad.gpo:
+      microsoft.ad.gpo_link:
         name: AnsibleTestGPO
         target: "{{ test_target }}"
         state: absent
