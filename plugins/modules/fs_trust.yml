@@ -28,8 +28,6 @@ DOCUMENTATION:
       description:
         - URL pointing to the federation metadata document for the
           relying party.
-        - The module tests connectivity to this URL before creating
-          the trust.
         - Mutually exclusive with O(metadata_file) and O(identifier).
       type: str
     metadata_file:
@@ -41,22 +39,31 @@ DOCUMENTATION:
       description:
         - List of unique identifiers (URIs) for the relying party trust.
         - Used for manual trust setup without a metadata document.
+        - When the trust already exists, the configured identifiers are
+          updated to match this list.
         - Mutually exclusive with O(metadata_url) and O(metadata_file).
       type: list
       elements: str
     saml_endpoint:
       description:
         - List of SAML Assertion Consumer Service endpoint URLs.
-        - Only used when creating a trust with O(identifier) for
-          manual setup.
         - Each URL is registered as a SAML POST binding endpoint.
+        - The first URL in the list will be marked as IsDefault,
+          and list order determines each endpoint's index.
+        - When the trust already exists, this list replaces the entire
+          set of configured SAML endpoints. It must always contain the
+          full desired set, not just the endpoint(s) being added or
+          changed.
+        - When creating a new trust, only used together with O(identifier)
+          for manual setup.
       type: list
       elements: str
     wsfed_endpoint:
       description:
         - WS-Federation passive endpoint URL for the relying party.
-        - Only used when creating a trust with O(identifier) for
-          manual setup.
+        - Used when creating a trust with O(identifier) for manual setup.
+        - When the trust already exists, the configured WS-Federation
+          endpoint is updated to match this value.
       type: str
     enabled:
       description:
@@ -109,6 +116,9 @@ DOCUMENTATION:
     - name: Add-AdfsRelyingPartyTrust
       description: Microsoft documentation for the underlying cmdlet.
       link: https://learn.microsoft.com/en-us/powershell/module/adfs/add-adfsrelyingpartytrust
+    - name: Set-AdfsRelyingPartyTrust
+      description: Microsoft documentation for the underlying cmdlet.
+      link: https://learn.microsoft.com/en-us/powershell/module/adfs/set-adfsrelyingpartytrust
   extends_documentation_fragment:
     - ansible.builtin.action_common_attributes
   attributes:
@@ -160,6 +170,21 @@ EXAMPLES: |
       metadata_url: https://app.example.com/federationmetadata/2007-06/federationmetadata.xml
       monitoring_enabled: true
 
+  - name: Update the identifiers and WS-Fed endpoint on an existing trust
+    microsoft.ad.fs_trust:
+      name: WsFedApp
+      identifier:
+        - https://wsfed.example.com/
+        - https://wsfed.example.com/alt
+      wsfed_endpoint: https://wsfed.example.com/auth2
+
+  - name: Replace the SAML endpoints on an existing trust
+    microsoft.ad.fs_trust:
+      name: CustomSaaS
+      saml_endpoint:
+        - https://app.example.com/saml/acs
+        - https://app.example.com/saml/acs2
+
   - name: Remove a relying party trust
     microsoft.ad.fs_trust:
       name: MyApp
@@ -182,3 +207,44 @@ RETURN:
     returned: success and state is present
     type: bool
     sample: true
+  auto_update_enabled:
+    description: Whether automatic metadata updates are enabled.
+    returned: success and state is present
+    type: bool
+    sample: true
+  token_lifetime:
+    description: Token validity duration in minutes.
+    returned: success and state is present
+    type: int
+    sample: 60
+  notes:
+    description: Freeform notes configured for the relying party trust.
+    returned: success and state is present
+    type: str
+    sample: Managed by Ansible
+  access_control_policy_name:
+    description: Name of the assigned access control policy.
+    returned: success and state is present
+    type: str
+    sample: Permit everyone
+  signature_algorithm:
+    description: Configured signature algorithm.
+    returned: success and state is present
+    type: str
+    sample: rsa_sha256
+  encrypt_claims:
+    description: Whether claims sent to the relying party are encrypted.
+    returned: success and state is present
+    type: bool
+    sample: false
+  wsfed_endpoint:
+    description: The configured WS-Federation passive endpoint URL, if any.
+    returned: success and state is present
+    type: str
+    sample: https://wsfed.example.com/auth
+  saml_endpoints:
+    description: The configured SAML Assertion Consumer Service endpoint URLs.
+    returned: success and state is present
+    type: list
+    elements: str
+    sample: ["https://app.example.com/saml/acs"]
