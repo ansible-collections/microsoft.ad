@@ -71,12 +71,17 @@ VOLATILE_KEYS = frozenset([
     "firmware",
 ])
 
-# Stable identifiers. A display `name` alongside one of these is redundant and
+# Stable identifiers. A display name alongside one of these is redundant and
 # mutable -- renaming the object produces a second audit row for one node.
 IDENTITY_KEYS = frozenset([
     "id", "moid", "serial", "serial_number", "object_guid", "guid", "uuid",
     "ansible_product_serial", "instance_id", "arn",
 ])
+
+# Human-facing labels. Not volatile enough to reject on their own -- for some
+# resources a name is the only identity there is -- but redundant and harmful
+# next to a stable identifier.
+DISPLAY_NAME_KEYS = frozenset(["name", "host_name", "hostname", "display_name"])
 
 
 def load_queries():
@@ -214,15 +219,39 @@ def sub_object(expression):
     return dict(split_pairs(block)) if block else {}
 
 
-def emitted_literals(expression):
-    """String literals the expression can emit.
+READERS = re.compile(r"\b(?:test|match|capture|contains|split|startswith"
+                     r"|endswith|ltrimstr|rtrimstr|sub|gsub|inside)\s*\(")
 
-    Excludes arguments to test()/match()/split() and friends -- those are
-    patterns being read, not taxonomy values being written.
+
+def strip_reader_calls(expression):
+    """Blank out the arguments of test()/gsub()/match() and friends.
+
+    Those are patterns being read, not taxonomy values being written. The
+    arguments are found by matching parens rather than by a regex, because a
+    jq regex routinely contains its own -- ``gsub("(?<c>[A-Z])"; "_" + (.c |
+    ascii_downcase))`` would otherwise be cut short at the first ``)`` and
+    leave ``"(?<c>[A-Z])"`` looking like an emitted literal.
     """
-    readers = (r"\b(test|match|contains|split|startswith|endswith|ltrimstr"
-               r"|rtrimstr|sub|gsub|inside)\s*\([^()]*\)")
-    return re.findall(r'"([^"\\]*)"', re.sub(readers, " ", expression or ""))
+    text = expression or ""
+    while True:
+        found = READERS.search(text)
+        if not found:
+            return text
+        depth, index = 0, found.end() - 1
+        while index < len(text):
+            if text[index] == "(":
+                depth += 1
+            elif text[index] == ")":
+                depth -= 1
+                if depth == 0:
+                    break
+            index += 1
+        text = text[:found.start()] + " " + text[index + 1:]
+
+
+def emitted_literals(expression):
+    """String literals the expression can emit."""
+    return re.findall(r'"([^"\\]*)"', strip_reader_calls(expression))
 
 
 PATH = re.compile(
@@ -231,50 +260,236 @@ PATH = re.compile(
 )
 
 
+def outer_parens_match(text):
+    """True if text[0] is the paren closed by text[-1]."""
+    if not text.startswith("(") or not text.endswith(")"):
+        return False
+    depth = 0
+    for index, char in enumerate(text):
+        if char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+            if depth == 0:
+                return index == len(text) - 1
+    return False
+
+
+def split_alternatives(expression):
+    """Split a jq ``a // b // c`` chain at depth 0, outermost parens removed."""
+    text = " ".join((expression or "").split())
+    while outer_parens_match(text):
+        text = text[1:-1].strip()
+    parts = []
+    depth = 0
+    in_string = False
+    start = 0
+    index = 0
+    while index < len(text):
+        char = text[index]
+        if in_string:
+            if char == "\\":
+                index += 2
+                continue
+            if char == '"':
+                in_string = False
+        elif char == '"':
+            in_string = True
+        elif char in "{[(":
+            depth += 1
+        elif char in "}])":
+            depth -= 1
+        elif char == "/" and depth == 0 and text[index:index + 2] == "//":
+            parts.append(text[start:index].strip())
+            index += 2
+            start = index
+            continue
+        index += 1
+    parts.append(text[start:].strip())
+    return [part for part in parts if part]
+
+
+def split_top(text, operator):
+    """Split ``text`` on a depth-0 occurrence of a single-character operator."""
+    parts = []
+    depth = 0
+    in_string = False
+    start = 0
+    for index, char in enumerate(text):
+        if in_string:
+            if char == '"':
+                in_string = False
+        elif char == '"':
+            in_string = True
+        elif char in "{[(":
+            depth += 1
+        elif char in "}])":
+            depth -= 1
+        elif char == operator and depth == 0:
+            parts.append(text[start:index])
+            start = index + 1
+    parts.append(text[start:])
+    return [part.strip() for part in parts]
+
+
+def concatenates_a_literal(expression):
+    """True for a ``+`` concatenation with a string-literal operand.
+
+    jq treats null as the identity for ``+``, so ``null + ":" + null`` is
+    ``":"``, not null. Without this, every ``(.a + ":" + .b)`` name reads as a
+    null risk.
+    """
+    text = " ".join((expression or "").split())
+    while outer_parens_match(text):
+        text = text[1:-1].strip()
+    operands = split_top(text, "+")
+    if len(operands) < 2:
+        return False
+    return any(re.fullmatch(r'"[^"]*"', operand) for operand in operands)
+
+
+SAFE_FILTERS = ("ascii_downcase", "ascii_upcase", "tostring", "tojson",
+                "tonumber", "length", "ltrimstr", "rtrimstr")
+
+
+def balanced_prefix(text, close):
+    """Inner text of the parenthesised group whose ``)`` is at index ``close``.
+
+    Scans backwards, so it copes with the parens inside a jq regex literal such
+    as ``capture("(?<t>[^/]+)")`` -- those are balanced, which is what matters.
+    """
+    depth = 0
+    index = close
+    while index >= 0:
+        if text[index] == ")":
+            depth += 1
+        elif text[index] == "(":
+            depth -= 1
+            if depth == 0:
+                return text[index + 1:close]
+        index -= 1
+    return None
+
+
+def pipeline_is_safe(alternative, paths):
+    """``X | ascii_downcase`` cannot be null when ``X`` is proven non-null."""
+    stages = split_top(alternative, "|")
+    if len(stages) < 2:
+        return False
+    head = stages[0]
+    while outer_parens_match(head):
+        head = head[1:-1].strip()
+    if head not in paths:
+        return False
+    return all(
+        any(stage.startswith(name) for name in SAFE_FILTERS)
+        for stage in stages[1:]
+    )
+
+
 def proven_non_null(query):
-    """Paths and variables the query proves non-null before building the record."""
+    """What the query proves before it builds the record.
+
+    Returns ``(paths, chains)``. ``paths`` are individually non-null. ``chains``
+    are alternative sets proven non-null *collectively*: ``select((.a // .b //
+    null) != null)`` does not prove either ``.a`` or ``.b`` on its own, but it
+    does prove that ``.a // .b`` is never null.
+    """
     source = strip_comments(query)
-    proven = set()
+    paths = set()
+    chains = []
+
+    def record(candidate):
+        alternatives = [
+            alternative for alternative in split_alternatives(candidate)
+            if alternative and alternative != "null"
+        ]
+        if len(alternatives) == 1:
+            paths.add(alternatives[0])
+        elif alternatives:
+            chains.append(frozenset(alternatives))
+
     for match in re.finditer(r"select\s*\(([^()]*(?:\([^()]*\)[^()]*)*)\)", source):
         condition = match.group(1)
         for inner in re.finditer(
-            r"\(?\s*(\$?[\w.\[\]]+)\s*(?://\s*null\s*)?\)?\s*!=\s*null", condition
+            r"(\([^()]*\)|\$?[\w.\[\]]+)\s*!=\s*null", condition
         ):
-            proven.add(inner.group(1))
-        if re.search(r"\.\s*!=\s*null", condition):
-            proven.add(".")
-    for match in re.finditer(r"\(\s*(\$?[\w.\[\]]+)\s*//\s*[^)]*?\)\s*!=\s*null", source):
-        proven.add(match.group(1))
-    # `(.kind // "missing") as $kind` -- the variable cannot be null.
+            record(inner.group(1))
+        if re.search(r"(?:^|[\s(])\.\s*!=\s*null", condition):
+            paths.add(".")
+        # `select((.x | type) == "string")` -- null has type "null", so passing
+        # this proves .x is not null.
+        for inner in re.finditer(
+            r"\(\s*(\$?[\w.\[\]]+)\s*\|\s*type\s*\)\s*==", condition
+        ):
+            paths.add(inner.group(1))
+        # `select(.x | test("..."))` -- test() raises on null, so reaching the
+        # record at all proves .x was a string.
+        for inner in re.finditer(
+            r"^\s*(\$?[\w.\[\]]+)\s*\|\s*(?:test|startswith|endswith)\b",
+            condition,
+        ):
+            paths.add(inner.group(1))
+    # `if (.a // null) != null and (.b // null) != null then ...`
+    for match in re.finditer(r"(\([^()]*\))\s*!=\s*null", source):
+        record(match.group(1))
+
+    # Variable bindings. `(.kind // "missing") as $kind` cannot be null, and
+    # neither can `($data.id | ascii_downcase) as $arm_id` once `$data.id` is
+    # proven. A binding can depend on an earlier binding, so iterate to a fixed
+    # point rather than making a single pass.
+    bindings = []
+    for match in re.finditer(r"\)\s+as\s+(\$[A-Za-z_]\w*)", source):
+        inner = balanced_prefix(source, match.start())
+        if inner is not None:
+            bindings.append((inner.strip(), match.group(1)))
     for match in re.finditer(
-        r"\(([^()]*(?:\([^()]*\)[^()]*)*)\)\s+as\s+(\$[A-Za-z_]\w*)", source
+        r"(?<![)\w])(\$?[\w.\[\]]+)\s+as\s+(\$[A-Za-z_]\w*)", source
     ):
-        expression, variable = match.group(1), match.group(2)
-        if re.search(r'//\s*("[^"]*"|\{\}|\[\]|-?\d+|true|false)\s*$', expression.strip()):
-            proven.add(variable)
-    for match in re.finditer(r"(\$?[\w.\[\]]+)\s+as\s+(\$[A-Za-z_]\w*)", source):
-        if match.group(1) in proven:
-            proven.add(match.group(2))
-    return proven
+        bindings.append((match.group(1), match.group(2)))
+
+    while True:
+        before = len(paths)
+        for expression, variable in bindings:
+            if variable not in paths and not can_be_null(expression, (paths, chains)):
+                paths.add(variable)
+        if len(paths) == before:
+            return paths, chains
 
 
 def can_be_null(expression, proven):
-    """True if this canonical_facts value expression can evaluate to null."""
+    """True if this value expression can evaluate to null.
+
+    jq's ``//`` yields the first alternative that is neither null nor false, so
+    a chain is non-null as soon as *any one* of its alternatives is non-null.
+    Treating the whole expression as a single reference -- which is what a naive
+    check does -- reports a false positive on every guarded fallback chain.
+    """
     if expression is None:
         return True
-    collapsed = " ".join(expression.split())
-    if re.search(r"//\s*null\s*\)?\s*$", collapsed):
-        return True                       # explicit `// null`
-    if re.fullmatch(r'"[^"]*"', collapsed):
-        return False                      # literal
-    if re.search(r'//\s*("[^"]*"|\{\}|\[\]|-?\d+|true|false)', collapsed):
-        return False                      # non-null default
-    if "tostring" in collapsed or "tojson" in collapsed:
-        return False                      # coerced to a string
-    references = PATH.findall(collapsed)
-    if not references:
-        return False
-    return any(reference not in proven for reference in references)
+    paths, chains = proven
+    alternatives = split_alternatives(expression)
+
+    for alternative in alternatives:
+        if alternative == "null":
+            continue
+        if re.fullmatch(r'"[^"]*"|\{\}|\[\]|-?\d+|true|false', alternative):
+            return False            # a non-null literal ends the chain
+        if concatenates_a_literal(alternative):
+            return False            # null is the identity for jq's `+`
+        if alternative in paths:
+            return False            # proven non-null by an earlier guard
+        if "tostring" in alternative or "tojson" in alternative:
+            return False            # coerced to a string
+        if pipeline_is_safe(alternative, paths):
+            return False            # `<proven> | ascii_downcase` and friends
+        if not PATH.findall(alternative):
+            return False            # no path reference, cannot be null
+
+    if any(chain <= set(alternatives) for chain in chains):
+        return False                # a guard proved this exact chain non-null
+
+    return True
 
 
 # --------------------------------------------------------------------------
@@ -369,11 +584,12 @@ def test_canonical_facts_holds_identity_only(module):
     )
 
     identifiers = sorted(lowered & IDENTITY_KEYS)
-    assert not ("name" in lowered and identifiers), (
-        "%s: canonical_facts contains both `name` and the stable identifier(s) "
-        "%s. `name` is mutable, so renaming the object counts it as a second "
-        "node. Keep the identifier, move `name` to `facts`."
-        % (module, ", ".join(identifiers))
+    labels = sorted(lowered & DISPLAY_NAME_KEYS)
+    assert not (labels and identifiers), (
+        "%s: canonical_facts contains both the label(s) %s and the stable "
+        "identifier(s) %s. A label is mutable, so renaming the object counts it "
+        "as a second node. Keep the identifier, move the label to `facts`."
+        % (module, ", ".join(labels), ", ".join(identifiers))
     )
 
     module_name = module.split(".")[-1]
