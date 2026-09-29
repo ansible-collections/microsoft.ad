@@ -48,6 +48,22 @@
 # identity only. Anything mutable in it — an IP, a name, a status — counts the
 # same node again every time it changes.
 #
+# NAME MUST BE UNIQUE WITHIN A JOB
+# --------------------------------
+# IndirectManagedNodeAudit declares unique_together = [('name', 'job')], and the
+# controller bulk_create()s every record for a job in one transaction. Two
+# records that deduplicate apart on canonical_facts but share a name raise
+# IntegrityError, which rolls back the whole transaction and loses EVERY audit
+# record for that job — not just the colliding pair. The rollback reverts
+# event_queries_processed with it, so the fallback task re-picks the job and
+# fails identically until it ages out.
+#
+# So name is object_guid, not distinguished_name. A DN is unique in the
+# directory at any instant, but an object deleted and recreated at the same DN
+# within one job yields two GUIDs sharing one DN — which is exactly the
+# collision. The DN is still reported, in facts.distinguished_name, which is
+# not constrained.
+#
 # EXCLUDED MODULES
 # ----------------
 # microsoft.ad.object_info  — returns every object matching an LDAP filter;
@@ -86,7 +102,7 @@ microsoft.ad.computer:
     if ($data.object_guid // null) != null
       and ($data.distinguished_name // null) != null
     then {
-      name: $data.distinguished_name,
+      name: $data.object_guid,
       canonical_facts: {
         object_guid: $data.object_guid
       },
