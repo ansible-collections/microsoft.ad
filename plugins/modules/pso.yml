@@ -1,0 +1,105 @@
+# Copyright (c) 2026 Ansible Project
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+DOCUMENTATION:
+  module: pso
+  short_description: Manage Active Directory Password Settings Objects
+  version_added: "1.12.0"
+  description:
+    - Create, modify, or remove Password Settings Objects (PSOs) in Active
+      Directory.
+    - PSOs implement fine-grained password policies that apply password and
+      account lockout settings to specific users and global security groups,
+      independently of the Default Domain Policy.
+  options:
+    precedence:
+      description:
+        - The precedence value of the PSO.
+        - Lower numbers take priority when multiple PSOs apply to the same subject.
+        - Required when creating a new PSO.
+      type: int
+    min_password_length:
+      description:
+        - The minimum password length enforced by the PSO.
+      type: int
+    complexity_enabled:
+      description:
+        - Whether password complexity requirements are enabled.
+      type: bool
+    lockout_threshold:
+      description:
+        - The number of failed logon attempts before an account is locked out.
+        - Set to V(0) to disable account lockout.
+      type: int
+    subjects:
+      description:
+        - List of users or global security groups the PSO should apply to.
+        - Each entry can be a C(sAMAccountName), C(distinguishedName), C(objectGUID),
+          C(objectSid), or C(userPrincipalName).
+        - When specified, the PSO applies to exactly these subjects (replace
+          semantics). Subjects not in the list are removed from the policy.
+        - When omitted, existing subject assignments are not changed.
+      type: list
+      elements: str
+  notes:
+    - PSOs are stored in the C(CN=Password Settings Container,CN=System,...)
+      container and cannot be moved to a different location.
+    - This module must be run on a Windows target host with the
+      C(ActiveDirectory) module installed.
+  extends_documentation_fragment:
+    - microsoft.ad.ad_object
+    - ansible.builtin.action_common_attributes
+  attributes:
+    check_mode:
+      support: full
+    diff_mode:
+      support: full
+    platform:
+      platforms:
+        - windows
+  seealso:
+    - module: microsoft.ad.object_info
+    - module: microsoft.ad.group
+  author:
+    - Ron Gershburg (@rgershbu)
+
+EXAMPLES: |
+  - name: Create a PSO for IT administrators
+    microsoft.ad.pso:
+      name: IT-Admins-PSO
+      description: Strong password policy for IT administrators
+      precedence: 100
+      min_password_length: 20
+      complexity_enabled: true
+      lockout_threshold: 5
+      subjects:
+        - IT-Admins
+      state: present
+
+  - name: Update lockout threshold on an existing PSO
+    microsoft.ad.pso:
+      name: IT-Admins-PSO
+      lockout_threshold: 10
+      state: present
+
+  - name: Remove a PSO
+    microsoft.ad.pso:
+      name: IT-Admins-PSO
+      state: absent
+
+RETURN:
+  object_guid:
+    description:
+      - The C(objectGUID) of the PSO that was created, removed, or edited.
+      - If a new object was created in check mode, a GUID of 0s will be
+        returned.
+    returned: always
+    type: str
+    sample: d84a141f-2b99-4f08-9da0-ed2d26864ba1
+  distinguished_name:
+    description:
+      - The C(distinguishedName) of the AD object that was created, removed, or
+        edited.
+    returned: always
+    type: str
+    sample: CN=IT-Admins-PSO,CN=Password Settings Container,CN=System,DC=example,DC=com

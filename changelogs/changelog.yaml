@@ -60,6 +60,108 @@ releases:
     - release-summary.yml
     - service_account-docs.yml
     release_date: '2025-11-20'
+  1.11.0:
+    changes:
+      bugfixes:
+      - 'Fix bug when creating a new AD object with an attribute set to an empty value.
+        For example using ``allowed_to_retrieve_password: {set: []}`` on ``microsoft.ad.service_account``
+        will be treated like the value was not specified at all - https://github.com/ansible-collections/microsoft.ad/issues/229'
+      - Removed use of deprecated ``_encode_script`` function used by the internal
+        reboot functionality of the AD plugins.
+      - domain - Fix PowerShell 7 compatibility
+      - domain_child - Fix PowerShell 7 compatibility
+      - domain_controller - Fix PowerShell 7 compatibility
+      - object_info - Fix PowerShell 7 compatibility when specified property does
+        not match the same case as the property on the found AD object
+      minor_changes:
+      - PowerShell 7 - Add initial support for running modules against PowerShell
+        7 interpreters. Support for PowerShell 7 varies across each module, see module
+        documentation for more information.
+      - microsoft.ad.ldap - Added new option ``domain_realm`` that can be used to
+        set the Kerberos realm in the SRV lookup. This option provides a way to override
+        the ``krb5.conf`` or avoid the requirement on Kerberos for the LDAP lookup
+        entirely.
+      release_summary: Release summary for v1.11.0
+    fragments:
+    - ldap-realm-option.yml
+    - new-ad-object-empty-attribute.yml
+    - pwsh-7.yml
+    - reboot-deprecation.yml
+    - release-summary.yml
+    modules:
+    - description: Manage CA CRL Distribution Points and Authority Information Access
+      name: cs_authority
+      namespace: ''
+    - description: Manage AD Certificate Services certificate templates
+      name: cs_template
+      namespace: ''
+    - description: Manage Active Directory domain trusts
+      name: domain_trust
+      namespace: ''
+    - description: Manage AD FS claim rules on a Relying Party Trust
+      name: fs_claim_rule
+      namespace: ''
+    - description: Manage AD FS Relying Party Trusts
+      name: fs_trust
+      namespace: ''
+    - description: Manages a KDS root key in a domain
+      name: kds_root_key
+      namespace: ''
+    - description: Gather information about one or more KDS root keys in a domain.
+      name: kds_root_key_info
+      namespace: ''
+    - description: Manage Active Directory replication sites
+      name: site
+      namespace: ''
+    - description: Manage Active Directory replication site links
+      name: site_link
+      namespace: ''
+    - description: Manage Active Directory replication subnets
+      name: site_subnet
+      namespace: ''
+    release_date: '2026-05-25'
+  1.11.1:
+    changes:
+      bugfixes:
+      - user - Ensure any post actions like editing the user's groups are performed
+        on the correct distinguished name. This fixes the error when changing the
+        user's groups when the user was moved in the same module invocation.
+      release_summary: Release summary for v1.11.1
+    fragments:
+    - release-summary.yml
+    - user-post-action-moved.yml
+    release_date: '2026-07-14'
+  1.12.0:
+    changes:
+      bugfixes:
+      - domain - Ensure that the `microsoft.ad.domain` module errors when a forest
+        already exists. This prevents the module from attempting to create a new forest
+        if an existing forest is detected and prints an error message indicating that.
+      release_summary: Release summary for v1.12.0, this is identical to v1.11.1 except
+        with proper changelog entries for the new modules accidentally marked in the
+        v1.11.1 release.
+    fragments:
+    - domain-print-error-on-existing.yml
+    - release-summary.yml
+    modules:
+    - description: Manage Group Policy Object links
+      name: gpo
+      namespace: ''
+    - description: Manage Active Directory Password Settings Objects
+      name: pso
+      namespace: ''
+    release_date: '2026-07-14'
+  1.12.1:
+    changes:
+      bugfixes:
+      - group - Treat the ``name`` value as part of the object's distinguished name
+        to avoid any false matches for a ``userPrincipalName`` or ``sAMAccountName``
+        pattern - https://github.com/ansible-collections/microsoft.ad/issues/198
+      release_summary: Release summary for v1.12.1
+    fragments:
+    - group-identity-lookup.yml
+    - release-summary.yml
+    release_date: '2026-08-26'
   1.2.0:
     changes:
       bugfixes:

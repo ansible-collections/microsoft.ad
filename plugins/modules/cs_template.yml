@@ -1,0 +1,254 @@
+# Copyright (c) 2026 Ansible Project
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+DOCUMENTATION:
+  module: cs_template
+  short_description: Manage AD Certificate Services certificate templates
+  version_added: 1.11.0
+  description:
+    - Create, modify, or remove Active Directory Certificate Services (AD CS)
+      certificate templates.
+    - New templates are created by cloning an existing source template and
+      overriding specific properties such as key size, extended key usages,
+      or validity period.
+    - Templates can optionally be published to (or unpublished from) one or
+      more Enterprise Certificate Authorities.
+  options:
+    name:
+      description:
+        - The CN (common name) of the certificate template.
+        - This is the unique short name used internally by AD CS (no spaces).
+      type: str
+      required: true
+    display_name:
+      description:
+        - The human-readable display name of the template.
+        - Defaults to the value of O(name) if not specified.
+      type: str
+    state:
+      description:
+        - Whether the template should be present or absent.
+        - When V(absent), the template is unpublished from all CAs, the
+          template AD object is removed.
+      type: str
+      default: present
+      choices: [present, absent]
+    source_template:
+      description:
+        - The display name of an existing template to clone when creating
+          a new template (e.g. V(WebServer), V(User), V(Computer)).
+        - Required when creating a template for the first time.
+        - Ignored when the template already exists (updates are applied
+          in-place).
+      type: str
+    key_size:
+      description:
+        - Minimum key size in bits for the certificate.
+        - Maps to the C(msPKI-Minimal-Key-Size) LDAP attribute.
+      type: int
+    extended_key_usages:
+      description:
+        - List of Extended Key Usage (EKU) values.
+        - Each value can be a well-known name or a raw OID string.
+        - Maps to the C(pKIExtendedKeyUsage) LDAP attribute.
+        - "Well-known names: V(server_authentication), V(client_authentication),
+          V(code_signing), V(secure_email), V(ip_security_end_system),
+          V(ip_security_tunnel), V(ip_security_user), V(time_stamping),
+          V(ocsp_signing), V(smart_card_logon), V(certificate_request_agent),
+          V(encrypting_file_system), V(file_recovery), V(key_recovery),
+          V(key_recovery_agent), V(document_signing), V(remote_desktop),
+          V(kdc_authentication)."
+      type: list
+      elements: str
+    key_usage:
+      description:
+        - List of key usage flags to set on the template.
+        - Maps to the C(pKIKeyUsage) LDAP attribute.
+        - "Valid values: V(digital_signature), V(non_repudiation),
+          V(key_encipherment), V(data_encipherment), V(key_agreement),
+          V(key_cert_sign), V(crl_sign), V(encipher_only),
+          V(decipher_only)."
+      type: list
+      elements: str
+    validity_period_days:
+      description:
+        - Certificate validity period in days.
+        - Maps to the C(pKIExpirationPeriod) LDAP attribute.
+      type: int
+    renewal_period_days:
+      description:
+        - Certificate renewal overlap period in days.
+        - Maps to the C(pKIOverlapPeriod) LDAP attribute.
+      type: int
+    enrollment_flag:
+      description:
+        - List of enrollment flag values to set on the template.
+        - Each value can be a well-known name or a raw integer (decimal or hex).
+        - Multiple values are combined with bitwise OR.
+        - Maps to the C(msPKI-Enrollment-Flag) LDAP attribute.
+        - "Well-known names: V(include_symmetric_algorithms),
+          V(pend_all_requests), V(publish_to_kra_container),
+          V(publish_to_ds), V(auto_enrollment_check_user_ds_certificate),
+          V(auto_enrollment),
+          V(previous_approval_validate_reenrollment)."
+      type: list
+      elements: str
+    private_key_flag:
+      description:
+        - List of private key flag values to set on the template.
+        - Each value can be a well-known name or a raw integer (decimal or hex).
+        - Multiple values are combined with bitwise OR.
+        - Maps to the C(msPKI-Private-Key-Flag) LDAP attribute.
+        - "Well-known names: V(require_private_key_archival),
+          V(exportable_key), V(strong_key_protection_required),
+          V(require_alternate_signature_algorithm),
+          V(require_same_key_renewal), V(use_legacy_provider),
+          V(ek_trust_on_use), V(ek_validate_cert), V(ek_validate_key),
+          V(attest_preferred), V(attest_required),
+          V(attestation_without_policy), V(hello_logon_key)."
+      type: list
+      elements: str
+    certificate_name_flag:
+      description:
+        - List of certificate name flag values to set on the template.
+        - Each value can be a well-known name or a raw integer (decimal or hex).
+        - Multiple values are combined with bitwise OR.
+        - Maps to the C(msPKI-Certificate-Name-Flag) LDAP attribute.
+        - "Well-known names: V(enrollee_supplies_subject),
+          V(enrollee_supplies_subject_alt_name),
+          V(subject_alt_require_domain_dns), V(subject_alt_require_spn),
+          V(subject_alt_require_directory_guid),
+          V(subject_alt_require_upn), V(subject_alt_require_email),
+          V(subject_alt_require_dns), V(subject_require_dns_as_cn),
+          V(subject_require_email), V(subject_require_common_name),
+          V(subject_require_directory_path)."
+      type: list
+      elements: str
+    schema_version:
+      description:
+        - Certificate template schema version.
+        - V(2) requires Windows Server 2003+, V(3) requires 2008+,
+          V(4) requires 2012+.
+        - Maps to the C(msPKI-Template-Schema-Version) LDAP attribute.
+      type: int
+      choices: [2, 3, 4]
+    publish_to_ca:
+      description:
+        - List of Enterprise CA short names to which the template should
+          be published.
+        - When specified, the module ensures the template is published to
+          exactly the listed CAs and unpublished from any others.
+        - An empty list V([]) will unpublish the template from all CAs.
+        - When omitted, publishing state is not managed.
+      type: list
+      elements: str
+    domain_server:
+      description:
+        - The FQDN of the domain controller to target for all AD operations.
+        - When not specified, the module will use the default domain
+          controller discovery.
+      type: str
+
+  notes:
+    - This module must be run on a Windows target host with the
+      ActiveDirectory PowerShell module available.
+    - Enterprise Administrator permissions are required to create or
+      remove certificate templates in the Configuration partition.
+    - Certificate templates are stored in the AD Configuration partition
+      and replicated forest-wide.
+    - Publishing a template requires that at least one Enterprise CA
+      is installed in the forest, but the module does not need to run
+      on the CA server itself.
+  seealso:
+    - module: microsoft.ad.object_info
+  extends_documentation_fragment:
+    - ansible.builtin.action_common_attributes
+  attributes:
+    check_mode:
+      support: full
+    diff_mode:
+      support: none
+    platform:
+      platforms:
+        - windows
+  author:
+    - Ron Gershburg (@rgershbu)
+
+EXAMPLES: |
+  - name: Create a certificate template cloned from WebServer with RSA 4096
+    microsoft.ad.cs_template:
+      name: Web4096Secure
+      display_name: Web Server (RSA 4096)
+      source_template: Web Server
+      key_size: 4096
+      extended_key_usages:
+        - server_authentication
+      key_usage:
+        - digital_signature
+        - key_encipherment
+      private_key_flag:
+        - exportable_key
+      certificate_name_flag:
+        - enrollee_supplies_subject
+      validity_period_days: 365
+      renewal_period_days: 42
+      state: present
+
+  - name: Create a template with specific EKUs for server authentication
+    microsoft.ad.cs_template:
+      name: CustomAuth
+      source_template: Web Server
+      extended_key_usages:
+        - server_authentication
+        - "1.3.6.1.4.1.311.20.2.2"
+      state: present
+
+  - name: Use raw integer flags alongside named flags
+    microsoft.ad.cs_template:
+      name: MixedFlags
+      source_template: Web Server
+      enrollment_flag:
+        - auto_enrollment
+        - publish_to_ds
+      private_key_flag:
+        - exportable_key
+        - 0x00000100
+      state: present
+
+  - name: Update key size on an existing template
+    microsoft.ad.cs_template:
+      name: Web4096Secure
+      key_size: 8192
+      state: present
+
+  - name: Publish a template to a specific CA
+    microsoft.ad.cs_template:
+      name: Web4096Secure
+      publish_to_ca:
+        - contoso-DC01-CA
+      state: present
+
+  - name: Unpublish a template from all CAs
+    microsoft.ad.cs_template:
+      name: Web4096Secure
+      publish_to_ca: []
+      state: present
+
+  - name: Remove a certificate template
+    microsoft.ad.cs_template:
+      name: Web4096Secure
+      state: absent
+
+RETURN:
+  distinguished_name:
+    description:
+      - The distinguished name of the certificate template object.
+    returned: always
+    type: str
+    sample: "CN=Web4096Secure,CN=Certificate Templates,CN=Public Key Services,CN=Services,CN=Configuration,DC=contoso,DC=com"
+  template_oid:
+    description:
+      - The OID of the certificate template.
+    returned: always
+    type: str
+    sample: "1.3.6.1.4.1.311.21.8.11489019.14294623.5588661.594850.12204198.151.6616009.14891906"

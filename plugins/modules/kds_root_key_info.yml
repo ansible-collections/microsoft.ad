@@ -1,0 +1,74 @@
+# Copyright (c) 2026 Ansible Project
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+DOCUMENTATION:
+  module: kds_root_key_info
+  short_description: Gather information about one or more KDS root keys in a domain.
+  version_added: 1.11.0
+  description:
+    - Gather information about one or more KDS root keys in a domain.
+    - You can specify a key ID to return information about a specific key, or gather
+      information about all keys.
+  options:
+    key_id:
+      description:
+        - The ID of the key that should be queried.
+        - If this is not provided, all keys will be returned.
+      type: str
+      required: false
+
+  notes:
+    - This module must be run on a Windows target host.
+    - This module requires the Domain Administrator or Enterprise Administrator role to view KDS keys.
+  extends_documentation_fragment:
+    - ansible.builtin.action_common_attributes
+  attributes:
+    check_mode:
+      support: full
+    diff_mode:
+      support: none
+    platform:
+      platforms:
+        - windows
+  author:
+    - Mike Morency (@mikemorency)
+
+EXAMPLES: |
+  - name: Gather information about all keys in a domain
+    microsoft.ad.kds_root_key_info:
+
+  - name: Gather information about a specific key
+    microsoft.ad.kds_root_key_info:
+      key_id: 11111111-1111-1111-1111-111111111111
+
+RETURN:
+  kds_root_keys:
+    description: Information about any keys that were found.
+    returned: always
+    type: list
+    contains:
+      key_id:
+        description:
+          - The Guid of the KDS root key.
+        returned: always
+        type: str
+        sample: 12345678-1234-1234-1234-123456789012
+      effective_time:
+        description:
+          - The effective time of the KDS root key.
+          - Keys are effective 10 hours after the effective time.
+        returned: always
+        type: str
+        sample: "2026-03-16T05:13:36.4151133Z"
+      creation_time:
+        description:
+          - The creation time of the KDS root key.
+        returned: always
+        type: str
+        sample: "2026-03-16T15:13:36.7190000Z"
+      version_number:
+        description:
+          - The version number of the KDS root key.
+        returned: always
+        type: int
+        sample: 1

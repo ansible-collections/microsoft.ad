@@ -83,6 +83,8 @@ Connecting to a Microsoft Active Directory or LDAP server requires information l
 +===============+================================+=============================================+
 | server        | Server lookup through Kerberos | The LDAP server hostname                    |
 +---------------+--------------------------------+---------------------------------------------+
+| domain_realm  | Default realm from Kerberos    | The realm to use for server SRV lookup      |
++---------------+--------------------------------+---------------------------------------------+
 | port          | 389 or 686 if tls_mode=ldaps   | The LDAP port                               |
 +---------------+--------------------------------+---------------------------------------------+
 | tls_mode      | LDAPS if port=686 else None    | TLS details - LDAP, LDAP + StartTLS, LDAPS  |
@@ -105,13 +107,13 @@ Server lookup
 If no server option was explicitly set, the plugin will attempt to lookup the LDAP server based on the current environment configuration. This is only possible if:
 
 * The ``dnspython`` Python package is installed
-* The ``pyspnego[kerberos]`` Python package for Kerberos is installed
-* The underlying Kerberos library has a ``default_realm`` set in the `MIT krb5.conf <https://web.mit.edu/kerberos/krb5-latest/doc/admin/host_config.html#default-realm>`_
+* The ``domain_realm`` value is explicitly set or
+* The ``pyspnego[kerberos]`` Python package for Kerberos is installed and the Kerberos library has a ``default_realm`` set in the `MIT krb5.conf <https://web.mit.edu/kerberos/krb5-latest/doc/admin/host_config.html#default-realm>`_
 
 If none of the above are true, the connection will fail and an explicit server must be supplied. If all the requirements are satisfied this is the server lookup workflow:
 
-* The ``default_realm`` of the local Kerberos configuration is retrieved
-* A DNS SRV lookup is done for the record ``_ldap._tcp.dc._msdcs.{{ default_realm }}``
+* The ``domain_realm`` specified in the options is used as the ``{{ realm }}``, otherwise the ``default_realm`` of the local Kerberos configuration is retrieved
+* A DNS SRV lookup is done for the record ``_ldap._tcp.dc._msdcs.{{ realm }}``
 * The DNS records are sorted by priority and weight and the first is selected
 * The hostname and port on the selected SRV record are used for the lookup
 

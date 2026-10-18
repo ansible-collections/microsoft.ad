@@ -1,0 +1,116 @@
+---
+- name: Reset Administrator password to known value
+  ansible.windows.win_powershell:
+    parameters:
+      Password: '{{ domain_password }}'
+    script: |
+      [CmdletBinding()]
+      param([string]$Password)
+      $Ansible.Changed = $false
+      $secure = ConvertTo-SecureString $Password -AsPlainText -Force
+      Set-ADAccountPassword -Identity Administrator -NewPassword $secure -Reset
+      $Ansible.Changed = $true
+  when: ansible_password is not defined
+
+- name: Update connection password
+  ansible.builtin.set_fact:
+    ansible_password: '{{ domain_password }}'
+  when: ansible_password is not defined
+
+- name: Ensure AD FS feature is installed
+  ansible.windows.win_feature:
+    name: ADFS-Federation
+    include_management_tools: true
+    state: present
+  register: _adfs_feature
+
+- name: Reboot after AD FS install
+  ansible.windows.win_reboot:
+  when: _adfs_feature.reboot_required
+
+- name: Configure AD FS farm
+  ansible.windows.win_powershell:
+    parameters:
+      DomainRealm: '{{ domain_realm }}'
+      AdminPassword: '{{ ansible_password }}'
+    script: |
+      [CmdletBinding()]
+      param(
+          [string]$DomainRealm,
+          [string]$AdminPassword
+      )
+      $ErrorActionPreference = 'Stop'
+      $Ansible.Changed = $false
+
+      try {
+          Get-AdfsFarmInformation -ErrorAction Stop
+          return
+      }
+      catch {}
+
+      $certSubject = "CN=adfs.$DomainRealm"
+      $cert = Get-ChildItem -Path Cert:\LocalMachine\My |
+          Where-Object { $_.Subject -eq $certSubject } |
+          Select-Object -First 1
+
+      if (-not $cert) {
+          $cert = New-SelfSignedCertificate `
+              -DnsName "adfs.$DomainRealm" `
+              -CertStoreLocation Cert:\LocalMachine\My
+      }
+
+      $securePassword = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
+      $credential = New-Object System.Management.Automation.PSCredential(
+          "$DomainRealm\Administrator", $securePassword
+      )
+
+      Install-AdfsFarm `
+          -CertificateThumbprint $cert.Thumbprint `
+          -FederationServiceDisplayName 'Test ADFS' `
+          -FederationServiceName "adfs.$DomainRealm" `
+          -ServiceAccountCredential $credential `
+          -OverwriteConfiguration `
+          -Confirm:$false
+
+      $Ansible.Changed = $true
+  register: _adfs_farm_config
+
+- name: Reboot after AD FS farm configuration
+  ansible.windows.win_reboot:
+  when: _adfs_farm_config is changed
+
+- name: Wait for AD FS service to come online
+  ansible.windows.win_powershell:
+    parameters:
+      Delay: 5
+      Retries: 120
+    script: |
+      [CmdletBinding()]
+      param(
+          [int]$Delay,
+          [int]$Retries
+      )
+      $Ansible.Changed = $false
+      $attempts = 0
+      while ($true) {
+          $attempts++
+          try {
+              Get-AdfsRelyingPartyTrust -ErrorAction Stop | Out-Null
+              break
+          }
+          catch {
+              if ($attempts -eq $Retries) {
+                  throw
+              }
+              Start-Sleep -Seconds $Delay
+          }
+      }
+      $attempts
+  async: 600
+  poll: 10
+  register: _adfs_wait
+
+- name: Verify ADFS came online
+  ansible.builtin.assert:
+    that:
+      - _adfs_wait is not failed

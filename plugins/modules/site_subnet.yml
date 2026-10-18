@@ -1,0 +1,96 @@
+# Copyright (c) 2026 Ansible Project
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+DOCUMENTATION:
+  module: site_subnet
+  short_description: Manage Active Directory replication subnets
+  version_added: 1.11.0
+  description:
+    - Create, modify, or remove Active Directory replication subnets.
+    - Subnets determine which replication site a computer belongs to
+      by mapping IP address ranges to sites, which in turn controls
+      domain controller discovery and replication topology.
+  options:
+    site:
+      description:
+        - The name of the AD replication site to associate with the
+          subnet.
+        - This controls which site computers in this subnet are
+          assigned to.
+      type: str
+    location:
+      description:
+        - A string describing the physical location of the subnet.
+      type: str
+  notes:
+    - The I(path) option for subnets defaults to the
+      C(CN=Subnets,CN=Sites,CN=Configuration,...) container. Subnets
+      cannot be moved to a different container.
+    - Subnet names must use valid CIDR notation. Both IPv4 and IPv6
+      subnets are supported.
+    - This module must be run on a Windows target host with the
+      C(ActiveDirectory) module installed.
+  extends_documentation_fragment:
+    - microsoft.ad.ad_object
+    - ansible.builtin.action_common_attributes
+  attributes:
+    check_mode:
+      support: full
+    diff_mode:
+      support: full
+    platform:
+      platforms:
+        - windows
+  seealso:
+    - module: microsoft.ad.object_info
+  author:
+    - Ron Gershburg (@rgershbu)
+
+EXAMPLES: |
+  - name: Create a subnet associated with a site
+    microsoft.ad.site_subnet:
+      name: 10.10.0.0/16
+      site: London-Branch
+      location: "London, UK"
+      description: London branch office subnet
+      state: present
+
+  - name: Create a subnet without a site association
+    microsoft.ad.site_subnet:
+      name: 192.168.1.0/24
+      description: Lab network
+      state: present
+
+  - name: Change the site association for a subnet
+    microsoft.ad.site_subnet:
+      name: 10.10.0.0/16
+      site: NYC-HQ
+      state: present
+
+  - name: Update the location of a subnet
+    microsoft.ad.site_subnet:
+      name: 10.10.0.0/16
+      location: "New York, US"
+      state: present
+
+  - name: Remove a subnet
+    microsoft.ad.site_subnet:
+      name: 10.10.0.0/16
+      state: absent
+
+RETURN:
+  object_guid:
+    description:
+      - The C(objectGUID) of the AD object that was created, removed, or edited.
+      - If a new object was created in check mode, a GUID of 0s will be
+        returned.
+    returned: always
+    type: str
+    sample: d84a141f-2b99-4f08-9da0-ed2d26864ba1
+  distinguished_name:
+    description:
+      - The C(distinguishedName) of the AD object that was created, removed, or
+        edited.
+    returned: always
+    type: str
+    sample: CN=10.10.0.0/16,CN=Subnets,CN=Sites,CN=Configuration,DC=contoso,DC=com

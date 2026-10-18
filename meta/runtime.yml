@@ -8,3 +8,16 @@ action_groups:
     - ou
     - service_account
     - user
+plugin_routing:
+  modules:
+    gpo:
+      redirect: microsoft.ad.gpo_link
+      deprecation:
+        # Normally we set removal_version to the next major version but this module is less than a
+        # month old and the doc examples had gpo_link. Instead we are doing a short deprecation
+        # window to give users some time to update their playbooks, just not the full major release
+        # typically done for deprecations.
+        # Once this is removed, also remove the tests/sanity/ignore-*.txt entry for this file.
+        warning_text: >-
+          Use microsoft.ad.gpo_link instead. This deprecation is for the alias microsoft.ad.gpo and
+          will be removed a future release or when a module for managing GPOs is created.

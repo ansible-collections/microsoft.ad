@@ -123,6 +123,9 @@
     name: MyUser2
     identity: '{{ object_sid }}'  # ID by SID
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    groups:
+      add:
+      - Domain Admins
   register: move_user_check
   check_mode: true
 
@@ -131,6 +134,7 @@
     identity: '{{ object_identity }}'
     properties:
     - sAMAccountName
+    - memberOf
   register: move_user_check_actual
 
 - name: assert move user - check
@@ -141,12 +145,16 @@
     - move_user_check_actual.objects[0].DistinguishedName == 'CN=MyUser2,CN=Users,' ~ setup_domain_info.output[0].defaultNamingContext
     - move_user_check_actual.objects[0].Name == 'MyUser2'
     - move_user_check_actual.objects[0].sAMAccountName == 'MyUser'
+    - move_user_check_actual.objects[0].memberOf == None
 
 - name: move user
   user:
     name: MyUser2
     identity: '{{ object_sid }}'  # ID by SID
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    groups:
+      add:
+      - Domain Admins
   register: move_user
 
 - name: get result of move user
@@ -154,6 +162,7 @@
     identity: '{{ object_identity }}'
     properties:
     - sAMAccountName
+    - memberOf
   register: move_user_actual
 
 - name: assert move user
@@ -164,12 +173,16 @@
     - move_user_actual.objects[0].DistinguishedName == 'CN=MyUser2,' ~ setup_domain_info.output[0].defaultNamingContext
     - move_user_actual.objects[0].Name == 'MyUser2'
     - move_user_actual.objects[0].sAMAccountName == 'MyUser'
+    - move_user_actual.objects[0].memberOf == ["CN=Domain Admins,CN=Users," ~ setup_domain_info.output[0].defaultNamingContext]
 
 - name: move user - idempotent
   user:
     name: MyUser2
     identity: '{{ object_sid }}'  # ID by SID
     path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    groups:
+      add:
+      - Domain Admins
   register: move_user_again
 
 - name: assert move user - idempotent

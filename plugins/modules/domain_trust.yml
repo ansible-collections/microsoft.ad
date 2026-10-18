@@ -1,0 +1,164 @@
+# Copyright (c) 2026 Ansible Project
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+DOCUMENTATION:
+  module: domain_trust
+  short_description: Manage Active Directory domain trusts
+  version_added: 1.11.0
+  description:
+    - Create or remove Active Directory domain trust relationships
+      between forests or domains.
+    - Supports Forest and External trust types with configurable
+      direction and selective authentication.
+    - Before creating a trust the module verifies that the target domain
+      name resolves via DNS. This catches missing conditional forwarders
+      early and avoids cryptic trust-creation errors.
+  options:
+    name:
+      description:
+        - The fully qualified domain name (FQDN) of the target domain
+          to trust (e.g. V(example.com)).
+        - This is the primary key used to identify the trust.
+      type: str
+      required: true
+    state:
+      description:
+        - Whether the trust should be present or absent.
+      type: str
+      default: present
+      choices: [present, absent]
+    direction:
+      description:
+        - The direction of the trust relationship.
+        - V(inbound) allows users in the target domain to authenticate
+          in the local domain.
+        - V(outbound) allows users in the local domain to authenticate
+          in the target domain.
+        - V(bidirectional) allows authentication in both directions.
+        - Required when O(state=present) and the trust does not yet
+          exist.
+        - Cannot be changed on an existing trust; remove and recreate
+          the trust to change direction.
+      type: str
+      choices: [inbound, outbound, bidirectional]
+    type:
+      description:
+        - The type of trust relationship to create.
+        - V(forest) creates a transitive trust between two AD forests.
+        - V(external) creates a non-transitive trust between two
+          domains that may be in different forests.
+        - Required when O(state=present) and the trust does not yet
+          exist.
+        - Cannot be changed on an existing trust; remove and recreate
+          the trust to change type.
+      type: str
+      choices: [external, forest]
+    trust_password:
+      description:
+        - The shared secret used to establish the trust.
+        - Both sides of the trust must use the same password.
+        - Required when O(state=present) and the trust does not yet
+          exist.
+      type: str
+    selective_authentication:
+      description:
+        - Whether selective authentication is enabled on the trust.
+        - When V(true), users in the trusted domain are not
+          automatically authenticated. Permissions must be granted
+          explicitly on each resource.
+        - This is the only property that can be updated on an existing
+          trust without removing it first.
+      type: bool
+    domain_server:
+      description:
+        - The FQDN of the domain controller to target for all AD
+          operations.
+        - When not specified the module uses default domain controller
+          discovery.
+      type: str
+
+  notes:
+    - This module must be run on a Windows domain controller.
+    - The C(ActiveDirectory) PowerShell module must be available on the
+      target (present on domain controllers by default).
+    - Domain Administrator or Enterprise Administrator permissions are
+      typically required to create or remove trusts.
+    - DNS conditional forwarders for the target domain must be
+      configured before creating a trust. The module will verify DNS
+      resolution and fail early if the target domain cannot be resolved.
+    - Trust creation and removal use the
+      C(System.DirectoryServices.ActiveDirectory) .NET classes. The
+      current trust state is read via C(Get-ADTrust).
+    - The module creates only the local side of the trust using a
+      shared password. Run the module on both domain controllers with
+      the same O(trust_password) to establish a working trust.
+    - The O(direction) and O(type) of an existing trust cannot be
+      changed in-place. The module will fail with a descriptive message
+      if the requested values differ from the current trust. Remove the
+      trust first and recreate it with the desired settings.
+  seealso:
+    - module: microsoft.ad.domain
+    - module: microsoft.ad.domain_child
+    - name: Forest.CreateLocalSideOfTrustRelationship
+      description: .NET API used to create the local side of forest trusts.
+      link: https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectory.forest.createlocalsideoftrustrelationship
+  extends_documentation_fragment:
+    - ansible.builtin.action_common_attributes
+  attributes:
+    check_mode:
+      support: full
+    diff_mode:
+      support: full
+    platform:
+      platforms:
+        - windows
+  author:
+    - Ron Gershburg (@rgershbu)
+
+EXAMPLES: |
+  - name: Create a bidirectional forest trust
+    microsoft.ad.domain_trust:
+      name: example.com
+      direction: bidirectional
+      type: forest
+      trust_password: S3cretTru5t!
+      state: present
+
+  - name: Create a one-way outbound external trust
+    microsoft.ad.domain_trust:
+      name: partner.example.com
+      direction: outbound
+      type: external
+      trust_password: Tr0stP@ss
+      state: present
+
+  - name: Create a forest trust with selective authentication
+    microsoft.ad.domain_trust:
+      name: example.com
+      direction: bidirectional
+      type: forest
+      trust_password: S3cretTru5t!
+      selective_authentication: true
+      state: present
+
+  - name: Enable selective authentication on an existing trust
+    microsoft.ad.domain_trust:
+      name: example.com
+      direction: bidirectional
+      type: forest
+      trust_password: S3cretTru5t!
+      selective_authentication: true
+      state: present
+
+  - name: Remove a domain trust
+    microsoft.ad.domain_trust:
+      name: example.com
+      state: absent
+
+RETURN:
+  distinguished_name:
+    description:
+      - The distinguished name of the trusted domain object in AD.
+    returned: success and trust exists
+    type: str
+    sample: "CN=example.com,CN=System,DC=contoso,DC=com"

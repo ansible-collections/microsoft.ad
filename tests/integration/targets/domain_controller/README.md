@@ -29,6 +29,9 @@ Once you are ready to run the tests run the following:
 
 ```bash
 ansible-playbook test.yml
+
+# For PowerShell 7 testing
+ansible-playbook test.yml -e '{"ansible_pwsh_interpreter": "C:\\Program Files\\PowerShell\\7\\pwsh.exe"}'
 ```
 
 Run `vagrant destroy` to remove the test VMs.

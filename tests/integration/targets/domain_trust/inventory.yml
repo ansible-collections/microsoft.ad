@@ -1,0 +1,21 @@
+all:
+  children:
+    windows:
+      hosts:
+        DC1:
+          ansible_host: 192.168.12.10
+          vagrant_box: jborean93/WindowsServer2022
+          domain_name: ad.test
+        DC2:
+          ansible_host: 192.168.12.11
+          vagrant_box: jborean93/WindowsServer2022
+          domain_name: trust.test
+      vars:
+        ansible_port: 5985
+        ansible_connection: psrp
+
+  vars:
+    ansible_user: vagrant
+    ansible_password: vagrant
+    domain_password: VagrantPass1
+    trust_password: TrustP@ss1

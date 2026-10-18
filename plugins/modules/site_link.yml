@@ -1,0 +1,101 @@
+# Copyright (c) 2026, Ansible Project
+# GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+
+DOCUMENTATION:
+  module: site_link
+  short_description: Manage Active Directory replication site links
+  description:
+    - Create, modify, or remove AD replication site links.
+    - Site links define the replication topology between AD sites,
+      controlling replication cost, frequency, and transport protocol.
+  version_added: "1.11.0"
+  options:
+    cost:
+      description:
+        - The cost assigned to the site link.
+        - Lower cost links are preferred for replication routing.
+        - This is the value set on the C(cost) LDAP attribute.
+      type: int
+    replication_frequency:
+      description:
+        - Replication interval in minutes.
+        - Defines how often replication occurs over this site link.
+        - This is the value set on the C(replInterval) LDAP attribute.
+      type: int
+    sites_included:
+      description:
+        - List of AD site names to include in this site link.
+        - When specified, the site link will contain exactly these
+          sites (replace semantics).
+        - At least two sites are required when creating a new site link.
+      type: list
+      elements: str
+    intersite_transport_protocol:
+      description:
+        - The transport protocol for the site link.
+        - This can only be set when creating a new site link and
+          cannot be changed after creation.
+      type: str
+      choices: [IP, SMTP]
+      default: IP
+  notes:
+    - Site links are stored in the AD Configuration partition under
+      C(CN=Inter-Site Transports,CN=Sites).
+    - O(intersite_transport_protocol) can only be set at creation time
+      and cannot be changed afterwards.
+    - This module must be run on a Windows target host with the
+      C(ActiveDirectory) module installed.
+  extends_documentation_fragment:
+    - microsoft.ad.ad_object
+    - ansible.builtin.action_common_attributes
+  attributes:
+    check_mode:
+      support: full
+    diff_mode:
+      support: full
+    platform:
+      platforms:
+        - windows
+  seealso:
+    - module: microsoft.ad.object_info
+  author:
+    - Ron Gershburg (@rgershbu)
+
+EXAMPLES: |
+  - name: Create a site link between NY and London with 15-min replication
+    microsoft.ad.site_link:
+      name: NY-London
+      sites_included:
+        - NewYork
+        - London
+      cost: 100
+      replication_frequency: 15
+      state: present
+
+  - name: Update replication frequency on an existing site link
+    microsoft.ad.site_link:
+      name: NY-London
+      replication_frequency: 30
+      state: present
+
+  - name: Remove a site link
+    microsoft.ad.site_link:
+      name: NY-London
+      state: absent
+
+RETURN:
+  object_guid:
+    description:
+      - The C(objectGUID) of the AD object that was created, removed, or edited.
+      - If a new object was created in check mode, a GUID of 0s will be
+        returned.
+    returned: always
+    type: str
+    sample: d84a141f-2c99-4e08-9ca0-eb2b26864ba1
+  distinguished_name:
+    description:
+      - The C(distinguishedName) of the AD object that was created, removed, or
+        edited.
+    returned: always
+    type: str
+    sample: CN=NY-London,CN=IP,CN=Inter-Site Transports,CN=Sites,CN=Configuration,DC=domain,DC=test

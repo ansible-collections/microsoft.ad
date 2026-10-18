@@ -4,6 +4,89 @@ Ansible Microsoft Active Directory Release Notes
 
 .. contents:: Topics
 
+v1.12.1
+=======
+
+Release Summary
+---------------
+
+Release summary for v1.12.1
+
+Bugfixes
+--------
+
+- group - Treat the ``name`` value as part of the object's distinguished name to avoid any false matches for a ``userPrincipalName`` or ``sAMAccountName`` pattern - https://github.com/ansible-collections/microsoft.ad/issues/198
+
+v1.12.0
+=======
+
+Release Summary
+---------------
+
+Release summary for v1.12.0, this is identical to v1.11.1 except with proper changelog entries for the new modules accidentally marked in the v1.11.1 release.
+
+Bugfixes
+--------
+
+- domain - Ensure that the `microsoft.ad.domain` module errors when a forest already exists. This prevents the module from attempting to create a new forest if an existing forest is detected and prints an error message indicating that.
+
+New Modules
+-----------
+
+- gpo - Manage Group Policy Object links
+- pso - Manage Active Directory Password Settings Objects
+
+v1.11.1
+=======
+
+Release Summary
+---------------
+
+Release summary for v1.11.1
+
+Bugfixes
+--------
+
+- user - Ensure any post actions like editing the user's groups are performed on the correct distinguished name. This fixes the error when changing the user's groups when the user was moved in the same module invocation.
+
+v1.11.0
+=======
+
+Release Summary
+---------------
+
+Release summary for v1.11.0
+
+Minor Changes
+-------------
+
+- PowerShell 7 - Add initial support for running modules against PowerShell 7 interpreters. Support for PowerShell 7 varies across each module, see module documentation for more information.
+- microsoft.ad.ldap - Added new option ``domain_realm`` that can be used to set the Kerberos realm in the SRV lookup. This option provides a way to override the ``krb5.conf`` or avoid the requirement on Kerberos for the LDAP lookup entirely.
+
+Bugfixes
+--------
+
+- Fix bug when creating a new AD object with an attribute set to an empty value. For example using ``allowed_to_retrieve_password: {set: []}`` on ``microsoft.ad.service_account`` will be treated like the value was not specified at all - https://github.com/ansible-collections/microsoft.ad/issues/229
+- Removed use of deprecated ``_encode_script`` function used by the internal reboot functionality of the AD plugins.
+- domain - Fix PowerShell 7 compatibility
+- domain_child - Fix PowerShell 7 compatibility
+- domain_controller - Fix PowerShell 7 compatibility
+- object_info - Fix PowerShell 7 compatibility when specified property does not match the same case as the property on the found AD object
+
+New Modules
+-----------
+
+- cs_authority - Manage CA CRL Distribution Points and Authority Information Access
+- cs_template - Manage AD Certificate Services certificate templates
+- domain_trust - Manage Active Directory domain trusts
+- fs_claim_rule - Manage AD FS claim rules on a Relying Party Trust
+- fs_trust - Manage AD FS Relying Party Trusts
+- kds_root_key - Manages a KDS root key in a domain
+- kds_root_key_info - Gather information about one or more KDS root keys in a domain.
+- site - Manage Active Directory replication sites
+- site_link - Manage Active Directory replication site links
+- site_subnet - Manage Active Directory replication subnets
+
 v1.10.0
 =======
 

@@ -1,0 +1,129 @@
+---
+- name: Setup common Windows information
+  hosts: windows
+  gather_facts: false
+
+  tasks:
+    - name: Get network connection names
+      ansible.windows.win_powershell:
+        parameters:
+          IPAddress: '{{ ansible_host }}'
+        script: |
+          param ($IPAddress)
+          $Ansible.Changed = $false
+          Get-CimInstance -ClassName Win32_NetworkAdapter -Filter "Netenabled='True'" |
+              ForEach-Object -Process {
+                  $config = Get-CimInstance -ClassName Win32_NetworkAdapterConfiguration -Filter "Index='$($_.Index)'"
+                  if ($config.IPAddress -contains $IPAddress) {
+                      $_.NetConnectionID
+                  }
+              }
+      register: connection_name
+
+- name: Setup forest 1 (DC1)
+  hosts: DC1
+  gather_facts: false
+
+  tasks:
+    - name: Set DNS for the internal adapter to localhost
+      ansible.windows.win_dns_client:
+        adapter_names:
+          - '{{ connection_name.output[0] }}'
+        dns_servers:
+          - 127.0.0.1
+
+    - name: Promote DC1 to domain controller
+      microsoft.ad.domain:
+        dns_domain_name: '{{ domain_name }}'
+        safe_mode_password: '{{ domain_password }}'
+        reboot: true
+
+    - name: Create domain admin user
+      microsoft.ad.user:
+        name: vagrant-domain
+        upn: 'vagrant-domain@{{ domain_name | upper }}'
+        password: '{{ domain_password }}'
+        password_never_expires: true
+        update_password: when_changed
+        groups:
+          add:
+            - Domain Admins
+            - Enterprise Admins
+        state: present
+
+- name: Setup forest 2 (DC2)
+  hosts: DC2
+  gather_facts: false
+
+  tasks:
+    - name: Set DNS for the internal adapter to localhost
+      ansible.windows.win_dns_client:
+        adapter_names:
+          - '{{ connection_name.output[0] }}'
+        dns_servers:
+          - 127.0.0.1
+
+    - name: Promote DC2 to domain controller in separate forest
+      microsoft.ad.domain:
+        dns_domain_name: '{{ domain_name }}'
+        safe_mode_password: '{{ domain_password }}'
+        reboot: true
+
+    - name: Create domain admin user
+      microsoft.ad.user:
+        name: vagrant-domain
+        upn: 'vagrant-domain@{{ domain_name | upper }}'
+        password: '{{ domain_password }}'
+        password_never_expires: true
+        update_password: when_changed
+        groups:
+          add:
+            - Domain Admins
+            - Enterprise Admins
+        state: present
+
+- name: Configure DNS conditional forwarders
+  hosts: windows
+  gather_facts: false
+
+  tasks:
+    - name: Set variables for the other DC
+      ansible.builtin.set_fact:
+        other_domain: "{{ hostvars[other_host].domain_name }}"
+        other_ip: "{{ hostvars[other_host].ansible_host }}"
+      vars:
+        other_host: "{{ (inventory_hostname == 'DC1') | ternary('DC2', 'DC1') }}"
+
+    - name: Add DNS conditional forwarder for the other forest
+      ansible.windows.win_powershell:
+        parameters:
+          ForwarderDomain: '{{ other_domain }}'
+          ForwarderIP: '{{ other_ip }}'
+        script: |
+          param($ForwarderDomain, $ForwarderIP)
+          $Ansible.Changed = $false
+          $existing = Get-DnsServerZone -Name $ForwarderDomain -ErrorAction SilentlyContinue
+          if (-not $existing) {
+              Add-DnsServerConditionalForwarderZone -Name $ForwarderDomain -MasterServers $ForwarderIP
+              $Ansible.Changed = $true
+          }
+
+    - name: Verify DNS resolution of the other forest
+      ansible.windows.win_powershell:
+        parameters:
+          TargetDomain: '{{ other_domain }}'
+        script: |
+          param($TargetDomain)
+          $Ansible.Changed = $false
+          $retries = 0
+          while ($retries -lt 30) {
+              try {
+                  Resolve-DnsName -Name $TargetDomain -ErrorAction Stop | Out-Null
+                  return
+              }
+              catch {
+                  $retries++
+                  Start-Sleep -Seconds 2
+              }
+          }
+          throw "DNS resolution for $TargetDomain failed after 30 retries"

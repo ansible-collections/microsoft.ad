@@ -4,6 +4,7 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 #AnsibleRequires -CSharpUtil Ansible.Basic
+#AnsibleRequires -PowerShell ..module_utils._DomainFeature
 
 $spec = @{
     options = @{
@@ -106,29 +107,15 @@ If ($state -eq "member_server" -and -not $isKdc) {
     $module.ExitJson()
 }
 
-# all other operations will require the AD-DS and RSAT-ADDS features...
-$requiredFeatures = @("AD-Domain-Services", "RSAT-ADDS")
-$features = Get-WindowsFeature -Name $requiredFeatures
-$unavailableFeatures = Compare-Object -ReferenceObject $requiredFeatures -DifferenceObject $features.Name -PassThru
+$featureRes = Install-DomainServicesFeature -CheckMode:$module.CheckMode
+$module.Result.changed = $featureRes.Changed
+$module.Result.reboot_required = $featureRes.RebootRequired
 
-if ($unavailableFeatures) {
-    $module.FailJson("The following features required for a domain controller are unavailable: $($unavailableFeatures -join ',')")
+if ($featureRes.Changed -and $module.CheckMode) {
+    # If we had to install features in check mode then we need to exit early as
+    # the AD cmdlets won't be available
+    $module.ExitJson()
 }
-
-$missingFeatures = $features | Where-Object InstallState -NE Installed
-if ($missingFeatures) {
-    $res = Install-WindowsFeature -Name $missingFeatures -WhatIf:$module.CheckMode
-    $module.Result.changed = $true
-    $module.Result.reboot_required = [bool]$res.RestartNeeded
-
-    # When in check mode and the prereq was "installed" we need to exit early as
-    # the AD cmdlets weren't really installed
-    if ($module.CheckMode) {
-        $module.ExitJson()
-    }
-}
-
-$lastBootTime = (Get-CimInstance -ClassName Win32_OperatingSystem -Property LastBootUpTime).LastBootUpTime.ToFileTime()
 
 if ($state -eq 'domain_controller') {
     # ensure that domain admin user is in UPN or down-level domain format (prevent hang from https://support.microsoft.com/en-us/kb/2737935)
@@ -186,42 +173,13 @@ if ($state -eq 'domain_controller') {
             $installParams.InstallDns = $installDns
         }
 
-        try {
-            $null = Install-ADDSDomainController @installParams
+        $wrapperParams = @{
+            AnsibleModule = $module
+            Command = 'Install-ADDSDomainController'
+            CommandParams = $installParams
+            Reboot = $module.Params.reboot
         }
-        catch [Microsoft.DirectoryServices.Deployment.DCPromoExecutionException] {
-            # ExitCode 15 == 'Role change is in progress or this computer needs to be restarted.'
-            # DCPromo exit codes details can be found at
-            # https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/deploy/troubleshooting-domain-controller-deployment
-            if ($_.Exception.ExitCode -in @(15, 19)) {
-                $module.Result.reboot_required = $true
-                $module.Result._do_action_reboot = $true
-            }
-
-            $module.FailJson("Failed to install ADDSDomainController, DCPromo exited with $($_.Exception.ExitCode): $($_.Exception.Message)", $_)
-        }
-        finally {
-            # The Netlogon service is set to auto start but is not started. This is
-            # required for Ansible to connect back to the host and reboot in a
-            # later task. Even if this fails Ansible can still connect but only
-            # with ansible_winrm_transport=basic so we just display a warning if
-            # this fails.
-            if (-not $module.CheckMode) {
-                try {
-                    Start-Service -Name Netlogon
-                }
-                catch {
-                    $msg = -join @(
-                        "Failed to start the Netlogon service after promoting the host, "
-                        "Ansible may be unable to connect until the host is manually rebooting: $($_.Exception.Message)"
-                    )
-                    $module.Warn($msg)
-                }
-            }
-        }
-
-        $module.Result.changed = $true
-        $module.Result.reboot_required = $true
+        Invoke-ADDSWrapper @wrapperParams
     }
 }
 else {
@@ -232,55 +190,26 @@ else {
     # FUTURE: figure out a sane way to hand off roles automatically (designated recipient server, randomly look one up?)
     If ($assignedRoles.Count -gt 0) {
         $msg = -join @(
-            "This domain controller has operation master role(s) ({0}) assigned; they must be moved to other "
-            "DCs before demotion (see Move-ADDirectoryServerOperationMasterRole)" -f ($assignedRoles -join ", ")
+            "This domain controller has operation master role(s) ({0}) assigned;  " -f ($assignedRoles -join ", ")
+            "they must be moved to other DCs before demotion (see Move-ADDirectoryServerOperationMasterRole)"
         )
         $module.FailJson($msg)
     }
 
-    # While the cmdlet has -WhatIf, it doesn't seem to work properly. Only run
-    # when not in check mode.
-    if (-not $module.CheckMode) {
-        $uninstallParams = @{
+    if ($module.CheckMode) {
+        $module.Result.changed = $true
+        $module.Result.reboot_required = $true
+    }
+    else {
+        # While the cmdlet has -WhatIf, it doesn't seem to work properly. Only
+        # run when not in check mode.
+        Invoke-ADDSWrapper -Command 'Uninstall-ADDSDomainController' -CommandParams @{
             Confirm = $false
             Credential = $domainCredential
             Force = $true
             LocalAdministratorPassword = $localAdminPassword
             NoRebootOnCompletion = $true
-        }
-        $null = Uninstall-ADDSDomainController @uninstallParams
-    }
-
-    $module.Result.changed = $true
-    $module.Result.reboot_required = $true
-}
-
-if ($module.Result.reboot_required -and $module.Params.reboot -and -not $module.CheckMode) {
-    # Promoting or depromoting puts the server in a very funky state and it may
-    # not be possible for Ansible to connect back without a reboot is done. If
-    # the user requested the action plugin to perform the reboot then start it
-    # here and get the action plugin to continue where this left off.
-
-    $module.Result._previous_boot_time = $lastBootTime
-
-    $shutdownRegPath = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon\AutoLogonChecked'
-    Remove-Item -LiteralPath $shutdownRegPath -Force -ErrorAction SilentlyContinue
-
-    $comment = 'Reboot initiated by Ansible'
-    $stdout = $null
-    $stderr = . { shutdown.exe /r /t 10 /c $comment | Set-Variable stdout } 2>&1 | ForEach-Object ToString
-    if ($LASTEXITCODE -eq 1190) {
-        # A reboot was already scheduled, abort it and try again
-        shutdown.exe /a
-        $stdout = $null
-        $stderr = . { shutdown.exe /r /t 10 /c $comment | Set-Variable stdout } 2>&1 | ForEach-Object ToString
-    }
-
-    if ($LASTEXITCODE) {
-        $module.Result.rc = $LASTEXITCODE
-        $module.Result.stdout = $stdout
-        $module.Result.stderr = $stderr
-        $module.FailJson("Failed to initiate reboot, see rc, stdout, stderr for more information")
+        } -AnsibleModule $module -Reboot:$module.Params.reboot
     }
 }
 
