@@ -1,0 +1,17 @@
+---
+bugfixes:
+  - event_query - ``canonical_facts`` set ``sid`` to ``($data.sid // null)``, so a
+    computer object whose result carried no SID emitted a ``null`` inside
+    ``canonical_facts``. The controller raises ``UnhashableFacts`` on a ``null``
+    there and silently discards the entire audit record, so those hosts were
+    counted as zero indirect nodes. ``sid`` is supplementary rather than identity
+    and has moved to ``facts``, which is not hashed; ``object_guid`` alone is
+    sufficient and immutable identity.
+minor_changes:
+  - event_query - added ``tests/unit/audit/test_event_query_contract.py``, which
+    compiles ``extensions/audit/event_query.yml`` with ``jq`` and runs it
+    against the module's own documented ``RETURN`` samples, asserting what the
+    query emits - one record per managed object, a non-null ``name`` that is the
+    immutable ``object_guid``, and a ``canonical_facts`` holding no ``null``,
+    which ``awx/main/tasks/host_indirect.py`` would otherwise discard the record
+    for. No domain controller is needed, so it runs on every change.

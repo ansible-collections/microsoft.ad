@@ -1,0 +1,16 @@
+---
+bugfixes:
+  - event_query - the ``microsoft.ad.computer`` expression referenced ``$data``
+    without ever binding it, so jq failed to compile it. Because the controller
+    compiles the expression outside the ``try`` that guards evaluation, the error
+    propagated out of ``build_indirect_host_data`` and rolled back the enclosing
+    transaction, discarding every indirect node audit record for that job - the
+    records of every other collection in the job included - and reverting
+    ``event_queries_processed`` so the fallback task re-ran and failed again
+    until the job aged out. The job reported success throughout. Binding the
+    input with ``. as $data |`` fixes it. Verified against a running Automation
+    Platform 2.7 controller.
+minor_changes:
+  - event_query - the contract test now compiles every expression with ``jq``
+    before running it. The checks it replaced read the query as text, so all of
+    them passed on an expression that could not run at all.
