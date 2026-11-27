@@ -1143,6 +1143,25 @@ Function Invoke-AnsibleADObject {
         $getParams.IdentityPassThru = $true
     }
 
+    # Enum properties like GroupScope serialize to their integer value. Show
+    # them in the diff as the option choice the user would set instead.
+    $getDiffValue = {
+        param ($Value, $PropInfo)
+
+        if ($Value -isnot [System.Enum]) {
+            return , $Value
+        }
+
+        $name = $Value.ToString()
+        $choice = $PropInfo.Option.choices | Where-Object { $_ -eq $name } | Select-Object -First 1
+        if ($choice) {
+            $choice
+        }
+        else {
+            $name
+        }
+    }
+
     $adObject = Get-AnsibleADObject @getParams @adParams
     if ($adObject) {
         $module.Result.object_guid = $adObject.ObjectGUID
@@ -1167,7 +1186,7 @@ Function Invoke-AnsibleADObject {
             if ($actualValue -is [System.Collections.IList]) {
                 $actualValue = @($actualValue | Sort-Object)
             }
-            $module.Diff.before[$propInfo.Name] = $actualValue
+            $module.Diff.before[$propInfo.Name] = & $getDiffValue $actualValue $propInfo
         }
     }
     else {
@@ -1465,7 +1484,7 @@ Function Invoke-AnsibleADObject {
                         }
                     }
 
-                    $module.Diff.after[$propInfo.Name] = $newValue
+                    $module.Diff.after[$propInfo.Name] = & $getDiffValue $newValue $propInfo
                 }
             }
 

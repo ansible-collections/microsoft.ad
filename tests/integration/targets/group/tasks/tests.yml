@@ -67,6 +67,27 @@
     that:
     - not create_group_again is changed
 
+# https://github.com/ansible-collections/microsoft.ad/issues/129
+- name: change group with diff of unchanged choice options - check
+  group:
+    name: MyGroup
+    state: present
+    scope: global
+    category: security
+    description: Group description
+  check_mode: true
+  diff: true
+  register: change_group_diff
+
+- name: assert change group with diff of unchanged choice options - check
+  assert:
+    that:
+    - change_group_diff is changed
+    - change_group_diff.diff.before.scope == 'global'
+    - change_group_diff.diff.after.scope == 'global'
+    - change_group_diff.diff.before.category == 'security'
+    - change_group_diff.diff.after.category == 'security'
+
 - name: add member to builtin group
   group:
     name: Administrators
