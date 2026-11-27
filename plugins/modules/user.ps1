@@ -190,13 +190,20 @@ $setParams = @{
                 # -WhatIf was broken until Server 2016 and will set the
                 # password. Just avoid calling this in check mode.
                 if (-not $Module.CheckMode) {
-                    $setParams = @{
+                    $resetParams = @{
                         Identity = $ADObject.ObjectGUID
                         Reset = $true
                         Confirm = $false
                         NewPassword = (ConvertTo-SecureString -AsPlainText -Force -String $module.Params.password)
                     }
-                    Set-ADAccountPassword @setParams @ADParams
+                    Set-ADAccountPassword @resetParams @ADParams
+                }
+
+                # An admin reset clears "User must change password at next logon".
+                # The password_expired option only sets the flag when it differs
+                # from the state read before the reset, so set it again here.
+                if ($Module.Params.password_expired -eq $true) {
+                    $SetParams.ChangePasswordAtLogon = $true
                 }
 
                 $Module.Diff.after.password = 'VALUE_SPECIFIED_IN_NO_LOG_PARAMETER - changed'

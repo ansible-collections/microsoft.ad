@@ -495,6 +495,29 @@
     that:
     - create_user_pass_expired_actual.objects[0].pwdLastSet == 0
 
+# https://github.com/ansible-collections/microsoft.ad/issues/180
+- name: reset password and keep the expired password flag on existing user
+  user:
+    name: MyUser
+    password: Password456!
+    update_password: always
+    password_expired: true
+    state: present
+  register: reset_pass_expired
+
+- name: get result of reset password and keep the expired password flag
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - pwdLastSet
+  register: reset_pass_expired_actual
+
+- name: assert reset password and keep the expired password flag
+  assert:
+    that:
+    - reset_pass_expired is changed
+    - reset_pass_expired_actual.objects[0].pwdLastSet == 0
+
 - name: remove expired password flag on existing user
   user:
     name: MyUser
