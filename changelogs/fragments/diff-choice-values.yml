@@ -1,0 +1,5 @@
+bugfixes:
+  - >-
+    AD objects - Show enum-backed options like ``scope`` and ``category`` of ``microsoft.ad.group`` as their choice value,
+    for example ``global``, in the ``--diff`` output rather than the enum's integer value
+    - https://github.com/ansible-collections/microsoft.ad/issues/129
