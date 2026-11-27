@@ -1,0 +1,8 @@
+bugfixes:
+  - >-
+    AD objects - Treat an empty string in ``attributes.set``, ``attributes.add``, or ``attributes.remove`` as no value,
+    so ``set`` clears the attribute instead of failing with ``Set-ADUser failed: replace``. AD does not accept an empty
+    string as an attribute value - https://github.com/ansible-collections/microsoft.ad/issues/221
+  - >-
+    AD objects - Fix the ``--diff`` output of ``attributes.remove`` reporting the wrong values as removed when the requested
+    values are in a different order from the existing ones.
