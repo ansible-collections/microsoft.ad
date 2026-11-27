@@ -1268,6 +1268,90 @@
     - spn_add is changed
     - spn_add_actual.objects[0].servicePrincipalName == ['HTTP/fake', 'HTTP/host.domain:8080', 'HTTP/host']
 
+# https://github.com/ansible-collections/microsoft.ad/issues/221
+- name: set attribute to clear later
+  user:
+    name: MyUser
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    attributes:
+      set:
+        telephoneNumber: '1234'
+  register: attr_set_phone
+
+- name: clear attribute with empty string
+  user:
+    name: MyUser
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    attributes:
+      set:
+        telephoneNumber: ''
+  register: attr_clear_empty_string
+
+- name: get result of clear attribute with empty string
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - telephoneNumber
+  register: attr_clear_empty_string_actual
+
+- name: assert clear attribute with empty string
+  assert:
+    that:
+    - attr_set_phone is changed
+    - attr_clear_empty_string is changed
+    - attr_clear_empty_string_actual.objects[0].telephoneNumber == None
+
+- name: clear attribute with empty string - idempotent
+  user:
+    name: MyUser
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    attributes:
+      set:
+        telephoneNumber: ''
+  register: attr_clear_empty_string_again
+
+- name: assert clear attribute with empty string - idempotent
+  assert:
+    that:
+    - not attr_clear_empty_string_again is changed
+
+- name: set multi-valued attribute
+  user:
+    name: MyUser
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    attributes:
+      set:
+        otherTelephone:
+        - '111'
+        - '222'
+
+- name: remove attribute value with an empty string in the list
+  user:
+    name: MyUser
+    path: '{{ setup_domain_info.output[0].defaultNamingContext }}'
+    attributes:
+      remove:
+        otherTelephone:
+        - ''
+        - '222'
+  diff: true
+  register: attr_remove_with_empty_string
+
+- name: get result of remove attribute value with an empty string in the list
+  object_info:
+    identity: '{{ object_identity }}'
+    properties:
+    - otherTelephone
+  register: attr_remove_with_empty_string_actual
+
+- name: assert remove attribute value with an empty string in the list
+  assert:
+    that:
+    - attr_remove_with_empty_string is changed
+    - attr_remove_with_empty_string.diff.before.attributes.otherTelephone | sort == ['111', '222']
+    - attr_remove_with_empty_string.diff.after.attributes.otherTelephone == ['111']
+    - attr_remove_with_empty_string_actual.objects[0].otherTelephone in ['111', ['111']]
+
 - name: remove user for next test
   user:
     identity: '{{ object_identity }}'

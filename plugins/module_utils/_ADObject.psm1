@@ -123,6 +123,12 @@ Function Compare-AnsibleADAttribute {
             $value = $attr
         }
 
+        # AD rejects an empty string as an attribute value, so treat it like
+        # null and request no value. Setting an attribute to '' clears it.
+        if ($type -in @('raw', 'string') -and $value -is [string] -and $value -eq '') {
+            continue
+        }
+
         switch ($type) {
             bool {
                 $desiredAttributes.Add([System.Boolean]$value)
@@ -182,13 +188,18 @@ Function Compare-AnsibleADAttribute {
         }
     }
     elseif ($Action -eq 'Remove') {
-        $diffAfter.AddRange($existingAttributes)
-
-        for ($i = $desired.Length - 1; $i -ge 0; $i--) {
+        for ($i = 0; $i -lt $desired.Length; $i++) {
             if ($desired[$i] -cin $existing) {
                 $value.Add($desiredAttributes[$i])
-                $diffAfter.RemoveAt($i)
                 $changed = $true
+            }
+        }
+
+        # The indexes of $desired do not match those of $existing, so keep
+        # the existing values that are not being removed.
+        for ($i = 0; $i -lt $existing.Length; $i++) {
+            if ($existing[$i] -cnotin $desired) {
+                $diffAfter.Add($existingAttributes[$i])
             }
         }
     }

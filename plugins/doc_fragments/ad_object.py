@@ -64,8 +64,8 @@ options:
           being requested.
         - The order of attribute values are not checked only, only that the
           values requested are the only values on the object attribute.
-        - Set this to null or an empty list to clear any values for the
-          attribute.
+        - Set this to null, an empty string, or an empty list to clear any
+          values for the attribute.
         default: {}
         type: dict
   description:
